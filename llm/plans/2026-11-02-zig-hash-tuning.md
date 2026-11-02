@@ -1071,6 +1071,222 @@ Other effects: iterate at 65 is 1.60 -> 1.29 (C API) and 1.19 -> 1.06 (nqp), sin
 - Not free: at 65-96 entries, lookup and delete lose the head start the 256-slot table gave them (0.58-0.81 of the C) and run at the C's time (0.97-1.06). That is an absolute regression of up to ~5 ns per lookup at 96 entries, the price of the spec §4.6 sizing. Reverting only the sizing keeps the head start, and the bulk insert alone then gives ~1376 ns at the 65th, inside the before spread.
 - The Zig engine now resizes at the 97th insert (128 -> 256), which it did not before. Its cost is 1952-1967 ns, the same as the C's 97th (1977-1986).
 
+### Task 8: ladder after the levers
+
+Builds: HEAD `193ccb493`, `zig build --prefix $PWD/zig-out install` with the defaults, the C engine with `-Dzig-impl=false`, from the same tree. libmoar text (`size zig-out/lib/libmoar.so`): Zig engine 9,498,148 bytes, C engine 9,310,708. Protocol runs: nqp `--engine=<c|zig> --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`, C API `zig build hash-bench --prefix $PWD/zig-out [-Dzig-impl=false] -- --sizes=<same> --runs=5 --nth=all`, and both engines at `--sizes=49,97`. Load average (1 min) 1.00-1.37 at the start of each protocol run, 0.23-1.23 during the interleaved runs (`traces/llm/bench/tuning-t8-load.log`). TSVs: `tuning-t8-{nqp,capi}-{c,zig}.tsv`, `tuning-t8-{nqp,capi}-{c,zig}-resize.tsv`.
+
+The protocol runs were noisy in a way that hits both engines: the C nqp insert ran at 95-209 ns at 16 and 101-107 ns at 128 (Task 7: ~50-55), and the C-API C insert at 64-256 at 85-90 ns (interleaved: ~44). A repeat of the nqp insert row alternated between ~50 and ~100 ns at the same size for either engine. So every cell was re-run, as Task 3 did, interleaved on the same binaries: the protocol `libmoar.so` of each engine copied aside and selected through `LD_LIBRARY_PATH` (it overrides `moar`'s RUNPATH), with the same `moar` for the nqp harness and each engine's own protocol `hash-bench` binary for the C API (the bench binary is engine-specific: the Zig one fails against the C library). 9 rounds of the full ladder, the engine order alternating per round. Cells: median of the 9 per-round medians [min-max of the per-round medians, zig / c] in ns. Raw rows (variant, round, then the harness's columns): `tuning-t8-interleaved-{nqp,capi}.tsv`, aggregated `tuning-t8-il-{nqp,capi}-{c,zig}.tsv`.
+
+Verdict rule (spec §8, plan line 19), applied to the interleaved cell: pass if the ratio is at or below 1.05 or the spreads overlap; Robin Hood iterate (65 and up) at or below 1.10; Small insert and iterate (16-64) below 1.0; `insert_nth` at 65 is the migration and is judged against the C 97th below. Size 4 is the warm-up (first size) and is not read. Where the protocol run's own verdict differs it is given in brackets.
+
+#### nqp level (the scoreboard)
+
+| op | size | protocol run | interleaved (9 rounds) | verdict |
+|---|---:|---|---|---|
+| insert | 4 | 1.88 [29.86-79.32 / 31.89-76.01] | 1.66 [27.60-68.45 / 34.08-72.76] | pass (overlap); warm-up size |
+| insert | 16 | 0.21 [21.49-24.86 / 95.85-209.34] | 0.45 [23.08-24.25 / 50.02-53.49] | pass (<1.0) |
+| insert | 32 | 0.19 [23.49-27.74 / 100.79-820.43] | 0.44 [23.13-25.14 / 53.19-54.47] | pass (<1.0) |
+| insert | 63 | 0.23 [24.33-28.12 / 96.85-111.33] | 0.45 [24.33-25.42 / 54.23-56.02] | pass (<1.0) |
+| insert | 64 | 0.39 [22.49-22.89 / 57.76-58.39] | 0.38 [21.77-22.73 / 57.09-60.94] | pass (<1.0) |
+| insert | 65 | 0.42 [41.56-44.21 / 97.73-119.33] | 0.75 [39.63-42.23 / 54.11-55.54] | pass |
+| insert | 128 | 0.94 [53.00-106.71 / 101.47-107.22] | 0.92 [49.39-50.81 / 52.57-55.76] | pass |
+| insert | 256 | 0.86 [94.98-448.47 / 94.46-369.26] | 0.97 [49.87-53.14 / 51.77-54.36] | pass |
+| insert | 1024 | 1.03 [84.98-88.40 / 83.02-1004.70] | 1.00 [51.44-52.66 / 49.78-53.51] | pass |
+| insert | 16384 | 1.02 [78.07-811.15 / 74.72-956.11] | 0.71 [53.50-56.87 / 75.44-81.25] | pass |
+| lookup_hit | 4 | 2.72 [15.85-56.34 / 13.47-54.40] | 1.12 [12.58-46.08 / 13.75-55.44] | pass (overlap); warm-up size |
+| lookup_hit | 16 | 0.82 [12.08-12.67 / 14.60-18.42] | 0.82 [12.08-12.54 / 14.68-15.08] | pass |
+| lookup_hit | 32 | 0.70 [13.55-13.76 / 15.89-21.16] | 0.92 [13.38-14.87 / 14.75-15.23] | pass |
+| lookup_hit | 63 | 1.04 [15.18-15.43 / 14.38-15.03] | 1.02 [14.47-15.83 / 14.46-14.74] | pass |
+| lookup_hit | 64 | 1.04 [15.14-15.28 / 14.47-14.86] | 1.00 [14.37-15.37 / 14.57-15.32] | pass |
+| lookup_hit | 65 | 0.96 [14.80-18.25 / 15.20-16.61] | 1.02 [14.83-16.07 / 14.56-15.44] | pass |
+| lookup_hit | 128 | 1.12 [15.65-25.05 / 15.08-16.17] | 1.00 [14.61-15.00 / 14.63-14.96] | pass (protocol: pass (overlap)) |
+| lookup_hit | 256 | 1.00 [15.65-23.20 / 15.07-19.31] | 1.00 [14.67-15.27 / 14.72-15.69] | pass |
+| lookup_hit | 1024 | 0.89 [16.30-35.33 / 16.85-39.52] | 1.01 [15.08-15.87 / 14.97-15.96] | pass |
+| lookup_hit | 16384 | 1.29 [18.11-25.64 / 16.65-21.99] | 0.98 [16.32-16.63 / 16.62-17.42] | pass (protocol: pass (overlap)) |
+| lookup_miss | 4 | 3.30 [14.51-51.94 / 14.11-55.24] | 0.65 [11.89-45.40 / 14.60-56.19] | pass (protocol: pass (overlap)); warm-up size |
+| lookup_miss | 16 | 0.80 [11.40-12.10 / 14.31-14.38] | 0.79 [11.18-12.40 / 14.62-14.80] | pass |
+| lookup_miss | 32 | 0.98 [13.64-15.59 / 14.25-14.79] | 0.98 [13.48-14.99 / 14.56-14.96] | pass |
+| lookup_miss | 63 | 1.06 [14.89-15.47 / 14.09-14.16] | 1.08 [14.98-15.81 / 14.15-14.34] | FAIL |
+| lookup_miss | 64 | 1.17 [16.55-16.86 / 14.20-14.51] | 1.05 [14.91-17.01 / 14.20-14.73] | FAIL |
+| lookup_miss | 65 | 1.04 [14.97-15.27 / 14.26-14.58] | 1.03 [14.86-15.12 / 14.46-14.79] | pass |
+| lookup_miss | 128 | 1.05 [14.79-15.31 / 14.24-14.37] | 1.02 [14.56-14.85 / 14.37-14.70] | pass |
+| lookup_miss | 256 | 1.04 [14.78-14.99 / 14.06-14.46] | 1.03 [14.70-15.06 / 14.39-14.67] | pass |
+| lookup_miss | 1024 | 1.04 [14.84-15.69 / 14.07-14.64] | 1.02 [14.70-15.05 / 14.25-14.69] | pass |
+| lookup_miss | 16384 | 1.05 [15.80-20.50 / 15.20-20.36] | 1.02 [15.83-16.06 / 15.38-15.67] | pass |
+| delete | 4 | 3.20 [12.19-48.56 / 13.61-77.56] | 0.87 [12.05-42.59 / 13.82-51.37] | pass (protocol: pass (overlap)); warm-up size |
+| delete | 16 | 0.78 [11.22-12.18 / 14.36-14.56] | 0.76 [11.20-11.86 / 14.57-14.95] | pass |
+| delete | 32 | 0.95 [13.63-18.28 / 14.42-14.74] | 0.91 [13.04-13.71 / 14.74-15.42] | pass |
+| delete | 63 | 0.98 [14.12-14.34 / 14.33-15.20] | 1.00 [14.04-16.04 / 14.39-14.74] | pass |
+| delete | 64 | 1.07 [15.28-17.45 / 14.46-14.57] | 1.03 [14.54-16.51 / 14.52-15.94] | pass (protocol: FAIL) |
+| delete | 65 | 1.01 [14.33-16.88 / 14.49-14.69] | 0.99 [14.32-14.80 / 14.59-16.07] | pass |
+| delete | 128 | 0.97 [14.22-16.17 / 14.53-16.33] | 0.97 [14.20-14.68 / 14.57-15.37] | pass |
+| delete | 256 | 1.00 [14.40-14.90 / 14.44-15.10] | 0.97 [14.24-14.58 / 14.61-15.05] | pass |
+| delete | 1024 | 0.98 [14.98-27.73 / 15.10-15.62] | 0.98 [14.49-14.77 / 14.87-15.17] | pass |
+| delete | 16384 | 1.03 [17.20-18.37 / 16.78-17.12] | 0.95 [15.84-16.34 / 16.80-17.12] | pass |
+| iterate | 4 | 2.13 [15.47-51.35 / 20.58-64.25] | 0.84 [16.71-52.59 / 20.92-58.52] | pass (protocol: pass (overlap)); warm-up size |
+| iterate | 16 | 0.75 [12.54-15.53 / 16.86-16.97] | 0.71 [12.28-14.57 / 17.14-18.96] | pass (<1.0) |
+| iterate | 32 | 0.68 [10.73-12.55 / 15.82-16.47] | 0.67 [10.72-15.05 / 16.41-18.90] | pass (<1.0) |
+| iterate | 63 | 0.67 [10.27-11.25 / 15.45-15.55] | 0.71 [10.48-12.83 / 15.74-17.59] | pass (<1.0) |
+| iterate | 64 | 0.71 [10.47-13.39 / 15.87-16.05] | 0.71 [10.45-11.92 / 15.48-15.98] | pass (<1.0) |
+| iterate | 65 | 1.07 [16.03-16.67 / 15.21-15.55] | 1.02 [16.72-17.93 / 15.70-17.18] | pass (<=1.10) |
+| iterate | 128 | 1.03 [15.66-16.13 / 15.13-15.47] | 1.03 [15.85-16.48 / 15.22-15.79] | pass (<=1.10) |
+| iterate | 256 | 1.07 [15.83-17.82 / 14.76-15.32] | 1.06 [15.65-16.59 / 15.09-15.49] | pass (<=1.10) |
+| iterate | 1024 | 1.04 [15.32-16.32 / 14.80-15.39] | 1.07 [15.58-16.31 / 14.79-15.34] | pass (<=1.10) |
+| iterate | 16384 | 1.04 [15.21-15.61 / 14.77-15.10] | 1.06 [15.42-16.32 / 14.72-15.46] | pass (<=1.10) |
+| insert_nth | 4 | 0.49 [15.73-30.44 / 19.49-35.19] | 0.48 [15.62-16.83 / 19.11-46.41] | pass; warm-up size |
+| insert_nth | 16 | 0.47 [15.70-20.50 / 27.45-38.55] | 0.69 [15.48-15.98 / 22.41-31.41] | pass |
+| insert_nth | 32 | 0.55 [17.38-18.55 / 23.51-82.40] | 0.57 [17.48-22.84 / 25.39-33.19] | pass |
+| insert_nth | 63 | 0.98 [28.46-43.60 / 29.71-31.70] | 0.26 [19.26-29.05 / 30.78-94.63] | pass |
+| insert_nth | 64 | 0.65 [21.65-24.35 / 28.82-43.03] | 0.68 [19.08-28.43 / 30.32-34.04] | pass |
+| insert_nth | 65 | 28.75 [1145.64-7525.32 / 36.88-116.99] | 32.70 [1042.85-1096.75 / 27.48-40.59] | migration: see yardstick |
+| insert_nth | 128 | 0.87 [36.75-138.80 / 40.88-55.30] | 1.13 [32.09-33.97 / 28.77-30.29] | FAIL (protocol: pass) |
+| insert_nth | 256 | 1.06 [44.42-132.36 / 37.85-116.71] | 1.11 [33.15-36.01 / 30.10-32.13] | FAIL (protocol: pass (overlap)) |
+| insert_nth | 1024 | 3.18 [147.16-165.33 / 37.11-62.78] | 0.76 [36.94-40.39 / 41.33-80.31] | pass (protocol: FAIL) |
+| insert_nth | 16384 | 1.07 [72.50-143.00 / 67.75-195.50] | 0.88 [50.00-65.25 / 55.25-122.50] | pass (protocol: pass (overlap)) |
+
+Re-runs of the failing cells, interleaved, 11 rounds each, two size orders (`--sizes=16,63,64,128,256` and `256,128,64,63,16`; 16 is the warm-up). Raw: `tuning-t8-rerun{1,2}-{nqp,capi}.tsv`.
+
+| op | size | rerun 1 | rerun 2 | after re-run |
+|---|---:|---|---|---|
+| lookup_miss | 63 | 1.09 [14.34-16.38 / 14.14-14.32] | 1.07 [14.81-16.47 / 14.08-14.39] | FAIL |
+| lookup_miss | 64 | 1.08 [14.31-15.87 / 14.23-14.45] | 1.05 [14.88-15.72 / 14.28-15.43] | above the line in every run (1.05-1.09); spreads overlap in both re-runs, disjoint in the full ladder: counted as a shortfall |
+| insert_nth | 128 | 1.11 [32.39-34.19 / 29.37-31.96] | 1.11 [32.31-33.33 / 28.88-30.33] | FAIL |
+| insert_nth | 256 | 1.12 [33.77-36.20 / 30.41-33.11] | 1.10 [33.50-35.62 / 30.37-33.11] | FAIL |
+
+The protocol-run failures that the interleaved runs do not reproduce: delete 64 (protocol 1.07, interleaved 1.03 with overlapping spreads) and insert_nth 1024 (protocol 3.18, a Zig run at 147-165 ns; interleaved 0.76).
+
+Scoreboard count (interleaved, sizes 16-16384, 53 cells: six ops at nine sizes less the migration cell; the warm-up size 4 excluded): 49 pass, 4 fail: lookup_miss 63 and 64 (Small tier), insert_nth 128 and 256 (Robin Hood). Every other finish-line item holds: Small insert 0.38-0.45 and iterate 0.67-0.71 at 16-64; Robin Hood iterate 1.02-1.07 (at or below 1.10); allocation at 16-64 (C API `mem` column, bytes per table) 288/960 = 0.30, 560/1912 = 0.29, 1104/3816 = 0.29, 1104/3816 = 0.29 at 16, 32, 63, 64, under a third.
+
+#### The migration against the C engine's 97th insert
+
+`insert_nth`, ns per N-th insert. Protocol runs (`tuning-t8-*-resize.tsv` and the ladder TSVs) and an interleaved run (7 rounds, `--sizes=16,49,65,97`, `tuning-t8-resize-interleaved-{nqp,capi}.tsv`).
+
+| harness | run | C 49th | C 97th | Zig 65th | Zig 65th / C 97th |
+|---|---|---:|---:|---:|---:|
+| nqp | protocol | 911.46 [876.05-1037.95] | 3306.97 [1697.99-5196.84] | 1215.85 [1145.64-7525.32] | 0.37 |
+| nqp | interleaved | 1002.28 [880.92-1015.76] | 1947.86 [1659.13-1969.81] | 1060.11 [1043.83-1072.58] | 0.54 |
+| C API | protocol | 867.70 [838.34-1027.28] | 1913.68 [1593.35-7060.68] | 1029.52 [1012.20-1083.53] | 0.54 |
+| C API | interleaved | 991.94 [984.07-1012.03] | 1935.73 [1888.00-1971.39] | 1046.17 [1013.58-1072.84] | 0.54 |
+
+Pass on both harnesses (the protocol nqp C 97th is a noisy run; the interleaved 0.54 is the reading). The Zig 97th insert (its 128 -> 256 growth since Task 7) is 1967.14 (nqp) and 1929.17 (C API) against the C's 1947.86 and 1935.73.
+
+#### C API (`zig build hash-bench`, the diagnostic)
+
+| op | size | protocol run | interleaved (9 rounds) | verdict |
+|---|---:|---|---|---|
+| insert | 4 | 0.69 [13.15-15.83 / 18.69-19.45] | 0.70 [13.14-14.21 / 18.51-19.53] | pass; warm-up size |
+| insert | 16 | 0.29 [11.64-12.26 / 40.70-42.32] | 0.29 [11.72-12.68 / 41.54-44.03] | pass (<1.0) |
+| insert | 32 | 0.29 [13.03-16.09 / 44.78-45.45] | 0.29 [12.72-13.37 / 44.13-45.71] | pass (<1.0) |
+| insert | 63 | 0.32 [14.29-17.71 / 44.79-93.24] | 0.32 [13.89-14.90 / 44.07-45.19] | pass (<1.0) |
+| insert | 64 | 0.16 [14.23-18.77 / 89.89-621.32] | 0.32 [13.74-14.80 / 44.12-45.52] | pass (<1.0) |
+| insert | 65 | 0.35 [29.81-34.40 / 87.23-657.24] | 0.69 [29.76-32.12 / 43.37-44.71] | pass |
+| insert | 128 | 0.45 [37.79-100.23 / 88.59-648.52] | 0.90 [38.80-41.13 / 43.42-44.93] | pass |
+| insert | 256 | 1.00 [82.13-659.42 / 84.42-775.26] | 0.97 [41.25-44.50 / 42.92-44.78] | pass |
+| insert | 1024 | 1.01 [72.87-79.85 / 75.51-763.11] | 0.60 [42.37-43.68 / 69.83-74.22] | pass |
+| insert | 16384 | 1.16 [69.91-399.78 / 67.18-74.36] | 0.70 [47.21-48.75 / 65.62-73.93] | pass (protocol: pass (overlap)) |
+| lookup_hit | 4 | 0.78 [5.16-6.76 / 6.53-8.02] | 0.77 [5.00-5.25 / 5.70-6.77] | pass; warm-up size |
+| lookup_hit | 16 | 0.67 [4.46-4.95 / 6.78-6.99] | 0.67 [4.51-4.87 / 6.77-7.13] | pass |
+| lookup_hit | 32 | 0.97 [6.48-6.92 / 6.98-7.11] | 0.95 [6.44-7.18 / 7.09-7.38] | pass |
+| lookup_hit | 63 | 1.01 [7.83-8.03 / 6.99-8.13] | 1.12 [7.38-8.18 / 7.00-7.11] | FAIL (protocol: pass) |
+| lookup_hit | 64 | 0.98 [7.79-8.05 / 7.34-9.03] | 1.11 [7.39-8.07 / 7.08-7.23] | FAIL (protocol: pass) |
+| lookup_hit | 65 | 0.72 [7.65-8.13 / 7.32-12.84] | 1.07 [7.63-7.87 / 7.17-7.26] | FAIL (protocol: pass) |
+| lookup_hit | 128 | 0.60 [7.70-8.11 / 12.45-13.14] | 1.07 [7.51-7.79 / 7.14-7.31] | FAIL (protocol: pass) |
+| lookup_hit | 256 | 0.71 [8.21-13.71 / 7.66-12.79] | 1.07 [7.60-7.96 / 7.15-7.45] | FAIL (protocol: pass) |
+| lookup_hit | 1024 | 0.53 [8.26-9.20 / 12.62-18.64] | 0.93 [7.69-7.87 / 8.11-10.03] | pass |
+| lookup_hit | 16384 | 1.10 [8.51-9.95 / 8.12-8.59] | 1.02 [8.37-9.12 / 8.19-8.38] | pass (protocol: pass (overlap)) |
+| lookup_miss | 4 | 0.65 [4.32-5.49 / 6.69-8.40] | 0.66 [4.19-5.28 / 6.52-6.84] | pass; warm-up size |
+| lookup_miss | 16 | 0.65 [4.47-4.90 / 7.02-7.12] | 0.58 [4.08-4.62 / 7.15-7.45] | pass |
+| lookup_miss | 32 | 0.98 [6.81-8.56 / 7.18-7.39] | 0.92 [6.51-6.86 / 7.21-7.51] | pass |
+| lookup_miss | 63 | 1.12 [7.90-12.19 / 7.05-7.61] | 1.13 [7.67-8.34 / 7.08-7.17] | FAIL |
+| lookup_miss | 64 | 1.16 [8.04-8.37 / 7.09-7.30] | 1.09 [7.58-8.40 / 7.19-7.31] | FAIL |
+| lookup_miss | 65 | 1.08 [7.94-8.05 / 7.22-8.04] | 1.10 [7.90-8.21 / 7.29-7.39] | FAIL (protocol: pass (overlap)) |
+| lookup_miss | 128 | 1.00 [7.76-8.44 / 7.67-8.03] | 1.08 [7.82-8.08 / 7.22-7.32] | FAIL (protocol: pass) |
+| lookup_miss | 256 | 1.08 [7.82-11.39 / 7.17-8.33] | 1.09 [7.84-8.07 / 7.17-7.37] | FAIL (protocol: pass (overlap)) |
+| lookup_miss | 1024 | 1.02 [7.83-7.94 / 7.30-10.68] | 1.09 [7.82-8.05 / 7.16-7.42] | FAIL (protocol: pass) |
+| lookup_miss | 16384 | 1.07 [9.17-12.68 / 8.08-12.05] | 1.08 [9.42-9.85 / 8.46-9.00] | FAIL (protocol: pass (overlap)) |
+| delete | 4 | 0.81 [6.40-18.61 / 7.36-8.40] | 0.78 [6.24-6.53 / 6.99-8.60] | pass; warm-up size |
+| delete | 16 | 0.88 [6.98-8.44 / 8.16-8.52] | 0.86 [7.03-7.30 / 8.21-8.59] | pass |
+| delete | 32 | 1.09 [8.78-9.40 / 8.31-8.91] | 1.09 [8.70-10.10 / 8.38-9.95] | pass (overlap) |
+| delete | 63 | 1.21 [10.09-10.56 / 8.39-8.62] | 1.23 [9.97-10.97 / 8.29-8.41] | FAIL |
+| delete | 64 | 1.24 [10.06-10.32 / 8.24-8.38] | 1.23 [10.08-11.08 / 8.30-8.50] | FAIL |
+| delete | 65 | 1.01 [8.42-8.50 / 8.33-10.64] | 1.00 [8.46-8.82 / 8.42-8.54] | pass |
+| delete | 128 | 0.81 [8.58-9.34 / 8.24-10.76] | 1.00 [8.33-8.69 / 8.34-8.45] | pass |
+| delete | 256 | 1.01 [8.33-8.44 / 8.22-10.50] | 1.00 [8.36-8.68 / 8.33-8.50] | pass |
+| delete | 1024 | 0.72 [8.40-8.57 / 8.36-13.93] | 1.00 [8.41-8.58 / 8.41-8.56] | pass |
+| delete | 16384 | 0.99 [9.25-9.35 / 9.23-9.97] | 0.97 [9.12-9.64 / 9.29-10.50] | pass |
+| iterate | 4 | 0.71 [6.99-7.21 / 9.83-14.97] | 0.71 [6.77-7.14 / 8.82-9.94] | pass; warm-up size |
+| iterate | 16 | 0.71 [6.12-7.53 / 8.73-8.92] | 0.70 [6.17-6.44 / 8.81-9.11] | pass (<1.0) |
+| iterate | 32 | 0.75 [6.22-6.35 / 8.35-8.56] | 0.74 [6.21-6.39 / 8.35-8.53] | pass (<1.0) |
+| iterate | 63 | 0.73 [6.11-6.12 / 8.30-8.46] | 0.73 [6.11-6.29 / 8.28-8.46] | pass (<1.0) |
+| iterate | 64 | 0.75 [6.11-6.24 / 8.08-8.25] | 0.74 [6.11-6.29 / 8.18-8.34] | pass (<1.0) |
+| iterate | 65 | 1.33 [10.66-15.43 / 8.10-9.14] | 1.32 [10.63-10.95 / 8.09-8.20] | FAIL (>1.10) |
+| iterate | 128 | 1.23 [10.65-15.28 / 8.34-8.99] | 1.32 [10.57-10.93 / 8.08-8.13] | FAIL (>1.10) |
+| iterate | 256 | 1.31 [10.49-10.99 / 7.90-8.27] | 1.32 [10.52-10.87 / 7.91-8.09] | FAIL (>1.10) |
+| iterate | 1024 | 1.33 [10.46-13.88 / 7.88-10.47] | 1.33 [10.46-10.65 / 7.76-7.98] | FAIL (>1.10) |
+| iterate | 16384 | 1.32 [10.32-10.77 / 7.87-7.99] | 1.32 [10.42-10.66 / 7.86-8.04] | FAIL (>1.10) |
+| insert_nth | 4 | 0.52 [7.59-9.01 / 14.13-15.11] | 0.50 [7.53-8.02 / 14.90-15.97] | pass; warm-up size |
+| insert_nth | 16 | 0.50 [7.52-7.72 / 14.80-15.73] | 0.52 [7.52-7.86 / 14.41-15.12] | pass |
+| insert_nth | 32 | 0.54 [9.18-9.28 / 16.58-18.70] | 0.56 [9.22-9.84 / 16.39-17.43] | pass |
+| insert_nth | 63 | 0.43 [10.60-11.66 / 22.81-58.25] | 0.55 [9.94-18.63 / 17.88-18.97] | pass |
+| insert_nth | 64 | 0.37 [10.22-11.11 / 23.37-56.11] | 0.54 [9.98-10.59 / 18.07-19.23] | pass |
+| insert_nth | 65 | 14.59 [1012.20-1083.53 / 25.48-75.16] | 55.44 [942.28-1061.89 / 18.29-19.28] | migration: see yardstick |
+| insert_nth | 128 | 0.60 [30.45-71.97 / 76.83-77.92] | 1.15 [22.74-23.60 / 19.20-23.85] | pass (overlap) (protocol: pass) |
+| insert_nth | 256 | 0.41 [26.85-59.64 / 72.13-80.00] | 1.14 [22.07-24.46 / 19.88-23.13] | pass (overlap) (protocol: pass) |
+| insert_nth | 1024 | 0.66 [30.06-58.39 / 27.39-81.72] | 0.80 [25.36-27.70 / 28.03-59.17] | pass |
+| insert_nth | 16384 | 0.63 [37.50-80.00 / 45.25-190.25] | 0.84 [32.50-42.75 / 32.75-60.00] | pass |
+
+C API count (same 53 cells, same rule, for reference only; it is not the scoreboard): 34 pass, 19 fail. The failures are Small lookup_hit and lookup_miss at 63/64 (1.09-1.13) and delete at 63/64 (1.23), Robin Hood lookup_hit at 65-256 (1.07) and lookup_miss at 65-16384 (1.08-1.10), and Robin Hood iterate at 1.32-1.33 (the C API's two calls per element; decision 7 exempts it at the nqp level, where it is 1.02-1.07). None of them starts a lever (only nqp cells do).
+
+Carry-overs:
+
+- (b) from Task 7: C-API delete at 128 is 1.00 [8.33-8.69 / 8.34-8.45] interleaved (protocol 0.81, with a noisy C run), so Task 7's 1.11 was the noisy run its reruns said it was. C-API lookup_hit at 128 is 1.07 [7.51-7.79 / 7.14-7.31] interleaved, disjoint: the Robin Hood lookup gap Task 3 measured (1.04-1.07) is still there at the C API, while the nqp cell is 1.00 [14.61-15.00 / 14.63-14.96]. Not a scoreboard failure; recorded, no lever.
+- (a) from Task 3: the Small `findIn(8)`/`findIn(16)` inlining is left to LLVM, not made explicit. Measured reason: round 8b below forced `@call(.always_inline, ..)` on all four `findIn` instantiations, and the 16-entry path got slower at the C API (lookup_miss 16 from 0.60 to 0.85 of the C, lookup_hit 16 from 0.68 to 0.92, delete 16 from 0.85 to 0.98). So the inlining decision is sensitive to what else is inlined into the exports. Annotating only the 8 and 16 calls does not reproduce today's code either: that build's `libmoar.so` differs from HEAD's and its text is 3,848 bytes smaller (9,494,300 against 9,498,148; HEAD rebuilds byte-identical), so it would be a new code shape needing its own measured round, beyond Task 8's bound. Today's shape is the measured one (Task 3 and this ladder: Small 16 lookup and delete 0.58-0.86 of the C at both harnesses).
+
+#### Step 2: profile and two lever rounds
+
+Profiles on unstripped builds (`zig build hash-bench -Dstrip=false`, both engines), the C-API bench, Task 1 Step 3's procedure.
+
+Small lookup_miss at 63. `perf stat` differential (`--op-repeat=51` minus `1`, `--ops=lookup_miss`, 5 runs), per lookup: Zig 152.6 instructions, 34.5 cycles, 0.00 branch misses; C 79.4 instructions, 32.0 cycles, 0.50 branch misses. At 32 the Zig is 136.6 instructions and 32.2 cycles against the C's 79.5 and 33.2, so the 63/64 deficit is 2-3 cycles that come with the 64-tag `findIn`. `perf record` (`--op-repeat=300`): `findIn(64)` 68.7%, `MVM_str_hash_fetch_nocheck` 17.4%, `MVM_string_substrings_equal_nocheck` 6.75%, `bcmp` 0.7%, bench 5%. Inside `findIn(64)` (`perf annotate`): the four 16-byte tag compares and the combine into one 64-bit mask about 50%; the tag-matched candidate (the entry key load, 13%, and the grapheme-count compare, 5%) about 20%; the prologue and epilogue (six callee-saved registers and two spills, because the function calls the out-of-line grapheme compare) about 15%. The 8-bit tag lets one key in 256 through, so a miss at 63 entries has ~0.25 candidates, and the bench keys (`k<i>`, `m<i>`) often have equal grapheme counts, so most candidates reach `MVM_string_substrings_equal_nocheck`. The C's Robin Hood metadata rarely matches a missing key, and the C pays a mispredicted branch every other lookup instead. Named cause: false tag matches that reach the out-of-line grapheme compare, plus the call frame of `findIn(64)` that the call forces.
+
+Robin Hood insert_nth at 128 and 256. The bench's N-th insert puts one key into each of 512 (256) tables of N-1 entries, a table-cold insert. A scratch variant of the bench (not committed: `HB_NTH_LOOP=K` repeats insert-then-delete of the N-th key across all the tables) reproduces the gap in steady state: insert 12.6 / 10.5 / 10.7 ns (Zig) against 11.0 / 8.8 / 9.8 ns (C) at 128 / 256 / 1024. Its profile at 256: Zig `insertInternal` 30.6%, `Table.lvalue` 11.8% (an out-of-line 893-instruction function holding the grow and migrate paths; its hottest instruction is the status test after the header load, 16.8% of it), the export 3.2%; C `hash_insert_internal` 34.3%, `memmove` 7.7%, the export 4.8%. `perf stat` per insert-and-delete pair (`HB_NTH_LOOP=3000` minus `1000`): Zig 332 instructions and 78 cycles, C 277 and 93, which disagrees with the timer (Zig ~17 ns, C ~16 ns per pair). The extra call level and instructions are visible, but the profile does not single out one cause that accounts for 1-2 ns, so no lever was started for these two cells.
+
+Round 8a: `StrSpec.eql` tests the two strings' cached hash codes (both set and different means not equal, `MVM_string_equal`'s own test in `src/strings/ops.c`) after the grapheme count and before `MVM_string_substrings_equal_nocheck`. Interleaved, 9 rounds, `--sizes=16,32,63,64,128,1024`, variants C, Zig HEAD (`zig0`) and Zig 8a (`zig8a`); raw `tuning-t8a-interleaved-{nqp,capi}.tsv`.
+
+| harness | op | size | HEAD / C | 8a / C | 8a / HEAD |
+|---|---|---:|---|---|---|
+| nqp | lookup_miss | 63 | 1.09 [14.93-16.74 / 13.99-14.22] | 1.06 [14.51-16.36 / 13.99-14.22] | 0.98 [14.51-16.36 / 14.93-16.74] |
+| nqp | lookup_miss | 64 | 1.09 [15.11-16.64 / 14.01-14.50] | 1.06 [14.36-16.38 / 14.01-14.50] | 0.97 [14.36-16.38 / 15.11-16.64] |
+| nqp | lookup_miss | 1024 | 1.03 [14.51-14.80 / 14.12-14.37] | 1.00 [14.05-14.64 / 14.12-14.37] | 0.98 |
+| C API | lookup_miss | 63 | 1.16 [7.61-8.76 / 6.97-7.04] | 1.07 [7.30-7.67 / 6.97-7.04] | 0.93 [7.30-7.67 / 7.61-8.76] |
+| C API | lookup_miss | 64 | 1.12 [7.43-8.40 / 7.04-7.21] | 1.05 [7.17-7.76 / 7.04-7.21] | 0.94 [7.17-7.76 / 7.43-8.40] |
+| C API | lookup_miss | 1024 | 1.09 [7.74-8.04 / 7.12-7.27] | 1.13 [8.03-8.18 / 7.12-7.27] | 1.04 [8.03-8.18 / 7.74-8.04] |
+
+Reverted. The targeted nqp cells moved 2-3% in the median but inside the spread (8a 14.51-16.36 against HEAD 14.93-16.74 at 63), and they stay above the line with spreads disjoint from the C's. At the C API the Small miss moved 6-7% (overlapping spreads), and the Robin Hood miss at 1024 got slower outside the spread (8.03-8.18 against 7.74-8.04), as the extra test changed the inlined probe loop.
+
+Round 8b: `find` calls every `findIn` instantiation with `@call(.always_inline, ..)`, so that `findIn(32)` and `findIn(64)` lose their own frame as 8 and 16 already had. Same protocol, variants C, `zig0`, `zig8b`; raw `tuning-t8b-interleaved-{nqp,capi}.tsv`.
+
+| harness | op | size | HEAD / C | 8b / C |
+|---|---|---:|---|---|
+| nqp | lookup_miss | 63 | 1.07 [14.77-16.62 / 13.97-14.78] | 1.07 [14.83-16.27 / 13.97-14.78] |
+| nqp | lookup_miss | 64 | 1.08 [14.64-16.29 / 14.14-14.95] | 1.08 [14.85-15.89 / 14.14-14.95] |
+| C API | lookup_miss | 63 | 1.12 [7.69-8.25 / 6.97-7.12] | 1.12 [7.63-8.01 / 6.97-7.12] |
+| C API | lookup_miss | 16 | 0.60 [4.08-5.01 / 7.10-7.57] | 0.85 [5.82-6.37 / 7.10-7.57] |
+| C API | lookup_hit | 16 | 0.68 [4.52-5.04 / 6.75-7.32] | 0.92 [6.05-9.04 / 6.75-7.32] |
+| C API | delete | 63 | 1.23 [9.80-10.80 / 8.16-8.36] | 1.29 [10.25-11.09 / 8.16-8.36] |
+
+Reverted. No movement at 63/64, and the 16-entry path lost most of its lead. Neither round is committed; their diffs were not kept in the tree.
+
+#### Shortfall (nqp level, after the two rounds)
+
+| op | size | ratio [zig / c spread] (interleaved full ladder) | tier | note |
+|---|---:|---|---|---|
+| lookup_miss | 63 | 1.08 [14.98-15.81 / 14.15-14.34] | Small | re-runs 1.07-1.09, disjoint; 8a moved it 2% inside the spread, 8b not at all |
+| lookup_miss | 64 | 1.05 [14.91-17.01 / 14.20-14.73] | Small | 1.05-1.09 in every run; overlapping spreads in 3 of 5 runs |
+| insert_nth | 128 | 1.13 [32.09-33.97 / 28.77-30.29] | Robin Hood | re-runs 1.11, disjoint; ~3.5 ns per table-cold insert; no single profiled cause |
+| insert_nth | 256 | 1.11 [33.15-36.01 / 30.10-32.13] | Robin Hood | re-runs 1.10-1.12, disjoint; same |
+
+The Small miss at 63/64 is the 64-wide tag scan's full cost on a miss (the C stops early at half load). The Robin Hood N-th insert at 128/256 was 1.20/1.31 at baseline. Both are recorded per decision 8 and the campaign proceeds to Task 9.
+
 ## Deviations
 
 Record here, during execution, anything that differed from the plan or spec and why.
@@ -1089,3 +1305,4 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 5: `LoopState` was not restructured. The annotate showed the probe loops already in registers after Task 6: 7 instructions per fetch iteration, the same as the C, and nothing reloaded through the header. The lever also took `growInner`'s per-entry copy (inline 16 bytes, the C's `str_hash_table.c:419` fast path), which the brief ties to the shifts. The make-room and back-shift copies became pointer-walking `shiftDown`/`shiftUp` and not a generic `memmove(dest, src, n)` helper, because the indexed form made LLVM carry the copy addresses through the delete probe loop (spilled induction variables). One test was added: runs of 3+ entries back-shifted and made room for, at entry sizes 16 (inline path) and 24 (`@memmove`), checked with `fsck == 0`, lookups and payloads after every delete.
 - Task 3: the brief's Step 1 measures lookup_hit and delete at 64 and 1024. By the controller's ruling it was widened to sizes 64, 65, 128, 1024 and 16384 (nqp with a warm-up 16) and to lookup_miss and insert. Because the protocol runs drifted between builds by more than the lever, the decision also uses interleaved runs: the same binaries, with the before, after and C `libmoar.so` swapped through `LD_LIBRARY_PATH`. The fetch and delete exports were also given one 32-bit status load (stale, set and control-only tested together), which the controller put in scope as "the same byte read". The stale read stays one volatile load per call, now 4 bytes wide. The brief's Small `entries_offset` item was Task 4's and was not redone. Beyond the brief's two tests, a two-set test Spec checks that set 1 reaches both of its rungs through `resolve`, and `hash_test.zig` asserts at comptime that the four single-rung tables have `dispatch_reads_set == false`. Not planned: LLVM now inlines Small's `findIn` for capacities 8 and 16 into the exports, which gives the gains at sizes 4-16.
 - Task 7: the brief's `presized and shrunk` test expects `build(.., 200)` to give 256 official slots. 256 slots hold only 192 entries, so the tier's existing rule gives 512, and the test asserts 512. The brief's unfilled-entry test inserts 64 keys, so its unfilled 65th entry is created after the migration and never reaches it. The test runs that order, and also an unfilled 64th entry in the source, which the migration skips (the engine's existing rule). The migration size is `max(next.from, cur_items) + 1`, not just `next.from + 1`, in case a lower rung ever holds more than the next rung's `from`. On every ladder in the tree the two are the same. Beyond the brief: a Robin Hood test that `insertKnownAbsent` and `insertInternal` lay out identical tables, and the make-room shared between them as `inline fn takeSlot`. The Zig engine now has a resize at the 97th insert (128 -> 256) that it did not have before, at the C's own cost. At 65-96 entries, lookup and delete are now at the C's time instead of 0.58-0.81 of it, because the table is as dense as the C's. `growInner`'s reinsert loop still uses `insertInternal`. Switching it to `insertKnownAbsent` would make the 97th and later doublings cheaper, but it is outside this task.
+- Task 8: Step 1 judged every cell on interleaved runs of the protocol binaries (9 rounds, `LD_LIBRARY_PATH` swaps), not on the single protocol run, because the protocol runs carried a both-engine insert noise of up to 2x. Step 2 ran two rounds on the Small lookup_miss 63/64 cells (8a cached-hash test in `StrSpec.eql`, 8b `findIn` always inlined), both reverted; the Robin Hood insert_nth 128/256 cells got a profile (with a scratch, uncommitted bench loop) but no lever, because no single cause was named. The `findIn(8)`/`findIn(16)` inlining stays implicit (carry-over from Task 3).
