@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Repo root: `/home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM`, branch `zig-hash-tuning` cut from `zig-hash-engine` (`a5ea2a419`). nqp stage0 at `../src/vm/moar/stage0`. `traces/llm` is a submodule: edits to this plan are committed inside it, then the pointer is bumped in MoarVM.
+- Repo root: `/home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM`, branch `zig-hash-tuning` cut from `zig-hash-engine` (`a5ea2a419`). nqp stage0 at `../src/vm/moar/stage0`. `traces/` is a submodule (with `llm/` a directory inside it): edits to this plan are committed inside it, then the pointer is bumped in MoarVM.
 - Spike branches are sources, not bases: `zig-hash-spike-boundary` (commits `d45ef388d` nqp harness, `ab1b05320` `-Dlto`/`-Dstrip` options) and `zig-hash-spike-profile` (harness changes for per-size `insert_nth` and `--ops`, unstripped builds; report `/tmp/claude-1000/hash-profile-report.md`). Cherry-pick or re-create their useful parts; never merge them.
 - Nothing observable changes (spec §5, §10): C APIs, headers, tier interface (changes must keep the four single-rung tables working and be called out), tier sets, `small_threshold = 64`, migration trigger, iteration order, stale/CAS/safepoint discipline. The C engine (`-Dzig-impl=false`, plain `perl Configure.pl`) builds exactly as today; without `-Dlto`/`--zig-lto` the link is exactly today's.
 - Measurement (spec §7): nqp harness `tools/bench/hash-bench.nqp` run as `zig-out/bin/moar --libpath=../src/vm/moar/stage0 ../src/vm/moar/stage0/nqp.moarvm tools/bench/hash-bench.nqp --engine=<c|zig> --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5`, medians with min and max; the C-API bench `zig build hash-bench --prefix $PWD/zig-out -- --sizes=... --runs=5`; ratios are Zig over C; a lever is kept only if its targeted ratios move outside the spread. The machine conditions (CPU model, governor, load) are recorded once in this plan's results section and kept for every comparison.
@@ -140,95 +140,7 @@
 ### Task 9: Whole-system check, docs, acceptance
 
 **Files:**
-- Modify: `docs/zig-build.md` ("Hash engine": the tuned ratios, the LTO options, a sentence per lever kept), this plan ("## Results" final tables, "### Task 5: Robin Hood tier fast paths (kept)
-
-Changes in `tiers/robinhood.zig`, all kept, measured as one lever because the whole moved outside the spread on lookup_hit and delete at the C API and on delete at the nqp level:
-
-- `isZeroKey` is one unsigned load and compare of the key bytes (`KeyBits`, `u64` for the pointer keys), not `std.mem.allEqual`'s byte chain. It still runs only after a metadata match (and in `grow`/`fsck`). The compiler now reuses that load for the key compare: `mov (%rbx),%rsi; test %rsi,%rsi; je; cmp %rsi,%r14`, where before it was `cmpb $0,(%rbx); jne` (up to eight times) followed by a second load of the key.
-- The make-room (`insertInternal`) and back-shift (`delete`) copies are `shiftDown`/`shiftUp`. For `entry_size == 16` they copy 16 bytes per entry inline (`movups` pairs), walking a pointer from `ls.entry`. Other sizes use `@memmove` (`compiler_rt.memmove`, as the C calls `memmove`). The test is a runtime branch only for the string table (runtime entry size). The comptime-sized single-rung tables fold it: `ptr` and `uni` (16 bytes) have inline copies only, `index` and `fixkey` (8 bytes) have a `memmove` call only. The byte loops (`copyForwards`/`copyBackwards(u8)`) are gone from every instantiation.
-- `growInner`'s per-entry copy is `copyEntry`: an inline 16-byte copy when `entry_size == 16`, otherwise `@memcpy`. This is the C's `sizeof(MVMHashEntry)` fast path (`str_hash_table.c:419`).
-- Loop state: not changed. Since Task 6 the probe loops keep every `LoopState` field in registers, and nothing is reloaded through the header in the loop (annotate below). The profile's reloads were in the out-of-line `ops.fetch` that Task 6 removed.
-- A first form of the shift, `moveEntries(dest, src, n)` with indexed `d[i] = s[i]` copies, was discarded before it was benchmarked. LLVM strength-reduced the copy addresses into the delete probe loop: 12 instructions per probe iteration, two of them read-modify-writes of stack slots (`addq $0x1,0x38(%rsp)`). The pointer walk from `ls.entry` keeps the delete probe at 9.
-
-Annotate (`-Dstrip=false`, `perf record -F 20000` of `hash-bench --sizes=1024 --runs=400`, `perf annotate --no-source`). Instructions per probe iteration that does not match the metadata, then the path from a metadata match to the key compare:
-
-| loop | C | Zig before | Zig after |
-|---|---|---|---|
-| fetch probe (`MVM_str_hash_fetch_nocheck` / C `bench_str_fetch_nocheck`) | 7: `ja; add; add; add; movzbl; cmp; jne` | 7 (same shape, all in registers) | 7 (unchanged) |
-| fetch, metadata match to key compare | 3: `mov (%r15),%r8; cmp %r9,%r8; je` | 5 when the key's low byte is non-zero (`cmpb $0,(%rbx); jne; mov (%rbx),%rsi; cmp; je`), up to 19 | 5: `mov (%rbx),%rsi; test; je; cmp; je` (one load) |
-| delete probe (`MVM_str_hash_delete_nocheck`) | 9 | 8 | 9 (one more pointer induction variable, for the copy) |
-| delete, metadata match to key compare | 3 | as fetch: 2-16 `cmpb`/`jne` then a reload | as fetch: one load |
-| back-shift copy, per 16-byte entry | `call memmoveFast` | 16 byte moves (4x unrolled `movzbl`/`mov %r8b`) | 2 (`movups` load/store; 4x unrolled) |
-
-Sample shares (final build): the hottest fetch line is `test %rsi,%rsi` at 19.9%, the first touch of the key's line. Before, it was the `jne` after the first `cmpb`, at 20.7%; the C's is `cmp %r9,%r8`, at 20.1%. For delete it is `test %rsi,%rsi` at 27.7%. Before, the `jne` after the first `cmpb` had 27.6%; the C's `cmp %r9,%r8` has 30.6%. These are the same line-latency cost on all three. The byte loop took ~13% of the delete function's samples before; the `movups` copies take ~3% now. (The discarded `moveEntries` form's 12-instruction loop came from a separate `-Dstrip=false` build.) The C side is the same code before and after, so it was annotated once.
-
-Runs: `--sizes=64,65,128,256,1024,16384 --runs=5` (C API), `--sizes=16,64,65,128,256,1024,16384 --runs=5` (nqp; 16 is the warm-up row and is not read). The C engine was run before (HEAD `8e77461b1`) and after (same C code, rebuilt) to bracket drift. Load average (1 min) at the start of each run: Zig before 2.08, C before 2.68, Zig after 1.54, C after 1.41 (C API) / 1.78 (nqp) (`traces/llm/bench/tuning-t5-load.log`). TSVs: `traces/llm/bench/tuning-t5-{capi,nqp}-{c,zig}-{before,after}.tsv`. Cells: `zig / c [zig min-max / c min-max]` in ns; before against C before, after against C after.
-
-C API:
-
-| op | size | before | after |
-|---|---:|---|---|
-| lookup_hit | 64 | 1.02 [7.21-7.24 / 7.05-12.35] | 1.07 [7.68-9.36 / 7.26-11.56] |
-| lookup_hit | 65 | 0.89 [6.32-6.47 / 7.06-7.24] | 0.79 [5.68-5.78 / 7.12-9.72] |
-| lookup_hit | 128 | 1.19 [8.45-8.65 / 7.07-7.38] | 1.07 [7.54-7.77 / 7.12-9.35] |
-| lookup_hit | 256 | 1.22 [8.53-8.89 / 7.17-7.46] | 1.07 [7.76-8.16 / 7.15-7.62] |
-| lookup_hit | 1024 | 1.21 [8.61-9.22 / 7.12-7.56] | 1.08 [7.84-8.59 / 7.30-8.44] |
-| lookup_hit | 16384 | 1.19 [9.56-9.85 / 7.98-8.55] | 1.07 [8.62-9.00 / 8.09-8.18] |
-| lookup_miss | 64 | 1.14 [8.06-8.31 / 7.14-10.71] | 1.08 [7.37-10.08 / 7.15-7.42] |
-| lookup_miss | 65 | 0.79 [5.69-5.80 / 7.18-7.32] | 0.74 [5.42-5.52 / 7.21-9.32] |
-| lookup_miss | 128 | 1.14 [8.14-8.26 / 7.15-7.20] | 1.08 [7.70-7.95 / 7.20-8.88] |
-| lookup_miss | 256 | 1.13 [8.21-8.52 / 7.18-7.38] | 1.10 [7.87-7.95 / 7.16-7.47] |
-| lookup_miss | 1024 | 1.15 [8.23-8.46 / 7.07-7.21] | 1.12 [7.84-8.21 / 7.16-7.42] |
-| lookup_miss | 16384 | 1.14 [9.43-13.30 / 8.12-12.11] | 1.11 [9.53-13.75 / 8.20-12.24] |
-| delete | 64 | 1.24 [10.25-10.61 / 8.34-12.56] | 1.18 [9.73-10.41 / 8.55-10.40] |
-| delete | 65 | 0.91 [7.56-7.70 / 8.32-8.43] | 0.82 [6.84-6.92 / 8.40-9.82] |
-| delete | 128 | 1.16 [9.56-9.66 / 8.28-8.50] | 1.00 [8.46-8.53 / 8.35-11.46] |
-| delete | 256 | 1.15 [9.50-9.68 / 8.30-8.45] | 1.01 [8.49-8.67 / 8.35-8.75] |
-| delete | 1024 | 1.17 [9.69-9.97 / 8.22-8.43] | 1.00 [8.52-8.63 / 8.47-8.69] |
-| delete | 16384 | 1.17 [10.56-10.75 / 9.08-9.24] | 1.00 [9.29-9.39 / 9.26-9.74] |
-| insert | 64 | 0.32 [13.10-16.23 / 40.57-44.10] | 0.30 [13.35-16.54 / 43.61-49.98] |
-| insert | 65 | 0.87 [37.61-40.08 / 40.49-46.08] | 0.84 [36.39-40.84 / 41.64-47.71] |
-| insert | 128 | 0.63 [24.58-27.94 / 43.69-47.68] | 0.61 [24.01-27.53 / 43.99-49.28] |
-| insert | 256 | 0.88 [36.27-42.17 / 40.18-43.73] | 0.79 [32.49-39.35 / 41.24-45.97] |
-| insert | 1024 | 1.13 [43.29-48.82 / 39.79-42.36] | 1.01 [38.54-45.48 / 40.34-42.47] |
-| insert | 16384 | 1.16 [49.83-62.19 / 39.86-56.62] | 1.01 [45.13-52.54 / 40.00-55.60] |
-
-nqp level:
-
-| op | size | before | after |
-|---|---:|---|---|
-| lookup_hit | 64 | 0.93 [14.91-15.14 / 14.64-23.76] | 0.97 [14.74-15.46 / 14.37-16.71] |
-| lookup_hit | 65 | 0.92 [13.09-13.30 / 14.32-14.54] | 0.89 [12.95-13.13 / 14.60-14.86] |
-| lookup_hit | 128 | 1.02 [14.61-14.94 / 14.32-14.55] | 1.01 [14.68-14.84 / 14.48-14.74] |
-| lookup_hit | 256 | 1.03 [14.59-15.34 / 14.56-14.94] | 0.99 [14.62-15.66 / 14.52-15.34] |
-| lookup_hit | 1024 | 1.00 [15.01-15.43 / 14.89-15.37] | 1.00 [14.85-15.89 / 14.94-15.18] |
-| lookup_hit | 16384 | 1.02 [16.60-16.75 / 16.10-16.41] | 1.01 [16.27-16.95 / 16.16-16.49] |
-| lookup_miss | 64 | 1.13 [16.06-16.32 / 14.24-15.46] | 1.01 [14.50-15.05 / 14.26-14.59] |
-| lookup_miss | 65 | 0.85 [11.84-12.12 / 14.12-14.44] | 0.84 [12.17-12.24 / 14.20-14.56] |
-| lookup_miss | 128 | 1.03 [14.41-14.56 / 14.07-14.31] | 1.01 [14.44-14.91 / 14.22-15.89] |
-| lookup_miss | 256 | 1.00 [14.41-14.64 / 14.24-15.75] | 1.02 [14.54-14.71 / 14.16-14.48] |
-| lookup_miss | 1024 | 1.00 [14.30-14.63 / 14.35-14.63] | 1.01 [14.22-14.70 / 14.30-14.61] |
-| lookup_miss | 16384 | 1.03 [15.40-20.11 / 15.12-19.96] | 1.01 [15.28-20.22 / 15.35-20.19] |
-| delete | 64 | 1.00 [14.57-15.06 / 14.09-20.50] | 1.00 [14.51-14.73 / 14.56-15.89] |
-| delete | 65 | 0.95 [13.57-13.94 / 14.40-14.66] | 0.91 [13.26-13.37 / 14.60-14.77] |
-| delete | 128 | 1.05 [14.96-15.23 / 14.33-15.37] | 1.01 [14.41-14.64 / 14.38-14.55] |
-| delete | 256 | 1.04 [14.84-15.31 / 14.51-16.40] | 1.00 [14.41-14.58 / 14.52-14.70] |
-| delete | 1024 | 1.04 [15.47-15.76 / 14.80-15.03] | 0.98 [14.58-14.83 / 14.85-14.92] |
-| delete | 16384 | 1.11 [17.50-18.22 / 16.31-16.96] | 1.01 [16.46-18.43 / 16.46-16.68] |
-| insert | 64 | 0.44 [22.32-25.88 / 53.28-61.10] | 0.38 [22.64-25.85 / 52.67-62.49] |
-| insert | 65 | 0.88 [46.16-51.91 / 50.80-56.20] | 0.88 [46.66-49.16 / 50.75-54.70] |
-| insert | 128 | 0.70 [34.15-37.57 / 50.91-57.83] | 0.67 [33.53-37.40 / 51.33-54.22] |
-| insert | 256 | 0.88 [46.50-47.22 / 52.95-54.09] | 0.82 [44.31-47.63 / 51.36-55.21] |
-| insert | 1024 | 1.09 [51.08-56.59 / 49.64-51.95] | 1.00 [47.34-53.41 / 49.38-53.10] |
-| insert | 16384 | 1.04 [58.48-70.98 / 49.15-63.63] | 0.98 [51.35-67.08 / 49.57-62.81] |
-
-- Kept. At the C API (Robin Hood, 128-16384), lookup_hit went from 1.19-1.22 to 1.07-1.08 and delete from 1.15-1.17 to 1.00-1.01. The Zig spreads are disjoint before and after at every size. lookup_miss went from 1.13-1.15 to 1.08-1.12, disjoint at 128-1024; at 16384 both spreads are wide (9.43-13.30 against 9.53-13.75 ns). Insert also moved at 1024/16384 (1.13/1.16 to 1.01/1.01), but its spreads overlap.
-- At the nqp level, delete went from 1.04-1.11 to 0.98-1.01, disjoint at 128, 256 and 1024 (14.96-15.23 / 14.84-15.31 / 15.47-15.76 against 14.41-14.64 / 14.41-14.58 / 14.58-14.83 ns). At 16384 there is one slow run after (max 18.43; the minimum fell from 17.50 to 16.46). lookup_hit (0.99-1.01) and lookup_miss (1.01-1.02) were already at parity after Task 6 and did not move beyond the spread.
-- Size 65 (the first Robin Hood row, 256 official slots) improved at the C API: lookup_hit 0.89 to 0.79, delete 0.91 to 0.82.
-- Small (64) did not regress. The C-API lookup_hit at 64 reads 1.02 to 1.07 (7.21-7.24 against 7.68-9.36 ns), but the Small code is unchanged. Three more C-API runs of each build at 64 gave lookup_hit 7.38 / 7.76 / 8.07 ns before and 7.43 / 7.48 / 7.58 ns after, lookup_miss 7.38 / 7.97 / 8.01 before and 7.28 / 7.36 / 7.96 after, and delete 10.08 / 10.57 / 10.70 before and 9.82 / 9.87 / 10.61 after. The first before run was at the bottom of the band.
-- What is left on Robin Hood at the C API, lookup_hit 1.07 and lookup_miss 1.08-1.12, is outside the probe loop, which now matches the C instruction for instruction. Before the loop: the `cur_items == 0` test, the dispatch/stale byte tests (Task 3), and `loopState`'s `key_right_shift + metadata_hash_bits` and `imul` (profile cause RH-4). Delete is at parity.
-
-## Deviations")
+- Modify: `docs/zig-build.md` ("Hash engine": the tuned ratios, the LTO options, a sentence per lever kept), this plan ("## Results" final tables, "## Deviations")
 
 - [ ] **Step 1: Two stacks and the spectest** as the engine campaign's Task 14 did (prefixes `/tmp/claude-1000/tune-c-prefix` and `/tmp/claude-1000/tune-zig-prefix`, nqp and rakudo built against each, three timed spectest runs per engine with peak RSS, the Raku-level benchmark with both rakus via `hash-bench.sh --raku-c --raku-zig`); record the tables; no new failures; wall and RSS within 2 percent.
 - [ ] **Step 2: The acceptance list** (spec §8, every item) run end to end and recorded with outcomes, including the LTO item and the gcc refusal.
@@ -818,6 +730,94 @@ nqp level:
 - Kept. lookup_hit and delete moved outside the spread at both levels and every size 16-64: at the C API, lookup_hit went from 1.45-1.57 to 0.94-1.10 and delete from 1.67-1.84 to 0.98-1.28; at the nqp level (32-64), lookup_hit went from 1.12-1.23 to 0.96-1.10 and delete from 1.21-1.31 to 0.94-1.10.
 - lookup_miss did not regress. At the C API it improved at 63/64 (7.64-7.93 against 7.98-8.24 ns, outside the spread). At the nqp level the Zig spreads overlap before and after at 63 and 64 (the 64 ratio moves from 1.09 to 1.15: the Zig median rose from 15.77 to 16.33 ns and the C median fell from 14.42 to 14.23 ns, so the move is mostly on the Zig side, and it lies inside the overlapping Zig spreads, 15.69-15.96 before and 15.69-16.56 after). Three more nqp runs of each build gave HEAD 14.0-15.4 / 15.6-16.4 / 15.7-16.2 ns and the change 15.0-15.3 / 15.4-16.3 / 16.1-16.6 ns at 32 / 63 / 64. That is the run-to-run band of the nqp miss.
 - What is left at 63/64 (lookup_hit 1.07-1.10, delete 1.24-1.28 at the C API) is the call chain, the wrapper and stale checks, and the hash call (Task 6), plus the out-of-line `find` call.
+
+### Task 5: Robin Hood tier fast paths (kept)
+
+Changes in `tiers/robinhood.zig`, all kept, measured as one lever because the whole moved outside the spread on lookup_hit and delete at the C API and on delete at the nqp level:
+
+- `isZeroKey` is one unsigned load and compare of the key bytes (`KeyBits`, `u64` for the pointer keys), not `std.mem.allEqual`'s byte chain. It still runs only after a metadata match (and in `grow`/`fsck`). The compiler now reuses that load for the key compare: `mov (%rbx),%rsi; test %rsi,%rsi; je; cmp %rsi,%r14`, where before it was `cmpb $0,(%rbx); jne` (up to eight times) followed by a second load of the key.
+- The make-room (`insertInternal`) and back-shift (`delete`) copies are `shiftDown`/`shiftUp`. For `entry_size == 16` they copy 16 bytes per entry inline (`movups` pairs), walking a pointer from `ls.entry`. Other sizes use `@memmove` (`compiler_rt.memmove`, as the C calls `memmove`). The test is a runtime branch only for the string table (runtime entry size). The comptime-sized single-rung tables fold it: `ptr` and `uni` (16 bytes) have inline copies only, `index` and `fixkey` (8 bytes) have a `memmove` call only. The byte loops (`copyForwards`/`copyBackwards(u8)`) are gone from every instantiation.
+- `growInner`'s per-entry copy is `copyEntry`: an inline 16-byte copy when `entry_size == 16`, otherwise `@memcpy`. This is the C's `sizeof(MVMHashEntry)` fast path (`str_hash_table.c:419`).
+- Loop state: not changed. Since Task 6 the probe loops keep every `LoopState` field in registers, and nothing is reloaded through the header in the loop (annotate below). The profile's reloads were in the out-of-line `ops.fetch` that Task 6 removed.
+- A first form of the shift, `moveEntries(dest, src, n)` with indexed `d[i] = s[i]` copies, was discarded before it was benchmarked. LLVM strength-reduced the copy addresses into the delete probe loop: 12 instructions per probe iteration, two of them read-modify-writes of stack slots (`addq $0x1,0x38(%rsp)`). The pointer walk from `ls.entry` keeps the delete probe at 9.
+
+Annotate (`-Dstrip=false`, `perf record -F 20000` of `hash-bench --sizes=1024 --runs=400`, `perf annotate --no-source`). Instructions per probe iteration that does not match the metadata, then the path from a metadata match to the key compare:
+
+| loop | C | Zig before | Zig after |
+|---|---|---|---|
+| fetch probe (`MVM_str_hash_fetch_nocheck` / C `bench_str_fetch_nocheck`) | 7: `ja; add; add; add; movzbl; cmp; jne` | 7 (same shape, all in registers) | 7 (unchanged) |
+| fetch, metadata match to key compare | 3: `mov (%r15),%r8; cmp %r9,%r8; je` | 5 when the key's low byte is non-zero (`cmpb $0,(%rbx); jne; mov (%rbx),%rsi; cmp; je`), up to 19 | 5: `mov (%rbx),%rsi; test; je; cmp; je` (one load) |
+| delete probe (`MVM_str_hash_delete_nocheck`) | 9 | 8 | 9 (one more pointer induction variable, for the copy) |
+| delete, metadata match to key compare | 3 | as fetch: 2-16 `cmpb`/`jne` then a reload | as fetch: one load |
+| back-shift copy, per 16-byte entry | `call memmoveFast` | 16 byte moves (4x unrolled `movzbl`/`mov %r8b`) | 2 (`movups` load/store; 4x unrolled) |
+
+Sample shares (final build): the hottest fetch line is `test %rsi,%rsi` at 19.9%, the first touch of the key's line. Before, it was the `jne` after the first `cmpb`, at 20.7%; the C's is `cmp %r9,%r8`, at 20.1%. For delete it is `test %rsi,%rsi` at 27.7%. Before, the `jne` after the first `cmpb` had 27.6%; the C's `cmp %r9,%r8` has 30.6%. These are the same line-latency cost on all three. The byte loop took ~13% of the delete function's samples before; the `movups` copies take ~3% now. (The discarded `moveEntries` form's 12-instruction loop came from a separate `-Dstrip=false` build.) The C side is the same code before and after, so it was annotated once.
+
+Runs: `--sizes=64,65,128,256,1024,16384 --runs=5` (C API), `--sizes=16,64,65,128,256,1024,16384 --runs=5` (nqp; 16 is the warm-up row and is not read). The C engine was run before (HEAD `8e77461b1`) and after (same C code, rebuilt) to bracket drift. Load average (1 min) at the start of each run: Zig before 2.08, C before 2.68, Zig after 1.54, C after 1.41 (C API) / 1.78 (nqp) (`traces/llm/bench/tuning-t5-load.log`). TSVs: `traces/llm/bench/tuning-t5-{capi,nqp}-{c,zig}-{before,after}.tsv`. Cells: `zig / c [zig min-max / c min-max]` in ns; before against C before, after against C after.
+
+C API:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 1.02 [7.21-7.24 / 7.05-12.35] | 1.07 [7.68-9.36 / 7.26-11.56] |
+| lookup_hit | 65 | 0.89 [6.32-6.47 / 7.06-7.24] | 0.79 [5.68-5.78 / 7.12-9.72] |
+| lookup_hit | 128 | 1.19 [8.45-8.65 / 7.07-7.38] | 1.07 [7.54-7.77 / 7.12-9.35] |
+| lookup_hit | 256 | 1.22 [8.53-8.89 / 7.17-7.46] | 1.07 [7.76-8.16 / 7.15-7.62] |
+| lookup_hit | 1024 | 1.21 [8.61-9.22 / 7.12-7.56] | 1.08 [7.84-8.59 / 7.30-8.44] |
+| lookup_hit | 16384 | 1.19 [9.56-9.85 / 7.98-8.55] | 1.07 [8.62-9.00 / 8.09-8.18] |
+| lookup_miss | 64 | 1.14 [8.06-8.31 / 7.14-10.71] | 1.08 [7.37-10.08 / 7.15-7.42] |
+| lookup_miss | 65 | 0.79 [5.69-5.80 / 7.18-7.32] | 0.74 [5.42-5.52 / 7.21-9.32] |
+| lookup_miss | 128 | 1.14 [8.14-8.26 / 7.15-7.20] | 1.08 [7.70-7.95 / 7.20-8.88] |
+| lookup_miss | 256 | 1.13 [8.21-8.52 / 7.18-7.38] | 1.10 [7.87-7.95 / 7.16-7.47] |
+| lookup_miss | 1024 | 1.15 [8.23-8.46 / 7.07-7.21] | 1.12 [7.84-8.21 / 7.16-7.42] |
+| lookup_miss | 16384 | 1.14 [9.43-13.30 / 8.12-12.11] | 1.11 [9.53-13.75 / 8.20-12.24] |
+| delete | 64 | 1.24 [10.25-10.61 / 8.34-12.56] | 1.18 [9.73-10.41 / 8.55-10.40] |
+| delete | 65 | 0.91 [7.56-7.70 / 8.32-8.43] | 0.82 [6.84-6.92 / 8.40-9.82] |
+| delete | 128 | 1.16 [9.56-9.66 / 8.28-8.50] | 1.00 [8.46-8.53 / 8.35-11.46] |
+| delete | 256 | 1.15 [9.50-9.68 / 8.30-8.45] | 1.01 [8.49-8.67 / 8.35-8.75] |
+| delete | 1024 | 1.17 [9.69-9.97 / 8.22-8.43] | 1.00 [8.52-8.63 / 8.47-8.69] |
+| delete | 16384 | 1.17 [10.56-10.75 / 9.08-9.24] | 1.00 [9.29-9.39 / 9.26-9.74] |
+| insert | 64 | 0.32 [13.10-16.23 / 40.57-44.10] | 0.30 [13.35-16.54 / 43.61-49.98] |
+| insert | 65 | 0.87 [37.61-40.08 / 40.49-46.08] | 0.84 [36.39-40.84 / 41.64-47.71] |
+| insert | 128 | 0.63 [24.58-27.94 / 43.69-47.68] | 0.61 [24.01-27.53 / 43.99-49.28] |
+| insert | 256 | 0.88 [36.27-42.17 / 40.18-43.73] | 0.79 [32.49-39.35 / 41.24-45.97] |
+| insert | 1024 | 1.13 [43.29-48.82 / 39.79-42.36] | 1.01 [38.54-45.48 / 40.34-42.47] |
+| insert | 16384 | 1.16 [49.83-62.19 / 39.86-56.62] | 1.01 [45.13-52.54 / 40.00-55.60] |
+
+nqp level:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 0.93 [14.91-15.14 / 14.64-23.76] | 0.97 [14.74-15.46 / 14.37-16.71] |
+| lookup_hit | 65 | 0.92 [13.09-13.30 / 14.32-14.54] | 0.89 [12.95-13.13 / 14.60-14.86] |
+| lookup_hit | 128 | 1.02 [14.61-14.94 / 14.32-14.55] | 1.01 [14.68-14.84 / 14.48-14.74] |
+| lookup_hit | 256 | 1.03 [14.59-15.34 / 14.56-14.94] | 0.99 [14.62-15.66 / 14.52-15.34] |
+| lookup_hit | 1024 | 1.00 [15.01-15.43 / 14.89-15.37] | 1.00 [14.85-15.89 / 14.94-15.18] |
+| lookup_hit | 16384 | 1.02 [16.60-16.75 / 16.10-16.41] | 1.01 [16.27-16.95 / 16.16-16.49] |
+| lookup_miss | 64 | 1.13 [16.06-16.32 / 14.24-15.46] | 1.01 [14.50-15.05 / 14.26-14.59] |
+| lookup_miss | 65 | 0.85 [11.84-12.12 / 14.12-14.44] | 0.84 [12.17-12.24 / 14.20-14.56] |
+| lookup_miss | 128 | 1.03 [14.41-14.56 / 14.07-14.31] | 1.01 [14.44-14.91 / 14.22-15.89] |
+| lookup_miss | 256 | 1.00 [14.41-14.64 / 14.24-15.75] | 1.02 [14.54-14.71 / 14.16-14.48] |
+| lookup_miss | 1024 | 1.00 [14.30-14.63 / 14.35-14.63] | 1.01 [14.22-14.70 / 14.30-14.61] |
+| lookup_miss | 16384 | 1.03 [15.40-20.11 / 15.12-19.96] | 1.01 [15.28-20.22 / 15.35-20.19] |
+| delete | 64 | 1.00 [14.57-15.06 / 14.09-20.50] | 1.00 [14.51-14.73 / 14.56-15.89] |
+| delete | 65 | 0.95 [13.57-13.94 / 14.40-14.66] | 0.91 [13.26-13.37 / 14.60-14.77] |
+| delete | 128 | 1.05 [14.96-15.23 / 14.33-15.37] | 1.01 [14.41-14.64 / 14.38-14.55] |
+| delete | 256 | 1.04 [14.84-15.31 / 14.51-16.40] | 1.00 [14.41-14.58 / 14.52-14.70] |
+| delete | 1024 | 1.04 [15.47-15.76 / 14.80-15.03] | 0.98 [14.58-14.83 / 14.85-14.92] |
+| delete | 16384 | 1.11 [17.50-18.22 / 16.31-16.96] | 1.01 [16.46-18.43 / 16.46-16.68] |
+| insert | 64 | 0.44 [22.32-25.88 / 53.28-61.10] | 0.38 [22.64-25.85 / 52.67-62.49] |
+| insert | 65 | 0.88 [46.16-51.91 / 50.80-56.20] | 0.88 [46.66-49.16 / 50.75-54.70] |
+| insert | 128 | 0.70 [34.15-37.57 / 50.91-57.83] | 0.67 [33.53-37.40 / 51.33-54.22] |
+| insert | 256 | 0.88 [46.50-47.22 / 52.95-54.09] | 0.82 [44.31-47.63 / 51.36-55.21] |
+| insert | 1024 | 1.09 [51.08-56.59 / 49.64-51.95] | 1.00 [47.34-53.41 / 49.38-53.10] |
+| insert | 16384 | 1.04 [58.48-70.98 / 49.15-63.63] | 0.98 [51.35-67.08 / 49.57-62.81] |
+
+- Kept. At the C API (Robin Hood, 128-16384), lookup_hit went from 1.19-1.22 to 1.07-1.08 and delete from 1.15-1.17 to 1.00-1.01. The Zig spreads are disjoint before and after at every size. lookup_miss went from 1.13-1.15 to 1.08-1.12, disjoint at 128-1024; at 16384 both spreads are wide (9.43-13.30 against 9.53-13.75 ns). Insert also moved at 1024/16384 (1.13/1.16 to 1.01/1.01), but its spreads overlap.
+- At the nqp level, delete went from 1.04-1.11 to 0.98-1.01, disjoint at 128, 256 and 1024 (14.96-15.23 / 14.84-15.31 / 15.47-15.76 against 14.41-14.64 / 14.41-14.58 / 14.58-14.83 ns). At 16384 there is one slow run after (max 18.43; the minimum fell from 17.50 to 16.46). lookup_hit (0.99-1.01) and lookup_miss (1.01-1.02) were already at parity after Task 6 and did not move beyond the spread.
+- Size 65 (the first Robin Hood row, 256 official slots) improved at the C API: lookup_hit 0.89 to 0.79, delete 0.91 to 0.82.
+- Small (64) did not regress. The C-API lookup_hit at 64 reads 1.02 to 1.07 (7.21-7.24 against 7.68-9.36 ns), but the Small code is unchanged. Three more C-API runs of each build at 64 gave lookup_hit 7.38 / 7.76 / 8.07 ns before and 7.43 / 7.48 / 7.58 ns after, lookup_miss 7.38 / 7.97 / 8.01 before and 7.28 / 7.36 / 7.96 after, and delete 10.08 / 10.57 / 10.70 before and 9.82 / 9.87 / 10.61 after. The first before run was at the bottom of the band.
+- What is left on Robin Hood at the C API, lookup_hit 1.07 and lookup_miss 1.08-1.12, is outside the probe loop, which now matches the C instruction for instruction. Before the loop: the `cur_items == 0` test, the dispatch/stale byte tests (Task 3), and `loopState`'s `key_right_shift + metadata_hash_bits` and `imul` (profile cause RH-4). Delete is at parity.
 
 ### Task 6: the C-shaped wrapper (kept)
 
