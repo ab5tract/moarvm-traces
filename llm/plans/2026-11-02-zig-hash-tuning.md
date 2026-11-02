@@ -1451,3 +1451,23 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 9: under `-Dlto` the lookup and delete exports are no longer inlined everywhere. Task 2 found no call site left for `fetch_nocheck`, `fetch`, `delete`, `lvalue_fetch`, `next`, `current_nocheck` and `count`. Now `fetch` keeps 143 direct call sites in 52 functions (`MVMHash_at_key`, `exists_key` and `MVM_interp_run` among them), `fetch_nocheck` 5, and `delete` and `delete_nocheck` 1 each. The binding holds (0 PLT calls), and the iteration exports are still inlined. Most likely this is the larger single-frame exports from Tasks 3 and 6. The LTO lookup gain was re-measured after the review ("#### LTO iterate re-measured").
 - Task 9: `perl Configure.pl --zig-lto` without `--zig` refuses with `--zig-lto needs --zig=PATH` (checked first); the `--cc=zig` message comes with `--zig=/usr/bin/zig --zig-lto` under gcc, the Task 2 check. Both exit 255.
 - Task 9: in the acceptance run the `-Dzig-impl=false` install came from the zig cache, so its `--verbose` log does not list every C hash file. "The C path unchanged" rests on `git diff a5ea2a419 HEAD` (no C source or header changed) plus that build's `test` and `unit-test` passing and its binding counts equalling Task 2's.
+
+## Post-campaign: the ladder with LTO on by default
+
+On 2026-11-02, after the campaign closed, the user turned LTO on by default (MoarVM `fe06dcd73`: `-Dlto` true unless `-Doptimize=Debug`, `--zig-lto` on with `--zig` and `--cc=zig` unless `--debug`, `--no-zig-lto` to turn it off, gcc builds pass `-Dlto=false`; spec §12 errata). The ladder was re-run at the nqp level on four builds of that tree, interleaved over 9 rounds as Task 8 did: zig-lto and c-lto (the default builds of each engine), zig and c (`-Dlto=false`). Procedure, builds, cell tables and verdicts: `traces/llm/bench/tuning-lto-default-nqp.md`; raw and aggregated TSVs beside it (`tuning-lto-default-*`).
+
+Ratio ranges per tier (Small 16-64, Robin Hood 65-16384; size 4 and the 65th `insert_nth` not read), `insert_nth` over 128-16384 in the Robin Hood column:
+
+| pair | insert | lookup_hit | lookup_miss | delete | iterate | insert_nth | cells |
+|---|---|---|---|---|---|---|---|
+| zig-lto / c-lto (both default builds, the scoreboard now) | 0.36-0.44 / 0.75-1.03 | 0.75-0.92 / 0.95-1.03 | 0.74-0.93 / 0.96-0.98 | 0.74-0.95 / 0.95-0.97 | 0.56-0.65 / 1.02-1.04 | 0.24-0.62 / 1.06-1.16 | 53/53 pass |
+| zig-lto / c | 0.36-0.43 / 0.73-1.03 | 0.71-0.87 / 0.90-0.97 | 0.69-0.87 / 0.91-0.92 | 0.70-0.91 / 0.91-0.93 | 0.55-0.61 / 0.95-0.98 | 0.24-0.69 / 1.00-1.07 | 52/53 (insert_nth 128 1.07, disjoint spreads) |
+| zig / c (Task 8's pairing, re-run) | 0.39-0.46 / 0.77-1.05 | 0.84-1.07 / 0.99-1.08 | 0.78-1.13 / 1.02-1.03 | 0.75-1.05 / 0.97-0.99 | 0.64-0.72 / 1.03-1.07 | 0.26-0.70 / 1.00-1.10 | 48/53 (insert 1024 1.05, lookup_miss 63 1.10 and 64 1.13, insert_nth 128 1.10 and 256 1.09) |
+| c-lto / c | 0.98-0.99 / 0.95-1.00 | 0.94-0.95 / 0.95 | 0.93-0.94 / 0.93-0.95 | 0.95-0.96 / 0.95-0.97 | 0.92-0.97 / 0.93-0.94 | 0.99-1.16 / 0.86-0.99 | - |
+
+- Default build against default build: every cell passes. The three Task 8 shortfall cells read Small lookup_miss 63 0.93 [11.38-13.41 / 13.22-13.52], Robin Hood insert_nth 128 1.11 [31.05-33.44 / 28.14-34.87] and 256 1.06 [31.74-33.27 / 29.31-35.22], the last two passing on overlap (the C's `insert_nth` spreads are wide at every Robin Hood size: 1024 1.07 and 16384 1.16 also pass on overlap). Robin Hood iterate 1.02-1.04 (rule: at most 1.10); lookup_hit 65 1.03 is the only Robin Hood lookup above 1.0.
+- Against the plain C (the engine most users had before this change) the default Zig build is below 1.0 on every op but `insert_nth`, with Robin Hood lookups and delete at 0.90-0.97 and iterate 0.95-0.98 (Task 9's LTO re-measure: 0.90-0.93 and 0.96-0.98).
+- The plain pairing re-run reads harsher than Task 8's ladder on Small lookup_miss (63 1.10 and 64 1.13 against 1.08 and 1.054) and one notch over the line on insert 1024 (1.05 after rounding, 1.0505). Same engine code; the plain Zig text differs from Task 8's by 384 bytes (the embedded version string). This is the between-session spread of that pairing, which no longer describes the default build.
+- Migration: zig-lto 65th 1046 ns [1033-1097] against c-lto 97th 1923 ns [1640-1956] = 0.54 (against plain c 97th 1839 ns: 0.57); zig-lto's own 97th 1976 ns. Unchanged from Task 8.
+- LTO on the C engine alone: c-lto / c 0.93-0.97 on lookups, delete and iterate, 0.95-1.00 on insert, consistent with Task 9's 0.94-0.96.
+
