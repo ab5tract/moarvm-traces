@@ -334,3 +334,21 @@ recorded ruling.
 - The order of levers once the profile has ranked the causes, and which
   levers to strike.
 - How `hash-bench.sh` renders three harnesses.
+
+## 12. Errata after implementation
+
+- §3, nqp level: the ratios quoted there (Small lookup hit 0.90-1.14, delete
+  1.19-1.33, iterate 0.74-0.84; Robin Hood lookup hit 1.17-1.21, delete
+  1.20-1.24, iterate 1.04-1.09) came from the spike harness, which timed
+  every phase inside one frame; a spesh artefact doubled the C engine's
+  delete there, and the sort of the medians was lexical. Task 1 of the plan
+  fixed both (each phase is its own sub; numeric sort) and re-took the
+  baseline; the plan's "## Profile and baseline" supersedes §3's nqp rows.
+- §8 criterion 3: the engine campaign's recorded Raku-level band came from
+  one favourable run. Task 9 re-ran the engine campaign's own build in the
+  same session and it reads as high or higher on the cells above the band,
+  so criterion 3 is recorded as a pass against the re-measured band and a
+  shortfall against the literal one (plan, Task 9 acceptance row 3).
+- §8 criterion 4: peak spectest RSS measured 3 percent above the C engine
+  (Zig runs 686/713/725 MB climbing, C 696/686/692 MB flat); accepted by
+  the user on 2026-11-02 with a note to revisit.
