@@ -1,7 +1,7 @@
 # Zig hash engine tuning: the default ladder at parity, the migration tamed, LTO opt-in
 
 **Date:** 2026-11-02
-**Status:** draft, awaiting builder check and user approval
+**Status:** approved (builder-checked; the two open questions were settled as decisions 7 and 8)
 **Builds on:** the Zig hash engine (`traces/llm/specs/2026-11-02-zig-hash-engine-design.md`, branch `zig-hash-engine`, head `a5ea2a419`), its recorded results (`traces/llm/plans/2026-11-02-zig-hash-engine.md`, "Benchmark results"), the boundary spikes (branch `zig-hash-spike-boundary`, report `/tmp/claude-1000/hash-spike-boundary-report.md`, summarised in §3), and the profile recon (branch `zig-hash-spike-profile`, report `/tmp/claude-1000/hash-profile-report.md`; its attribution is recorded by the plan's first task, §6).
 **Campaign:** 1 of 3 (then: strategies in the VM; the Rakudo `Hash[:strategy, :size]` syntax; then REPRs).
 
@@ -58,7 +58,15 @@ Taken in the brainstorm (2026-11-02); the plan does not re-litigate them.
 6. **The finish line** (§8): every operation in both tiers within 5 percent
    of the C engine or better at the nqp level, the Small tier's insert,
    iterate and memory wins kept, the migrating insert no more expensive than
-   the C engine's 98th insert, spectest and Raku level at parity.
+   the C engine's 97th insert, spectest and Raku level at parity.
+7. **Iterate is exempt from the 5 percent line in non-LTO builds**: the C
+   API's two calls per element are its shape and only LTO removes them, so
+   Robin Hood iterate must be at or below 1.10 in a default build and within
+   noise of 1.0 under `-Dlto`, judged against the plain C engine.
+8. **The campaign is bounded**: the levers the profile supports, plus at
+   most two further profile-and-lever rounds. If the finish line is still
+   missed, the campaign ends with the shortfall recorded per operation in
+   the plan, and campaign 2 (strategies) proceeds regardless.
 
 ## 3. Verified facts
 
@@ -277,11 +285,14 @@ support is struck from the plan with a note.
 
 1. nqp level, medians against the C engine with the spread reported: every
    operation at every ladder size in both tiers at or below 1.05, or the
-   difference inside the measured noise band; Small-tier insert, iterate and
-   allocation remain better than C (insert and iterate below 1.0 at 16-64;
-   allocation under a third).
-2. The migrating insert at 65 costs no more than the C engine's 98th insert
+   difference inside the measured noise band, except Robin Hood iterate in
+   a non-LTO build, which must be at or below 1.10 (decision 7); Small-tier
+   insert, iterate and allocation remain better than C (insert and iterate
+   below 1.0 at 16-64; allocation under a third).
+2. The migrating insert at 65 costs no more than the C engine's 97th insert
    (its resize into 256 official slots), at the nqp level and at the C API.
+   If the campaign ends short of criterion 1 or 2 (decision 8), the plan
+   records the shortfall per operation and size.
 3. Raku-level: every ratio within the engine campaign's recorded band or
    better; no new outlier above 1.25 except the already-recorded 65536
    insert, which must not get worse.
