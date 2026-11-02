@@ -728,8 +728,70 @@ nqp level:
 | delete | 64 | 1.30 [18.84-19.18 / 14.47-14.58] | 1.10 [15.43-16.01 / 14.30-14.67] |
 
 - Kept. lookup_hit and delete moved outside the spread at both levels and every size 16-64: at the C API, lookup_hit went from 1.45-1.57 to 0.94-1.10 and delete from 1.67-1.84 to 0.98-1.28; at the nqp level (32-64), lookup_hit went from 1.12-1.23 to 0.96-1.10 and delete from 1.21-1.31 to 0.94-1.10.
-- lookup_miss did not regress. At the C API it improved at 63/64 (7.64-7.93 against 7.98-8.24 ns, outside the spread). At the nqp level the Zig spreads overlap before and after at 63 and 64 (the 64 ratio moves from 1.09 to 1.15 mostly because the C base dropped from 14.67 to 14.29 median). Three more nqp runs of each build gave HEAD 14.0-15.4 / 15.6-16.4 / 15.7-16.2 ns and the change 15.0-15.3 / 15.4-16.3 / 16.1-16.6 ns at 32 / 63 / 64. That is the run-to-run band of the nqp miss.
+- lookup_miss did not regress. At the C API it improved at 63/64 (7.64-7.93 against 7.98-8.24 ns, outside the spread). At the nqp level the Zig spreads overlap before and after at 63 and 64 (the 64 ratio moves from 1.09 to 1.15: the Zig median rose from 15.77 to 16.33 ns and the C median fell from 14.42 to 14.23 ns, so the move is mostly on the Zig side, and it lies inside the overlapping Zig spreads, 15.69-15.96 before and 15.69-16.56 after). Three more nqp runs of each build gave HEAD 14.0-15.4 / 15.6-16.4 / 15.7-16.2 ns and the change 15.0-15.3 / 15.4-16.3 / 16.1-16.6 ns at 32 / 63 / 64. That is the run-to-run band of the nqp miss.
 - What is left at 63/64 (lookup_hit 1.07-1.10, delete 1.24-1.28 at the C API) is the call chain, the wrapper and stale checks, and the hash call (Task 6), plus the out-of-line `find` call.
+
+### Task 6: the C-shaped wrapper (kept)
+
+Changes, measured as one lever (`str.zig`, `table.zig`; no change to `dispatch`'s or `resolve`'s semantics, to any tier, or to the exports):
+
+- `StrSpec.hash` is an `inline fn` that reads `key.*.body.cached_hash_code` and calls `MVM_string_compute_hash_code` only when it is 0, as the C static inline `MVM_string_hash_code` (`src/strings/ops.h`) does. The translate-c copy of that inline was a 14-byte out-of-line function that no caller inlined.
+- `StrSpec.eql` is `inline`, with the same order (pointer, grapheme counts, `MVM_string_substrings_equal_nocheck`); the counts come from the translated `MVM_string_graphs_nocheck` called with `@call(.always_inline, ..)`.
+- `keyIsValid` is `inline` and does the C's checks in the C's order (`str_hash_table_funcs.h:366-371`): `MVM_is_null` written out (NULL or `VMNull`), the REPR ID compare through `moar.repr(obj).ID`, then `moar.isConcrete`. No call.
+- `str.fetchNocheck`, `deleteNocheck`, `fetch` and `delete` are `inline fn` and call `StrTable.fetch`/`delete` with `@call(.always_inline, ..)`.
+- In `table.zig`: `ops.fetch`, `ops.lvalue` and `ops.delete` are `inline fn`. They call the tier's `fetch`/`delete` and `I.hash` with `@call(.always_inline, ..)`. `Table.fetch`, `lvalue` and `delete` call `dispatch` with `@call(.always_inline, ..)`. `resolve` and `dispatch`'s `Op.f` are `inline fn`. `dispatch` itself stays a plain `fn`, and its other callers (grow, iteration, fsck, drain) keep calling it. Marking only `ops.*` inline was not enough: LLVM then outlined `dispatch` and the Robin Hood `fetch`/`delete`, which made the chain longer, so `resolve`/`Op.f` had to be inlined too.
+
+Chain evidence (`-Dstrip=false` build, `nm -S` and `objdump -d` of `libmoar.so`, which the bench binary calls):
+
+| | before | after |
+|---|---|---|
+| `MVM_str_hash_fetch_nocheck` | 8 bytes: `mov (%rsi),%rsi; jmp str.fetchNocheck` | 0x2fc bytes, one frame (7 pushes, one `ret`) |
+| behind it | `str.fetchNocheck` 0x93 (5 pushes; RH: `jmp ops.fetch__anon` 0x10d, 7 pushes; Small: `call moar_c.MVM_string_hash_code`, `call small.find` 0x440) | none on a cached hash. Calls left: `MVM_string_compute_hash_code@plt` behind `mov 0x28(%r14),%rax; test %rax,%rax; jne` (cache miss only), `MVM_string_substrings_equal_nocheck@plt` (unequal pointers only), one Small `findIn` per capacity (8/16/32/64; `find`'s switch is now inline) |
+| `MVM_str_hash_delete_nocheck` | 8 bytes: `jmp str.deleteNocheck` 0xe5, then `call ops.delete__anon` 0x28b | 0x607 bytes, one frame; the same calls left as fetch, plus the existing `compiler_rt.memcpy` for non-16-byte Small swaps |
+| calls to `MVM_string_hash_code` | from `fetchNocheck`, `ops.fetch`, `ops.delete`, `deleteNocheck` | none from any string-table export (`moar_c.MVM_string_hash_code` is still linked for other callers) |
+
+`MVM_str_hash_fetch`/`MVM_str_hash_delete` are now one frame too, and the key check is inline (`test %rdx,%rdx; cmp 0x708(%rax),%r14` for VMNull, the REPR ID load and compare, the type-object flag). The Robin Hood probe is inlined twice per export, once for set 0's rung 1 and once for set 1's rung 0. `Table(StrSpec).lvalue` (0xff8) now holds the Robin Hood `lvalueFetch` inline. The two lvalue exports call it.
+
+Runs: `--sizes=16,64,128,1024,16384 --runs=5`, both harnesses. Size 16 is only a warm-up for the nqp ladder and is not read. The C engine was run before (HEAD `8c3f57e10`) and after (the same C code, rebuilt) to bracket drift. Load average (1 min) at the start of each run: Zig before 2.30, C before 2.30, Zig after 1.04, C after 1.04 (`traces/llm/bench/tuning-t6-load.log`). TSVs: `traces/llm/bench/tuning-t6-{capi,nqp}-{c,zig}-{before,after}.tsv`. Cells: `zig / c [zig min-max / c min-max]` in ns; before is against C before, after against C after.
+
+capi:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 1.07 [7.69-7.82 / 6.96-8.22] | 1.15 [7.63-8.57 / 7.08-7.22] |
+| lookup_hit | 128 | 1.32 [9.42-9.52 / 7.12-7.22] | 1.18 [8.32-8.60 / 7.12-7.24] |
+| lookup_hit | 1024 | 1.32 [9.63-10.30 / 7.25-8.23] | 1.21 [8.64-9.40 / 7.28-8.36] |
+| lookup_hit | 16384 | 1.31 [10.71-11.01 / 8.12-8.27] | 1.15 [9.33-9.72 / 8.15-8.37] |
+| lookup_miss | 64 | 1.16 [7.89-9.12 / 7.05-7.52] | 1.10 [7.50-13.37 / 7.16-7.32] |
+| lookup_miss | 128 | 1.24 [9.03-9.20 / 7.18-7.36] | 1.16 [8.09-9.28 / 7.16-7.28] |
+| lookup_miss | 1024 | 1.25 [9.04-9.26 / 7.19-7.42] | 1.14 [8.26-8.61 / 7.18-7.39] |
+| lookup_miss | 16384 | 1.28 [10.49-14.29 / 8.33-12.46] | 1.13 [9.39-13.38 / 8.27-12.37] |
+| delete | 64 | 1.21 [9.87-10.35 / 8.36-24.39] | 1.25 [9.65-23.38 / 8.35-8.48] |
+| delete | 128 | 1.29 [10.68-10.96 / 8.34-8.52] | 1.14 [9.47-9.64 / 8.37-8.46] |
+| delete | 1024 | 1.29 [10.92-11.04 / 8.44-8.60] | 1.17 [9.93-10.05 / 8.46-8.54] |
+| delete | 16384 | 1.29 [11.95-12.34 / 9.22-9.39] | 1.14 [10.59-11.83 / 9.35-9.98] |
+
+nqp level:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 1.03 [15.25-15.44 / 14.75-15.31] | 0.99 [14.45-14.71 / 14.50-15.44] |
+| lookup_hit | 128 | 1.15 [16.76-17.06 / 14.49-14.77] | 1.01 [14.62-14.74 / 14.54-14.76] |
+| lookup_hit | 1024 | 1.16 [17.13-17.39 / 14.66-15.43] | 1.04 [15.47-17.35 / 14.68-15.13] |
+| lookup_hit | 16384 | 1.18 [19.22-19.58 / 16.08-16.82] | 1.03 [16.77-17.16 / 16.09-16.40] |
+| lookup_miss | 64 | 1.15 [16.53-16.93 / 14.40-14.94] | 1.07 [15.19-15.68 / 14.13-14.81] |
+| lookup_miss | 128 | 1.13 [16.22-16.39 / 14.37-14.59] | 1.00 [14.39-14.51 / 14.29-14.53] |
+| lookup_miss | 1024 | 1.14 [16.23-16.52 / 14.25-14.66] | 1.02 [14.59-16.69 / 14.16-14.56] |
+| lookup_miss | 16384 | 1.11 [17.16-22.12 / 15.27-20.42] | 1.00 [15.29-19.93 / 15.25-20.03] |
+| delete | 64 | 1.04 [15.18-15.40 / 14.64-14.91] | 1.00 [14.30-14.73 / 14.40-14.77] |
+| delete | 128 | 1.17 [16.89-17.07 / 14.44-14.74] | 1.04 [15.11-15.49 / 14.37-14.74] |
+| delete | 1024 | 1.17 [17.45-17.88 / 14.80-15.11] | 1.09 [16.12-16.38 / 14.63-15.04] |
+| delete | 16384 | 1.19 [19.79-20.32 / 16.53-16.87] | 1.10 [17.61-18.00 / 16.00-16.66] |
+
+- Kept. On Robin Hood (128-16384) at the C API, the targeted ops moved outside the Zig spread at every size. lookup_hit went from 1.31-1.32 to 1.15-1.21 and delete from 1.29 to 1.14-1.17. lookup_miss went from 1.24-1.28 to 1.13-1.16, but its Zig spreads overlap at 128 and 16384 because of one slow run each (after max 9.28 and 13.38 ns). At the nqp level, lookup_hit went from 1.15-1.18 to 1.01-1.04, lookup_miss from 1.11-1.14 to 1.00-1.02 and delete from 1.17-1.19 to 1.04-1.10. Three nqp Zig spreads overlap. At 1024, lookup_hit and lookup_miss each have one slow run after (max 17.35 and 16.69 ns), while their minimums fall from 17.13 to 15.47 and from 16.23 to 14.59 ns. At 16384, lookup_miss is wide on both engines (C 15.25-20.03 ns). Every other nqp spread is disjoint.
+- Small (64): at the nqp level, lookup_hit 1.03 -> 0.99, lookup_miss 1.15 -> 1.07 and delete 1.04 -> 1.00, all outside the Zig spread. At the C API, lookup_hit 1.07 -> 1.15 and delete 1.21 -> 1.25 are in the run-to-run band: the Zig spreads overlap (7.69-7.82 against 7.63-8.57 ns; 9.87-10.35 against 9.65-23.38 ns). Three more C-API runs of the after build gave lookup_hit 7.57 / 7.91 / 8.01 ns and delete 10.21 / 10.38 / 10.48 ns at 64, against 7.79 / 10.16 before and 7.78 / 10.61 in Task 4's after. The Small path still makes one call, to `findIn`, so the profile's ~12% share for Small is not measurable at the C API.
+- insert and iterate did not move beyond the band at either level (C API insert 1024/16384 1.17/1.26 -> 1.13/1.16 with wide spreads; iterate 1.33-1.34 both).
+- What is left on Robin Hood is the zero-key byte chain, `loopState`, the backward shift (Task 5) and the status-byte checks (Task 3).
 
 ## Deviations
 
@@ -745,3 +807,4 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 2: the `fn` + `@export` form changes the default (non-LTO) `moar_zig.o` slightly. `MVM_index_hash_build` and `MVM_uni_hash_build` no longer inline their callee (0x170 to 0x61 bytes) and `MVM_str_hash_lvalue_fetch` grows by 3 bytes. The hot exports (`fetch_nocheck`, `fetch`, `delete`, `next`, `current_nocheck`, `first`) have the same sizes. Symbols, visibility and link commands are unchanged.
 - Task 2: `Configure.pl` checks `$args{compiler}` (set by `--cc=zig`), not `$config{compiler}`, which Configure.pl never sets.
 - Task 4: the Small payload grew from 4 to 8 bytes (`entries_offset` next to `capacity`); tags start at offset 16 instead of 12, and `entriesOffset` is unchanged for every capacity 8-64, so blocks are the same size. `find`'s return path (sentinel index instead of `?u32`) and the one-load zero-key test were in scope by the controller's ruling. The lever was measured whole, not part by part, because the whole moved outside the spread.
+- Task 6: the lever reached into `table.zig` (by the controller's ruling): `ops.fetch`/`lvalue`/`delete`, `resolve` and `dispatch`'s `Op.f` are `inline fn`. The fetch, lvalue and delete paths call `dispatch` with `@call(.always_inline, ..)`. `dispatch`'s semantics and its other callers are unchanged. The brief's commit message became "hash engine: string wrapper chain inlined, cached-hash fast path". The ladder gained a warm-up size 16 in front of 64, because 64 as the first nqp size carried the warm-up (spreads of 15-49 ns in a first attempt).
