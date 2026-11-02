@@ -687,6 +687,8 @@ agree with the table above within run-to-run noise (small-tier insert
 0.29-0.33, hit 1.23-1.89, delete 2.96-3.31; Robin Hood 1.13-1.75 on lookup,
 delete and iterate except a 0.98 miss at 65536, and 0.62-1.14 on insert).
 
+Post-fix note (2026-11-02, final review): after `Table.delete` stopped pre-fetching the entry for the comptime no-op log hook (one probe instead of two), the small-tier delete ratios at sizes 16/32/63/64 are 1.74/1.70/1.95/1.98 (`--sizes=16,32,63,64 --runs=3`, same session before the fix: 2.80/2.68/3.01/3.10); the tables above are left as recorded.
+
 ### Raku-level benchmark (Task 14, 2026-11-02)
 
 `tools/bench/hash-bench.sh --raku-c=$PC/bin/raku --raku-zig=$PZ/bin/raku`

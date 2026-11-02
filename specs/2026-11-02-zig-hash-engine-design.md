@@ -611,3 +611,31 @@ Raku-visible surface of their own.
   and interned.
 - Task order in the plan, except that the spike precedes fixing the
   threshold and the string table precedes the other four.
+
+## Errata after implementation
+
+Recorded on 2026-11-02 from the final review of the implementation. The
+sections above are left as written; where they differ from the code, this
+section is right.
+
+1. **Iteration order of Small (§6.1, §13).** `first` returns `cur_items`
+   and `next` descends, so Small iterates in *reverse* insertion order,
+   perturbed by swap-remove: a delete moves the last entry into the hole,
+   and that entry is then visited where the deleted one was. "A hash of at
+   most 64 entries" is also loose: a hash presized above `small_threshold`,
+   or one that grew past it and shrank, stays in Robin Hood, because
+   migration is upward only. And Small does hash the keys: each entry is
+   tagged with the top byte of its hash, and a lookup compares the tags
+   with a vector compare before calling the key equality on the candidates.
+2. **The reserved double-write hook (decision 5, §4.4) cannot support
+   double-write where it is positioned.** The insert hook fires before the
+   caller fills in the key and value, so it sees an entry whose key bytes
+   are zero; value updates through `lvalue_fetch` of an existing key are
+   never reported; and entries move after the hook has seen them (Small's
+   swap-remove, Robin Hood's bit trade, doubling and backward shift). A
+   write log built on this hook could not mirror the table. Double-write
+   needs a different capture point, for example a mirror built during the
+   migration drain, or an API that is told when the caller has finished
+   writing the entry. The `double_write` field and the no-op hook stay as
+   reserved; the policy layer now skips the work of producing an entry for
+   the delete hook while the hook is a comptime no-op.

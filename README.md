@@ -11,15 +11,15 @@ own `docs/` and `build/README.md` and is meant for upstream).
 - Mounted as the `traces/llm` git submodule of the MoarVM checkout
   (`rakudo/nqp/MoarVM`). Paths inside the documents are written relative
   to the MoarVM root, e.g. `traces/llm/specs/<name>`.
-- Intended remote: `git@github.com:ab5tract/moarvm-traces.git`.
-  MoarVM's `.gitmodules` already records that URL. Until the GitHub
-  repository exists, the submodule checkout's own `origin` points at the
-  local path of this repository
-  (`/home/longwalker/code/raku/x.core/zmoarz/moarvm-traces`), so commits
-  can be made and fetched locally. Once the GitHub repository is created
-  and this repository pushed to it, run
-  `git -C traces/llm remote set-url origin git@github.com:ab5tract/moarvm-traces.git`
-  (or `git submodule sync`) in the MoarVM checkout.
+- Remote: `git@github.com:ab5tract/moarvm-traces.git` (the submodule
+  checkout's own `origin`; the local sibling checkout at
+  `/home/longwalker/code/raku/x.core/zmoarz/moarvm-traces` is the original
+  import and is no longer updated).
+- MoarVM's `.gitmodules` records the https form of that URL
+  (`https://github.com/ab5tract/moarvm-traces.git`) with `update = none`,
+  so a plain `git submodule update` (which MoarVM's `Configure.pl` runs on
+  every submodule) skips this one and never needs access to the repository;
+  `git submodule update --init traces/llm` checks it out explicitly.
 
 ## Layout
 
