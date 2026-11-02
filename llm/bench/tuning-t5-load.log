@@ -1,0 +1,16 @@
+zig before capi start 2.08 1.36 1.12 1/2334 2920328
+zig before capi end 2.08 1.36 1.12 1/2335 2920400
+zig before nqp start 2.08 1.36 1.12 1/2335 2920401
+zig before nqp end 2.08 1.36 1.12 1/2335 2920404
+c before capi start 2.68 1.63 1.22 2/2348 2921063
+c before capi end 2.68 1.63 1.22 1/2348 2921128
+c before nqp start 2.68 1.63 1.22 1/2348 2921129
+c before nqp end 2.68 1.63 1.22 1/2348 2921139
+zig after capi start 1.54 1.01 1.01 1/2353 2926337
+zig after capi end 1.54 1.01 1.01 1/2353 2926408
+zig after nqp start 1.54 1.01 1.01 1/2353 2926409
+zig after nqp end 1.54 1.01 1.01 1/2353 2926418
+c after capi start 1.41 1.01 1.01 1/2354 2926703
+c after capi end 1.78 1.09 1.03 2/2356 2926770
+c after nqp start 1.78 1.09 1.03 1/2356 2926771
+c after nqp end 1.78 1.09 1.03 1/2355 2926786
