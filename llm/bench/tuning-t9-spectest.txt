@@ -1,0 +1,86 @@
+# Task 9 spectest runs (rakudo make spectest, TEST_JOBS=24, roast fb1d87214), timed by the wait4 stand-in for GNU time -v
+
+c run 1 start 2026-11-02T17:16:05+01:00 load 1.53 1.26 0.99 roast fb1d87214
+c run 1 exit 0 end 2026-11-02T17:21:51+01:00 roast fb1d87214
+c run 2 start 2026-11-02T17:21:51+01:00 load 14.55 17.74 9.07 roast fb1d87214
+c run 2 exit 2 end 2026-11-02T17:27:16+01:00 roast fb1d87214
+c run 3 start 2026-11-02T17:27:16+01:00 load 14.61 22.62 14.31 roast fb1d87214
+c run 3 exit 0 end 2026-11-02T17:32:37+01:00 roast fb1d87214
+zig run 1 start 2026-11-02T17:37:24+01:00 load 1.46 10.61 13.92 roast fb1d87214
+zig run 1 exit 0 end 2026-11-02T17:42:36+01:00 roast fb1d87214
+zig run 2 start 2026-11-02T17:42:36+01:00 load 14.50 19.73 17.45 roast fb1d87214
+zig run 2 exit 0 end 2026-11-02T17:47:26+01:00 roast fb1d87214
+zig run 3 start 2026-11-02T17:47:26+01:00 load 13.74 22.62 19.79 roast fb1d87214
+zig run 3 exit 0 end 2026-11-02T17:52:12+01:00 roast fb1d87214
+
+## c run 1
+	Command being timed: "make spectest"
+	User time (seconds): 4160.00
+	System time (seconds): 2187.52
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:45.93
+	Maximum resident set size (kbytes): 696216
+	Exit status: 0
+Files=1365, Tests=138715, 336 wallclock secs (36.20 usr  9.42 sys + 4119.10 cusr 2175.36 csys = 6340.08 CPU)
+Result: PASS
+failed files:
+
+## c run 2
+	Command being timed: "make spectest"
+	User time (seconds): 4062.48
+	System time (seconds): 1932.38
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:25.49
+	Maximum resident set size (kbytes): 686228
+	Exit status: 2
+Files=1365, Tests=138715, 316 wallclock secs (35.78 usr  9.59 sys + 4021.93 cusr 1920.01 csys = 5987.31 CPU)
+Result: FAIL
+failed files:
+t/spec/S17-channel/basic.t
+t/spec/S17-channel/basic.t                                    (Wstat: 256 (exited 1) Tests: 29 Failed: 1)
+  Failed test:  29
+  Non-zero exit status: 1
+t/spec/S26-documentation/04-code.rakudo.moar                  (Wstat: 0 Tests: 50 Failed: 0)
+
+## c run 3
+	Command being timed: "make spectest"
+	User time (seconds): 4084.76
+	System time (seconds): 1841.69
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:20.19
+	Maximum resident set size (kbytes): 691912
+	Exit status: 0
+Files=1365, Tests=138715, 312 wallclock secs (36.32 usr  9.30 sys + 4043.74 cusr 1829.64 csys = 5919.00 CPU)
+Result: PASS
+failed files:
+
+## zig run 1
+	Command being timed: "make spectest"
+	User time (seconds): 4336.10
+	System time (seconds): 1378.70
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:11.65
+	Maximum resident set size (kbytes): 685816
+	Exit status: 0
+Files=1365, Tests=138715, 303 wallclock secs (36.72 usr  8.98 sys + 4294.76 cusr 1366.99 csys = 5707.45 CPU)
+Result: PASS
+failed files:
+
+## zig run 2
+	Command being timed: "make spectest"
+	User time (seconds): 4376.52
+	System time (seconds): 908.35
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:49.96
+	Maximum resident set size (kbytes): 712816
+	Exit status: 0
+Files=1365, Tests=138715, 282 wallclock secs (36.48 usr  8.38 sys + 4335.18 cusr 897.37 csys = 5277.41 CPU)
+Result: PASS
+failed files:
+
+## zig run 3
+	Command being timed: "make spectest"
+	User time (seconds): 4391.42
+	System time (seconds): 850.05
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:46.41
+	Maximum resident set size (kbytes): 725328
+	Exit status: 0
+Files=1365, Tests=138715, 278 wallclock secs (36.19 usr  8.33 sys + 4350.65 cusr 838.87 csys = 5234.04 CPU)
+Result: PASS
+failed files:
+

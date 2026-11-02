@@ -1288,6 +1288,115 @@ lookup_miss 64 (not a shortfall): median above 1.05 in every run (1.054 full lad
 
 The Small miss at 63 is the 64-wide tag scan's full cost on a miss (the C stops early at half load). The Robin Hood N-th insert at 128/256 was 1.20/1.31 at baseline. Both are recorded per decision 8 and the campaign proceeds to Task 9.
 
+### Task 9: whole-system check and acceptance
+
+#### The two stacks
+
+HEAD `56470b51a`. Each MoarVM, nqp and rakudo installed into one fresh prefix: `/tmp/claude-1000/tune-c-prefix` (`perl Configure.pl --prefix $PC && make -j24 install`) and `/tmp/claude-1000/tune-zig-prefix` (`perl Configure.pl --zig=/usr/bin/zig --prefix $PZ && make -j24 install`); nqp `perl Configure.pl --backends=moar --with-moar=$P/bin/moar --prefix=$P && make -j24 install`, rakudo `perl Configure.pl --backends=moar --with-nqp=$P/bin/nqp --prefix=$P && make -j24 install` (nqp HEAD `305ff2f77`, rakudo HEAD `3d626b9b24`). Build times: moar 11 s / 11 s, nqp 17 s / 17 s, rakudo 252 s / 258 s (C / Zig). The Zig prefix's `libmoar.so` exports `MVM_str_hash_fetch_nocheck` and the C one does not. `$P/bin/raku -e 'my %h = (1..300).map({ "k$_" => $_ }); say %h<k299>; say %h.elems'` prints `299` and `300` on both.
+
+#### rakudo spectest
+
+`make spectest` in the rakudo checkout, `TEST_JOBS=24`, roast `t/spec` at `fb1d87214` (unchanged across all runs; `make spectest` pulls it, and upstream had not moved), timed with the engine campaign's `wait4` stand-in for GNU `time -v` (wall clock and `ru_maxrss` of the largest descendant). The tree was configured and built for the C prefix and spectested three times, then rebuilt for the Zig prefix and spectested three times, sequentially. Load average (1 min) at the start of each run, with each run starting right after the previous one ended: C 1.53 / 14.55 / 14.61, Zig 1.46 / 14.50 / 13.74. Summaries: `traces/llm/bench/tuning-t9-spectest.txt`.
+
+| engine | run | wall clock | peak RSS (kbytes) | user / sys (s, children) | files / tests | result | failed files |
+|---|---:|---:|---:|---:|---|---|---|
+| C | 1 | 5:45.93 | 696216 | 4160 / 2188 | 1365 / 138715 | PASS | none |
+| C | 2 | 5:25.49 | 686228 | 4062 / 1932 | 1365 / 138715 | FAIL (exit 2) | `S17-channel/basic.t` test 29 |
+| C | 3 | 5:20.19 | 691912 | 4044 / 1830 | 1365 / 138715 | PASS | none |
+| Zig | 1 | 5:11.65 | 685816 | 4295 / 1367 | 1365 / 138715 | PASS | none |
+| Zig | 2 | 4:49.96 | 712816 | 4335 / 897 | 1365 / 138715 | PASS | none |
+| Zig | 3 | 4:46.41 | 725328 | 4351 / 839 | 1365 / 138715 | PASS | none |
+
+Medians: C 5:25.49 wall and 691912 kbytes; Zig 4:49.96 wall and 712816 kbytes. Zig / C: wall 0.89, peak RSS 1.030.
+
+- Failures, per run: C run 2 failed `t/spec/S17-channel/basic.t` test 29 (`got all urls`, the rakudo#1974 test: a `Supply.throttle(3, ..)` feeding a Channel, checked with `is-deeply` against one order), exit 1, on the C engine; C runs 1 and 3 and all three Zig runs have no failed file. Zig failures absent from every C run: none. No new failures.
+- Wall: the Zig median is 11 percent below the C's. The runs were not interleaved and the session drifted: the children's system time fell with every run, from 2188 s (C run 1) to 839 s (Zig run 3), while user time stayed at 4044-4351 s. So the 0.89 is mostly drift, not the engine; it is within 2 percent or better in any case. Pass.
+- Peak RSS: the Zig median is 3.0 percent above the C's. The C runs are flat (686-696 MB); the Zig runs climb across the session, 686, 713, 725 MB. Accepted by the user on 2026-11-02, to be revisited later; not investigated. (A set of interleaved runs with the two `libmoar.so` swapped through `LD_LIBRARY_PATH` was started and stopped after the ruling; its partial first run was discarded.)
+
+#### Raku-level benchmark
+
+`tools/bench/hash-bench.sh --out=traces/llm/bench/tuning-t9-raku.md --raku-c=$PC/bin/raku --raku-zig=$PZ/bin/raku` (default ladder, `--runs=3`; it also re-ran the C-API microbenchmark, kept beside it). Load 0.6-1.0. Because the engine campaign's table was one invocation with no spread, the Raku script was then run four more times per engine, alternating the engine order (`tuning-t9-raku-reps.tsv`). Cells: ratio of the medians of the five invocations [min-max of the five per-invocation ratios].
+
+| size | insert | lookup_hit | lookup_miss | delete | iterate | insert_nth |
+|---:|---|---|---|---|---|---|
+| 4 | 1.07 [1.02-1.17] | 1.05 [1.04-1.06] | 1.01 [0.99-1.04] | 1.01 [1.00-1.04] | 1.02 [1.00-1.04] | - |
+| 16 | 0.86 [0.82-0.90] | 0.92 [0.88-0.95] | 0.97 [0.91-1.01] | 0.99 [0.95-1.08] | 0.99 [0.94-1.02] | - |
+| 32 | 0.78 [0.77-0.84] | 0.94 [0.89-0.97] | 0.99 [0.93-1.06] | 0.96 [0.80-1.00] | 0.94 [0.94-0.98] | - |
+| 63 | 0.82 [0.81-0.83] | 0.87 [0.84-0.92] | 1.01 [0.99-1.06] | 0.89 [0.81-1.09] | 0.97 [0.94-1.02] | - |
+| 64 | 0.80 [0.79-0.88] | 0.90 [0.86-0.99] | 1.01 [0.98-1.05] | 0.94 [0.93-1.03] | 0.88 [0.83-0.95] | 0.66 [0.54-0.75] |
+| 65 | 0.93 [0.83-0.97] | 0.96 [0.93-0.97] | 1.00 [0.90-1.06] | 1.02 [1.00-1.11] | 0.99 [0.97-1.06] | 3.75 [3.32-4.32] |
+| 128 | 0.96 [0.93-1.09] | 0.97 [0.90-1.01] | 1.00 [0.89-1.04] | 0.98 [0.90-1.05] | 1.00 [0.96-1.05] | - |
+| 256 | 1.02 [0.97-1.09] | 1.01 [0.99-1.07] | 0.99 [0.93-1.02] | 0.96 [0.89-1.16] | 0.95 [0.88-1.11] | - |
+| 1024 | 1.03 [0.97-1.12] | 1.02 [0.89-1.07] | 1.00 [0.98-1.03] | 1.04 [0.92-1.07] | 1.02 [0.95-1.14] | - |
+| 16384 | 0.98 [0.91-1.12] | 1.00 [0.96-1.08] | 0.95 [0.91-1.01] | 0.97 [0.85-1.04] | 0.93 [0.84-1.03] | - |
+| 65536 | 1.02 [0.81-1.18] | 0.99 [0.94-1.05] | 1.00 [0.89-1.03] | 1.00 [0.95-1.03] | 1.00 [0.92-1.01] | - |
+| 1048576 | 1.01 [0.99-1.18] | 1.04 [1.03-1.09] | 1.00 [1.00-1.04] | 0.98 [0.96-1.00] | 0.70 [0.69-0.72] | - |
+
+Against the engine campaign's recorded band (one invocation; small up to 64: insert 0.80-0.83, hit 0.87-0.97, miss 0.91-1.00, delete 0.83-1.01, iterate 0.81-1.04, size 4 up to 1.23; 64th insert 0.76; 65: insert 0.96, hit 0.92, miss 0.93, delete 1.17, iterate 0.95, the migration 4.29; 128 and up: insert 0.96-1.10 and 1.61 at 65536, hit 0.92-1.17, miss 0.92-0.97, delete 1.01-1.16, iterate 0.66-0.95):
+
+- Better: the migration insert at 65 (3.75 against 4.29), the 64th insert (0.66 against 0.76), insert at 65536 (1.02 against 1.61), Robin Hood delete (0.96-1.04 against 1.01-1.16), Small delete (0.89-0.99).
+- Within: Small insert except 16, Small hit and iterate, size 4, Robin Hood insert and hit.
+- Above the recorded upper end on the median: Small insert at 16 (0.86 against 0.83), Small miss at 63/64 (1.01 against 1.00), Robin Hood miss at 128, 256, 1024, 65536 and 1048576 (0.99-1.00 against 0.97; 1024 and 1048576 with spreads wholly above 0.97), Robin Hood iterate at 128, 1024 and 65536 (1.00-1.02 against 0.95; 128 with a spread wholly above), and at 65 hit 0.96, miss 1.00 and iterate 0.99 (against that row's 0.92, 0.93 and 0.95).
+- No new outlier above 1.25: the largest median is 1.07 (size 4 insert), the largest single invocation 1.18; the 65536 insert did not get worse (1.02 against 1.61).
+
+To tell the engine from the recorded band's luck, the engine campaign's own stack (`/tmp/claude-1000/hash-zig-prefix`, its Task 14 Zig stack, untouched) was run in the same session, five rounds of tuned Zig, engine-campaign Zig and the C (`tuning-t9-raku-xcheck.tsv`). In that run the engine-campaign Zig reads lookup_miss 1.00-1.06 against the C at every size from 16 up (recorded: 0.91-1.00 and 0.92-0.97) and Robin Hood iterate 0.91-1.08 (recorded 0.66-0.95; 0.69 at 1048576). Tuned Zig over engine-campaign Zig, same rounds: lookup_miss 0.98-1.04 and iterate 0.98-1.11 [spreads 0.86-1.13] at 16-1048576, delete 0.91-1.02, insert 0.91-1.15 (1.15 at 128 [0.99-1.18], where the insert of 128 keys now contains the 97th insert's doubling, as the C's does since Task 7), the migration 0.67 [0.63-0.75]. So the cells above the recorded band are the band's single invocation, not a regression: the same-session engine-campaign stack is as high or higher on them. Verdict: no outlier above 1.25, the 65536 insert better; the band criterion holds against the same-session re-measurement and is missed on the cells listed against the literal recorded numbers.
+
+#### Acceptance (spec §8)
+
+| # | criterion | command / evidence | outcome |
+|---|---|---|---|
+| 1 | nqp level at or below 1.05 or inside the noise, RH iterate at or below 1.10, Small insert and iterate below 1.0, allocation under a third | Task 8 interleaved ladder (9 rounds) and re-runs, "#### nqp level (the scoreboard)" | shortfall under decision 8: 50 of 53 cells pass. Fail: Small lookup_miss 63 1.08 [14.98-15.81 / 14.15-14.34], Robin Hood insert_nth 128 1.13 [32.09-33.97 / 28.77-30.29] and 256 1.11 [33.15-36.01 / 30.10-32.13]. lookup_miss 64 passes marginally (1.054, spreads overlap in both re-runs). Small insert 0.38-0.45, iterate 0.67-0.71, Robin Hood iterate 1.02-1.07, allocation 0.29-0.30: pass |
+| 2 | migrating 65th insert at most the C's 97th, nqp and C API | Task 8 "#### The migration against the C engine's 97th insert" | pass: 0.54 on both harnesses (nqp 1060 / 1948 ns, C API 1046 / 1936 ns, interleaved) |
+| 3 | Raku level within the recorded band or better, no new outlier above 1.25, 65536 insert not worse | `hash-bench.sh --raku-c --raku-zig` plus four repeats and the same-session cross-check above | no outlier above 1.25 (largest median 1.07); 65536 insert 1.02 (was 1.61); against the literal recorded band, Small insert 16, Small miss 63/64, Robin Hood miss and iterate at several sizes and 65 hit/iterate read above its upper end, and the same-session engine-campaign stack reads as high or higher on those cells: pass against the re-measured band, shortfall against the literal one |
+| 4 | spectest 0 new failures; wall and peak RSS within 2 percent (medians of three) | six timed `make spectest` runs above | failures: pass (C run 2's `S17-channel/basic.t` is on the C engine; Zig 0 in every run). Wall: pass (0.89). RSS: 3 percent over the criterion (712816 against 691912 kbytes), accepted by the user on 2026-11-02, to be revisited later |
+| 5 | `-Dlto` and `--zig-lto` (with `--cc=zig`) build and pass test, unit-test, stage0 smoke; LTO iterate within noise of 1.0; C-side gain reported; nothing changes without them; gcc hard-fails | `zig build -Dlto --prefix $PWD/zig-out install` (58 s), `zig build test -Dlto` (exit 0), `zig build unit-test -Dlto` (59/59 steps, 170/170 tests); `perl Configure.pl --cc=zig --zig=/usr/bin/zig --zig-lto` (Makefile carries `-flto` and `-Dlto=true`), `make -j24` (73 s), stage0 smoke `1` / `301` / `299`; default build and Perl `--zig` without LTO: no `-flto`, no `-Dlto=true`, smoke `1` / `301` / `299`; `perl Configure.pl --zig=/usr/bin/zig --zig-lto` exits 255 with `--zig-lto needs --cc=zig (gcc cannot consume the LTO object)` (`perl Configure.pl --zig-lto` alone exits 255 earlier with `--zig-lto needs --zig=PATH`). Iterate and C-side gain: Task 2's measurements (Zig+LTO / C Robin Hood iterate 0.97-0.98 at 128-16384, 1.00-1.02 against C+LTO; C+LTO / C 0.87-0.98) | pass, with the binding note below |
+| 6 | every existing test passes; `zig fmt --check`, `perl -c`, `sh -n` clean; the C path unchanged | `zig fmt --check build.zig build/zig src/zig tools/zig` (exit 0), `perl -c Configure.pl` (syntax OK), `sh -n tools/bench/hash-bench.sh tools/check-lto-binding.sh` (exit 0); default build: `zig build test` exit 0, `zig build unit-test` 59/59 steps, 170/170 tests; `-Dzig-impl=false`: install, `zig build test` exit 0, `unit-test` 27/27 steps, 101/101 tests; `git diff --stat a5ea2a419 HEAD` outside `src/zig`, `traces`, `docs`, `tools`: no C source or header changed, only `Configure.pl` (`--zig-lto`), `build/zig/{options,zigimpl,moar,thirdparty}.zig` (the gated `-Dlto`, and `-Dstrip` for the third-party libraries) and `.gitmodules` | pass |
+| 7 | one results row per lever, kept or reverted, with numbers | "### Final ladder and lever summary" below | pass |
+
+`tools/check-lto-binding.sh` (dynamic `MVM_str_hash_` symbols / PLT calls / `fetch_nocheck` definitions / its call sites), `traces/llm/bench/tuning-t9-acceptance.log`:
+
+| build | dyn | plt | defs | call sites | Task 2 |
+|---|---:|---:|---:|---:|---|
+| Zig (default) | 22 | 119 | 1 | 3 | 22 / 119 / 1 / 3 |
+| C `-Dzig-impl=false` | 6 | 27 | 0 | 0 | 6 / 27 / 0 / 0 |
+| Zig `-Dlto` | 22 | 0 | 1 | 5 | 22 / 0 / 1 / 0 |
+| Perl `--cc=zig --zig --zig-lto` | 22 | 0 | 1 | 5 | 22 / 0 / 1 / 0 |
+| Perl `--zig` (gcc, no LTO) | 22 | 124 | 1 | 3 | not recorded |
+
+Binding note (item 5). The binding holds (no PLT call under LTO), but LTO now inlines fewer of the exports than in Task 2. An unstripped `-Dlto -Dstrip=false` build has direct calls to `MVM_str_hash_fetch` from 52 functions (143 sites, among them `MVMHash_at_key`, `exists_key`, `MVM_repr_at_key_o` and `MVM_interp_run`), to `fetch_nocheck` from 5 (`MVM_sc_find_by_handle`, `MVM_serialization_read_ref`, `MVM_serialization_deserialize`, `serialize`, `debugserver_worker`), and one each to `delete` (`delete_key`) and `delete_nocheck`. In Task 2 all of these were inlined. `next`, `current_nocheck`, `lvalue_fetch`, `count` and `insert_nocheck` have no call site left, so the iteration path that criterion 5 measures is still inlined. The likely cause is Tasks 3 and 6: the lookup and delete exports are now one large frame each (`fetch_nocheck` 0x2fc bytes after Task 6 and 0x5f7 after Task 3, without LTO), above LLVM's inlining threshold for those callers. Under LTO they are direct calls to a locally bound symbol, so the call costs no PLT indirection, but the LTO lookup gain Task 2 measured (0.03-0.08 beyond the C side's) was measured before the levers and was not re-measured here.
+
+Trees after the task: MoarVM clean apart from this commit's files (Perl residue removed after each Perl build, `zig-out` reinstalled with the default options); nqp and rakudo `git status` clean; the six spectests left roast clean.
+
+### Final ladder and lever summary
+
+Levers in run order (2 first, then 4, 6, 5, 3, 7, then Task 8's two rounds). Ratios are Zig / C medians; "before" is the Zig engine just before the lever, "after" just after it, each against the C engine measured in the same session. Spreads and raw TSVs are in each task's section.
+
+| lever | task | change | targeted ratios before -> after | kept / reverted | reason |
+|---|---|---|---|---|---|
+| LTO opt-in (`-Dlto`, `--zig-lto`), protected exports | 2 | full LTO of libmoar with the Zig object; exports protected under LTO only | nqp Robin Hood iterate 1.02-1.05 (Zig) -> 0.97-0.98 (Zig+LTO) against C, 1.00-1.02 against C+LTO; PLT calls to `MVM_str_hash_*` 119 -> 0; C side alone (C+LTO / C) 0.87-0.98 on the five main ops | kept, off by default | iterate at parity under LTO; the link takes ~3x as long, and the default link is unchanged |
+| Small tier fast paths | 4 | `find` returns a sentinel `u32`; entry base and size hoisted (`entries_offset`); one-load zero-key test; inline 16-byte delete swap | C API lookup_hit 1.45-1.57 -> 0.94-1.10, delete 1.67-1.84 -> 0.98-1.28 (16-64); nqp lookup_hit 1.12-1.23 -> 0.96-1.10, delete 1.21-1.31 -> 0.94-1.10 (32-64) | kept | moved outside the spread at both levels and every size |
+| C-shaped wrapper | 6 | cached-hash fast path inline; `eql`, `keyIsValid` and the fetch/lvalue/delete chain inlined into one frame per export | Robin Hood (128-16384) nqp lookup_hit 1.15-1.18 -> 1.01-1.04, lookup_miss 1.11-1.14 -> 1.00-1.02, delete 1.17-1.19 -> 1.04-1.10; C API lookup_hit 1.31-1.32 -> 1.15-1.21, delete 1.29 -> 1.14-1.17; Small 64 nqp lookup_miss 1.15 -> 1.07 | kept | outside the Zig spread at every Robin Hood size at the C API, at most at the nqp level |
+| Robin Hood fast paths | 5 | one-load zero-key test; inline 16-byte make-room, back-shift and grow copies | C API (128-16384) lookup_hit 1.19-1.22 -> 1.07-1.08, delete 1.15-1.17 -> 1.00-1.01, lookup_miss 1.13-1.15 -> 1.08-1.12; nqp delete 1.04-1.11 -> 0.98-1.01 | kept | disjoint spreads on lookup_hit and delete (C API) and delete (nqp) |
+| Policy-layer dispatch and checks | 3 | set-0 switch first; stale, set and control-only bits tested in one 32-bit status load | C API delete 64 1.25 -> 1.05; interleaved Robin Hood delete 1-4% faster (after / C 0.98-1.00 C API, 0.97-0.98 nqp); Small 8/16 lookup and delete 0.70-0.88 of before (the `findIn` inlining side effect) | kept | delete outside the spread; lookups ~2%, as the instruction count predicts |
+| Migration sized and bulk-inserted | 7 | next rung built for `max(from, cur_items) + 1` entries (128 slots, not 256); `insertKnownAbsent` bulk insert | 65th insert 1452 -> 1032 ns (C API), 1612 -> 1009 ns (nqp); 0.51-0.52 of the C 97th insert. Price: lookup and delete at 65-96 entries from 0.58-0.81 to 0.97-1.06 of the C | kept | outside the spread on both harnesses; the table is now the C's size and density |
+| 8a: cached-hash test in `StrSpec.eql` | 8 | both cached hashes set and different means unequal | nqp Small lookup_miss 63 1.09 -> 1.06, 64 1.09 -> 1.06 (inside the spread); C API Robin Hood lookup_miss 1024 1.09 -> 1.13 (worse, outside the spread) | reverted | no move outside the spread on the target; a regression elsewhere |
+| 8b: `findIn` always inlined | 8 | `@call(.always_inline, ..)` on every Small `findIn` instantiation | nqp lookup_miss 63/64 1.07/1.08 -> 1.07/1.08; C API Small 16 lookup_miss 0.60 -> 0.85, lookup_hit 0.68 -> 0.92 | reverted | no move on the target; the 16-entry path lost its lead |
+
+Final ladder, nqp level (Task 8, interleaved, 9 rounds; the scoreboard), ratio ranges by tier:
+
+| op | Small (16-64) | Robin Hood (65-16384) | finish line |
+|---|---|---|---|
+| insert | 0.38-0.45 | 0.71-1.00 | Small below 1.0: pass |
+| lookup_hit | 0.82-1.02 | 0.98-1.02 | pass |
+| lookup_miss | 0.79-1.08 | 1.02-1.03 | 63 fails (1.08, disjoint); 64 passes marginally (1.054, overlapping in the re-runs) |
+| delete | 0.76-1.03 | 0.95-0.99 | pass |
+| iterate | 0.67-0.71 | 1.02-1.07 | Small below 1.0, Robin Hood at or below 1.10: pass |
+| insert_nth | 0.26-0.69 | 0.76-1.13 (128-16384) | 128 (1.13) and 256 (1.11) fail, disjoint |
+| allocation (C API bytes) | 0.29-0.30 | - | under a third: pass |
+| migration (Zig 65th / C 97th) | - | 0.54 (nqp and C API, interleaved) | pass |
+
+Scoreboard: 50 of 53 cells pass. Shortfall (decision 8): Small lookup_miss 63 (1.08), Robin Hood insert_nth 128 (1.13) and 256 (1.11); lookup_miss 64 is the weakest passing cell.
+
 ## Deviations
 
 Record here, during execution, anything that differed from the plan or spec and why.
@@ -1307,3 +1416,8 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 3: the brief's Step 1 measures lookup_hit and delete at 64 and 1024. By the controller's ruling it was widened to sizes 64, 65, 128, 1024 and 16384 (nqp with a warm-up 16) and to lookup_miss and insert. Because the protocol runs drifted between builds by more than the lever, the decision also uses interleaved runs: the same binaries, with the before, after and C `libmoar.so` swapped through `LD_LIBRARY_PATH`. The fetch and delete exports were also given one 32-bit status load (stale, set and control-only tested together), which the controller put in scope as "the same byte read". The stale read stays one volatile load per call, now 4 bytes wide. The brief's Small `entries_offset` item was Task 4's and was not redone. Beyond the brief's two tests, a two-set test Spec checks that set 1 reaches both of its rungs through `resolve`, and `hash_test.zig` asserts at comptime that the four single-rung tables have `dispatch_reads_set == false`. Not planned: LLVM now inlines Small's `findIn` for capacities 8 and 16 into the exports, which gives the gains at sizes 4-16.
 - Task 7: the brief's `presized and shrunk` test expects `build(.., 200)` to give 256 official slots. 256 slots hold only 192 entries, so the tier's existing rule gives 512, and the test asserts 512. The brief's unfilled-entry test inserts 64 keys, so its unfilled 65th entry is created after the migration and never reaches it. The test runs that order, and also an unfilled 64th entry in the source, which the migration skips (the engine's existing rule). The migration size is `max(next.from, cur_items) + 1`, not just `next.from + 1`, in case a lower rung ever holds more than the next rung's `from`. On every ladder in the tree the two are the same. Beyond the brief: a Robin Hood test that `insertKnownAbsent` and `insertInternal` lay out identical tables, and the make-room shared between them as `inline fn takeSlot`. The Zig engine now has a resize at the 97th insert (128 -> 256) that it did not have before, at the C's own cost. At 65-96 entries, lookup and delete are now at the C's time instead of 0.58-0.81 of it, because the table is as dense as the C's. `growInner`'s reinsert loop still uses `insertInternal`. Switching it to `insertKnownAbsent` would make the 97th and later doublings cheaper, but it is outside this task.
 - Task 8: Step 1 judged every cell on interleaved runs of the protocol binaries (9 rounds, `LD_LIBRARY_PATH` swaps), not on the single protocol run, because the protocol runs carried a both-engine insert noise of up to 2x. Step 2 ran two rounds on the Small lookup_miss cells (63 failing, 64 marginal; 8a cached-hash test in `StrSpec.eql`, 8b `findIn` always inlined), both reverted. Rounds 8a and 8b were measured from uncommitted working trees and never committed, although the brief asks for a commit per round: both were reverted, and the section describes each change (the file, the function and the exact test or call form) precisely enough to reproduce it; the Robin Hood insert_nth 128/256 cells got a profile (with a scratch, uncommitted bench loop) but no lever, because no single cause was named. The `findIn(8)`/`findIn(16)` inlining stays implicit (carry-over from Task 3).
+- Task 9: acceptance item 4's peak RSS is 3 percent over the criterion (Zig median 712816 kbytes against the C's 691912; per run C 696216 / 686228 / 691912, Zig 685816 / 712816 / 725328, the Zig runs climbing across the session while the C runs stayed flat). Accepted by the user on 2026-11-02, to be revisited later; not investigated, and the spectests were not re-run for it. A set of interleaved spectests (the two `libmoar.so` swapped through `LD_LIBRARY_PATH` on one rakudo build) had been started to separate the session drift from the engine; it was stopped after the ruling and its partial first run discarded.
+- Task 9: the Raku-level benchmark was run four times more than `hash-bench.sh` runs it (five invocations per engine, alternating), and the engine campaign's Zig stack (`/tmp/claude-1000/hash-zig-prefix`) was run beside the tuned one and the C in five rounds. That stack was only a reference measurement, not one of this task's two stacks. Reason: the recorded band is one invocation without a spread, and several cells read above it; the same-session engine-campaign stack shows those readings are the band's, not the tuning's.
+- Task 9: under `-Dlto` the lookup and delete exports are no longer inlined everywhere. Task 2 found no call site left for `fetch_nocheck`, `fetch`, `delete`, `lvalue_fetch`, `next`, `current_nocheck` and `count`. Now `fetch` keeps 143 direct call sites in 52 functions (`MVMHash_at_key`, `exists_key` and `MVM_interp_run` among them), `fetch_nocheck` 5, and `delete` and `delete_nocheck` 1 each. The binding holds (0 PLT calls), and the iteration exports are still inlined. Most likely this is the larger single-frame exports from Tasks 3 and 6. The LTO lookup gain was not re-measured (the brief repeats the LTO build and smoke, not the benchmarks).
+- Task 9: `perl Configure.pl --zig-lto` without `--zig` refuses with `--zig-lto needs --zig=PATH` (checked first); the `--cc=zig` message comes with `--zig=/usr/bin/zig --zig-lto` under gcc, the Task 2 check. Both exit 255.
+- Task 9: in the acceptance run the `-Dzig-impl=false` install came from the zig cache, so its `--verbose` log does not list every C hash file. "The C path unchanged" rests on `git diff a5ea2a419 HEAD` (no C source or header changed) plus that build's `test` and `unit-test` passing and its binding counts equalling Task 2's.

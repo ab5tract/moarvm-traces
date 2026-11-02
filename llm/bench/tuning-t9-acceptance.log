@@ -1,0 +1,152 @@
+HEAD 56470b51a; zig 0.16.0
+### 6: zig fmt --check, perl -c, sh -n (18:02:17, load 0.76)
+fmt exit=0
+Configure.pl syntax OK
+perl -c exit=0
+sh -n exit=0
+sh -n hash-bench exit=0
+sh -n check-lto-binding exit=0
+### 6: default build (Zig engine, no LTO): install, test, unit-test, binding counts (18:02:17, load 0.76)
+install exit=0 0s
+dynamic MVM_str_hash_ symbols: 22
+plt calls to MVM_str_hash_: 119
+definitions of MVM_str_hash_fetch_nocheck: 1
+call sites of MVM_str_hash_fetch_nocheck: 3
+test exit=0
+unit-test exit=0
+Build Summary: 59/59 steps succeeded; 170/170 tests passed
+### 6: C path: -Dzig-impl=false install, test, unit-test, binding counts (18:02:36, load 1.49)
+install exit=0 0s
+C hash files compiled: 1
+dynamic MVM_str_hash_ symbols: 6
+plt calls to MVM_str_hash_: 27
+definitions of MVM_str_hash_fetch_nocheck: 0
+call sites of MVM_str_hash_fetch_nocheck: 0
+test exit=0
+unit-test exit=0
+Build Summary: 27/27 steps succeeded; 101/101 tests passed
+### 5: -Dlto install, binding counts, test, unit-test (18:02:38, load 1.49)
+install exit=0 58s
+dynamic MVM_str_hash_ symbols: 22
+plt calls to MVM_str_hash_: 0
+definitions of MVM_str_hash_fetch_nocheck: 1
+call sites of MVM_str_hash_fetch_nocheck: 5
+test exit=0
+unit-test exit=0
+Build Summary: 59/59 steps succeeded; 170/170 tests passed
+### 5: Perl --cc=zig --zig --zig-lto: configure, make, binding counts, stage0 smoke (18:03:53, load 1.81)
+configure exit=0
+2
+1
+make exit=0 73s
+dynamic MVM_str_hash_ symbols: 22
+plt calls to MVM_str_hash_: 0
+definitions of MVM_str_hash_fetch_nocheck: 1
+call sites of MVM_str_hash_fetch_nocheck: 5
+1
+301
+299
+smoke exit=0
+### 5: Perl plain --zig (no LTO): stage0 smoke, binding counts (nothing changes) (18:05:11, load 1.97)
+configure exit=0
+0
+0
+make exit=0
+dynamic MVM_str_hash_ symbols: 22
+plt calls to MVM_str_hash_: 124
+definitions of MVM_str_hash_fetch_nocheck: 1
+call sites of MVM_str_hash_fetch_nocheck: 3
+1
+301
+299
+smoke exit=0
+### 5: gcc refusal (18:05:24, load 4.29)
+configure --zig-lto exit=255
+    --zig-lto needs --zig=PATH
+configure --zig --zig-lto exit=255
+    --zig-lto needs --cc=zig (gcc cannot consume the LTO object)
+### restore default zig-out (no LTO) and cleanup (18:05:25, load 4.29)
+install exit=0
+ ? traces
+### done
+
+### -Dlto -Dstrip=false: call and jump sites to MVM_str_hash_* exports from other functions (objdump -d of libmoar.so; count per caller)
+<MVM_str_hash_build> <bind_attribute.2846>: 1
+<MVM_str_hash_build> <copy_to.2844>: 1
+<MVM_str_hash_build> <deserialize.2545>: 1
+<MVM_str_hash_build> <MVM_bytecode_finish_frame>: 1
+<MVM_str_hash_build> <MVM_vm_create_instance>: 1
+<MVM_str_hash_delete> <delete_key>: 1
+<MVM_str_hash_delete_nocheck> <gc_free.2955>: 1
+<MVM_str_hash_demolish> <gc_free.2547>: 1
+<MVM_str_hash_demolish> <gc_free.2852>: 1
+<MVM_str_hash_demolish> <MVM_tc_destroy>: 1
+<MVM_str_hash_demolish> <MVM_vm_destroy_instance>: 1
+<MVM_str_hash_fetch> <add_string_to_heap>: 1
+<MVM_str_hash_fetch> <async_read>: 1
+<MVM_str_hash_fetch> <async_spawn_merge_bytes_read>: 1
+<MVM_str_hash_fetch> <async_spawn_on_exit>: 1
+<MVM_str_hash_fetch> <async_spawn_stderr_bytes_read>: 1
+<MVM_str_hash_fetch> <async_spawn_stdout_bytes_read>: 1
+<MVM_str_hash_fetch> <bind_attribute.3190>: 1
+<MVM_str_hash_fetch> <bind_attribute.3266>: 1
+<MVM_str_hash_fetch> <bind_attribute.3459>: 1
+<MVM_str_hash_fetch> <code_pair_configure_container_spec>: 2
+<MVM_str_hash_fetch> <compose.2500>: 2
+<MVM_str_hash_fetch> <compose.2630>: 4
+<MVM_str_hash_fetch> <compose.2796>: 3
+<MVM_str_hash_fetch> <compose.2819>: 2
+<MVM_str_hash_fetch> <compose.3163>: 2
+<MVM_str_hash_fetch> <compose.3202>: 5
+<MVM_str_hash_fetch> <compose.3278>: 4
+<MVM_str_hash_fetch> <compose.3471>: 5
+<MVM_str_hash_fetch> <compose.3515>: 3
+<MVM_str_hash_fetch> <compose.3698>: 3
+<MVM_str_hash_fetch> <debugserver_worker>: 2
+<MVM_str_hash_fetch> <exists_key>: 1
+<MVM_str_hash_fetch> <find_method>: 1
+<MVM_str_hash_fetch> <get_attribute.2845>: 1
+<MVM_str_hash_fetch> <get_attribute.3189>: 1
+<MVM_str_hash_fetch> <get_attribute.3265>: 1
+<MVM_str_hash_fetch> <get_attribute.3458>: 1
+<MVM_str_hash_fetch> <get_refresh_flag>: 1
+<MVM_str_hash_fetch> <get_rw_flag>: 1
+<MVM_str_hash_fetch> <get_str_free_flag>: 1
+<MVM_str_hash_fetch> <grab_one_value>: 1
+<MVM_str_hash_fetch> <is_attribute_initialized.2848>: 1
+<MVM_str_hash_fetch> <lang_find_meth>: 1
+<MVM_str_hash_fetch> <lang_meth_call>: 1
+<MVM_str_hash_fetch> <MVM_decoder_configure>: 3
+<MVM_str_hash_fetch> <MVM_disp_program_record_index_lookup_table>: 1
+<MVM_str_hash_fetch> <MVM_disp_program_record_index_tracked_lookup_table>: 1
+<MVM_str_hash_fetch> <MVM_disp_program_run>: 1
+<MVM_str_hash_fetch> <MVMHash_at_key>: 1
+<MVM_str_hash_fetch> <MVM_hll_set_config>: 40
+<MVM_str_hash_fetch> <MVM_hll_sym_get>: 2
+<MVM_str_hash_fetch> <MVM_interp_run>: 3
+<MVM_str_hash_fetch> <MVM_nativecall_build>: 4
+<MVM_str_hash_fetch> <MVM_nativecall_get_arg_type>: 6
+<MVM_str_hash_fetch> <MVM_profile_heap_start>: 1
+<MVM_str_hash_fetch> <MVM_profile_start>: 1
+<MVM_str_hash_fetch> <MVM_repr_at_key_o>: 1
+<MVM_str_hash_fetch> <MVM_serialization_write_ref>: 1
+<MVM_str_hash_fetch> <MVM_vm_event_subscription_configure>: 2
+<MVM_str_hash_fetch_nocheck> <debugserver_worker>: 1
+<MVM_str_hash_fetch_nocheck> <MVM_sc_find_by_handle>: 1
+<MVM_str_hash_fetch_nocheck> <MVM_serialization_deserialize>: 1
+<MVM_str_hash_fetch_nocheck> <MVM_serialization_read_ref>: 1
+<MVM_str_hash_fetch_nocheck> <serialize.2544>: 1
+<MVM_str_hash_fetch> <serialize.4096>: 5
+<MVM_str_hash_fetch> <spawn_setup>: 9
+<MVM_str_hash_fetch> <unmarshal_callback>: 2
+<MVM_str_hash_first> <copy_to.2541>: 1
+<MVM_str_hash_first> <copy_to.2844>: 1
+<MVM_str_hash_first> <gc_mark.2761>: 1
+<MVM_str_hash_first> <gc_mark.2851>: 1
+<MVM_str_hash_first> <MVM_args_perform_flattening>: 1
+<MVM_str_hash_first> <MVM_gc_root_add_instance_roots_to_worklist>: 2
+<MVM_str_hash_first> <MVM_gc_root_add_tc_roots_to_worklist>: 1
+<MVM_str_hash_first> <MVMHash_gc_mark>: 1
+<MVM_str_hash_first> <MVM_iter>: 1
+<MVM_str_hash_first> <serialize.2544>: 1
+<MVM_str_hash_shallow_copy> <copy_to.2541>: 1
