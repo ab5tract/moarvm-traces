@@ -675,8 +675,8 @@ migration). Raw TSVs: `traces/llm/bench/hash-2026-11-02.micro-{zig,c}.tsv`.
 Small hashes (up to the threshold of 64): the Zig Small tier inserts in
 0.29-0.35 of the C time (0.98 at size 4), iterates in 0.69-0.74 and misses
 in 0.93-1.10, but a lookup hit costs 1.43-1.94 and a delete 2.90-3.37 times
-the C engine, with a third to a half of C's allocation. Large hashes (128
-and up): the Zig Robin Hood tier costs 1.14-1.79 times the C engine on
+the C engine, with under a third of C's allocation (0.61 at size 4). Large
+hashes (128 and up): the Zig Robin Hood tier costs 1.14-1.79 times the C engine on
 lookups (1.14-1.34), delete (1.42-1.79) and iterate (1.29-1.33), and 0.64-1.17
 on insert, at the same allocation (+8 bytes); the migration at 65 costs
 1516 ns against the C engine's 19 ns ordinary insert.
@@ -684,7 +684,8 @@ on insert, at the same allocation (+8 bytes); the migration at 65 costs
 The microbenchmark was re-run by Task 14's `hash-bench.sh` invocation
 (`traces/llm/bench/hash-2026-11-02-raku.micro-{zig,c}.tsv`); the figures
 agree with the table above within run-to-run noise (small-tier insert
-0.29-0.33, hit 1.23-1.89, delete 2.96-3.31; Robin Hood 1.13-1.75).
+0.29-0.33, hit 1.23-1.89, delete 2.96-3.31; Robin Hood 1.13-1.75 on lookup,
+delete and iterate except a 0.98 miss at 65536, and 0.62-1.14 on insert).
 
 ### Raku-level benchmark (Task 14, 2026-11-02)
 
@@ -717,17 +718,18 @@ is `traces/llm/bench/hash-2026-11-02-raku.md`.
 | 1048576 | 1.05 (525.16 / 500.65) | 1.17 (393.56 / 336.25) | 0.95 (222.83 / 235.42) | 1.12 (457.47 / 407.83) | 0.66 (136.35 / 207.71) | - | 247463936 / 222322688 |
 
 Small hashes (up to 64): the Zig engine inserts in 0.80-0.83 of the C time
-(1.23 at size 4), hits in 0.87-0.97 (1.09 at size 4), misses in 0.91-1.01,
-deletes in 0.83-1.01 (1.05 at size 4) and iterates in 0.81-1.04; the 64th
+(1.23 at size 4), hits in 0.87-0.97 (1.09 at size 4), misses in 0.91-1.00
+(1.01 at size 4), deletes in 0.83-1.01 (1.05 at size 4) and iterates in
+0.81-1.04; the 64th
 insert costs 0.76. Large hashes (128 and up): insert 0.96-1.10 (1.61 at
 65536), lookup hit 0.92-1.17, miss 0.92-0.97, delete 1.01-1.16, iterate
 0.66-0.95; the 65th insert, which migrates the table into a Robin Hood
 block, costs 4.29 times the C engine's ordinary insert (1996 ns against
 466 ns). The C-API deficits of the Small tier (lookup hit, delete) and of
 the Robin Hood tier are mostly hidden under the Raku and MoarVM layers at
-this level: every Raku-level ratio lies between 0.80 and 1.23 except insert
-at 65536 (1.61), the 1M-entry iterate (0.66) and the migration insert
-(4.29). The harness's run-to-run spread was not measured separately; the
+this level: every Raku-level ratio lies between 0.80 and 1.23 except the
+64th insert (0.76), insert at 65536 (1.61), the 1M-entry iterate (0.66) and
+the migration insert (4.29). The harness's run-to-run spread was not measured separately; the
 medians of three runs are reported as they are.
 
 ### rakudo spectest (Task 14, 2026-11-02)
