@@ -633,6 +633,41 @@ The shares are the report's estimates. Each task's own before/after measurement 
 
 Task 1: baseline and attribution are under "## Profile and baseline". No lever was struck. Run order: 4, 6, 5, 3, 7.
 
+### Task 2: LTO opt-in (`-Dlto`, `--zig-lto`)
+
+Binding: option (a), protected visibility, engaged and was kept; (b) `-Bsymbolic-functions` and (c) hidden were not needed. The exports are `fn ... callconv(.c)` plus `@export(.., .{ .visibility = v })` where `v` is `.protected` under `-Dlto` and `.default` otherwise (a `zig_options` module on the `moar_zig` root carries the flag). Without `-Dlto` the build is today's: the libmoar and moar link commands from `zig build --verbose` are identical, argument for argument, to a build of `zig-hash-engine`. The `moar_zig` command gains only the `zig_options` module. `nm -D` is identical and `tools/check-lto-binding.sh` reports the same counts. The Perl Makefiles from `--zig`, `--cc=zig --zig`, `--cc=zig` and the default configure are identical to those from the Task 1 `Configure.pl`.
+
+`tools/check-lto-binding.sh zig-out/lib/libmoar.so` (dynamic `MVM_str_hash_` symbols / `@plt` calls to `MVM_str_hash_` / definitions of `MVM_str_hash_fetch_nocheck` / call sites of it):
+
+| build | dyn | plt | defs | call sites |
+|---|---:|---:|---:|---:|
+| Zig (default) | 22 | 119 | 1 | 3 |
+| Zig `-Dlto` (protected) | 22 | 0 | 1 | 0 |
+| C `-Dzig-impl=false` | 6 | 27 | 0 | 0 |
+| C `-Dzig-impl=false -Dlto` | 6 | 25 | 0 | 0 |
+| Perl `--cc=zig --zig --zig-lto` | 22 | 0 | 1 | 0 |
+
+The `fetch_nocheck` definition stays because it is exported; that is what keeps the shim and `hash-str-test` linking. An unstripped `-Dlto -Dstrip=false` build shows zero call or jump sites to `fetch_nocheck`, `fetch`, `delete`, `lvalue_fetch`, `next`, `current_nocheck` and `count`, the same set the spike's hidden+LTO build inlined. The calls left are 5 `build`, 2 `demolish`, 11 `first`, 3 `insert_nocheck` and 1 `shallow_copy`. Build time for `zig build install` goes from 19 s to 59 s for Zig and from 35 s to 55 s for C.
+
+Measurements were taken under the machine conditions above. Load average was 2.0-2.9 at the start of the runs, higher than the baseline's 0.9, because the same script built each variant just before benchmarking it; 5.0 at the start of C. Runs: `--sizes=16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`. TSVs: `traces/llm/bench/tuning-lto-{nqp,capi}-{c,c-lto,zig,zig-lto}.tsv`. Size 16 is the first size of this ladder and carries the warm-up, like size 4 did in the baseline (C+LTO lookup at 16 is 3.24), so it is not read.
+
+nqp level, ratio of medians (cells: Zig+LTO / C | C+LTO / C | Zig / C | Zig+LTO / C+LTO):
+
+| op | 32 | 63 | 64 | 65 | 128 | 256 | 1024 | 16384 |
+|---|---|---|---|---|---|---|---|---|
+| insert | 0.44 / 0.96 / 0.50 / 0.46 | 0.46 / 0.97 / 0.52 / 0.47 | 0.45 / 0.97 / 0.51 / 0.47 | 0.88 / 0.96 / 0.95 / 0.92 | 0.69 / 0.98 / 0.77 / 0.71 | 0.87 / 0.96 / 0.98 / 0.91 | 1.11 / 0.96 / 1.19 / 1.16 | 1.01 / 0.89 / 1.08 / 1.14 |
+| lookup_hit | 1.00 / 0.94 / 1.06 / 1.06 | 1.09 / 0.90 / 1.16 / 1.21 | 1.08 / 0.91 / 1.15 / 1.20 | 0.92 / 0.90 / 1.00 / 1.02 | 1.08 / 0.96 / 1.15 / 1.13 | 1.09 / 0.95 / 1.18 / 1.15 | 1.08 / 0.93 / 1.11 / 1.16 | 1.12 / 0.94 / 1.16 / 1.18 |
+| lookup_miss | 0.90 / 0.93 / 1.02 / 0.97 | 0.99 / 0.89 / 1.09 / 1.11 | 0.99 / 0.91 / 1.04 / 1.10 | 0.85 / 0.91 / 0.92 / 0.93 | 1.04 / 0.94 / 1.13 / 1.11 | 1.05 / 0.93 / 1.12 / 1.13 | 1.06 / 0.95 / 1.13 / 1.11 | 1.04 / 0.93 / 1.12 / 1.12 |
+| delete | 1.12 / 0.93 / 1.19 / 1.21 | 1.15 / 0.87 / 1.26 / 1.32 | 1.14 / 0.89 / 1.22 / 1.28 | 0.90 / 0.88 / 0.98 / 1.02 | 1.07 / 0.94 / 1.15 / 1.13 | 1.06 / 0.97 / 1.16 / 1.09 | 1.06 / 0.94 / 1.15 / 1.12 | 1.10 / 0.96 / 1.22 / 1.14 |
+| iterate | 0.61 / 1.10 / 0.71 / 0.56 | 0.62 / 0.93 / 0.65 / 0.67 | 0.61 / 0.95 / 0.71 / 0.64 | 1.11 / 0.95 / 1.17 / 1.17 | 0.97 / 0.96 / 1.04 / 1.01 | 0.97 / 0.97 / 1.03 / 1.00 | 0.97 / 0.96 / 1.02 / 1.01 | 0.98 / 0.96 / 1.05 / 1.02 |
+| insert_nth | 0.66 / 1.14 / 0.81 / 0.58 | 0.75 / 0.89 / 0.75 / 0.84 | 0.72 / 0.92 / 0.96 / 0.78 | 54.4 / 0.93 / 51.3 / 58.8 | 1.09 / 0.92 / 1.23 / 1.18 | 1.10 / 0.93 / 1.28 / 1.19 | 1.00 / 0.91 / 1.17 / 1.10 | 0.85 / 1.00 / 1.21 / 0.93 |
+
+- Hash gain. Robin Hood iterate, Zig+LTO against C, is 0.97-0.98 at 128-16384 (Zig without LTO: 1.02-1.05). Against the matched C+LTO it is 1.00-1.02, which is parity, as the spike found. Lookup and delete improve by the C-side gain plus about 0.03-0.08. Against C+LTO, lookup_hit is 1.13-1.18, lookup_miss 1.11-1.13 and delete 1.09-1.14 at 128 and up, so the deficit inside the engine is unchanged (Tasks 3-7). At 65 (just migrated) and in the Small tier, insert and iterate gain a further 0.04-0.10.
+- C-side gain. C+LTO against C is 0.89-0.97 on every op at 32-16384 (lookup 0.90-0.96, delete 0.87-0.97, iterate 0.93-0.97, insert 0.89-0.98), so 3-11 percent, in line with the spike's 3-8 percent. This is a gain from LTO itself, not from the hash engine.
+- C API (`zig build hash-bench`): Zig+LTO is no better than Zig. RH lookup_hit is 1.23-1.31 against 1.21-1.32; iterate is 1.30-1.39 against 1.24-1.31, a few percent worse, and C+LTO against C is 0.92-1.07. That is expected: the shim calls libmoar's exports from outside the DSO in every variant, so LTO cannot inline across that boundary.
+- Zig without `-Dlto` against the Task 1 Zig baseline: every op at 32-16384 is within 0.89-1.07, except insert at 32-64 (1.15-1.27). The Zig/C ratio for insert at 32-64 is 0.50-0.52 here against 0.38-0.44 in the baseline, and the C insert is 0.95-1.01 of its baseline. This is in the run-to-run band of the Small insert (the baseline's ladder started at 4, this one at 16). Task 4 re-measures it.
+- Kept. `-Dlto` stays off by default.
+
 ## Deviations
 
 Record here, during execution, anything that differed from the plan or spec and why.
@@ -642,3 +677,7 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 1: harness output gains `ns_min`/`ns_max` columns (6, 7) in both `hash-bench.nqp` and `bench.zig`. The first five columns are unchanged, so `hash-bench.sh`'s existing renderer and the Raku harness still work.
 - Task 1, lever order: 4, 6, 5, 3, 7 (not the plan's numbering). Scope extensions: Task 4 takes `find`'s return path, Task 6 the call-chain inlining, Task 5 the `@memmove` shifts. Reasons under "### Lever order".
 - Task 1: the migration finish line (Zig 65th ≤ C 97th) is already met at baseline on both harnesses. Task 7 is kept as an improvement and runs last.
+- Task 2: binding (a) is protected visibility only under `-Dlto`, not on every build. Unconditional protected also binds locally without LTO: PLT calls go from 119 to 0. That would contradict Step 3's check that the counts without `-Dlto` equal Step 1's and the constraint that the link without `-Dlto` is today's. `-Bsymbolic-functions` was not needed in either build (spec 4.7 had planned it for both).
+- Task 2: `tools/check-lto-binding.sh` prints a fourth count, the call and jump sites to `MVM_str_hash_fetch_nocheck`. Under (a) the definition stays because it is exported, so the brief's expected "0 definitions under LTO" cannot hold. The call-site count is what shows the inlining (0 under LTO, 3 without).
+- Task 2: the `fn` + `@export` form changes the default (non-LTO) `moar_zig.o` slightly. `MVM_index_hash_build` and `MVM_uni_hash_build` no longer inline their callee (0x170 to 0x61 bytes) and `MVM_str_hash_lvalue_fetch` grows by 3 bytes. The hot exports (`fetch_nocheck`, `fetch`, `delete`, `next`, `current_nocheck`, `first`) have the same sizes. Symbols, visibility and link commands are unchanged.
+- Task 2: `Configure.pl` checks `$args{compiler}` (set by `--cc=zig`), not `$config{compiler}`, which Configure.pl never sets.
