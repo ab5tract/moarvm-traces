@@ -676,9 +676,9 @@ Small hashes (up to the threshold of 64): the Zig Small tier inserts in
 0.29-0.35 of the C time (0.98 at size 4), iterates in 0.69-0.74 and misses
 in 0.93-1.10, but a lookup hit costs 1.43-1.94 and a delete 2.90-3.37 times
 the C engine, with a third to a half of C's allocation. Large hashes (128
-and up): the Zig Robin Hood tier is 1.13-1.79 times the C engine on every
-operation (insert 0.64-1.17, lookups 1.14-1.34, delete 1.42-1.79, iterate
-1.29-1.33) at the same allocation (+8 bytes), and the migration at 65 costs
+and up): the Zig Robin Hood tier costs 1.14-1.79 times the C engine on
+lookups (1.14-1.34), delete (1.42-1.79) and iterate (1.29-1.33), and 0.64-1.17
+on insert, at the same allocation (+8 bytes); the migration at 65 costs
 1516 ns against the C engine's 19 ns ordinary insert.
 
 (Task 14 adds the Raku-level and spectest tables.)
