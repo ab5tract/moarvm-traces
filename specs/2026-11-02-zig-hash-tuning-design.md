@@ -39,8 +39,14 @@ Taken in the brainstorm (2026-11-02); the plan does not re-litigate them.
    C-API bench against the C engine, and is kept only if it moves its
    number outside the measured noise. Changes that do not move a number are
    reverted, not kept "because they should help".
-4. **The migration is judged against the C engine's own resize**, measured
-   at its 50th and 98th inserts, not against an ordinary insert.
+4. **The migration is judged against the C engine's own resize.** The C
+   table built with `entries = 0` starts at 8 official slots (6 items) and
+   `lvalue_fetch` grows when `cur_items >= max_items`, so the inserts that
+   resize are the 7th, 13th, 25th, 49th and 97th; the yardstick is the 49th
+   and 97th inserts (the 97th is the 128-to-256 resize), measured as the
+   N-th insert into a table of N-1, median over at least 5 runs so that
+   salt-dependent probe-limit growth averages out. The harnesses learn to
+   emit `insert_nth` at any size on the ladder, not only at the threshold.
 5. **LTO is opt-in**: `-Dlto` in the zig build and `--zig-lto` in the Perl
    build, the latter only with `--cc=zig` (gcc cannot consume the bitcode
    object; Configure hardfails on the combination). Default builds are
@@ -182,9 +188,14 @@ outside the noise band the measurement protocol establishes (§7).
 - Measure the salt draw and the `freeAtSafepoint` node separately; they are
   expected to be small and are not attacked unless the profile says
   otherwise.
-- The yardstick (decision 4): the C engine's 50th and 98th inserts, which
-  include its resizes (its minimum table of 8 official slots grows at 6,
-  12, 24, 48 and 96 entries).
+- The yardstick (decision 4): the C engine's 49th and 97th inserts, the
+  ones that resize.
+- Sizing the target at 128 slots changes the bucket order of hashes with
+  65 to 96 entries compared with today's Zig engine. That is not an
+  observable change in the §10 sense: Robin Hood bucket order is already
+  salt-random and unspecified, and the new order is closer to the C
+  engine's (which has a 128-slot table at those sizes). Recorded here as
+  the ruling.
 
 ### 4.7 LTO, opt-in
 
@@ -193,10 +204,13 @@ outside the noise band the measurement protocol establishes (§7).
   exports bind locally; `zig build test`, `unit-test` and `hash-bench` work
   unchanged with it (symbols stay exported).
 - Perl build: `--zig-lto` requires `--zig` and `--compiler=zig`
-  (`--cc=zig`); adds `-flto` to the C compile and link flags and
+  (`--cc=zig`); adds `-flto` to the C compile and link flags,
+  `-Wl,-Bsymbolic-functions` to libmoar's link (the same local binding as
+  the zig build, without which LTO buys only the C-side gain) and
   `-Dlto=true` to `ZIG_BUILD_FLAGS` so the object is bitcode; hardfails with
   any other compiler with a message naming the reason. `make clean`
-  unchanged.
+  unchanged. The hidden-visibility fallback, if needed, must work in both
+  builds.
 - If `-Bsymbolic-functions` does not let LTO inline the exports (the spike
   only tested hidden visibility), the fallback is hidden visibility under
   `-Dlto` only, and the benchmark shim and the libmoar-linked tests link the
@@ -222,14 +236,21 @@ outside the noise band the measurement protocol establishes (§7).
 ## 6. The profile is the first task
 
 Before any lever, the plan's first task records, in the plan, the profile
-recon's attribution: for lookup hit and delete in each tier, the share of
-samples in the wrapper, the policy layer, the hash and bucket computation,
-the probe or scan loop, `Spec.eql` and the rest; `perf stat` instruction
-counts per operation for both engines; the migration broken into
-allocation and clear, reinsert loop, salt draw and safepoint node; and the
-C engine's 50th and 98th insert costs. The levers in §4 are then ordered by
-that attribution, and any lever the attribution does not support is struck
-from the plan with a note.
+attribution: for lookup hit and delete in each tier, the share of samples
+in the wrapper, the policy layer, the hash and bucket computation, the
+probe or scan loop, `Spec.eql` and the rest; `perf stat` instruction counts
+per operation for both engines; the migration broken into allocation and
+clear, reinsert loop, salt draw and safepoint node; and the C engine's 49th
+and 97th insert costs. The profile recon on branch `zig-hash-spike-profile`
+produces this (`perf` 7.2.9 is available with `perf_event_paranoid = 2`,
+which allows sampling one's own processes; the recon builds the engine
+unstripped in ReleaseFast so `perf annotate` can attribute lines). If its
+report is missing or stale when the plan runs, task 1 performs the same
+profiling itself with those tools. The recon's harness changes (per-size
+`insert_nth`, an `--ops=` filter, the unstripped-object build setting as an
+option) are adopted into the tree by the same task. The levers in §4 are
+then ordered by the attribution, and any lever the attribution does not
+support is struck from the plan with a note.
 
 ## 7. Measurement protocol
 
