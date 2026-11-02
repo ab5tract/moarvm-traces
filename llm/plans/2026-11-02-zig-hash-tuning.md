@@ -1471,3 +1471,22 @@ Ratio ranges per tier (Small 16-64, Robin Hood 65-16384; size 4 and the 65th `in
 - Migration: zig-lto 65th 1046 ns [1033-1097] against c-lto 97th 1923 ns [1640-1956] = 0.54 (against plain c 97th 1839 ns: 0.57); zig-lto's own 97th 1976 ns. Unchanged from Task 8.
 - LTO on the C engine alone: c-lto / c 0.93-0.97 on lookups, delete and iterate, 0.95-1.00 on insert, consistent with Task 9's 0.94-0.96.
 
+### Whole system after the merge (spectest and Raku level, LTO default)
+
+Merged into `zig-hash-engine` (fast-forward to `1f9de9998`). The Task 9 prefixes kept their nqp and rakudo; each got its moar reinstalled from `zig build install` of the merged tree (C engine `-Dzig-impl=false`), so both engines are the default build: zig cc, LTO (binding counts 6/25/0/0 and 22/0/1/5). One rakudo tree (built for the Zig prefix) ran `make spectest` six times, `TEST_JOBS=24`, roast `fb1d87214`, interleaved C Z Z C C Z with `libmoar.so` chosen through `LD_LIBRARY_PATH` (verified in the runner's maps); `make spectest_update` ran once untimed first. Record: `traces/llm/bench/post-lto-spectest.txt`.
+
+| run | engine | wall | peak RSS (kbytes) | user / sys (s, children) | result |
+|---:|---|---:|---:|---:|---|
+| 1 | C | 4:58.83 | 707,940 | 4317 / 1143 | FAIL: `S16-unfiled/getpeername.rakudo.moar` exited 255 before its plan (0 of 1 tests) |
+| 2 | Zig | 4:55.92 | 705,888 | 4296 / 1118 | PASS |
+| 3 | Zig | 4:56.16 | 696,336 | 4296 / 1099 | PASS |
+| 4 | C | 4:59.62 | 739,636 | 4326 / 1145 | PASS |
+| 5 | C | 4:57.00 | 719,584 | 4317 / 1120 | PASS |
+| 6 | Zig | 4:54.57 | 704,192 | 4309 / 1066 | PASS |
+
+Medians: C 4:58.83 and 719,584 kbytes; Zig 4:55.92 and 704,192. Zig / C: wall 0.990, peak RSS 0.979. 1365 files, 138715 tests on every passing run. No Zig failure; the one C failure is a network test that ran no test at all, absent from the other five runs. With the runs interleaved the session drift of Task 9 is gone (user time 4296-4326 s on every run) and so is the RSS climb: acceptance item 4 passes on both counts (Task 9: wall 0.89 with drift, RSS +3.0 percent accepted).
+
+Raku level (`post-lto-raku.md`, `post-lto-raku-reps.md`, raw `post-lto-raku-reps.tsv`): `hash-bench.sh --raku-c --raku-zig` once (it also re-ran the C-API microbenchmark; Robin Hood iterate there is 1.30-1.34 as in Task 8, two export calls per element from outside libmoar) and ten more alternating invocations, eleven per engine. Medians (ratio of medians): Small insert 0.75-0.82 except 63 at 1.18, lookups 0.94-1.00, delete 0.92-0.98, iterate 0.90-1.00; Robin Hood insert 0.91-1.03 except 256 at 1.23 and 65536 at 1.52, lookups 0.96-1.03 (65 hit 1.19), delete 0.98-1.04, iterate 0.73-1.11; the migration 2.84 (Task 9: 3.75). The four cells above 1.1 are bimodal between invocations on both engines (insert at 63: Zig 103-110 ns in 4 runs and 166-171 in 7, C 137-146 in 8 and 226-229 in 3), the Zig stack landing in the slow mode more often.
+
+Two checks (same prefixes, same session). (1) Both engines rebuilt with `-Dlto=false`, six alternating reps: the four cells read 0.76, 0.97, 0.82 and 0.99 with tight spreads (Zig 63 insert 106-109 ns in all six), every other cell as above (`post-lto-raku-nolto-reps.*`). (2) On the LTO builds, eight invocations of `--sizes=63,256,65536 --runs=3` plain, with `MVM_SPESH_BLOCKING=1` and with `MVM_JIT_DISABLE=1` (`post-lto-raku-spesh-diag.txt`): blocking spesh removes the spread on both engines (Zig 63 insert 94-109, C 133-144, ratio about 0.72; plain Zig 104-139, C 147-182), and without the JIT both engines sit together at 176-227. So the slow mode is a spesh timing race in the Raku-level loop, not the hash engine, and the LTO builds change the race's odds (both engines; in the full-ladder reps the Zig stack lost it more often). Not pursued here; the lead is which frame's specialisation lands late (spesh log on a slow and a fast invocation).
+

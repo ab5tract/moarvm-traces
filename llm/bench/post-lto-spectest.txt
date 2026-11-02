@@ -1,0 +1,77 @@
+# Post-campaign spectest runs with LTO on by default (MoarVM 1f9de9998, rakudo make spectest, TEST_JOBS=24, roast fb1d87214), six interleaved runs C Z Z C C Z on one rakudo tree, libmoar.so chosen through LD_LIBRARY_PATH; both moars from zig build install (C engine -Dzig-impl=false), both with LTO. Timed by the wait4 stand-in for GNU time -v.
+
+run 1 c start 22:25:17 load 1.38 1.03 0.67 roast fb1d87214
+run 1 c exit 2 end 22:30:15
+run 2 zig start 22:30:15 load 12.75 15.10 7.41 roast fb1d87214
+run 2 zig exit 0 end 22:35:11
+run 3 zig start 22:35:11 load 13.20 20.83 12.54 roast fb1d87214
+run 3 zig exit 0 end 22:40:08
+run 4 c start 22:40:08 load 13.55 23.15 16.32 roast fb1d87214
+run 4 c exit 0 end 22:45:07
+run 5 c start 22:45:07 load 13.25 23.49 18.83 roast fb1d87214
+run 5 c exit 0 end 22:50:04
+run 6 zig start 22:50:04 load 14.50 24.30 20.91 roast fb1d87214
+run 6 zig exit 0 end 22:54:59
+
+## run 1 (c)
+	Command being timed: "make spectest"
+	User time (seconds): 4317.49
+	System time (seconds): 1142.92
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:58.83
+	Maximum resident set size (kbytes): 707940
+	Exit status: 2
+Files=1365, Tests=138714, 291 wallclock secs (35.90 usr  8.82 sys + 4276.89 cusr 1131.37 csys = 5452.98 CPU)
+Result: FAIL
+
+## run 2 (zig)
+	Command being timed: "make spectest"
+	User time (seconds): 4296.25
+	System time (seconds): 1118.06
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.92
+	Maximum resident set size (kbytes): 705888
+	Exit status: 0
+Files=1365, Tests=138715, 288 wallclock secs (36.68 usr  8.64 sys + 4254.84 cusr 1106.65 csys = 5406.81 CPU)
+Result: PASS
+
+## run 3 (zig)
+	Command being timed: "make spectest"
+	User time (seconds): 4296.23
+	System time (seconds): 1099.22
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:56.16
+	Maximum resident set size (kbytes): 696336
+	Exit status: 0
+Files=1365, Tests=138715, 288 wallclock secs (35.99 usr  9.04 sys + 4255.62 cusr 1087.33 csys = 5387.98 CPU)
+Result: PASS
+
+## run 4 (c)
+	Command being timed: "make spectest"
+	User time (seconds): 4325.58
+	System time (seconds): 1145.33
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:59.62
+	Maximum resident set size (kbytes): 739636
+	Exit status: 0
+Files=1365, Tests=138715, 292 wallclock secs (36.00 usr  8.74 sys + 4284.92 cusr 1133.76 csys = 5463.42 CPU)
+Result: PASS
+
+## run 5 (c)
+	Command being timed: "make spectest"
+	User time (seconds): 4317.49
+	System time (seconds): 1120.35
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:57.00
+	Maximum resident set size (kbytes): 719584
+	Exit status: 0
+Files=1365, Tests=138715, 289 wallclock secs (35.87 usr  8.69 sys + 4276.87 cusr 1108.94 csys = 5430.37 CPU)
+Result: PASS
+
+## run 6 (zig)
+	Command being timed: "make spectest"
+	User time (seconds): 4308.68
+	System time (seconds): 1065.77
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:54.57
+	Maximum resident set size (kbytes): 704192
+	Exit status: 0
+Files=1365, Tests=138715, 287 wallclock secs (35.78 usr  8.75 sys + 4268.37 cusr 1054.06 csys = 5366.96 CPU)
+Result: PASS
+
+## failures
+run 1 (C): t/spec/S16-unfiled/getpeername.rakudo.moar exited 255 before its plan (Bad plan: planned 1, ran 0); no other run failed any file.
