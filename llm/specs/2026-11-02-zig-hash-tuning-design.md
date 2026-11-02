@@ -352,3 +352,12 @@ recorded ruling.
 - §8 criterion 4: peak spectest RSS measured 3 percent above the C engine
   (Zig runs 686/713/725 MB climbing, C 696/686/692 MB flat); accepted by
   the user on 2026-11-02 with a note to revisit.
+- §1 goal 5 and §4.7 (LTO opt-in): after the campaign closed, the user turned LTO
+  on by default (2026-11-02) so the LTO path (protected exports, bitcode
+  object, `-flto` link) is the one every zig-toolchain build exercises
+  instead of an option that drifts untested: `-Dlto` defaults to true
+  unless `-Doptimize=Debug`, and `--zig-lto` is on whenever `--zig` and
+  `--cc=zig` are given without `--debug` (`--no-zig-lto` turns it off;
+  gcc builds stay off and pass `-Dlto=false` to `zig build zig-objects`).
+  The opt-in wording in §1, §4.7 and the plan's Task 2 record describe the
+  state at the time; the measured numbers are unchanged.
