@@ -881,3 +881,15 @@ Recorded during execution on 2026-11-02:
   configured for the C prefix, spectested three times, then reconfigured for
   the Zig prefix and spectested three times, because `make spectest` runs
   the last configured rakudo.
+- Final whole-branch review (2026-11-02): the traces/llm submodule became
+  optional (https URL, `update = none`) because its SSH URL broke
+  `perl Configure.pl` for users without access; Small's iteration order is
+  reverse insertion order (docs and spec errata corrected, test added);
+  `Table.delete` and `ptr` `fetchAndDelete` no longer pre-probe for the
+  no-op log hook (small-tier delete ratio about 3.0 to about 1.9); the
+  double-write hook's capture point is recorded as unsuitable in the spec
+  errata. Parked for the next tier campaign: the migration trigger relies
+  on a rung's `grow` returning null rather than on `next.from`, Robin Hood
+  has no ceiling, and two `unreachable`s guard what `validate` does not
+  check. Parked until the repository is public: `--git-cache-dir` still
+  clones the submodule.
