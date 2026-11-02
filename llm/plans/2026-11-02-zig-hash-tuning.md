@@ -683,6 +683,54 @@ The cells that the parity and C-side gain judgements rest on, with the spread (`
 - Zig without `-Dlto` against the Task 1 Zig baseline: every op at 32-16384 is within 0.89-1.07, except insert at 32-64 (1.15-1.27). The Zig/C ratio for insert at 32-64 is 0.50-0.52 here against 0.38-0.44 in the baseline, and the C insert is 0.95-1.01 of its baseline. This is in the run-to-run band of the Small insert (the baseline's ladder started at 4, this one at 16). Task 4 re-measures it.
 - Kept. `-Dlto` stays off by default.
 
+### Task 4: Small tier fast paths (kept)
+
+Changes in `tiers/small.zig`, all kept, measured as one lever because the whole moved well outside the spread:
+
+- `find` returns a plain `u32` with `absent = maxInt(u32)` instead of `?u32`. The result now comes back in `%eax` and the caller tests `cmp $0xffffffff,%eax` (unstripped `-Dstrip=false` build, `objdump` of `str.fetchNocheck`), so the store-to-load forwarding stall of the 4-byte value plus 1-byte flag reloaded as 8 bytes is gone. `find` shrank from 1530 to 1088 bytes.
+- The Small payload is now `{ capacity: u32, entries_offset: u32 }` (8 bytes; `tags` start at 16 instead of 12, which leaves `entriesOffset` unchanged for every capacity 8-64). `init` and `grow` write `entries_offset`; `entryAtIndex` adds it. `findIn` loads the entry base and the entry size once, before the scan.
+- `isZeroKey` is one unsigned load and compare of the key (`u64` for the 8-byte keys) instead of `std.mem.allEqual`'s byte chain. It still runs only on tag-matched candidates.
+- Delete's swap: `if (es == 16)` copies `[16]u8` inline (one `movups` pair), else `@memcpy` (still `compiler_rt.memcpy` for other sizes).
+
+A variant that kept the per-candidate `entryAtIndex` (no hoisting of the base and size in `findIn`) was also tried: C-API lookup_hit at 63/64 was 8.6 ns against 7.4-7.8 ns with the hoist, so the hoist stays.
+
+Runs: `--sizes=16,32,63,64 --runs=5`, both harnesses, C engine before (HEAD `eec1ca260`) and after (same C code, rebuilt to bracket drift). Load average (1 min) at the start of each run: Zig before 2.08, C before 2.52, Zig after 1.23 (first run) and 1.71 (the recorded one), C after 1.71 (`traces/llm/bench/tuning-t4-load.log`). TSVs: `traces/llm/bench/tuning-t4-{capi,nqp}-{c,zig}-{before,after}.tsv`. Size 16 is the ladder's first size and carries the warm-up at the nqp level, so it is not read there. Cells: `zig / c [zig min-max / c min-max]` in ns; before against C before, after against C after.
+
+C API:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 16 | 1.51 [10.69-10.99 / 7.05-16.98] | 0.97 [6.53-7.75 / 6.96-7.15] |
+| lookup_hit | 32 | 1.45 [10.81-11.84 / 7.26-7.73] | 0.94 [6.48-8.35 / 7.43-12.65] |
+| lookup_hit | 63 | 1.57 [11.18-11.54 / 7.07-7.29] | 1.07 [7.40-7.61 / 6.88-8.44] |
+| lookup_hit | 64 | 1.57 [11.27-11.56 / 7.18-7.21] | 1.10 [7.78-7.79 / 7.01-7.15] |
+| lookup_miss | 16 | 0.97 [6.71-7.23 / 7.13-7.53] | 0.85 [6.19-6.39 / 7.31-7.41] |
+| lookup_miss | 32 | 0.89 [6.65-6.88 / 7.29-7.64] | 0.95 [6.47-7.60 / 7.44-7.74] |
+| lookup_miss | 63 | 1.14 [7.98-8.24 / 7.13-7.19] | 1.08 [7.64-7.93 / 7.06-7.18] |
+| lookup_miss | 64 | 1.12 [8.03-8.14 / 7.14-7.29] | 1.07 [7.71-7.81 / 7.20-7.32] |
+| delete | 16 | 1.71 [13.76-32.77 / 8.09-10.65] | 0.98 [8.32-11.16 / 8.51-8.63] |
+| delete | 32 | 1.67 [14.41-15.72 / 8.67-8.99] | 1.04 [9.22-10.56 / 8.95-9.29] |
+| delete | 63 | 1.84 [15.24-15.63 / 8.33-8.57] | 1.24 [10.24-11.47 / 8.18-8.42] |
+| delete | 64 | 1.81 [15.27-15.55 / 8.41-8.57] | 1.28 [10.42-10.67 / 8.30-8.51] |
+
+nqp level:
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 32 | 1.12 [16.54-16.69 / 14.76-14.88] | 0.96 [14.15-14.43 / 14.68-15.01] |
+| lookup_hit | 63 | 1.23 [17.77-17.99 / 14.48-15.59] | 1.09 [15.37-15.68 / 14.30-15.35] |
+| lookup_hit | 64 | 1.22 [17.61-17.91 / 14.43-14.67] | 1.10 [15.61-16.11 / 14.35-14.94] |
+| lookup_miss | 32 | 0.97 [14.23-14.34 / 14.58-14.74] | 0.97 [14.08-14.20 / 14.39-14.71] |
+| lookup_miss | 63 | 1.11 [15.64-15.89 / 14.20-14.33] | 1.13 [15.76-16.07 / 13.91-14.28] |
+| lookup_miss | 64 | 1.09 [15.69-15.96 / 14.37-17.16] | 1.15 [15.69-16.56 / 14.10-14.49] |
+| delete | 32 | 1.21 [17.78-17.97 / 14.49-14.97] | 0.94 [13.89-14.23 / 14.60-14.89] |
+| delete | 63 | 1.31 [18.78-19.06 / 14.43-14.76] | 1.08 [15.38-15.71 / 14.12-14.51] |
+| delete | 64 | 1.30 [18.84-19.18 / 14.47-14.58] | 1.10 [15.43-16.01 / 14.30-14.67] |
+
+- Kept. lookup_hit and delete moved outside the spread at both levels and every size 16-64: at the C API, lookup_hit went from 1.45-1.57 to 0.94-1.10 and delete from 1.67-1.84 to 0.98-1.28; at the nqp level (32-64), lookup_hit went from 1.12-1.23 to 0.96-1.10 and delete from 1.21-1.31 to 0.94-1.10.
+- lookup_miss did not regress. At the C API it improved at 63/64 (7.64-7.93 against 7.98-8.24 ns, outside the spread). At the nqp level the Zig spreads overlap before and after at 63 and 64 (the 64 ratio moves from 1.09 to 1.15 mostly because the C base dropped from 14.67 to 14.29 median). Three more nqp runs of each build gave HEAD 14.0-15.4 / 15.6-16.4 / 15.7-16.2 ns and the change 15.0-15.3 / 15.4-16.3 / 16.1-16.6 ns at 32 / 63 / 64. That is the run-to-run band of the nqp miss.
+- What is left at 63/64 (lookup_hit 1.07-1.10, delete 1.24-1.28 at the C API) is the call chain, the wrapper and stale checks, and the hash call (Task 6), plus the out-of-line `find` call.
+
 ## Deviations
 
 Record here, during execution, anything that differed from the plan or spec and why.
@@ -696,3 +744,4 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 2: `tools/check-lto-binding.sh` prints a fourth count, the call and jump sites to `MVM_str_hash_fetch_nocheck`. Under (a) the definition stays because it is exported, so the brief's expected "0 definitions under LTO" cannot hold. The call-site count is what shows the inlining (0 under LTO, 3 without).
 - Task 2: the `fn` + `@export` form changes the default (non-LTO) `moar_zig.o` slightly. `MVM_index_hash_build` and `MVM_uni_hash_build` no longer inline their callee (0x170 to 0x61 bytes) and `MVM_str_hash_lvalue_fetch` grows by 3 bytes. The hot exports (`fetch_nocheck`, `fetch`, `delete`, `next`, `current_nocheck`, `first`) have the same sizes. Symbols, visibility and link commands are unchanged.
 - Task 2: `Configure.pl` checks `$args{compiler}` (set by `--cc=zig`), not `$config{compiler}`, which Configure.pl never sets.
+- Task 4: the Small payload grew from 4 to 8 bytes (`entries_offset` next to `capacity`); tags start at offset 16 instead of 12, and `entriesOffset` is unchanged for every capacity 8-64, so blocks are the same size. `find`'s return path (sentinel index instead of `?u32`) and the one-load zero-key test were in scope by the controller's ruling. The lever was measured whole, not part by part, because the whole moved outside the spread.
