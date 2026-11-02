@@ -819,6 +819,152 @@ nqp level:
 - Small (64) did not regress. The C-API lookup_hit at 64 reads 1.02 to 1.07 (7.21-7.24 against 7.68-9.36 ns), but the Small code is unchanged. Three more C-API runs of each build at 64 gave lookup_hit 7.38 / 7.76 / 8.07 ns before and 7.43 / 7.48 / 7.58 ns after, lookup_miss 7.38 / 7.97 / 8.01 before and 7.28 / 7.36 / 7.96 after, and delete 10.08 / 10.57 / 10.70 before and 9.82 / 9.87 / 10.61 after. The first before run was at the bottom of the band.
 - What is left on Robin Hood at the C API, lookup_hit 1.07 and lookup_miss 1.08-1.12, is outside the probe loop, which now matches the C instruction for instruction. Before the loop: the `cur_items == 0` test, the dispatch/stale byte tests (Task 3), and `loopState`'s `key_right_shift + metadata_hash_bits` and `imul` (profile cause RH-4). Delete is at parity.
 
+### Task 3: policy-layer dispatch and checks (kept)
+
+Changes (`table.zig`; tests in `table.zig`, `str.zig`, `hash_test.zig`; no tier, Spec, export or C change):
+
+- `dispatch` tests `header.set == 0` first and takes `dispatchSet0`: one `switch` on the `tier` byte with an `inline` prong per rung of `Spec.sets[0]`. Any other set goes through `dispatchOther` (`resolve`, as before). When `Spec.sets.len == 1` (`pub const dispatch_reads_set == false`), the set byte is not read at all. That covers the four single-rung tables, `IntSpec`, and every `dispatch` caller (grow, iteration, `fsck`, `blockOf`). The string table's `standard` set is index 0, so every C-API hash takes the switch and only `large_only` takes `resolve`. `str.zig` asserts this at comptime.
+- `fetch`, `lvalue` and `delete` read the header's first four bytes (`tier`, `set`, `entry_size`, `stale`) in one 32-bit load (`statusOf`; `*volatile` under `.safepoint_cas`, so the entry stale check is still a volatile read, once per call, before any other table access). They test one mask: the stale byte (`.safepoint_cas` only), the set byte (multi-set Specs only) and the control-only bit. When the masked bits are all zero, they switch on the tier byte from that same load. Otherwise they take the separate tests in the old order: stale (`MVM_oops` with the same message), control-only (`fetch` null, `delete` false, `lvalue` materialises), then `resolve` for set != 0. The mask is built from `@offsetOf(Header, ..)` (native byte order), and there are comptime checks that the four bytes are the header's first four and that the header is 4-aligned.
+- The exit "turned stale" check of `delete` (and `lvalue`/`shallowCopy`) is unchanged: one volatile byte compare, `cmpb $0x0,0x3(%r10)`, before and after. The `entries_offset` handling for Small was Task 4's and is not touched. Neither is `loopState`/`cur_items` (RH-4).
+
+Prologue (`objdump -d` of the installed `libmoar.so`'s `MVM_str_hash_fetch_nocheck`; Robin Hood rung of set 0, cached hash; instructions from entry to the first probe-loop instruction `movzbl (%r15),%eax`):
+
+    before (50; 26 before loopState)                   after (46; 22 before loopState)
+    push x7 ; mov %rdi,(%rsp)                          push x6 ; sub $0x48,%rsp ; mov %rdi,(%rsp)
+    mov (%rsi),%rbx ; test ; je        (null)          mov (%rsi),%r12 ; test ; je         (null)
+    cmpb $0x0,0x3(%rbx) ; jne          (stale)         mov %rdx,%rbx
+    movzbl (%rbx),%ecx ; test %cl ; js (control-only)  mov (%r12),%ecx                     (one volatile load)
+    mov %rdx,%r14                                      test $0xff00ff80,%ecx ; je  fast    (stale|set|control)
+    cmpb $0x0,0x1(%rbx) ; je           (set == 0)      fast: mov 0x28(%rbx),%rax ; test $0x7f,%cl ; je small
+    mov 0x28(%r14),%rax ; test %cl ; je small (rung)         test %rax ; je compute ; cmpl $0x0,0x4(%r12) ; jne
+    test %rax ; jne ; cmpl $0x0,0x4(%rbx) ; je         loopState (24, unchanged) ; probe loop
+    loopState (24) ; probe loop
+
+The dispatch part went from 11 instructions with 3 header-byte loads (stale, tier, set) to 7 with one word load. `MVM_str_hash_delete_nocheck`, entry to loopState: 27 before, 23 after, with the same three loads folded into one. The slow path (stale, control-only, set != 0) is laid out after the fast `je`.
+
+A side effect of the restructure: LLVM now inlines the Small tier's `findIn` for capacities 8 and 16 into the `fetch`/`delete` exports, where before it called all four capacity instantiations. 32 and 64 are still calls, and `findIn(64)` is byte-identical before and after. The exports grew: `fetch_nocheck` from 0x299 to 0x5f7 bytes, `delete_nocheck` from 0x5e6 to 0xa17. The frame is `sub $0x48` instead of `push %rax`. This is an inlining-heuristic outcome, not something the code asks for. It accounts for the large gains at sizes 4-16 below. A later change to `small.zig` or the exports can flip it back, so Task 8 should check it.
+
+Runs: the protocol runs (separate builds, `--sizes=64,65,128,1024,16384 --runs=5` C API, `--sizes=16,64,65,128,1024,16384 --runs=5` nqp; 16 is the warm-up row), Zig before at HEAD `92d9ff5dc`, C before, Zig after, C after. Load average (1 min) at the start: Zig before 2.13, C before 2.90 (right after a build), Zig after 0.62, C after 0.62 (C API) / 0.99 (nqp) (`traces/llm/bench/tuning-t3-load.log`). TSVs: `traces/llm/bench/tuning-t3-{capi,nqp}-{c,zig}-{before,after}.tsv`, plus `tuning-t3-capi-{zig-before,zig-after,c-after}-small.tsv` (sizes 4-32). Cells: `zig / c [zig min-max / c min-max]` in ns, before against C before, after against C after.
+
+The protocol runs moved the Zig numbers by more than the change could explain in both directions (C-API lookup_hit at 64 was 7.21-7.40 ns in a first after build and 8.02-8.52 in the recorded one, from the same source). So each harness was also run interleaved: the same bench binary and the same `moar`, with the before and after `libmoar.so` (and the C one) swapped through `LD_LIBRARY_PATH` (RUNPATH, so it overrides) and run alternately. That was 10 rounds at the C API and 6 rounds for each of two nqp size orders. Cells: median of the per-round medians [min-max of the per-round medians] in ns. Raw rows (variant, round, then the harness columns): `traces/llm/bench/tuning-t3-interleaved-{capi,nqp,nqp-small}.tsv`. Load 0.6-0.9.
+
+C API (protocol runs):
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 1.08 [8.01-8.31 / 7.30-7.51] | 1.13 [8.02-8.52 / 7.19-7.51] |
+| lookup_hit | 65 | 0.80 [5.70-6.32 / 7.38-7.50] | 0.75 [5.36-5.55 / 7.17-7.26] |
+| lookup_hit | 128 | 1.09 [7.66-7.95 / 7.09-7.32] | 1.07 [7.59-7.80 / 7.08-7.26] |
+| lookup_hit | 1024 | 1.04 [7.84-8.36 / 7.62-8.41] | 1.09 [7.79-9.26 / 7.28-7.87] |
+| lookup_hit | 16384 | 1.00 [8.49-8.67 / 8.52-8.80] | 1.05 [8.46-8.67 / 8.00-8.22] |
+| lookup_miss | 64 | 1.11 [7.86-8.33 / 7.35-7.42] | 1.02 [7.39-8.02 / 7.20-10.33] |
+| lookup_miss | 65 | 0.75 [5.41-5.70 / 7.49-7.66] | 0.73 [5.38-5.46 / 7.30-7.52] |
+| lookup_miss | 128 | 1.09 [7.80-8.02 / 7.12-7.44] | 1.08 [7.79-7.94 / 7.12-7.30] |
+| lookup_miss | 1024 | 1.06 [7.91-8.24 / 7.53-7.71] | 1.09 [7.85-9.66 / 7.20-7.44] |
+| lookup_miss | 16384 | 0.99 [8.87-13.05 / 9.08-12.42] | 1.08 [9.10-14.06 / 8.36-12.37] |
+| delete | 64 | 1.25 [10.56-10.87 / 8.63-8.79] | 1.05 [9.74-10.36 / 8.46-17.12] |
+| delete | 65 | 0.82 [6.89-7.19 / 8.65-8.88] | 0.79 [6.65-6.69 / 8.42-8.56] |
+| delete | 128 | 1.02 [8.42-8.58 / 8.29-8.78] | 0.99 [8.26-8.41 / 8.30-8.52] |
+| delete | 1024 | 0.97 [8.53-8.71 / 8.78-9.39] | 1.03 [8.49-9.13 / 8.41-8.48] |
+| delete | 16384 | 0.93 [9.10-9.34 / 9.71-10.29] | 0.99 [9.08-9.74 / 9.12-9.37] |
+| insert | 64 | 0.31 [13.86-16.93 / 43.13-46.67] | 0.31 [13.80-16.55 / 44.14-45.60] |
+| insert | 65 | 0.85 [37.39-39.11 / 42.41-45.74] | 0.83 [37.79-41.56 / 44.30-48.97] |
+| insert | 128 | 0.61 [24.01-27.82 / 41.40-46.45] | 0.63 [24.90-28.30 / 44.08-47.94] |
+| insert | 1024 | 1.02 [41.06-42.58 / 40.07-43.16] | 1.04 [41.91-43.16 / 40.24-43.33] |
+| insert | 16384 | 0.97 [40.61-58.68 / 42.77-58.69] | 1.00 [41.17-58.51 / 42.19-58.29] |
+
+nqp level (protocol runs):
+
+| op | size | before | after |
+|---|---:|---|---|
+| lookup_hit | 64 | 0.99 [14.89-15.22 / 14.68-19.14] | 1.03 [15.03-15.53 / 14.46-23.90] |
+| lookup_hit | 65 | 0.88 [12.77-13.49 / 14.67-15.40] | 0.87 [12.59-12.92 / 14.57-14.83] |
+| lookup_hit | 128 | 1.01 [14.66-14.87 / 14.62-15.17] | 1.01 [14.44-14.55 / 14.25-14.48] |
+| lookup_hit | 1024 | 1.00 [15.00-15.26 / 14.90-16.78] | 1.03 [14.87-16.60 / 14.65-14.77] |
+| lookup_hit | 16384 | 1.01 [16.30-17.16 / 16.29-17.96] | 1.01 [16.27-16.67 / 16.24-16.90] |
+| lookup_miss | 64 | 1.06 [14.57-15.36 / 14.13-14.37] | 1.08 [15.19-17.65 / 14.29-15.37] |
+| lookup_miss | 65 | 0.83 [11.91-12.30 / 14.39-15.96] | 0.83 [11.99-12.19 / 14.27-14.52] |
+| lookup_miss | 128 | 0.99 [14.36-14.48 / 14.45-14.64] | 1.03 [14.45-14.73 / 14.06-14.31] |
+| lookup_miss | 1024 | 1.00 [14.45-14.72 / 14.38-14.95] | 1.03 [14.57-18.65 / 14.02-14.31] |
+| lookup_miss | 16384 | 1.01 [15.45-20.20 / 15.39-20.46] | 1.02 [15.62-19.81 / 15.24-19.76] |
+| delete | 64 | 0.95 [14.13-14.54 / 14.47-19.89] | 1.04 [15.09-15.88 / 14.57-22.33] |
+| delete | 65 | 0.86 [13.03-13.37 / 14.75-20.33] | 0.88 [12.78-12.88 / 14.50-15.03] |
+| delete | 128 | 0.88 [14.37-14.75 / 14.62-24.43] | 0.98 [13.93-14.32 / 14.29-14.42] |
+| delete | 1024 | 0.99 [14.76-14.94 / 14.85-16.10] | 0.98 [13.76-14.53 / 14.73-14.97] |
+| delete | 16384 | 1.01 [16.60-16.86 / 16.40-20.90] | 1.00 [16.43-16.80 / 16.33-17.10] |
+| insert | 64 | 0.48 [21.98-37.38 / 52.57-64.61] | 0.44 [23.10-27.98 / 52.77-60.66] |
+| insert | 65 | 0.88 [45.66-52.82 / 52.60-55.97] | 0.89 [47.10-51.94 / 53.96-54.58] |
+| insert | 128 | 0.67 [33.66-36.93 / 52.59-55.91] | 0.70 [34.22-37.67 / 52.82-56.28] |
+| insert | 1024 | 0.94 [47.99-53.73 / 49.28-60.07] | 1.00 [45.76-51.17 / 46.79-53.91] |
+| insert | 16384 | 0.91 [53.97-66.84 / 55.80-78.76] | 1.04 [55.40-73.41 / 53.33-63.42] |
+
+C API, interleaved (10 rounds, `--sizes=8,16,64,128,1024,16384 --runs=5`):
+
+| op | size | Zig before | Zig after | C | after/before | before/C | after/C |
+|---|---:|---|---|---|---:|---:|---:|
+| delete | 8 | 8.07 [7.85-8.61] | 7.07 [6.86-7.45] | 8.64 [7.99-8.95] | 0.88 | 0.93 | 0.82 |
+| delete | 16 | 8.04 [7.89-8.30] | 7.04 [6.99-7.32] | 8.26 [8.20-8.47] | 0.88 | 0.97 | 0.85 |
+| delete | 64 | 10.34 [9.85-11.43] | 10.18 [9.84-10.44] | 8.36 [8.22-9.28] | 0.98 | 1.24 | 1.22 |
+| delete | 128 | 8.55 [8.40-9.05] | 8.28 [8.24-8.38] | 8.29 [8.19-10.10] | 0.97 | 1.03 | 1.00 |
+| delete | 1024 | 8.52 [8.38-9.90] | 8.40 [8.28-8.55] | 8.39 [8.27-8.51] | 0.99 | 1.01 | 1.00 |
+| delete | 16384 | 9.27 [9.09-10.43] | 9.09 [8.95-9.70] | 9.25 [9.08-9.35] | 0.98 | 1.00 | 0.98 |
+| lookup_hit | 8 | 6.17 [6.03-6.36] | 5.00 [4.89-5.45] | 6.94 [6.63-7.31] | 0.81 | 0.89 | 0.72 |
+| lookup_hit | 16 | 6.43 [6.01-6.62] | 4.56 [4.45-4.87] | 6.89 [6.79-7.01] | 0.71 | 0.93 | 0.66 |
+| lookup_hit | 64 | 7.74 [7.31-8.35] | 7.76 [7.42-8.10] | 7.11 [6.99-7.72] | 1.00 | 1.09 | 1.09 |
+| lookup_hit | 128 | 7.80 [7.71-8.37] | 7.62 [7.54-8.12] | 7.14 [7.00-7.97] | 0.98 | 1.09 | 1.07 |
+| lookup_hit | 1024 | 7.90 [7.74-8.33] | 7.71 [7.61-7.83] | 7.32 [7.16-7.45] | 0.98 | 1.08 | 1.05 |
+| lookup_hit | 16384 | 8.57 [8.45-9.18] | 8.43 [8.31-8.67] | 8.11 [7.96-8.24] | 0.98 | 1.06 | 1.04 |
+| lookup_miss | 8 | 6.03 [5.77-6.57] | 4.25 [4.07-4.74] | 7.57 [7.40-7.83] | 0.70 | 0.80 | 0.56 |
+| lookup_miss | 16 | 6.02 [5.70-6.80] | 4.21 [4.01-4.65] | 7.12 [7.04-7.22] | 0.70 | 0.84 | 0.59 |
+| lookup_miss | 64 | 7.57 [7.42-8.29] | 8.04 [7.46-8.34] | 7.17 [7.04-7.80] | 1.06 | 1.06 | 1.12 |
+| lookup_miss | 128 | 7.89 [7.75-8.11] | 7.78 [7.70-7.86] | 7.20 [7.09-7.91] | 0.99 | 1.10 | 1.08 |
+| lookup_miss | 1024 | 7.93 [7.79-8.26] | 7.84 [7.79-7.99] | 7.25 [7.11-7.32] | 0.99 | 1.09 | 1.08 |
+| lookup_miss | 16384 | 9.37 [9.25-9.97] | 9.40 [9.23-10.57] | 8.53 [8.42-8.78] | 1.00 | 1.10 | 1.10 |
+
+nqp level, interleaved (6 rounds, `--sizes=16,64,128,1024,16384`; 16 is the warm-up):
+
+| op | size | Zig before | Zig after | C | after/before | before/C | after/C |
+|---|---:|---|---|---|---:|---:|---:|
+| delete | 64 | 14.89 [14.15-15.65] | 14.75 [14.12-15.89] | 14.58 [14.53-14.71] | 0.99 | 1.02 | 1.01 |
+| delete | 128 | 14.58 [14.47-14.90] | 14.28 [14.21-14.42] | 14.57 [14.47-14.61] | 0.98 | 1.00 | 0.98 |
+| delete | 1024 | 14.96 [14.83-15.18] | 14.51 [14.38-15.93] | 14.98 [14.90-15.06] | 0.97 | 1.00 | 0.97 |
+| delete | 16384 | 16.66 [16.46-16.76] | 16.04 [15.90-16.13] | 16.52 [16.46-16.63] | 0.96 | 1.01 | 0.97 |
+| lookup_hit | 64 | 14.59 [14.14-14.93] | 14.95 [14.46-16.18] | 14.72 [14.66-15.40] | 1.02 | 0.99 | 1.02 |
+| lookup_hit | 128 | 14.88 [14.78-16.03] | 15.39 [14.63-15.82] | 14.68 [14.56-14.81] | 1.03 | 1.01 | 1.05 |
+| lookup_hit | 1024 | 15.52 [14.88-16.49] | 15.16 [14.92-15.87] | 15.10 [14.97-15.30] | 0.98 | 1.03 | 1.00 |
+| lookup_hit | 16384 | 16.52 [16.33-16.73] | 16.44 [16.06-16.53] | 16.40 [16.29-16.69] | 1.00 | 1.01 | 1.00 |
+| lookup_miss | 64 | 14.70 [14.47-15.20] | 16.40 [15.79-17.17] | 14.36 [14.25-14.50] | 1.12 | 1.02 | 1.14 |
+| lookup_miss | 128 | 14.62 [14.48-15.01] | 14.83 [14.69-15.00] | 14.39 [14.35-14.56] | 1.01 | 1.02 | 1.03 |
+| lookup_miss | 1024 | 14.61 [14.53-14.90] | 14.91 [14.80-15.07] | 14.50 [14.48-14.69] | 1.02 | 1.01 | 1.03 |
+| lookup_miss | 16384 | 15.68 [15.54-15.83] | 15.81 [15.72-16.04] | 15.56 [15.38-15.71] | 1.01 | 1.01 | 1.02 |
+
+nqp level, interleaved, small sizes (6 rounds, `--sizes=128,4,8,16,32,64`; 128 is the warm-up):
+
+| op | size | Zig before | Zig after | C | after/before | before/C | after/C |
+|---|---:|---|---|---|---:|---:|---:|
+| delete | 4 | 15.45 [13.55-43.91] | 13.98 [12.25-45.20] | 14.96 [13.93-50.68] | 0.91 | 1.03 | 0.93 |
+| delete | 8 | 12.94 [12.76-13.25] | 11.61 [11.52-12.49] | 14.41 [14.27-14.58] | 0.90 | 0.90 | 0.81 |
+| delete | 16 | 13.04 [12.69-13.73] | 11.36 [11.13-12.15] | 14.77 [14.45-15.05] | 0.87 | 0.88 | 0.77 |
+| delete | 32 | 14.01 [13.13-14.14] | 13.59 [13.29-14.33] | 14.71 [14.46-14.80] | 0.97 | 0.95 | 0.92 |
+| delete | 64 | 14.72 [14.28-15.13] | 14.48 [14.14-14.95] | 14.56 [14.30-15.05] | 0.98 | 1.01 | 0.99 |
+| lookup_hit | 4 | 19.00 [13.49-46.72] | 18.80 [16.88-49.10] | 16.68 [13.50-55.25] | 0.99 | 1.14 | 1.13 |
+| lookup_hit | 8 | 13.35 [12.75-13.47] | 12.72 [11.99-12.96] | 14.35 [14.08-14.90] | 0.95 | 0.93 | 0.89 |
+| lookup_hit | 16 | 13.32 [12.69-13.92] | 12.45 [12.01-12.90] | 14.76 [14.53-15.04] | 0.93 | 0.90 | 0.84 |
+| lookup_hit | 32 | 13.89 [13.36-14.58] | 14.23 [14.00-15.08] | 14.68 [14.57-14.84] | 1.02 | 0.95 | 0.97 |
+| lookup_hit | 64 | 15.01 [14.70-15.32] | 15.43 [14.57-15.96] | 14.57 [14.42-14.78] | 1.03 | 1.03 | 1.06 |
+| lookup_miss | 4 | 13.45 [13.25-45.40] | 11.95 [11.87-47.83] | 17.73 [14.53-56.28] | 0.89 | 0.76 | 0.67 |
+| lookup_miss | 8 | 12.79 [12.73-13.59] | 11.45 [11.31-12.08] | 14.84 [14.61-15.17] | 0.90 | 0.86 | 0.77 |
+| lookup_miss | 16 | 13.14 [12.78-13.49] | 11.52 [11.35-12.40] | 14.63 [14.54-15.04] | 0.88 | 0.90 | 0.79 |
+| lookup_miss | 32 | 13.90 [13.36-14.73] | 14.43 [12.83-14.86] | 14.54 [14.41-14.73] | 1.04 | 0.96 | 0.99 |
+| lookup_miss | 64 | 15.72 [15.27-16.31] | 15.49 [15.10-15.84] | 14.37 [14.22-14.56] | 0.99 | 1.09 | 1.08 |
+
+Zig after against Zig before at sizes 4-32, C API protocol build (`tuning-t3-capi-zig-{before,after}-small.tsv`): lookup_hit 0.81 / 0.82 / 0.70 / 1.03, lookup_miss 0.72 / 0.65 / 0.64 / 1.05, delete 0.81 / 0.87 / 0.87 / 1.02 at 4 / 8 / 16 / 32. Against the C (`tuning-t3-capi-c-after-small.tsv`): lookup_hit 0.88 / 0.78 / 0.64 / 0.96, lookup_miss 0.62 / 0.57 / 0.57 / 0.95, delete 0.86 / 0.90 / 0.86 / 1.07.
+
+- Kept. Delete moved outside the spread. In the protocol runs, C-API delete went from 1.25 to 1.05 at 64 (10.56-10.87 against 9.74-10.36 ns) and from 1.02 to 0.99 at 128 (8.42-8.58 against 8.26-8.41). Interleaved, Robin Hood delete is 1-4% faster on both harnesses: disjoint at C-API 128 (8.40-9.05 against 8.24-8.38) and at nqp 128 and 16384 (14.47-14.90 against 14.21-14.42; 16.46-16.76 against 15.90-16.13). It is at or below the C from 128 up (C API 0.98-1.00, nqp 0.97-0.98). Small 8 and 16 lookup and delete moved far outside the spread on both harnesses (C API 0.70-0.88 of before; nqp 0.87-0.95). That gain is the `findIn` inlining side effect above.
+- Robin Hood lookup_hit is 2% faster at the C API interleaved (0.98 at 128-16384, spreads overlap) and moves either way at the nqp level (0.98-1.03, overlapping). Robin Hood lookup_miss did not move (0.99-1.02). The dispatch chain was 4 of the ~50 instructions in front of the probe, so a ~2% effect on lookups is what the instruction count predicts. What is left of the Robin Hood lookup gap (C API 1.04-1.07 hit, 1.08-1.10 miss interleaved) is not in the dispatch: the policy prologue is now one word load and one masked test against the C's stale byte and `cur_items` test. The rest is `loopState` (RH-4) and what precedes the probe in the tier.
+- Small at 64 shows no lever effect beyond noise. One reading needs explaining: nqp lookup_miss at 64 was 1.12 of before in the interleaved run with sizes 16,64,128,... (every round, 14.47-15.20 against 15.79-17.17) and 0.99 in the run with sizes 128,4,...,64 (15.27-16.31 against 15.10-15.84). The C-API interleaved 64 miss was 1.06 with overlapping spreads (7 rounds of 10 slower). The 64 path is the same out-of-line `findIn(64)` (byte-identical) behind a dispatch that has two fewer instructions plus one `%r12` spill around the call. So the order-dependent nqp reading is attributed to layout (the larger export; `findIn(64)` moved from a 64-byte-aligned to a 32-byte-aligned address), not to the dispatch.
+- Insert (lvalue) shares the folded entry test but keeps `dispatch` in its retry loop. At 1024 and 16384 it is 1.00-1.04 of the C, unchanged within the spread.
+
 ### Task 6: the C-shaped wrapper (kept)
 
 Changes, measured as one lever (`str.zig`, `table.zig`; no change to `dispatch`'s or `resolve`'s semantics, to any tier, or to the exports):
@@ -897,3 +1043,4 @@ Record here, during execution, anything that differed from the plan or spec and 
 - Task 4: the Small payload grew from 4 to 8 bytes (`entries_offset` next to `capacity`); tags start at offset 16 instead of 12, and `entriesOffset` is unchanged for every capacity 8-64, so blocks are the same size. `find`'s return path (sentinel index instead of `?u32`) and the one-load zero-key test were in scope by the controller's ruling. The lever was measured whole, not part by part, because the whole moved outside the spread.
 - Task 6: the lever reached into `table.zig` (by the controller's ruling): `ops.fetch`/`lvalue`/`delete`, `resolve` and `dispatch`'s `Op.f` are `inline fn`. The fetch, lvalue and delete paths call `dispatch` with `@call(.always_inline, ..)`. `dispatch`'s semantics and its other callers are unchanged. The brief's commit message became "hash engine: string wrapper chain inlined, cached-hash fast path". The ladder gained a warm-up size 16 in front of 64, because 64 as the first nqp size carried the warm-up (spreads of 15-49 ns in a first attempt).
 - Task 5: `LoopState` was not restructured. The annotate showed the probe loops already in registers after Task 6: 7 instructions per fetch iteration, the same as the C, and nothing reloaded through the header. The lever also took `growInner`'s per-entry copy (inline 16 bytes, the C's `str_hash_table.c:419` fast path), which the brief ties to the shifts. The make-room and back-shift copies became pointer-walking `shiftDown`/`shiftUp` and not a generic `memmove(dest, src, n)` helper, because the indexed form made LLVM carry the copy addresses through the delete probe loop (spilled induction variables). One test was added: runs of 3+ entries back-shifted and made room for, at entry sizes 16 (inline path) and 24 (`@memmove`), checked with `fsck == 0`, lookups and payloads after every delete.
+- Task 3: the brief's Step 1 measures lookup_hit and delete at 64 and 1024. By the controller's ruling it was widened to sizes 64, 65, 128, 1024 and 16384 (nqp with a warm-up 16) and to lookup_miss and insert. Because the protocol runs drifted between builds by more than the lever, the decision also uses interleaved runs: the same binaries, with the before, after and C `libmoar.so` swapped through `LD_LIBRARY_PATH`. The fetch and delete exports were also given one 32-bit status load (stale, set and control-only tested together), which the controller put in scope as "the same byte read". The stale read stays one volatile load per call, now 4 bytes wide. The brief's Small `entries_offset` item was Task 4's and was not redone. Beyond the brief's two tests, a two-set test Spec checks that set 1 reaches both of its rungs through `resolve`, and `hash_test.zig` asserts at comptime that the four single-rung tables have `dispatch_reads_set == false`. Not planned: LLVM now inlines Small's `findIn` for capacities 8 and 16 into the exports, which gives the gains at sizes 4-16.

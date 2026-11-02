@@ -1,0 +1,17 @@
+zig before capi start 2.13 1.12 1.06 2/2355 2936699
+zig before capi end 1.95 1.12 1.06 1/2358 2936897
+zig before nqp start 1.95 1.12 1.06 1/2358 2936898
+zig before nqp end 1.95 1.12 1.06 1/2358 2936907
+c before capi start 2.90 1.44 1.16 2/2353 2937509
+c before capi end 2.69 1.44 1.17 1/2355 2937702
+c before nqp start 2.69 1.44 1.17 1/2355 2937703
+c before nqp end 2.69 1.44 1.17 1/2354 2937706
+zig after capi start 0.62 0.86 0.99 2/2354 2941584
+zig after capi end 0.62 0.86 0.99 1/2354 2941661
+zig after nqp start 0.62 0.86 0.99 1/2354 2941662
+zig after nqp end 0.62 0.86 0.99 1/2354 2941665
+c after capi start 0.62 0.86 0.99 2/2354 2941788
+c after capi end 0.99 0.93 1.01 1/2351 2941974
+c after nqp start 0.99 0.93 1.01 1/2351 2941975
+c after nqp end 0.99 0.93 1.01 1/2356 2941983
+interleaved runs (same bench binary/moar, libmoar swapped via LD_LIBRARY_PATH): capi start 0.87 end 0.89; nqp start 0.60 end 0.72; nqp-small ~0.7 (not sampled)
