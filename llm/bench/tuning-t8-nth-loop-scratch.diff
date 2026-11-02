@@ -1,0 +1,30 @@
+diff --git a/src/zig/core/hash/bench.zig b/src/zig/core/hash/bench.zig
+index 39ff4d867..3c72eb7d9 100644
+--- a/src/zig/core/hash/bench.zig
++++ b/src/zig/core/hash/bench.zig
+@@ -352,9 +352,22 @@ const Size = struct {
+     fn runNth(self: *Size, io: std.Io, tc: Tc, i: usize) void {
+         self.buildAll(tc);
+         for (self.tables) |*t| insertInto(tc, t, self.present[0 .. self.n - 1]);
+-        const timer = Timer.begin(io);
+-        for (self.tables) |*t| insertInto(tc, t, self.present[self.n - 1 ..]);
+-        self.insert_nth[i] = @as(f64, @floatFromInt(timer.elapsedNs())) / @as(f64, @floatFromInt(self.reps));
++        // SCRATCH (Task 8 profiling, not committed): HB_NTH_LOOP=K repeats insert-then-delete of the N-th key.
++        const loops: usize = if (std.c.getenv("HB_NTH_LOOP")) |v| std.fmt.parseInt(usize, std.mem.span(v), 10) catch 1 else 1;
++        var ins_ns: u64 = 0;
++        var del_ns: u64 = 0;
++        for (0..loops) |l| {
++            const timer = Timer.begin(io);
++            for (self.tables) |*t| insertInto(tc, t, self.present[self.n - 1 ..]);
++            ins_ns += timer.elapsedNs();
++            if (l + 1 < loops) {
++                const t2 = Timer.begin(io);
++                for (self.tables) |*t| bench_str_delete_nocheck(tc, t, self.present[self.n - 1]);
++                del_ns += t2.elapsedNs();
++            }
++        }
++        if (loops > 1) std.debug.print("nth-loop n={d} insert {d:.2} delete {d:.2}\n", .{ self.n, @as(f64, @floatFromInt(ins_ns)) / @as(f64, @floatFromInt(self.reps * loops)), @as(f64, @floatFromInt(del_ns)) / @as(f64, @floatFromInt(self.reps * (loops - 1))) });
++        self.insert_nth[i] = @as(f64, @floatFromInt(ins_ns)) / @as(f64, @floatFromInt(self.reps * loops));
+         self.demolishAll(tc);
+     }
+ };
