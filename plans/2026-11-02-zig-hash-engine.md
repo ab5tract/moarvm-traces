@@ -649,8 +649,54 @@ others           -545 100.000% 100.000% 100.000%
 
 ## Benchmark results
 
-(Tasks 13 and 14 fill this in: microbenchmark, Raku-level and spectest tables with ratios and memory.)
+### C-API microbenchmark (Task 13, 2026-11-02)
+
+`tools/bench/hash-bench.sh` (the default ladder, `--runs=3`, medians), Zig
+0.16.0 ReleaseFast, both engines through the same C shim; cells are
+`zig_ns / c_ns` with both absolute nanoseconds per operation, `insert_nth`
+the N-th insert alone into a table of N-1 (at 65 the Small-to-Robin-Hood
+migration). Raw TSVs: `traces/llm/bench/hash-2026-11-02.micro-{zig,c}.tsv`.
+
+| size | insert | lookup_hit | lookup_miss | delete | iterate | insert_nth | alloc_bytes zig / c |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 0.98 (14.35 / 14.67) | 1.94 (10.48 / 5.41) | 0.96 (6.25 / 6.51) | 3.37 (23.31 / 6.92) | 0.74 (6.62 / 8.93) | - | 152 / 248 |
+| 16 | 0.29 (11.72 / 40.43) | 1.53 (10.60 / 6.91) | 0.93 (6.56 / 7.03) | 2.90 (23.58 / 8.13) | 0.69 (6.01 / 8.71) | - | 288 / 960 |
+| 32 | 0.35 (15.03 / 43.46) | 1.43 (9.87 / 6.88) | 0.97 (6.91 / 7.13) | 3.07 (25.18 / 8.20) | 0.73 (5.96 / 8.14) | - | 560 / 1912 |
+| 63 | 0.31 (13.99 / 44.79) | 1.55 (11.04 / 7.11) | 1.10 (7.77 / 7.05) | 2.90 (25.02 / 8.63) | 0.72 (5.87 / 8.10) | - | 1104 / 3816 |
+| 64 | 0.32 (14.19 / 44.38) | 1.58 (11.00 / 6.98) | 1.09 (7.81 / 7.14) | 2.91 (25.38 / 8.71) | 0.74 (5.87 / 7.95) | 0.61 (11.46 / 18.78) | 1104 / 3816 |
+| 65 | 0.88 (38.58 / 43.65) | 1.03 (7.38 / 7.14) | 0.88 (6.47 / 7.37) | 1.44 (12.70 / 8.80) | 1.58 (12.46 / 7.89) | 77.98 (1515.95 / 19.44) | 7632 / 3816 |
+| 128 | 0.64 (28.26 / 44.20) | 1.33 (9.30 / 7.00) | 1.22 (8.86 / 7.26) | 1.74 (14.26 / 8.18) | 1.33 (10.31 / 7.77) | - | 7632 / 7624 |
+| 256 | 0.89 (38.76 / 43.73) | 1.27 (9.41 / 7.40) | 1.27 (9.00 / 7.08) | 1.79 (14.48 / 8.11) | 1.33 (10.24 / 7.72) | - | 13056 / 13048 |
+| 1024 | 1.17 (47.58 / 40.73) | 1.34 (9.60 / 7.14) | 1.25 (8.98 / 7.16) | 1.73 (14.43 / 8.36) | 1.31 (10.04 / 7.65) | - | 39168 / 39160 |
+| 16384 | 1.15 (56.88 / 49.57) | 1.33 (10.42 / 7.86) | 1.23 (10.39 / 8.43) | 1.71 (15.54 / 9.08) | 1.29 (9.98 / 7.71) | - | 561408 / 561400 |
+| 65536 | 0.99 (50.98 / 51.37) | 1.32 (11.28 / 8.54) | 1.33 (12.90 / 9.73) | 1.71 (16.32 / 9.57) | 1.31 (10.02 / 7.67) | - | 2232576 / 2232568 |
+| 1048576 | 1.13 (138.21 / 122.62) | 1.31 (33.08 / 25.32) | 1.14 (17.21 / 15.13) | 1.42 (38.62 / 27.20) | 1.29 (9.78 / 7.61) | - | 35655936 / 35655928 |
+
+Small hashes (up to the threshold of 64): the Zig Small tier inserts in
+0.29-0.35 of the C time (0.98 at size 4), iterates in 0.69-0.74 and misses
+in 0.93-1.10, but a lookup hit costs 1.43-1.94 and a delete 2.90-3.37 times
+the C engine, with a third to a half of C's allocation. Large hashes (128
+and up): the Zig Robin Hood tier is 1.13-1.79 times the C engine on every
+operation (insert 0.64-1.17, lookups 1.14-1.34, delete 1.42-1.79, iterate
+1.29-1.33) at the same allocation (+8 bytes), and the migration at 65 costs
+1516 ns against the C engine's 19 ns ordinary insert.
+
+(Task 14 adds the Raku-level and spectest tables.)
 
 ## Deviations
 
 Record here, during execution, anything that differed from the plan or spec and why.
+
+- Task 13: the microbenchmark root is `src/zig/core/hash/bench.zig` with its
+  C shim `bench_shim.c` beside it, not under a `bench/` directory: a Zig
+  module cannot import files above its root file's directory, and the
+  benchmark imports `str.zig` (`small_threshold`) and `test/keys.zig`.
+  The C API is timed through out-of-line C wrappers compiled into the
+  executable with libmoar's flags (with the Zig groups off most of the
+  string table API is inline C in the headers), so both engines run the
+  same compiled path. Small sizes are timed over a batch of `65536 / N`
+  tables inside one timed region so a clock read is amortised over at
+  least 65536 operations; the per-operation figure is unchanged in
+  meaning. The results go to `traces/llm/bench/` rather than `docs/bench/`.
+  Only the microbenchmark was run here; the Raku script was smoke-tested
+  with the system raku and waits for the two stacks of Task 14.
