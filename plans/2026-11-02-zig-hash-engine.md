@@ -681,7 +681,81 @@ lookups (1.14-1.34), delete (1.42-1.79) and iterate (1.29-1.33), and 0.64-1.17
 on insert, at the same allocation (+8 bytes); the migration at 65 costs
 1516 ns against the C engine's 19 ns ordinary insert.
 
-(Task 14 adds the Raku-level and spectest tables.)
+The microbenchmark was re-run by Task 14's `hash-bench.sh` invocation
+(`traces/llm/bench/hash-2026-11-02-raku.micro-{zig,c}.tsv`); the figures
+agree with the table above within run-to-run noise (small-tier insert
+0.29-0.33, hit 1.23-1.89, delete 2.96-3.31; Robin Hood 1.13-1.75).
+
+### Raku-level benchmark (Task 14, 2026-11-02)
+
+`tools/bench/hash-bench.sh --raku-c=$PC/bin/raku --raku-zig=$PZ/bin/raku`
+(the default ladder, `--runs=3`, medians) with the two rakus of the stacks
+below; `tools/bench/hash-bench.raku` times the same operations on a Raku
+`Hash` (`%h{$k} = 1`, `:exists` hit and miss, `for %h.kv`, `:delete`, and
+the N-th insert alone at 64 and 65), so each cell includes the Raku and
+MoarVM layers above the table. Cells are `zig_ns / c_ns` with both
+absolute nanoseconds per operation; the last column is the `ru_maxrss`
+delta over the size's runs (a high-water mark: a 0 means the size's runs
+never exceeded the earlier peak, so only the first rows and the 1048576 row
+are meaningful). Raw TSVs:
+`traces/llm/bench/hash-2026-11-02-raku.raku-{zig,c}.tsv`; the rendered file
+is `traces/llm/bench/hash-2026-11-02-raku.md`.
+
+| size | insert | lookup_hit | lookup_miss | delete | iterate | insert_nth | maxrss delta bytes zig / c |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 1.23 (359.19 / 290.90) | 1.09 (523.31 / 478.36) | 1.01 (451.07 / 446.78) | 1.05 (427.51 / 405.75) | 1.03 (509.36 / 493.96) | - | 35983360 / 40325120 |
+| 16 | 0.83 (129.54 / 155.33) | 0.93 (327.78 / 354.26) | 0.91 (252.78 / 277.71) | 1.01 (365.49 / 362.74) | 0.81 (213.74 / 262.91) | - | 12599296 / 20987904 |
+| 32 | 0.80 (114.54 / 143.13) | 0.97 (235.57 / 243.45) | 1.00 (238.65 / 237.92) | 0.94 (264.42 / 280.14) | 1.04 (192.12 / 185.58) | - | 6291456 / 16777216 |
+| 63 | 0.82 (103.53 / 125.73) | 0.87 (285.62 / 327.72) | 1.00 (221.49 / 220.75) | 0.83 (261.81 / 317.29) | 0.91 (157.22 / 172.08) | - | 4194304 / 8585216 |
+| 64 | 0.81 (101.25 / 124.53) | 0.87 (218.67 / 252.20) | 0.99 (216.87 / 218.53) | 0.98 (251.63 / 256.11) | 0.83 (223.73 / 270.04) | 0.76 (336.81 / 441.25) | 0 / 44052480 |
+| 65 | 0.96 (249.00 / 259.44) | 0.92 (227.34 / 247.64) | 0.93 (208.37 / 224.32) | 1.17 (332.03 / 283.71) | 0.95 (172.65 / 181.61) | 4.29 (1996.17 / 465.80) | 69218304 / 0 |
+| 128 | 0.96 (112.45 / 117.16) | 0.97 (221.86 / 228.22) | 0.97 (206.88 / 212.81) | 1.03 (291.90 / 282.49) | 0.94 (156.25 / 165.35) | - | 0 / 0 |
+| 256 | 1.10 (119.35 / 108.23) | 0.99 (226.75 / 228.39) | 0.96 (203.43 / 211.47) | 1.16 (335.53 / 289.17) | 0.95 (169.06 / 177.14) | - | 0 / 1179648 |
+| 1024 | 1.04 (175.22 / 168.53) | 1.03 (229.72 / 224.08) | 0.96 (201.30 / 209.35) | 1.15 (299.36 / 260.00) | 0.92 (154.33 / 168.48) | - | 0 / 0 |
+| 16384 | 1.07 (128.88 / 120.19) | 0.97 (215.37 / 222.51) | 0.95 (203.37 / 213.82) | 1.07 (336.94 / 316.33) | 0.95 (232.38 / 244.46) | - | 1572864 / 0 |
+| 65536 | 1.61 (194.80 / 121.26) | 0.92 (240.58 / 262.60) | 0.92 (211.27 / 229.63) | 1.01 (358.90 / 354.35) | 0.93 (150.37 / 161.00) | - | 0 / 0 |
+| 1048576 | 1.05 (525.16 / 500.65) | 1.17 (393.56 / 336.25) | 0.95 (222.83 / 235.42) | 1.12 (457.47 / 407.83) | 0.66 (136.35 / 207.71) | - | 247463936 / 222322688 |
+
+Small hashes (up to 64): the Zig engine inserts in 0.80-0.83 of the C time
+(1.23 at size 4), hits in 0.87-0.97 (1.09 at size 4), misses in 0.91-1.01,
+deletes in 0.83-1.01 (1.05 at size 4) and iterates in 0.81-1.04; the 64th
+insert costs 0.76. Large hashes (128 and up): insert 0.96-1.10 (1.61 at
+65536), lookup hit 0.92-1.17, miss 0.92-0.97, delete 1.01-1.16, iterate
+0.66-0.95; the 65th insert, which migrates the table into a Robin Hood
+block, costs 4.29 times the C engine's ordinary insert (1996 ns against
+466 ns). The C-API deficits of the Small tier (lookup hit, delete) and of
+the Robin Hood tier are mostly hidden under the Raku and MoarVM layers at
+this level: every Raku-level ratio lies between 0.80 and 1.23 except insert
+at 65536 (1.61), the 1M-entry iterate (0.66) and the migration insert
+(4.29). The harness's run-to-run spread was not measured separately; the
+medians of three runs are reported as they are.
+
+### rakudo spectest (Task 14, 2026-11-02)
+
+Two stacks, each MoarVM, nqp and rakudo installed into one prefix:
+`/tmp/claude-1000/hash-c-prefix` (`perl Configure.pl --prefix $PC`) and
+`/tmp/claude-1000/hash-zig-prefix` (`perl Configure.pl --zig=/usr/bin/zig
+--prefix $PZ`); nqp `--backends=moar --with-moar=$P/bin/moar`, rakudo
+`--backends=moar --with-nqp=$P/bin/nqp`; the same roast checkout
+(`t/spec` at fb1d87214) and `TEST_JOBS=24` as the Task 1 baseline, three
+`make spectest` runs per stack, timed with a `wait4`-based stand-in for
+GNU `time -v` (not installed on the host; same wall clock and `ru_maxrss`
+of the largest descendant). Every run: 1365 files, 138715 tests, PASS.
+
+| engine | run | wall clock | peak RSS (kbytes) | failed files |
+|---|---:|---:|---:|---:|
+| C | 1 | 5:04.19 | 707660 | 0 |
+| C | 2 | 4:50.99 | 705792 | 0 |
+| C | 3 | 4:51.18 | 694708 | 0 |
+| Zig | 1 | 4:59.73 | 692096 | 0 |
+| Zig | 2 | 4:47.02 | 701128 | 0 |
+| Zig | 3 | 4:48.34 | 703452 | 0 |
+
+Medians: C 4:51.18 wall and 705792 kbytes, Zig 4:48.34 wall and 701128
+kbytes. The Zig engine passes the spectest with no failures and no new
+failures against the C baseline (0 on both), in the same wall time (1
+percent faster, within noise) at the same peak RSS (within 1 percent);
+rakudo builds in 252 s on the Zig engine against 262 s on the C engine.
 
 ## Deviations
 
@@ -700,3 +774,106 @@ Record here, during execution, anything that differed from the plan or spec and 
   meaning. The results go to `traces/llm/bench/` rather than `docs/bench/`.
   Only the microbenchmark was run here; the Raku script was smoke-tested
   with the system raku and waits for the two stacks of Task 14.
+
+Recorded during execution on 2026-11-02:
+
+- Task 1: `small_threshold` = 64 stands despite the histogram's measurement
+  caveats (only demolished tables are counted, HashAttrStore never
+  appeared, non-atomic counters lose about 0.003 percent of counts): the
+  rule's margin (99.7 percent versus 95) dwarfs those effects; cost if
+  wrong, a threshold one rung too low, correctable by one constant.
+- Task 4: tier test files under `tiers/` cannot be zig-test roots (Zig 0.16
+  rejects `../tier.zig` as an import outside the module path), so
+  `src/zig/core/hash/test_spec.zig` is the unit-test root for the tiers and
+  imports them in its `test {}` block; Task 5 added its import there and ran
+  `zig test src/zig/core/hash/test_spec.zig` instead of the brief's command.
+  Cost if wrong: none (the same tests run; `tier.zig`'s tests run twice).
+- Task 4: `Header.cur_items` is maintained by the tier (incremented on
+  insert, decremented on delete) and only read by the policy layer, contrary
+  to spec §5's "the policy layer owns cur_items": the tier's insert/delete
+  and the Small iteration formulas depend on it, and a second updater would
+  duplicate logic. Cost if wrong: the policy layer must never adjust
+  `cur_items` itself (carried into Task 6).
+- Task 5: tier `grow` takes `ctx`, `grow(header, ctx, allocator) !?*Header`
+  on both tiers, because doubling rehashes every key with
+  `Spec.hash(ctx, key)` and the block stores no hashes; the plan's
+  `grow(header, allocator)` was unimplementable for Robin Hood. Cost if
+  wrong: none (Task 6 carried the signature).
+- Task 5: `init(.., 100)` yields 256 official slots (100/0.75 = 133, rounded
+  to 2^8), as the C does; the plan's "official 128" was an arithmetic error;
+  the test asserts 256 and `init(.., 96)` gives 128. Cost if wrong: none.
+- Task 5: tiers must not free the old block inside `grow` when they return a
+  new block; `grow` returns the new header and leaves the old block
+  allocated, and the policy layer disposes of it (plain free, or stale plus
+  `MVM_free_at_safepoint` for `.safepoint_cas`) through `blockStart`: spec
+  §4.4 makes publication the policy layer's, and a tier-side free would make
+  stale/safepoint publication impossible. Applied to both tiers before
+  review. Cost if wrong: a leak if the policy layer forgets to free (Task 6's
+  growth tests run under the testing allocator, which detects leaks).
+- Task 5: Robin Hood `capacity` returns the recomputed load limit rather than
+  the raw `max_items` field (which the C zeroes as a probe-limit flag): the
+  policy layer needs the real limit, and `isFull` reads the field. Cost if
+  wrong: none observable.
+- Task 6: the plan's negative probe `[Small(64) from 0, Small(8) from 64]` is
+  legal under `validate`'s rule (max_capacity 64 is not below the next
+  `from` of 64; the second rung has no successor), so the implementer's
+  capacity-32 variant is the correct probe and `validate` is unchanged. Cost
+  if wrong: none.
+- Task 6: readers without a ctx (`count`, `first`, `next`, `start`,
+  `current`) cannot stale-check in `table.zig`; Task 7's C-API wrappers,
+  which all take `tc`, perform the stale check for them. Cost if wrong: a
+  stale read through those five functions is reported one layer up instead
+  of in the policy layer; the same behaviour for callers.
+- Task 7: `insertNocheck` follows the C (validates, stores the key in the
+  fresh entry, throws "insert duplicate key %s" through
+  `MVM_exception_throw_adhoc_free`) instead of the plan's "returns an entry
+  with a null key": the C callers (MVMHash deserialize, HashAttrStore,
+  bytecode.c) rely on the stored key and spec §8.8 requires the C text; the
+  plan's test expectation was wrong. Cost if wrong: none.
+- Task 7: the libmoar-linked test root receives `str.zig` as a named module
+  `hash_str` (Zig forbids importing a file outside the root's directory);
+  `addShimTests` takes `(root, name, extra_imports)`; Tasks 10 and 11 added
+  their tests to this root the same way. Cost if wrong: none.
+- Task 7: `moar.zig` gained `freeAtSafepoint` (a port of `alloc.h:80-88`
+  over `trycas`, with a test) because the translated `MVM_free_at_safepoint`
+  references an untranslatable static inline and does not link; `table.zig`'s
+  two call sites use the shim. Cost if wrong: a behaviour difference from the
+  C free-at-safepoint list push, covered by the shim's test and the stage0
+  run in Task 8.
+- Task 8: `MVM_round_up_log_base2` matches the C exactly (returns 1 for
+  v == 1 and 32 for v == 0) rather than the plan's "0 for v <= 1" note,
+  which was wrong: the two C callers depend on the C's values. Cost if
+  wrong: none.
+- Tasks 9-12: batched into one implementer dispatch (same-shape ports; one
+  commit per table; one review of the whole range) per the skill's batching
+  rule. Cost if wrong: one larger review instead of four small ones.
+- Tasks 9-12: all four tables' tests live in the libmoar-linked root
+  (`hash_test.zig`) rather than pure zig-test roots, because the production
+  Specs allocate through `moar.mvm_allocator` and the briefs' "pure Zig"
+  tests would need a different allocator than production. Cost if wrong:
+  none (the tests still exercise the Zig API directly).
+- Tasks 9-12: per-table verification was `zig build install`, `zig build
+  test` and `zig build unit-test` with the groups on; the full Task 8 Step 4
+  block (both zig modes, both Perl modes, stage0, nqp snippet) ran once
+  after the fourth table. Cost if wrong: a defect in one table is found at
+  the end of the batch rather than immediately; the per-table zig build and
+  stage0 test still catch link and runtime failures.
+- Task 13: the microbenchmark reaches the C API through a small C shim
+  (bench wrappers compiled into the benchmark executable with libmoar's
+  flags) so that the C engine's inline fast paths are measured as compiled
+  C, not as translate-c's rendering, and both engines pay the same wrapper
+  call. Cost if wrong: one extra call per operation in both columns, which
+  cancels in the ratio.
+- Task 13: benchmark result files go to `traces/llm/bench/` (LLM-produced
+  results belong in the traces repository per the user's documentation-root
+  instruction), not `docs/bench/`. Cost if wrong: a path.
+- Task 14: `/usr/bin/time` (GNU time) is not installed on the host, so the
+  spectests were timed by a small Python stand-in that runs `make spectest`
+  under `os.wait4` and writes GNU time's "Elapsed (wall clock) time" and
+  "Maximum resident set size" lines from the same `rusage` fields. The
+  benchmark runner was given `--out=traces/llm/bench/hash-2026-11-02-raku.md`
+  so Task 13's `hash-2026-11-02.md` and its TSVs stay; the microbenchmark
+  it re-ran is kept beside the Raku TSVs. The nqp and rakudo trees were
+  configured for the C prefix, spectested three times, then reconfigured for
+  the Zig prefix and spectested three times, because `make spectest` runs
+  the last configured rakudo.
