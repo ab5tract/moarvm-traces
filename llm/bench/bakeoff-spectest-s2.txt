@@ -1,0 +1,19 @@
+# Bake-off strategy 2 (array-ordered tier) whole-system gate, 2026-11-03.
+# rakudo make spectest with MVM_HASH_STRATEGY=2 TEST_JOBS=24, every MVMHash
+# and HashAttrStore built through the ordered_only set. MoarVM zig-hash-bakeoff
+# (0edbaaf21 + the strategy 2 tier) installed into the tune-zig-prefix; nqp
+# zig-hash-strategies; roast fb1d87214. Load average before the start 1.19.
+
+Files=1365, Tests=138715, 298 wallclock secs (36.55 usr  8.34 sys + 4290.66 cusr 1022.85 csys = 5358.40 CPU)
+Result: PASS
+
+Failing files: 0. Strategy failures: 0.
+The test count equals the default zig engine's run (spectest-zig-1.log,
+138715; strategy 1's run had 20 fewer from its stale-precompilation file).
+
+Order dependence: none seen. Strategy 2 iterates in reverse insertion order
+until the first delete, where the default order is salted and randomised, so
+a roast test that passed only by depending on order would show up as a
+difference here. No file failed, and the set of files reporting "TODO
+passed" (29 files) is identical to the default engine's run and to strategy
+1's, so no TODO test started passing because of insertion order either.
