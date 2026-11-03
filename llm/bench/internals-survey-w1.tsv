@@ -1,0 +1,95 @@
+op	f1	build	100	67044
+op	f1	insert	150	47027
+op	f1	overwrite	251169	21022597
+op	f2	build	100	3449
+op	f3	build	100	3304
+op	f3	insert	50	16946
+op	f3	fetch_hit	17900	1851392
+op	f3	fetch_miss	50	25160
+op	f4	build	100	3451
+op	f4	insert	50	4107
+op	f4	fetch_hit	17850	20881579
+op	f4	fetch_miss	50	56018
+op	f5	build	100	3860
+op	f5	insert	500	82754
+op	f5	fetch_hit	150	270618
+op	f5	fetch_miss	500	103193
+op	f5	grow	50	29156
+op	f6	build	100	3197
+op	f6	insert	1850	861510
+op	f6	fetch_hit	200	463240
+op	f6	fetch_miss	1850	2150440
+op	f6	grow	202	425611
+op	f7	build	100	3486
+op	f7	insert	300	90724
+op	f7	fetch_hit	1600	543345
+op	f8	build	100	4523
+op	f8	insert	8400	4001370
+op	f8	fetch_hit	116250	52492899
+op	f8	grow	431	485551
+op	i1	build	100	64598966
+op	i1	insert	4700	2279348
+op	i1	fetch_hit	264050	92758038
+op	i1	grow	11	1480
+op	i2	build	20200	4041177
+op	i2	insert	288300	53151635
+op	i2	fetch_hit	1117600	76694648
+op	i2	fetch_miss	24350	3405002
+op	i2	grow	21	3626
+op	other	fetch_miss	249800	10697546
+op	other	iter_start	5350	0
+op	p1	build	100	10915
+op	p1	insert	1400	461701
+op	p1	fetch_hit	2950	287047
+op	p1	grow	150	162356
+op	s1	build	100	12987
+op	s1	insert	2150	1625560
+op	s1	overwrite	8250	6293663
+op	s1	fetch_hit	14600	8741130
+op	s1	grow	150	51800
+op	s5	build	241250	12885661
+op	s5	insert	3933950	764199986
+op	s5	overwrite	14650	1489858
+op	s5	fetch_hit	1781300	182653878
+op	s5	fetch_miss	944750	81183595
+op	s5	delete_hit	300	111888
+op	s5	delete_miss	1150	226417
+op	s5	iter_start	12650	0
+op	s5	iter_step	62500	0
+op	s5	copy	1550	0
+op	s5	grow	174815	196066067
+op	s5	migrate	9900	60235455
+op	s6	build	250	57979
+op	s6	insert	900	148522
+op	s6	fetch_hit	1800	126544
+op	s6	fetch_miss	100	26159
+op	u1	build	50	1038738
+op	u1	insert	219000	20831673
+op	u1	fetch_hit	100	30414
+op	u1	grow	50	26048
+op	u4	build	11500	430485
+op	u4	insert	505800	146381956
+op	u4	overwrite	26600	2648860
+op	u4	grow	14400	91734579
+build	f1	0	100
+build	f2	0	100
+build	f3	0	100
+build	f4	0	100
+build	f5	0	100
+build	f6	0	100
+build	f7	0	100
+build	f8	0	100
+build	i1	3	100
+build	i2	1	17650
+build	i2	2	1650
+build	i2	3	400
+build	i2	5	400
+build	i2	6	50
+build	i2	7	50
+build	p1	0	100
+build	s1	0	100
+build	s5	0	241250
+build	s6	0	200
+build	s6	1	50
+build	u1	8	50
+build	u4	0	11500

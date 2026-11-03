@@ -229,3 +229,21 @@
 ## Measurement conventions (for every task that measures)
 
 Variants are libmoar builds in their own prefixes, run against `tune-zig-prefix`'s nqp and rakudo through `LD_LIBRARY_PATH`; rounds interleaved with the variant order rotated per round (`tools/bench/hash-ab.sh`); medians of at least 5 runs per round, spreads the min and max of round medians; load under 2.0 before a run and recorded; nothing judged from a single run; records in `traces/llm/bench/internals-*` with the header fields of `bakeoff-scoreboard.md` (date, shas, build flags, CPU, prefix, rounds, commands, load, raw files). Spectests from the rakudo checkout, `TEST_JOBS=24`, roast fb1d87214, timed with `tools/bench/timev.py` only where wall and RSS are part of the criterion.
+
+## Survey
+
+Task 5, 2026-11-03; full record `traces/llm/bench/internals-survey.md` (raw TSVs `internals-survey-w{1..4}.tsv`, overhead bound `internals-survey-overhead.md`). The spectest under the stats build passed (`Result: PASS`, Files=1365, 138715 tests; every test file left its stats file, loss 0). This is what the user rules on at the stop.
+
+**Hash share of cycles** (counted on the stats build, so an upper bound; the lower bound applies the overhead factor 2.3 / 3.49): W1 startup 7.9 percent (3.6 / 2.4), W2 the core setting build 2.9 (1.3 / 0.8; the CORE.c compile alone 4.3, 1.9 / 1.3), W3 the spectest 4.4 (1.9 / 1.3), W4 uni-bench 11.1 (5.1 / 3.4).
+
+**Hot list and proposed assignment** (share of hash cycles W1 / W2 / W3; rule: 5 percent in any one of them, plus u1-u4):
+
+- s5 MVMHash (63.4 / 81.7 / 81.3): stay on default. 99.8 percent of its tables stay at or under 64 entries, where nothing beat the default; 55 percent of W3's insert cycles are growing 0-hint tables, so the lever is a size hint or growth path, not a layout. Judge: `hash-bench.nqp` sizes 4-64 plus an MVMHash-churn benchmark. Ruling needed: close the site, or open a presizing task.
+- i2 lexical names (8.3 / 14.0 / 6.6): stay on default. 94.6-98.6 percent of tables hold at most 64 entries; LOOKUP could only serve the 1.4-5.4 percent at 65 and up. Judge: a lexical-lookup benchmark (to be written at the ruling) plus the C-API index-kind fetch ladder. Ruling needed: whether big frames alone justify a port.
+- i1 REPR registry (9.7, 6.0 without the stats-init artifact / 0.3 / 3.6): strike; a 47-key table built once per process, cold by decision 6, hot only by the 5 percent rule in W1.
+- u1 property names (1.3 / 0.0 / 1.1; 38.2 in W4): LOOKUP (4380 entries). Judge: uni-bench `propcode_alias`/`propcode_hit`/`propcode_miss`.
+- u3 codepoint names (- / - / 0.2; 34.1 in W4): LOOKUP plus a size hint (65K entries, 24 grows per build). Judge: uni-bench `cpbyname_hit`/`miss`/`miss_prefix`.
+- u4 property values (9.1 / 0.4 / 3.6; 21.7 in W4): LOOKUP for tables at 65 entries and up, default below (the per-table size distribution needs a check against the census); size hint for the build (grows are 61 percent of its W1 cycles). Judge: uni-bench `pvalcode_hit`/`pvalcode_miss`.
+- u2 sequence names (- / - / 0.0; 2.1 in W4): LOOKUP with u1. Judge: uni-bench `strfromname_seq`.
+
+u1-u4 hold 97.48 percent of uni-bench's fetch operations (Task 4: 97.67). Cold and left on default: every f, s1, s6, p1, `other` (mostly misses on never-built MVMHash handles). Never seen: s2 s3 s4 s7 s8 s9 i3 p2.

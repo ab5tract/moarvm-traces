@@ -1,0 +1,97 @@
+op	f1	build	2	1295
+op	f1	insert	2	962
+op	f1	overwrite	276	45029
+op	f2	build	2	74
+op	f3	build	2	74
+op	f4	build	2	74
+op	f5	build	2	38
+op	f6	build	2	74
+op	f6	insert	20	5994
+op	f6	fetch_miss	20	22126
+op	f6	grow	2	1850
+op	f7	build	2	74
+op	f7	insert	6	2331
+op	f8	build	2	38
+op	f8	insert	168	79439
+op	f8	fetch_hit	1020	572760
+op	f8	grow	9	9805
+op	i1	build	2	1125540
+op	i1	insert	94	50542
+op	i1	fetch_hit	550	254671
+op	i2	build	80	18278
+op	i2	insert	1130	270690
+op	i2	fetch_hit	78739	6242533
+op	i2	fetch_miss	55121	3468841
+op	other	fetch_miss	39417	1458463
+op	other	iter_start	766	0
+op	p1	build	2	148
+op	p1	insert	10	5142
+op	p1	fetch_hit	12	2146
+op	p1	delete_hit	10	627
+op	s1	build	2	555
+op	s1	insert	26	19462
+op	s1	overwrite	76	61531
+op	s1	fetch_hit	102	58016
+op	s1	iter_start	8	0
+op	s1	iter_step	104	0
+op	s1	grow	2	555
+op	s5	build	45478	2221097
+op	s5	insert	92924	20270607
+op	s5	overwrite	1028	70402
+op	s5	fetch_hit	381901	27598768
+op	s5	fetch_miss	85365	5077184
+op	s5	delete_hit	3818	293585
+op	s5	iter_start	10066	0
+op	s5	iter_step	24975	0
+op	s5	copy	20	0
+op	s5	grow	641	1339657
+op	s5	migrate	42	171532
+op	s5	demolish	44894	0
+op	s6	build	2	555
+op	s6	insert	6	2220
+op	s6	fetch_hit	12	2812
+op	u1	build	2	38221
+op	u1	insert	8760	1004600
+op	u1	fetch_hit	7470024	508913601
+op	u1	fetch_miss	3355080	190228169
+op	u1	grow	2	3478
+op	u2	build	2	9361
+op	u2	insert	7360	622673
+op	u2	fetch_hit	334546	38749926
+op	u3	build	2	185
+op	u3	insert	103742	31892208
+op	u3	fetch_hit	3148910	319994504
+op	u3	fetch_miss	4250322	273410970
+op	u3	grow	48	18976079
+op	u4	build	230	9086
+op	u4	insert	10116	2760491
+op	u4	overwrite	532	52170
+op	u4	fetch_hit	3143680	231792211
+op	u4	fetch_miss	3143680	163237451
+op	u4	grow	288	1626032
+build	f1	0	2
+build	f2	0	2
+build	f3	0	2
+build	f4	0	2
+build	f5	0	2
+build	f6	0	2
+build	f7	0	2
+build	f8	0	2
+build	i1	3	2
+build	i2	1	62
+build	i2	2	14
+build	i2	5	4
+build	p1	0	2
+build	s1	0	2
+build	s5	0	45478
+build	s6	0	2
+build	u1	8	2
+build	u2	8	2
+build	u3	0	2
+build	u4	0	230
+demolish	s5	0	0	0	44257
+demolish	s5	0	0	1	589
+demolish	s5	0	0	2	24
+demolish	s5	0	0	3	14
+demolish	s5	0	1	5	8
+demolish	s5	0	1	6	2

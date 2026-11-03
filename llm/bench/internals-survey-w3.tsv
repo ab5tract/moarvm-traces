@@ -1,0 +1,137 @@
+op	f1	build	2624	60248876
+op	f1	insert	5240	6309055
+op	f1	overwrite	15081309	6564471073
+op	f2	build	2624	119703
+op	f3	build	2624	133592
+op	f3	insert	2624	2083322
+op	f3	fetch_hit	1757768	751266902
+op	f3	fetch_miss	2624	3959518
+op	f4	build	2624	238302
+op	f4	insert	2624	671254
+op	f4	fetch_hit	1755144	4274818680
+op	f4	fetch_miss	2624	4915598
+op	f5	build	2624	217743
+op	f5	insert	26240	9275332
+op	f5	fetch_hit	7985	78875601
+op	f5	fetch_miss	26240	9406917
+op	f5	grow	2625	4478295
+op	f6	build	2624	160450
+op	f6	insert	70998	215609065
+op	f6	fetch_hit	12592	88593281
+op	f6	fetch_miss	70998	149495836
+op	f6	grow	7909	129437692
+op	f7	build	2624	230124
+op	f7	insert	7872	6977534
+op	f7	fetch_hit	83681	97448047
+op	f8	build	2624	635881
+op	f8	insert	220416	181108306
+op	f8	fetch_hit	8513316	11845891880
+op	f8	grow	11056	72889519
+op	i1	build	2624	38487994664
+op	i1	insert	123328	98146200
+op	i1	fetch_hit	13967352	10454230564
+op	i1	grow	200	162652
+op	i2	build	1610755	8010104211
+op	i2	insert	19461880	9130198210
+op	i2	fetch_hit	273835246	52742686012
+op	i2	fetch_miss	122964791	19228845282
+op	i2	grow	1043	849927
+op	i2	demolish	52814	0
+op	other	fetch_miss	78835388	9822566752
+op	other	delete_miss	840	117033
+op	other	iter_start	5991312	0
+op	p1	build	2603	1037409
+op	p1	insert	6452446	3769097230
+op	p1	fetch_hit	11047533	1808227106
+op	p1	delete_hit	5980878	1344162475
+op	p1	grow	17314	1123908004
+op	s1	build	2624	446516
+op	s1	insert	148344	400739424
+op	s1	overwrite	728301	1965050908
+op	s1	fetch_hit	648310	1253800045
+op	s1	delete_hit	52814	62383965
+op	s1	iter_start	12551	0
+op	s1	iter_step	3267479	0
+op	s1	grow	5845	65668414
+op	s1	migrate	44	1704257
+op	s5	build	39905612	13286959238
+op	s5	insert	402540319	801701897701
+op	s5	overwrite	10396822	4091793351
+op	s5	fetch_hit	651152334	215348503155
+op	s5	fetch_miss	289147598	63339902319
+op	s5	delete_hit	1751101	702721548
+op	s5	delete_miss	474272	126828217
+op	s5	iter_start	39843137	0
+op	s5	iter_step	549789745	0
+op	s5	copy	18135480	0
+op	s5	grow	16668126	443038660885
+op	s5	migrate	979329	93394885200
+op	s5	demolish	39334243	0
+op	s6	build	57604	342086978
+op	s6	insert	642960	210345542
+op	s6	overwrite	6497	2783510
+op	s6	fetch_hit	1718867	790527394
+op	s6	fetch_miss	7453880	2890681108
+op	s6	iter_start	11848	0
+op	s6	iter_step	464041	0
+op	s6	grow	108	37222
+op	u1	build	2615	13146204303
+op	u1	insert	11453700	2188008310
+op	u1	fetch_hit	15355	25794033
+op	u1	fetch_miss	20	11618
+op	u1	grow	2615	4216705
+op	u2	build	4	102231
+op	u2	insert	14720	1449808
+op	u2	fetch_hit	5	9694
+op	u2	fetch_miss	12	4884
+op	u3	build	36	62234
+op	u3	insert	1867356	2539784812
+op	u3	fetch_hit	1836	3589407
+op	u3	fetch_miss	17	20128
+op	u3	grow	864	2101126807
+op	u4	build	301760	27377631
+op	u4	insert	13272192	47834513354
+op	u4	overwrite	697984	134067088
+op	u4	fetch_hit	9644	10262764
+op	u4	fetch_miss	66	28638
+op	u4	grow	377856	45190334649
+build	f1	0	2624
+build	f2	0	2624
+build	f3	0	2624
+build	f4	0	2624
+build	f5	0	2624
+build	f6	0	2624
+build	f7	0	2624
+build	f8	0	2624
+build	i1	3	2624
+build	i2	1	1477426
+build	i2	2	88179
+build	i2	3	22506
+build	i2	4	7
+build	i2	5	17405
+build	i2	6	2616
+build	i2	7	2615
+build	i2	8	1
+build	p1	0	2603
+build	s1	0	2624
+build	s5	0	39905612
+build	s6	0	23982
+build	s6	1	24335
+build	s6	2	5189
+build	s6	3	3246
+build	s6	6	850
+build	s6	8	2
+build	u1	8	2615
+build	u2	8	4
+build	u3	0	36
+build	u4	0	301760
+demolish	i2	0	0	1	52814
+demolish	s5	0	0	0	21616652
+demolish	s5	0	0	1	17165683
+demolish	s5	0	0	2	360704
+demolish	s5	0	0	3	102193
+demolish	s5	0	1	4	213
+demolish	s5	0	1	5	80532
+demolish	s5	0	1	6	4686
+demolish	s5	0	1	7	3574
+demolish	s5	0	1	8	6

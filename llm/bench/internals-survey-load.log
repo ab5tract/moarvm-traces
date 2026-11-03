@@ -1,0 +1,23 @@
+W3 start 2026-11-03T20:14:24+01:00 load 0.79 0.98 0.85
+overhead: round 1 default nqp load 1.05
+overhead: round 1 default capi load 1.05
+overhead: round 1 stats nqp load 1.05
+overhead: round 1 stats capi load 1.05
+overhead: round 2 stats nqp load 1.05
+overhead: round 2 stats capi load 1.05
+overhead: round 2 default nqp load 1.05
+overhead: round 2 default capi load 1.05
+overhead: round 3 default nqp load 1.05
+overhead: round 3 default capi load 1.05
+overhead: round 3 stats nqp load 1.05
+overhead: round 3 stats capi load 1.05
+overhead: round 4 stats nqp load 1.05
+overhead: round 4 stats capi load 1.05
+overhead: round 4 default nqp load 1.05
+overhead: round 4 default capi load 1.13
+overhead: round 5 default nqp load 1.13
+overhead: round 5 default capi load 1.13
+overhead: round 5 stats nqp load 1.13
+overhead: round 5 stats capi load 1.13
+overhead: end load 1.13
+summary: W1 (100 files, untimed), W2 (78 files, untimed), W4 (2 files, untimed); loads not gated for counter runs
