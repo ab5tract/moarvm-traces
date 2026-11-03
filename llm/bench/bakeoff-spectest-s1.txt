@@ -1,0 +1,22 @@
+# Bake-off strategy 1 (Swiss-style tier) whole-system gate, 2026-11-03.
+# rakudo make spectest with MVM_HASH_STRATEGY=1 TEST_JOBS=24, every MVMHash
+# and HashAttrStore built through the swiss_only set. MoarVM zig-hash-bakeoff
+# (dd3da0553 + the strategy 1 tier) installed into the tune-zig-prefix; nqp
+# zig-hash-strategies; roast fb1d87214. Load average before the start 0.94.
+
+Files=1365, Tests=138695, 293 wallclock secs (35.40 usr  8.54 sys + 4236.07 cusr 1068.83 csys = 5348.84 CPU)
+Result: FAIL
+
+Failing files: 1
+t/spec/S06-operator-overloading/imported-subs.t  (Wstat: 256 (exited 1) Tests: 0, Parse errors: No plan found)
+  Reason: "Missing or wrong version of dependency 'gen/moar/stage2/NQPHLL.nqp'
+  (from t/spec/packages/Exportops/lib/Exportops.rakumod)": a stale precompiled
+  Exportops in t/spec/packages/Exportops/lib/.precomp, written 2026-11-02 17:38
+  against the nqp installed before the hashstrategy ops were added.
+  Not a strategy failure: run alone it fails identically with and without
+  MVM_HASH_STRATEGY=1 (./rakudo-m -Ilib t/spec/S06-operator-overloading/imported-subs.t,
+  exit 1 both ways); a copy of the test and the Exportops package with no
+  .precomp passes 20/20 under strategy 1 (twice) and under strategy 0.
+  The stale cache will fail the default run the same way until it is removed.
+
+Strategy failures: 0.
