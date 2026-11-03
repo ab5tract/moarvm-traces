@@ -1,0 +1,15 @@
+round 1 base nqp load 1.02
+round 1 head nqp load 1.02
+round 2 head nqp load 1.09
+round 2 base nqp load 1.09
+round 3 base nqp load 1.08
+round 3 head nqp load 1.07
+round 4 head nqp load 1.07
+round 4 base nqp load 1.07
+round 5 base nqp load 1.06
+round 5 head nqp load 1.06
+round 6 head nqp load 1.13
+round 6 base nqp load 1.20
+round 7 base nqp load 1.18
+round 7 head nqp load 1.17
+end load 1.24

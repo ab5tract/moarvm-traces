@@ -297,3 +297,16 @@ Task 5, 2026-11-03; full record `traces/llm/bench/internals-survey.md` (raw TSVs
 - u2 sequence names (- / - / 0.0; 2.1 in W4): LOOKUP with u1. Judge: uni-bench `strfromname_seq`.
 
 u1-u4 hold 97.48 percent of uni-bench's fetch operations (Task 4: 97.67). Cold and left on default: every f, s1, s6, p1, `other` (mostly misses on never-built MVMHash handles). Never seen: s2 s3 s4 s7 s8 s9 i3 p2.
+
+## Assignment results
+
+Task 7 (uni kind), record `traces/llm/bench/internals-uni-bench.md`. Rule: ratio at or below 0.90 with disjoint spreads on the site's nqp cells; the macros are in `src/core/hash_internal_strategies.h`.
+
+| site | macro | cells (nqp, swiss/default) | C-API beside them | result |
+|---|---|---|---|---|
+| u1 property names (4380) | `MVM_HASH_INTERNAL_UNI_PROPERTY_CODES` | hit 1.05, alias 1.03, miss 0.98 | alias 0.84, miss 0.73, hit 1.11 | reverted to DEFAULT (nqp cells flat) |
+| u2 sequence names (3680) | `MVM_HASH_INTERNAL_UNI_SEQ_NAMES` | strfromname_seq 1.03 | 0.98 | reverted to DEFAULT |
+| u3 codepoint names (about 52K) | `MVM_HASH_INTERNAL_UNI_CODEPOINTS` | hit 1.02, miss 1.02, miss_prefix 1.01 | 1.03, 1.09, 1.11 | reverted to DEFAULT |
+| u4 property values (115 tables, Swiss from 65) | `MVM_HASH_INTERNAL_UNI_PROPERTY_VALUES(n)` | hit 1.00, miss 1.00 | 1.08, 1.06 | reverted to DEFAULT; the two-rung `small_then_swiss` round was not run (see the record) |
+
+Kept: the explicit sized builds at all four sites (u3 builds once at its real size instead of growing 24 times; its nqp cells improved to 0.89-0.93 of the old base before any Swiss), the `MVM_uni_hash_build_strategy` entry point and the uni `swiss_rung` set, strategy 2 refused. No uni site stays on a non-default set, so no spectest gate was run for this task.
