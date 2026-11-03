@@ -657,3 +657,51 @@ Same recipe as above: pretier 4e37cbbbc rebuilt into a scratch prefix, **current
 | insert_nth | 256 | 32.72 [31.86-33.15] | 33.81 [32.80-34.01] | 1.03 |  |
 | insert_nth | 1024 | 36.63 [34.28-39.77] | 35.69 [32.41-35.84] | 0.97 |  |
 | insert_nth | 16384 | 55.00 [45.00-122.75] | 60.00 [55.00-80.00] | 1.09 |  |
+
+### Post-fix call counts
+
+These count calls and tail jumps from each set-0 export into hash-engine helpers that LTO outlined. Each export's body runs up to its int3 padding. PLT calls, the noreturn `MVM_oops`/panic stubs and compiler_rt `memcpy` are left out. **hot** means the helper switches on the set byte with set 0 included, so set 0 pays the call. **cold** means the helper is `dispatchOtherCall`: it opens with a switch on set-1, covers sets 1-5 only, and is reached only after the inline `set != 0` test. Builds: 4e37cbbbc (pretier), 7d055755c (pre-fix) and the installed fix. The installed fix's instruction stream is identical to a fresh HEAD (15e9838f3) build once addresses are normalised.
+
+| export | 4e37cbbbc hot | 7d055755c hot | fix hot | fix cold |
+|---|---:|---:|---:|---:|
+| shallow_copy | 0 | 1 | 0 | 2 |
+| allocated_size | 0 | 1 | 0 | 2 |
+| first | 0 | 1 | 0 | 1 |
+| next | 0 | 1 | 0 | 1 |
+| next_nocheck | 0 | 1 | 0 | 1 |
+| current | 0 | 1 | 0 | 1 |
+| current_nocheck | 0 | 1 | 0 | 1 |
+| at_start | 0 | 0 | 0 | 1 |
+| start | 0 | 0 | 0 | 1 |
+| library-wide: sites calling into outlined `first`/`next`/`current`/`at_start`/`start` helpers | 0 | 52 (all hot) | 0 | 72 (all cold) |
+
+The library-wide figure counts tail jumps as well as calls, which is why it is 52 for 7d055755c rather than the 49 calls given above.
+
+### iterate 63/64 rerun
+
+The same recipe with `--sizes=63,64 --runs=5 --nth=all` and 9 rounds, alternated: pretier is 4e37cbbbc rebuilt into a scratch prefix, current is the installed fix. Load was 0.16-0.23, and nothing else was running. 63 is the first size the process measures, so its spreads carry warm-up.
+
+**Verdict: parity.** iterate is 0.89 at 63 and 1.01 at 64, both with overlapping spreads, and every other row is within 5 percent or within its spread. The 1.11-1.14 seen in the A/B above was the pretier build's bimodality at these sizes, not a shift.
+
+| op | size | pretier [min-max] | current [min-max] | current / pretier | |
+|---|---:|---:|---:|---:|---|
+| insert | 63 | 22.73 [21.94-26.07] | 22.20 [19.13-24.77] | 0.98 |  |
+| insert | 64 | 22.24 [21.97-25.75] | 21.75 [20.61-24.26] | 0.98 |  |
+| lookup_hit | 63 | 16.71 [14.93-49.29] | 16.82 [15.58-46.86] | 1.01 |  |
+| lookup_hit | 64 | 11.88 [11.54-12.70] | 12.28 [11.15-13.42] | 1.03 |  |
+| lookup_miss | 63 | 14.92 [13.36-49.46] | 16.09 [13.97-47.64] | 1.08 |  |
+| lookup_miss | 64 | 11.74 [10.88-12.25] | 12.11 [11.41-13.23] | 1.03 |  |
+| delete | 63 | 12.68 [12.02-15.68] | 15.29 [11.99-27.92] | 1.21 |  |
+| delete | 64 | 12.29 [11.42-13.30] | 12.42 [11.87-27.02] | 1.01 |  |
+| iterate | 63 | 14.21 [12.07-35.21] | 12.66 [12.28-35.19] | 0.89 |  |
+| iterate | 64 | 9.61 [9.48-10.89] | 9.71 [9.53-10.81] | 1.01 |  |
+| bulk_load | 63 | 32.51 [30.68-34.52] | 31.51 [28.96-37.99] | 0.97 |  |
+| bulk_load | 64 | 33.82 [32.87-36.96] | 31.81 [30.92-35.39] | 0.94 |  |
+| overwrite | 63 | 21.01 [18.62-23.84] | 21.92 [19.97-48.13] | 1.04 |  |
+| overwrite | 64 | 17.94 [17.68-18.96] | 17.95 [16.95-21.75] | 1.00 |  |
+| clone | 63 | 3.83 [3.65-6.19] | 3.48 [3.33-6.19] | 0.91 |  |
+| clone | 64 | 3.84 [3.44-6.84] | 6.05 [3.17-6.30] | 1.58 |  |
+| iterate_delete | 63 | 23.27 [21.58-28.02] | 23.39 [20.75-27.79] | 1.01 |  |
+| iterate_delete | 64 | 21.46 [20.99-22.77] | 21.97 [20.40-23.42] | 1.02 |  |
+| insert_nth | 63 | 52.73 [43.03-63.34] | 37.42 [33.96-39.68] | 0.71 | faster >10%, disjoint |
+| insert_nth | 64 | 24.64 [17.97-45.63] | 19.99 [17.18-27.05] | 0.81 |  |
