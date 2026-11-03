@@ -299,6 +299,8 @@ The memory ratio is the ru_maxrss delta over a size's runs: below 65 it is a few
 
 **Baseline check.** Strategy 0 agrees with its reference (`bakeoff-baseline-s0.tsv`) in 83 of 110 judged cells. All 27 that differ are slower. Seven of them are size 49, which is now the first size its process measures and carries warm-up. Nine ladder cells are out by more than 10 percent: `clone` at 16-128 and 16384 (1.11-2.27) and `insert_nth` at 128-256 (1.12-1.14). This is a same-direction move, either from the build (three more tiers in the dispatch) or from the machine. A slower strategy 0 there makes the other strategies' `clone` and `insert_nth` ratios look better by the same factor. Left to the controller.
 
+**Default ladder A/B.** A same-machine A/B of the pre-tier build 4e37cbbbc against d3d8dbf90, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The strategies' `clone` and `insert_nth` ratios above are therefore measured against a slowed strategy 0.
+
 ### Blocks (the aggregator's list, with ratio range and memory ratio range over the block's cells)
 
 **Strategy 1**
