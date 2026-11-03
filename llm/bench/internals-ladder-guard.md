@@ -2,7 +2,7 @@
 
 **Run.** Base: MoarVM 1478311f6 (before the campaign), default build (LTO,
 x86-64-v3, no `-Dhash-stats`) in `/tmp/claude-1000/internals-base-prefix`.
-Head: `zig-hash-internals` on top of 54866bf06 (the commit "Hash engine: statistics hooks, site attribution, A/B runner and timing stand-in"; `hash-ab.sh` differs from
+Head: `zig-hash-internals` at a375403d1 (the hooks commit; `hash-ab.sh` differs from
 the built tree only by its load wait), default build in
 `/tmp/claude-1000/tune-zig-prefix`. AMD Ryzen 9 5900X. nqp ladder through
 `tune-zig-prefix`'s `nqp-m` under each variant's `LD_LIBRARY_PATH`; C-API ladder
