@@ -301,6 +301,8 @@ The memory ratio is the ru_maxrss delta over a size's runs: below 65 it is a few
 
 **Default ladder A/B.** A same-machine A/B of the pre-tier build 4e37cbbbc against d3d8dbf90, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The strategies' `clone` and `insert_nth` ratios above are therefore measured against a slowed strategy 0.
 
+**Default ladder fix (Task 8b).** The cause was inlining, not the tiers: with six sets `Table.dispatch` inlined every set's op through `resolve` and grew past LLVM's inlining threshold, so set 0's clone (`blockOf` in `shallowCopy`), iteration exports and grow-path `publish` each paid a call (49 outlined-dispatcher calls in the iteration paths against 0 before); and the migration's `Mover.visit` and the shared Robin Hood `hash` fell out of Small's drain loop (about 6 percent on the 64-to-65 insert). MoarVM 0113fddae keeps the set-0 switch inline in `dispatch` and calls the other sets out of line, keeps `lvalue` fully inline, and makes `visit` and its hash inline; set-0 semantics are unchanged. The same A/B against 4e37cbbbc is at parity: every judged cell within 5 percent or within the spread, clone 0.88-1.02, insert_nth 0.92-1.10 (overlapping). See `bakeoff-scoreboard.md`, "Default ladder A/B after the fix". The scoreboard's strategy ratios above were measured against the slowed build and were not re-run.
+
 ### Blocks (the aggregator's list, with ratio range and memory ratio range over the block's cells)
 
 **Strategy 1**

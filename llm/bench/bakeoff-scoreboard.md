@@ -536,3 +536,114 @@ Asked by the controller to attribute the baseline check's slower strategy-0 `clo
 | iterate_delete | 256 | 26.41 [26.13-26.72] | 27.53 [27.31-27.75] | 1.04 |  |
 | iterate_delete | 1024 | 26.74 [26.59-27.46] | 27.70 [27.59-28.29] | 1.04 |  |
 | iterate_delete | 16384 | 32.25 [32.17-33.28] | 32.83 [32.31-33.15] | 1.02 |  |
+
+## Default ladder A/B after the fix
+
+The regression above, found and fixed (MoarVM 0113fddae, `src/zig/core/hash/table.zig` only). **Cause:** with `StrSpec.sets` grown from 2 to 6, `Table.dispatch` (a plain `fn` that inlined every set's op through `resolve`) became too large for LLVM to inline into its callers, so set 0's clone (`blockOf` in `shallowCopy`: a call plus a jump table on the set byte), the iteration exports (`first`/`next`/`current`/`at_start`: 49 calls to outlined dispatchers in the bake-off build, 0 in 4e37cbbbc) and the grow path's `publish` paid a call each. Separately, the migration's `Mover.visit` and the Robin Hood `hash` (now shared by four sets) stopped being inlined into Small's drain loop, which cost the 64-to-65 migration about 6 percent (65th-insert microbenchmark, 20000 tables x 40 runs: 1250 ns pretier against 1325 ns). **Fix:** `dispatch` keeps the set-0 switch inline and calls the other sets out of line (`dispatchOtherCall`, `never_inline`); `lvalue` keeps all sets inline (`dispatchInline`, the previous body); `Mover.visit` is `inline` and forces the hash inline. Set-0 semantics are unchanged; the microbenchmark is at parity after it (1399-1481 against 1430-1471 ns).
+
+Same recipe as above: pretier 4e37cbbbc rebuilt into a scratch prefix, **current** is 0113fddae installed into `/tmp/claude-1000/tune-zig-prefix`, same `nqp-m`, `LD_LIBRARY_PATH` swapped, strategy 0, `--sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`, 5 rounds alternated, load 0.99-1.07. Marks: ratio above 1.10 or below 0.90 with disjoint spreads (bold), or beyond 5 percent with disjoint spreads.
+
+**Verdict: set 0 is back at parity.** Every judged cell is within 5 percent or within the spread; the only disjoint mark is clone 32, faster (0.95). Clone is 0.88-1.02 and insert_nth 0.92-1.10 (overlapping spreads beyond 1.05: insert_nth 64 1.10 and 16384 1.09, the single-insert cells with wide spreads). Iterate 63-64 read 1.11-1.14 with overlapping spreads: the pretier rounds are bimodal there (9.4 or 10.9), current sits on the upper mode, and the A/B above had them at 0.98-0.99. An intermediate build with only the dispatch change (two A/B runs) already fixed clone and insert_nth 128-256 but left insert_nth 65 at 1.05 and 1.08 (disjoint in one run), which the `visit` change closed.
+
+| op | size | pretier [min-max] | current [min-max] | current / pretier | |
+|---|---:|---:|---:|---:|---|
+| insert | 4 | 25.42 [24.80-27.29] | 24.71 [24.20-25.13] | 0.97 | warm-up |
+| insert | 16 | 21.37 [21.12-22.21] | 21.59 [21.21-21.88] | 1.01 |  |
+| insert | 32 | 19.51 [18.96-21.41] | 19.48 [19.05-19.69] | 1.00 |  |
+| insert | 63 | 22.07 [21.45-22.47] | 21.90 [21.44-21.94] | 0.99 |  |
+| insert | 64 | 22.16 [21.45-24.99] | 21.81 [21.72-24.54] | 0.98 |  |
+| insert | 65 | 37.55 [37.07-37.76] | 38.14 [37.14-39.63] | 1.02 |  |
+| insert | 128 | 46.70 [46.35-47.34] | 47.70 [47.39-48.05] | 1.02 |  |
+| insert | 256 | 50.01 [49.55-50.42] | 50.60 [50.04-50.70] | 1.01 |  |
+| insert | 1024 | 49.89 [49.11-50.29] | 50.66 [48.77-51.17] | 1.02 |  |
+| insert | 16384 | 55.14 [54.47-57.04] | 55.46 [55.28-56.57] | 1.01 |  |
+| lookup_hit | 4 | 10.84 [10.65-13.61] | 11.42 [11.33-11.50] | 1.05 | warm-up |
+| lookup_hit | 16 | 10.70 [10.26-13.20] | 10.84 [10.72-11.18] | 1.01 |  |
+| lookup_hit | 32 | 10.61 [10.17-14.60] | 10.83 [10.73-11.44] | 1.02 |  |
+| lookup_hit | 63 | 12.08 [11.30-15.77] | 11.74 [11.52-12.02] | 0.97 |  |
+| lookup_hit | 64 | 12.09 [11.55-15.92] | 11.73 [11.52-12.07] | 0.97 |  |
+| lookup_hit | 65 | 13.60 [13.20-14.36] | 13.63 [13.43-14.60] | 1.00 |  |
+| lookup_hit | 128 | 13.13 [13.07-14.07] | 13.34 [13.23-13.90] | 1.02 |  |
+| lookup_hit | 256 | 13.31 [13.11-14.25] | 13.36 [13.34-13.78] | 1.00 |  |
+| lookup_hit | 1024 | 13.64 [13.45-14.60] | 13.83 [13.50-13.96] | 1.01 |  |
+| lookup_hit | 16384 | 14.81 [14.65-15.76] | 14.81 [14.79-15.14] | 1.00 |  |
+| lookup_miss | 4 | 13.76 [11.01-14.81] | 14.07 [10.50-14.32] | 1.02 | warm-up |
+| lookup_miss | 16 | 10.17 [9.50-11.47] | 9.98 [9.89-11.06] | 0.98 |  |
+| lookup_miss | 32 | 10.55 [9.76-11.82] | 11.21 [9.96-11.39] | 1.06 |  |
+| lookup_miss | 63 | 12.23 [10.83-14.13] | 12.05 [11.92-12.67] | 0.99 |  |
+| lookup_miss | 64 | 11.85 [10.67-13.95] | 12.04 [11.59-12.58] | 1.02 |  |
+| lookup_miss | 65 | 13.19 [12.95-13.79] | 13.32 [13.23-13.52] | 1.01 |  |
+| lookup_miss | 128 | 12.94 [12.87-13.46] | 13.15 [13.10-13.31] | 1.02 |  |
+| lookup_miss | 256 | 12.99 [12.91-13.53] | 13.19 [13.09-13.40] | 1.02 |  |
+| lookup_miss | 1024 | 13.07 [13.04-13.56] | 13.24 [13.09-13.35] | 1.01 |  |
+| lookup_miss | 16384 | 14.02 [13.90-14.65] | 14.30 [14.16-14.61] | 1.02 |  |
+| delete | 4 | 11.02 [10.89-18.20] | 11.07 [11.07-11.27] | 1.00 | warm-up |
+| delete | 16 | 10.11 [9.91-17.68] | 10.13 [10.07-10.58] | 1.00 |  |
+| delete | 32 | 11.32 [10.81-19.01] | 11.46 [10.98-20.56] | 1.01 |  |
+| delete | 63 | 11.68 [11.65-19.96] | 12.33 [11.81-22.17] | 1.06 |  |
+| delete | 64 | 11.83 [11.56-19.94] | 12.27 [11.85-22.19] | 1.04 |  |
+| delete | 65 | 13.43 [13.23-19.23] | 13.56 [13.47-13.77] | 1.01 |  |
+| delete | 128 | 13.08 [13.04-18.95] | 13.47 [13.37-13.57] | 1.03 |  |
+| delete | 256 | 13.11 [13.06-18.92] | 13.45 [13.24-13.55] | 1.03 |  |
+| delete | 1024 | 13.36 [13.21-19.10] | 13.66 [13.49-13.86] | 1.02 |  |
+| delete | 16384 | 15.00 [14.86-19.81] | 15.26 [15.07-15.48] | 1.02 |  |
+| iterate | 4 | 17.05 [13.94-17.26] | 16.29 [13.82-16.80] | 0.96 | warm-up |
+| iterate | 16 | 10.79 [10.62-11.34] | 10.70 [10.62-10.89] | 0.99 |  |
+| iterate | 32 | 9.91 [9.84-10.29] | 9.85 [9.83-9.90] | 0.99 |  |
+| iterate | 63 | 9.80 [9.36-10.99] | 10.92 [9.85-11.01] | 1.11 |  |
+| iterate | 64 | 9.51 [9.32-10.85] | 10.87 [10.84-10.90] | 1.14 |  |
+| iterate | 65 | 15.07 [14.74-16.19] | 14.90 [14.80-16.07] | 0.99 |  |
+| iterate | 128 | 14.74 [14.61-15.06] | 14.69 [14.63-14.92] | 1.00 |  |
+| iterate | 256 | 14.60 [14.45-14.97] | 14.62 [14.50-14.75] | 1.00 |  |
+| iterate | 1024 | 14.43 [14.41-14.80] | 14.49 [14.37-14.58] | 1.00 |  |
+| iterate | 16384 | 14.48 [14.36-14.80] | 14.39 [14.33-14.68] | 0.99 |  |
+| bulk_load | 4 | 36.04 [34.61-37.15] | 37.29 [35.37-38.12] | 1.03 | warm-up |
+| bulk_load | 16 | 32.23 [31.67-33.85] | 31.71 [31.06-33.04] | 0.98 |  |
+| bulk_load | 32 | 28.64 [28.50-30.91] | 28.48 [28.20-30.86] | 0.99 |  |
+| bulk_load | 63 | 32.08 [31.71-33.22] | 31.97 [30.91-34.43] | 1.00 |  |
+| bulk_load | 64 | 32.63 [31.04-35.98] | 34.20 [30.91-36.83] | 1.05 |  |
+| bulk_load | 65 | 47.40 [46.78-49.98] | 47.46 [46.55-51.70] | 1.00 |  |
+| bulk_load | 128 | 57.14 [55.90-57.66] | 56.98 [54.61-58.73] | 1.00 |  |
+| bulk_load | 256 | 60.37 [58.20-61.71] | 61.17 [57.63-62.69] | 1.01 |  |
+| bulk_load | 1024 | 61.20 [60.55-63.10] | 62.58 [60.71-63.30] | 1.02 |  |
+| bulk_load | 16384 | 65.20 [62.85-65.70] | 65.12 [62.81-67.40] | 1.00 |  |
+| overwrite | 4 | 16.56 [16.41-17.38] | 16.62 [16.45-20.61] | 1.00 | warm-up |
+| overwrite | 16 | 16.04 [15.79-17.05] | 15.78 [15.66-16.26] | 0.98 |  |
+| overwrite | 32 | 16.58 [15.84-17.73] | 16.67 [16.01-16.88] | 1.01 |  |
+| overwrite | 63 | 17.91 [16.64-18.09] | 17.44 [17.06-17.79] | 0.97 |  |
+| overwrite | 64 | 17.94 [16.65-18.46] | 17.16 [17.04-17.61] | 0.96 |  |
+| overwrite | 65 | 20.63 [20.45-21.03] | 21.02 [20.65-21.09] | 1.02 |  |
+| overwrite | 128 | 20.45 [20.43-20.60] | 21.00 [20.63-21.07] | 1.03 |  |
+| overwrite | 256 | 20.60 [20.52-20.98] | 20.97 [20.64-21.36] | 1.02 |  |
+| overwrite | 1024 | 20.88 [20.79-21.13] | 21.12 [21.02-21.50] | 1.01 |  |
+| overwrite | 16384 | 22.40 [22.25-22.65] | 22.64 [22.44-23.27] | 1.01 |  |
+| clone | 4 | 12.66 [10.89-12.79] | 12.78 [11.51-14.89] | 1.01 | warm-up |
+| clone | 16 | 7.10 [4.34-7.42] | 6.89 [4.10-7.17] | 0.97 |  |
+| clone | 32 | 4.16 [4.13-4.30] | 3.95 [3.94-3.99] | 0.95 | faster >5%, disjoint |
+| clone | 63 | 6.34 [3.48-6.52] | 6.15 [5.90-6.29] | 0.97 |  |
+| clone | 64 | 3.54 [3.45-6.88] | 3.28 [3.19-6.48] | 0.93 |  |
+| clone | 65 | 15.27 [14.98-15.45] | 15.55 [14.67-15.91] | 1.02 |  |
+| clone | 128 | 14.91 [14.76-15.10] | 15.01 [14.87-15.15] | 1.01 |  |
+| clone | 256 | 13.02 [11.50-14.43] | 11.45 [11.21-14.22] | 0.88 |  |
+| clone | 1024 | 10.90 [10.67-13.33] | 10.97 [10.71-11.44] | 1.01 |  |
+| clone | 16384 | 10.48 [10.30-10.58] | 10.54 [10.46-10.61] | 1.01 |  |
+| iterate_delete | 4 | 29.17 [25.98-35.04] | 27.97 [25.62-28.76] | 0.96 | warm-up |
+| iterate_delete | 16 | 21.39 [20.59-26.65] | 20.92 [20.65-21.05] | 0.98 |  |
+| iterate_delete | 32 | 20.47 [19.72-25.49] | 21.03 [20.84-29.41] | 1.03 |  |
+| iterate_delete | 63 | 21.11 [20.60-26.51] | 21.29 [19.89-30.22] | 1.01 |  |
+| iterate_delete | 64 | 20.68 [20.43-27.68] | 21.28 [20.16-29.79] | 1.03 |  |
+| iterate_delete | 65 | 26.91 [26.83-30.73] | 26.73 [26.59-27.12] | 0.99 |  |
+| iterate_delete | 128 | 26.37 [26.26-30.26] | 26.23 [26.18-26.60] | 0.99 |  |
+| iterate_delete | 256 | 26.58 [26.10-30.13] | 26.39 [25.97-26.51] | 0.99 |  |
+| iterate_delete | 1024 | 26.76 [26.61-30.48] | 26.59 [26.47-26.92] | 0.99 |  |
+| iterate_delete | 16384 | 32.44 [32.29-36.53] | 31.89 [31.66-32.45] | 0.98 |  |
+| insert_nth | 4 | 14.74 [14.63-15.09] | 14.82 [14.62-14.89] | 1.01 | warm-up |
+| insert_nth | 16 | 14.46 [14.31-15.05] | 14.45 [14.22-14.92] | 1.00 |  |
+| insert_nth | 32 | 17.65 [14.89-21.84] | 16.19 [14.96-17.29] | 0.92 |  |
+| insert_nth | 63 | 18.99 [16.31-21.43] | 19.37 [17.23-21.39] | 1.02 |  |
+| insert_nth | 64 | 17.92 [15.74-27.05] | 19.68 [18.31-20.58] | 1.10 |  |
+| insert_nth | 65 | 1013.04 [999.66-1015.71] | 1032.85 [1025.86-1065.81] | 1.02 |  |
+| insert_nth | 128 | 31.41 [30.84-32.07] | 31.33 [31.19-31.66] | 1.00 |  |
+| insert_nth | 256 | 32.72 [31.86-33.15] | 33.81 [32.80-34.01] | 1.03 |  |
+| insert_nth | 1024 | 36.63 [34.28-39.77] | 35.69 [32.41-35.84] | 0.97 |  |
+| insert_nth | 16384 | 55.00 [45.00-122.75] | 60.00 [55.00-80.00] | 1.09 |  |
