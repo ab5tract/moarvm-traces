@@ -281,7 +281,15 @@ Build under test installed into `/tmp/claude-1000/tune-zig-prefix` with `zig bui
 
 ## Census
 
-(appended by Task 1)
+Record: `traces/llm/bench/bakeoff-census.md` (Task 1, static read, no code changes).
+
+- 26 creation sites: 21 `MVM_*_hash_build` calls (str 8, uni 2, fixkey 8, index 2, ptr 1) plus 5 implicit ones (zero-filled tables and shallow copies): str 9, uni 4, fixkey 8, index 3, ptr 2.
+- No spesh, JIT, NFG or serialization-internal tables; those subsystems only call registry lookups or deserialize MVMHash.
+- Fixed-key material: the unicode name tables (u1-u4, bulk-loaded from static arrays, then fetch only, the largest at about 65k keys), every static frame's `lexical_names` index table (i2/i3, presized bulk load then miss-heavy fetch), the syscall and container registries, debug locals, and MVMHash up to the end of `deserialize`.
+- Swiss material: the general MVMHash (s5), `sc_weakhash`, `object_ids` (insert and fetch-and-delete churn), the heap snapshot's `seen` table (millions of insert-if-absent probes).
+- Array-ordered material: MVMHash under GC marking, serialization and `MVMIter`; `sc_weakhash` and the native callback cache (iterated every GC); HashAttrStore's clone-by-reinsert.
+- Not on the ladder: overwrite (lvalue-fetch of a present key), clone (shallow copy), delete at the current iterator position, fetch-and-delete (ptr only).
+- Proposed errata for the user: E1, the array tier must iterate last-to-first so swap-remove under `MVMIter` delete-at-current does not skip entries; E2, `overwrite` (and optionally `clone`, `iterate_delete`) ladder cells; E3, the best fixed-key sites are uni and index tables, outside the str-only candidates, so the next campaign needs ports; E4, spec 5.3 names an MVMHash `initialize` that does not exist (the build is lazy in `bind_key`).
 
 ## Scoreboard
 
