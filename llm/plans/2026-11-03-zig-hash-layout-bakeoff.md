@@ -435,7 +435,17 @@ Strategy 3 pays for the build and then the seal. That comes to about 88-99 ns pe
 
 ## Incremental resize
 
-(appended by Task 10)
+**Design (Task 10, one page).** The ORDERED tier (`tiers/ordered.zig`) won the insert block, so it is the one that was tried. Its `grow` allocates a block of twice the size and rebuilds the index by hashing every key and probing for an empty slot: n random index writes at the 8-to-9, 64-to-65, ... insert, the spike at 65 (about 735 ns against a typical 17-40 ns insert). The classic two-table scheme spreads that over the following inserts.
+
+- *Flag*: `ordered.Tier(.{ .incremental = true })`, comptime; default false, so the shipped set is byte-for-byte unchanged unless kept.
+- *Single block*: the new block carries the old index after its entries (`Control.has_old`), so no second allocation and no pointer into another block; a verbatim copy of the block is a working table in any state. `Control.moved` counts old entries (from position 0) already registered in the new index; `moved_done` otherwise.
+- *Grow*: allocate 2x, copy the live entries by one `memcpy` (positions kept, the tail zeroed), copy the old index into the trailing region, `moved = 0`. No hashing at the trigger.
+- *Per insert*: `moves_per_insert` = 2 old entries are hashed and registered in the new index. The old entry count equals the old capacity, which is refilled after that many inserts, so a rate of 1 would suffice; 2 leaves margin and ends the move a quarter of the way through the new capacity.
+- *Lookups* probe the new index; a miss while moving probes the old (an entry is in the new index, moved or appended since, or only in the old). *Inserts* probe both before appending, and register the new entry in the new index only. *Delete* finishes the move first (swap-remove would otherwise have to repair two indexes). Iteration uses the entries array and is untouched.
+- *Expected*: `insert_nth` at 65 (and at each ORDERED doubling) falls to roughly the cost of the entry copy; every other cell unchanged except lookups of tables caught mid-move.
+- *Rule*: insert_nth wins (<= 0.90, disjoint spreads) on two adjacent ladder sizes, and no cell loses (>= 1.05, disjoint spreads).
+
+**Outcome: reverted.** MoarVM eb49b1253 measured as temporary strategy 3 against strategy 2, 7 rounds (`bakeoff-incremental.md`). insert_nth wins at 65 only (0.63; 64 is 1.40 and 128 is 0.82 with overlapping spreads), so the win condition fails; four cells lose: lookup_hit 65 (1.24), lookup_miss 65 (1.32), delete 65 (1.11), insert 16384 (1.12). A table of 65 entries has just grown, so it is mid-move for its whole read phase and pays two probes per miss, plus 1.30x memory. The tier code and temporary strategy 3 are removed; ORDERED stays as shipped.
 
 ## Acceptance
 
