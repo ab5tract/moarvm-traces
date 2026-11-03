@@ -1,0 +1,9 @@
+round 2 (c-lto zig-lto) load 0.70 0.95 1.04 14:28:45
+round 3 (zig-lto c-lto) load 0.80 0.96 1.05 14:28:48
+round 4 (c-lto zig-lto) load 0.80 0.96 1.05 14:28:51
+round 5 (zig-lto c-lto) load 0.90 0.98 1.05 14:28:54
+round 6 (c-lto zig-lto) load 0.90 0.98 1.05 14:28:57
+round 7 (zig-lto c-lto) load 0.90 0.98 1.05 14:29:00
+round 8 (c-lto zig-lto) load 0.90 0.98 1.05 14:29:02
+round 9 (zig-lto c-lto) load 0.99 1.00 1.06 14:29:05
+round 10 (c-lto zig-lto) load 0.99 1.00 1.06 14:29:08

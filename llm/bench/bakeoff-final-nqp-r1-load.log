@@ -1,0 +1,9 @@
+round 1 (zig-lto c-lto) load 1.16 1.04 1.07 14:27:44
+round 2 (c-lto zig-lto) load 1.16 1.04 1.07 14:27:47
+round 3 (zig-lto c-lto) load 1.14 1.04 1.07 14:27:50
+round 4 (c-lto zig-lto) load 1.13 1.04 1.07 14:27:53
+round 5 (zig-lto c-lto) load 1.13 1.04 1.07 14:27:56
+round 6 (c-lto zig-lto) load 1.20 1.05 1.08 14:27:59
+round 7 (zig-lto c-lto) load 1.20 1.05 1.08 14:28:02
+round 8 (c-lto zig-lto) load 1.18 1.05 1.08 14:28:05
+round 9 (zig-lto c-lto) load 1.25 1.07 1.08 14:28:08

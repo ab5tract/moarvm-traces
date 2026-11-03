@@ -1,0 +1,45 @@
+# Bake-off final spectest with the default (no MVM_HASH_STRATEGY): MoarVM c4df263dc, rakudo make spectest, TEST_JOBS=24, roast fb1d87214, installed into tune-zig-prefix from HEAD (nqp and rakudo rebuilt in Task 9 against this oplist). Timed by the wait4 stand-in for GNU time -v. Three runs, the first and second not clean for environmental reasons, the third the measurement.
+
+run 1 start 14:37:17 load 0.39 0.91 1.02
+run 1 exit 2: stale t/spec/**/.precomp ('Missing or wrong version of dependency gen/moar/stage2/NQPHLL.nqp' in t/spec/S06-operator-overloading/imported-subs.t, the known environmental failure); all .precomp directories removed afterwards
+run 2 start 14:42:41 load 8.31 13.91 7.49 (not idle: the 1-minute average still carried run 1's tail), exit 0
+run 3 start 14:50:10 load 1.40 12.87 10.92 (the 1-minute average idle, the 5-minute still carried run 2), exit 0
+
+## run 1 (zig default)
+	Command being timed: "make spectest"
+	User time (seconds): 4164.72
+	System time (seconds): 1229.50
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:57.82
+	Maximum resident set size (kbytes): 691476
+	Exit status: 2
+Files=1365, Tests=138695, 290 wallclock secs (35.11 usr  8.64 sys + 4124.91 cusr 1218.21 csys = 5386.87 CPU)
+Result: FAIL
+
+## run 2 (zig default)
+	Command being timed: "make spectest"
+	User time (seconds): 4274.18
+	System time (seconds): 1448.02
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:11.91
+	Maximum resident set size (kbytes): 697228
+	Exit status: 0
+Files=1365, Tests=138715, 302 wallclock secs (34.73 usr  9.20 sys + 4234.71 cusr 1436.15 csys = 5714.79 CPU)
+Result: PASS
+
+## run 3 (zig default)
+	Command being timed: "make spectest"
+	User time (seconds): 4195.66
+	System time (seconds): 1314.97
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:01.07
+	Maximum resident set size (kbytes): 709504
+	Exit status: 0
+Files=1365, Tests=138715, 293 wallclock secs (35.43 usr  9.14 sys + 4155.53 cusr 1303.08 csys = 5503.18 CPU)
+Result: PASS
+
+## comparison with post-lto-spectest.txt (Zig runs 2, 3, 6)
+Zig medians there: wall 4:55.92 (295.92 s; runs 295.92, 296.16, 294.57), RSS 704192 kB (705888, 696336, 704192).
+run 3 (clean, idle start): wall 5:01.07 = 301.07 s = 1.017 of the median; RSS 709504 kB = 1.008 of the median; Result PASS, Files=1365, Tests=138715 (as post-lto). Within the 2 percent.
+run 2 (not idle start, load 8.31): wall 5:11.91 = 311.91 s = 1.054; RSS 697228 kB = 0.990; PASS. Wall outside 2 percent with a loaded start, hence the third run.
+run 1 (idle start, but exit 2 from the stale precomp): wall 4:57.82 = 1.006; RSS 691476 kB = 0.982; Tests=138695 (the 20 tests of the one file that could not compile).
+
+## failures
+run 1: t/spec/S06-operator-overloading/imported-subs.t, stale .precomp (environmental, removed). Runs 2 and 3: none.
