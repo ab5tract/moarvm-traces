@@ -1,0 +1,30 @@
+# Bake-off strategy 3 (fixed-key sealed tier) whole-system gate, 2026-11-03.
+# rakudo make spectest with MVM_HASH_STRATEGY=3 TEST_JOBS=24: every MVMHash
+# and HashAttrStore built through the fixed_staging set (Robin Hood), and
+# every hash MVMHash's deserialize fills sealed into the fixed_sealed set
+# (the setting's included). MoarVM zig-hash-bakeoff (53980a8d7 + the
+# strategy 3 tier, committed as 770ffac9c) installed into the
+# tune-zig-prefix; nqp zig-hash-strategies; roast fb1d87214. Load average
+# before the start 2.03 (the preceding zig builds settling; the run itself
+# was not slowed: 292 s wallclock against strategy 2's 298 s).
+
+Files=1365, Tests=138715, 292 wallclock secs (35.87 usr  8.95 sys + 4231.03 cusr 1166.22 csys = 5442.07 CPU)
+Result: PASS
+
+Failing files: 0. Strategy failures: 0.
+The test count equals the default zig engine's run and strategy 2's
+(138715). The files reporting "TODO passed" number 29, as in strategies
+1 and 2.
+
+Sealed tables that migrated: 0 of 55074 seals.
+Measured in a second, instrumented spectest run (not committed: an
+O_APPEND line per call written by MVM_str_hash_seal when it seals a
+staging table, and by the fixed tier's grow, which is called exactly once
+per migration out of the sealed rung). That run: Files=1365,
+Tests=138715, Result: PASS, 292 s; 55074 seal lines, 0 migration lines.
+The instrumentation was checked first on tools/bench/t/strategy.nqp
+(6 seals, 4 migrations, matching its insert-after-seal cases). So across
+roast no deserialized hash was inserted into after load; the sealed
+layout served every lookup, delete and iteration of those hashes, and the
+migration path out of it is exercised only by the unit, C-API and nqp
+tests.
