@@ -143,6 +143,22 @@
 
 ---
 
+### Task 5b: Lookups binned by table size (added at the stop, 2026-11-03, at the user's request)
+
+**Files:**
+- Modify: `src/zig/core/hash/stats.zig` (a per-thread histogram `fetch[site][hit|miss][bucket]` of counts and cycles, bucketed by the table's `cur_items` at the time of the fetch with the existing `bucketOf`; dump rows `fetch\t<site>\t<hit|miss>\t<bucket>\t<count>\t<cycles>`), `src/zig/core/hash/table.zig` (the `fetch` hit/miss hooks pass `header.cur_items`; a fetch on a null handle goes to bucket 0 under site 255), `tools/bench/hash-stats.pl` (parse the rows; per site a "Lookups by table size" table: per bucket the hit and miss counts, cycles, share of the site's fetch cycles; `--tsv` carries the rows), `tools/bench/t/hash-stats.t` (fixture rows), `src/zig/core/hash/test/stats_test.zig`
+- Record: `traces/llm/bench/internals-survey-binned.md`, `internals-survey-binned-w{1,2,3}.tsv`; the survey (`internals-survey.md`: a "Lookups by table size" section and corrected s5/i2 rows) and this plan's "## Survey" section (s5 and i2 lines restated from lookup shares)
+
+**Interfaces:** consumes Task 1-3's stats module and aggregator; produces the `fetch` row kind (the only change to the dump format) and the share of each site's fetch cycles that falls on tables above 64 entries, which is the number the stop's s5 and i2 rulings need.
+
+- [ ] **Step 1: Failing tests.** `stats_test.zig`: `"fetches are binned by the table's size"` (build a str table with 100 keys, 10 hits and 10 misses; the dump has `fetch\t<site>\thit\t5\t10` and `fetch\t<site>\tmiss\t5\t10`, bucket 5 being 65-128; a 10-key table's fetches land in bucket 1). `hash-stats.t`: two synthetic files with `fetch` rows; the report's per-site "Lookups by table size" table sums them and the share column sums to 100. RED, then implement until GREEN; `zig build unit-test` with and without `-Dhash-stats=true`; `zig build test` both engines; `zig fmt --check`; `perl -c`; `prove`.
+- [ ] **Step 2: Rebuild the stats prefix** (`zig build install --prefix /tmp/claude-1000/stats-zig-prefix -Dhash-stats=true`). The default prefix is unchanged (no default-build code changed; confirm with the Step 3 disassembly check of Task 2 on a default `zig build`).
+- [ ] **Step 3: Re-run W1, W2 and W3** exactly as Task 5 did (same commands, `.precomp` removal, load wait, `make install` with the default lib after W2), into fresh `MVM_HASH_STATS` directories; W3 must pass again.
+- [ ] **Step 4: Aggregate and write** `internals-survey-binned.md`: per site (every site with fetches; s5 and i2 first) the hit/miss counts and cycles per bucket per workload and the share of the site's fetch cycles at or above 65 entries (bucket 4 and up) and at or above 128; then the two conclusions the stop needs, stated from lookup shares, not table shares: for s5, what share of its lookups and lookup cycles hit tables above 64; for i2, the same, plus the hit/miss split above 64. Correct the survey's s5 and i2 rows and the plan's "## Survey" lines; the "measurement gap" caveat is replaced by the measured figures.
+- [ ] **Step 5: Commit** MoarVM ("Hash engine: stats bin fetches by table size; aggregator reports them"); traces ("internals: lookups binned by table size") and the pointer.
+
+---
+
 ### Task 6: The stop: the user's ruling on the assignment
 
 **Files:**
