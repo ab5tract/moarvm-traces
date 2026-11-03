@@ -1,6 +1,6 @@
-# Bake-off composed set for GENERAL: Small then Swiss (2026-11-03)
+# Bake-off composed set for LOOKUP: Small then Swiss (2026-11-03)
 
-**Outcome: does not ship.** GENERAL is the bare Swiss tier (`swiss_only`,
+**Outcome: does not ship.** LOOKUP is the bare Swiss tier (`swiss_only`,
 the scoreboard's strategy 1, already spectested as
 `bakeoff-spectest-s1.txt`); the composed set is deleted.
 
@@ -24,7 +24,7 @@ Method, the same as the scoreboard's (plan "## Scoreboard"):
 
 ## The rule (controller ruling 2)
 
-The composed set ships as GENERAL only if
+The composed set ships as LOOKUP only if
 - (a) it keeps every single-op block strategy 1 holds in the final scoreboard (bulk_load excluded, it no longer exists), and
 - (b) its 16-64 cells are within 5 percent of strategy 0 or inside the round spread (strategy 0's and its spreads overlap), since it is the same Small tier there.
 
@@ -75,7 +75,7 @@ losing lookup_hit, delete and overwrite at 65-256, which strategy 1 won.
 
 ## Outcome
 
-Both (a) and (b) fail, so the composed set does not ship: GENERAL is the
+Both (a) and (b) fail, so the composed set does not ship: LOOKUP is the
 bare `swiss_only` set (strategy 1 of the scoreboard), which gives up 16-64
 as the scoreboard records (insert 1.6-1.85x, clone 1.5-1.9x, memory
 2.0-2.2x there). No spectest was run for the composed set (the ruling asks

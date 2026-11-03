@@ -60,7 +60,7 @@
 - Test: `src/zig/core/hash/test/str_test.zig`
 
 **Interfaces:**
-- Produces (C): `typedef enum { MVM_HASH_STRATEGY_DEFAULT = 0, MVM_HASH_STRATEGY_SWISS = 1, MVM_HASH_STRATEGY_ORDERED = 2, MVM_HASH_STRATEGY_FIXED = 3, MVM_HASH_STRATEGY_COUNT = 4 } MVMHashStrategy;` in `str_hash_table.h` (the names are bake-off names; Task 9 renames). `void MVM_str_hash_build_strategy(MVMThreadContext *tc, MVMStrHashTable *hashtable, MVMuint32 entry_size, MVMuint32 entries, MVMuint8 strategy);` and `void MVM_str_hash_seal(MVMThreadContext *tc, MVMStrHashTable *hashtable);` in `str_hash_table_funcs.h`. `MVMuint8 hash_strategy_default;` on `MVMInstance`.
+- Produces (C): `typedef enum { MVM_HASH_STRATEGY_DEFAULT = 0, MVM_HASH_STRATEGY_SWISS = 1, MVM_HASH_STRATEGY_APPEND = 2, MVM_HASH_STRATEGY_FIXED = 3, MVM_HASH_STRATEGY_COUNT = 4 } MVMHashStrategy;` in `str_hash_table.h` (the names are bake-off names; Task 9 renames). `void MVM_str_hash_build_strategy(MVMThreadContext *tc, MVMStrHashTable *hashtable, MVMuint32 entry_size, MVMuint32 entries, MVMuint8 strategy);` and `void MVM_str_hash_seal(MVMThreadContext *tc, MVMStrHashTable *hashtable);` in `str_hash_table_funcs.h`. `MVMuint8 hash_strategy_default;` on `MVMInstance`.
 - Produces (Zig, `str.zig`): `pub const strategy_count: u8 = 4;`, `pub const strategy_sets = [strategy_count]?u8{ standard_set, null, null, null };` (a null slot means "not built into this engine"; Tasks 5, 6, 7 edit the literal to fill slots 1, 2, 3), `pub fn buildStrategy(tc: *ThreadContext, ht: *c.MVMStrHashTable, entry_size: u32, entries: u32, strategy: u8) void`, `pub fn seal(tc: *ThreadContext, ht: *c.MVMStrHashTable) void` (a no-op until Task 7).
 - Ruling recorded here: the spec's "the set index is the strategy number" is implemented as the `strategy_sets` mapping rather than by reordering the set list, so `large_only` keeps index 1 and the sealed set (Task 7) can live anywhere. Same observable behaviour; no set-0 change.
 
@@ -158,7 +158,7 @@
 
 ---
 
-### Task 6: Candidate 2, array-ordered entries with a side index (`MVM_HASH_STRATEGY_ORDERED`)
+### Task 6: Candidate 2, array-ordered entries with a side index (`MVM_HASH_STRATEGY_APPEND`)
 
 **Files:**
 - Create: `src/zig/core/hash/tiers/ordered.zig`
@@ -435,17 +435,17 @@ Strategy 3 pays for the build and then the seal. That comes to about 88-99 ns pe
 
 ## Incremental resize
 
-**Design (Task 10, one page).** The ORDERED tier (`tiers/ordered.zig`) won the insert block, so it is the one that was tried. Its `grow` allocates a block of twice the size and rebuilds the index by hashing every key and probing for an empty slot: n random index writes at the 8-to-9, 64-to-65, ... insert, the spike at 65 (about 735 ns against a typical 17-40 ns insert). The classic two-table scheme spreads that over the following inserts.
+**Design (Task 10, one page).** The APPEND tier (`tiers/ordered.zig`) won the insert block, so it is the one that was tried. Its `grow` allocates a block of twice the size and rebuilds the index by hashing every key and probing for an empty slot: n random index writes at the 8-to-9, 64-to-65, ... insert, the spike at 65 (about 735 ns against a typical 17-40 ns insert). The classic two-table scheme spreads that over the following inserts.
 
 - *Flag*: `ordered.Tier(.{ .incremental = true })`, comptime; default false, so the shipped set is byte-for-byte unchanged unless kept.
 - *Single block*: the new block carries the old index after its entries (`Control.has_old`), so no second allocation and no pointer into another block; a verbatim copy of the block is a working table in any state. `Control.moved` counts old entries (from position 0) already registered in the new index; `moved_done` otherwise.
 - *Grow*: allocate 2x, copy the live entries by one `memcpy` (positions kept, the tail zeroed), copy the old index into the trailing region, `moved = 0`. No hashing at the trigger.
 - *Per insert*: `moves_per_insert` = 2 old entries are hashed and registered in the new index. The old entry count equals the old capacity, which is refilled after that many inserts, so a rate of 1 would suffice; 2 leaves margin and ends the move a quarter of the way through the new capacity.
 - *Lookups* probe the new index; a miss while moving probes the old (an entry is in the new index, moved or appended since, or only in the old). *Inserts* probe both before appending, and register the new entry in the new index only. *Delete* finishes the move first (swap-remove would otherwise have to repair two indexes). Iteration uses the entries array and is untouched.
-- *Expected*: `insert_nth` at 65 (and at each ORDERED doubling) falls to roughly the cost of the entry copy; every other cell unchanged except lookups of tables caught mid-move.
+- *Expected*: `insert_nth` at 65 (and at each APPEND doubling) falls to roughly the cost of the entry copy; every other cell unchanged except lookups of tables caught mid-move.
 - *Rule*: insert_nth wins (<= 0.90, disjoint spreads) on two adjacent ladder sizes, and no cell loses (>= 1.05, disjoint spreads).
 
-**Outcome: reverted.** MoarVM eb49b1253 measured as temporary strategy 3 against strategy 2, 7 rounds (`bakeoff-incremental.md`). insert_nth wins at 65 only (0.63; 64 is 1.40 and 128 is 0.82 with overlapping spreads), so the win condition fails; four cells lose: lookup_hit 65 (1.24), lookup_miss 65 (1.32), delete 65 (1.11), insert 16384 (1.12). A table of 65 entries has just grown, so it is mid-move for its whole read phase and pays two probes per miss, plus 1.30x memory. The tier code and temporary strategy 3 are removed; ORDERED stays as shipped.
+**Outcome: reverted.** MoarVM eb49b1253 measured as temporary strategy 3 against strategy 2, 7 rounds (`bakeoff-incremental.md`). insert_nth wins at 65 only (0.63; 64 is 1.40 and 128 is 0.82 with overlapping spreads), so the win condition fails; four cells lose: lookup_hit 65 (1.24), lookup_miss 65 (1.32), delete 65 (1.11), insert 16384 (1.12). A table of 65 entries has just grown, so it is mid-move for its whole read phase and pays two probes per miss, plus 1.30x memory. The tier code and temporary strategy 3 are removed; APPEND stays as shipped.
 
 ## Acceptance
 
@@ -457,5 +457,5 @@ Spec section 12, checked on the final branch head (MoarVM c4df263dc), 2026-11-03
 | 2 | Three candidates implemented as tiers with unit tests, suites green, each passing the spectest as process-wide default with zero new failures | met in a modified form: all three were implemented and spectested, one (strategy 3, fixed-key) was later deleted | `bakeoff-spectest-s1.txt`, `bakeoff-spectest-s2.txt`, `bakeoff-spectest-s3.txt`; the tiers' unit tests (zig build test) |
 | 3 | The two ops and the C build-with-strategy entry point work from NQP, with the tests of section 7; unknown and misuse cases throw | met | `tools/bench/t/strategy.nqp` (66 ok), `docs/hash-strategies.md` |
 | 4 | Scoreboard under section 6, at least 7 interleaved rounds, baseline check passing | met | `bakeoff-scoreboard.md` (7 rounds), `bakeoff-baseline-check.md` (99/110) |
-| 5 | Strategies named, losers deleted, documentation written, incremental-resize experiment run and ruled | met in a modified form: strategy 3 was deleted by the user's decision although it held a block; GENERAL (1) and ORDERED (2) are named and shipped; the incremental experiment was run and reverted | `docs/hash-strategies.md`, `bakeoff-composed-general.md`, `bakeoff-incremental.md`, the spec errata |
+| 5 | Strategies named, losers deleted, documentation written, incremental-resize experiment run and ruled | met in a modified form: strategy 3 was deleted by the user's decision although it held a block; LOOKUP (1) and APPEND (2) are named and shipped; the incremental experiment was run and reverted | `docs/hash-strategies.md`, `bakeoff-composed-lookup.md`, `bakeoff-incremental.md`, the spec errata |
 | 6 | Default ladder re-measured once against the C engine: every cell still passes | met as no-regression; two pre-existing shortfall cells annotated: 51/53 (insert_nth 128 and 256 disjoint at 1.07-1.12, the tuning campaign's own Robin Hood shortfall; the base-vs-HEAD A/B has them at 1.00 and 0.98; the CPU default is not the cause). Spectest with the default: PASS, zero failures, Files=1365, Tests=138715; wall 1.017 and RSS 1.008 of the Zig medians (clean run), a loaded-start run at 1.054 wall | `bakeoff-final-nqp.md`, `bakeoff-final-spectest.txt` |

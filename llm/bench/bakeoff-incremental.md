@@ -1,4 +1,4 @@
-# Bake-off: incremental resize on the ORDERED tier (2026-11-03, Task 10)
+# Bake-off: incremental resize on the APPEND tier (2026-11-03, Task 10)
 
 **Outcome: reverted.** The flag's `insert_nth` win is one ladder size (65, ratio 0.63); the
 win rule needs two adjacent sizes. It also loses four other cells (below). No incremental
@@ -31,7 +31,7 @@ cells again with `--sizes=49,97`. Ratios are strategy 3 over strategy 2 (`--base
 rounds, order rotated per round. 1512 + 252 rows (raw: `bakeoff-incremental-raw.tsv`,
 `bakeoff-incremental-raw-resize.tsv`). Load (1-minute average before each run): 1.27-1.35 for
 the main run, 1.17-1.27 for the resize run; no other `hash-bench.nqp` was running.
-Cells: `ratio [min-max of the round medians, ns] mem`; s2 is the unflagged ORDERED, s3 the flagged.
+Cells: `ratio [min-max of the round medians, ns] mem`; s2 is the unflagged APPEND, s3 the flagged.
 
 ### main run: insert
 

@@ -386,16 +386,18 @@ this text.
   - The `MVM_HASH_STRATEGY` override is exercised by the spectest gates and by `MVM_HASH_STRATEGY=<n> raku -e ...`, not by that script.
 - **Final names and numbers (section 8).** The user named the winners.
   - `MVM_HASH_STRATEGY_DEFAULT` = 0 (Small then Robin Hood, unchanged).
-  - `MVM_HASH_STRATEGY_GENERAL` = 1: the Swiss-style tier (section 4.1, the scoreboard's strategy 1, set `swiss_only`).
-  - `MVM_HASH_STRATEGY_ORDERED` = 2: the array-ordered tier (section 4.2, the scoreboard's strategy 2, set `ordered_only`). It ships as the bare tier, with no composed set.
-  - `MVM_HASH_STRATEGY_COUNT` = 3. `str.zig`'s `strategy_sets` is `{ standard_set, general_set, ordered_set }`.
-  - The spectest records keep their column names: `bakeoff-spectest-s1.txt` is GENERAL and `-s2.txt` is ORDERED.
+  - `MVM_HASH_STRATEGY_LOOKUP` = 1: the Swiss-style tier (section 4.1, the scoreboard's strategy 1, set `swiss_only`).
+  - `MVM_HASH_STRATEGY_APPEND` = 2: the array-ordered tier (section 4.2, the scoreboard's strategy 2, set `ordered_only`). It ships as the bare tier, with no composed set.
+  - `MVM_HASH_STRATEGY_COUNT` = 3. `str.zig`'s `strategy_sets` is `{ standard_set, lookup_set, append_set }`.
+  - The spectest records keep their column names: `bakeoff-spectest-s1.txt` is LOOKUP and `-s2.txt` is APPEND.
   - MoarVM's `docs/hash-strategies.md` documents the strategies.
 - **Strategy 3 deleted (sections 4.3, 5.2, 5.3).** The fixed-key candidate is deleted by the user's decision, although it held a block (iterate and clone, 65-16384). It never won a lookup cell, its memory was 1.09-1.69x strategy 0's from 128 up, and strategies 1 and 2 beat it on the same ops.
   - The seal mechanism went with it: the `hashseal` op (and its nqp mapping), `MVM_str_hash_seal`, `Table.seal` and the optional `initFrom` tier contract, the override's deserialize seal hook (section 5.3), `tiers/fixed.zig`, and the harness's `--seal` option and `bulk_load` op.
   - Section 5.2's second op and section 7's seal tests therefore no longer exist.
   - The scoreboard (`traces/llm/bench/bakeoff-scoreboard.md`) keeps the strategy-3 column as measured.
-- **Composed set (section 8).** One composed set was measured for GENERAL: Small then Swiss, the default ladder with the Swiss tier in place of Robin Hood. The rule was that it must keep every single-op block strategy 1 holds, and its 16-64 cells must be within 5 percent of strategy 0 or inside the round spread.
+- **Composed set (section 8).** One composed set was measured for LOOKUP: Small then Swiss, the default ladder with the Swiss tier in place of Robin Hood. The rule was that it must keep every single-op block strategy 1 holds, and its 16-64 cells must be within 5 percent of strategy 0 or inside the round spread.
   - It kept 4 of the 9 blocks: it lost lookup_hit, lookup_miss, delete, insert_nth and overwrite.
   - It was 7-21 percent slower with disjoint spreads in several 16-64 cells, iterate_delete at all four.
-  - So it did not ship, and GENERAL is the bare Swiss tier. See `traces/llm/bench/bakeoff-composed-general.md`.
+  - So it did not ship, and LOOKUP is the bare Swiss tier. See `traces/llm/bench/bakeoff-composed-lookup.md`.
+
+- **Rename (2026-11-03, after the merge).** The user renamed the shipped strategies: GENERAL became LOOKUP and ORDERED became APPEND (`MVM_HASH_STRATEGY_LOOKUP` = 1, `MVM_HASH_STRATEGY_APPEND` = 2; sets `lookup_set` and `append_set` in `str.zig`). Records written before the rename, and the campaign ledger, use the old names; the strategy numbers and the tier sets are unchanged.
