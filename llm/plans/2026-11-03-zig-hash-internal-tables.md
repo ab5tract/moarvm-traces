@@ -191,7 +191,20 @@
 
 ---
 
-### Task 8: Swiss for the index kind (i2, i3) — runs only if the ruling names them
+## Assignment ruling (Task 6, 2026-11-03)
+
+The user ruled at the stop, after the binned re-measurement (Task 5b):
+
+1. **s5, the general MVMHash:** amend the plan to measure Small-then-Swiss as the default ladder (set 0) — Task 9b below. This amends Global Constraint 2 ("set 0 does not change") for that one task; the C engine, the LOOKUP/APPEND strategies, the ops and the override are still untouched.
+2. **i2, the lexical-name tables:** closed. Task 8 does not run.
+3. **u1, u2, u3 on LOOKUP** (u3 with a size hint), **u4 LOOKUP per table where the pre-counted size is 65 or more, default below**, judged on the unicode benchmark cells: confirmed. Task 7 runs as written.
+4. Nothing else added or struck. i1 is struck as proposed; every str, fixkey and ptr site other than s5 is cold, so the old Task 9 does not run.
+
+Order: Task 7, then Task 9b, then Task 10.
+
+---
+
+### Task 8: Swiss for the index kind (i2, i3) — NOT RUN: closed by the user's ruling (tables above 64 lexicals carry 1-13 percent of the site's lookups)
 
 **Files:**
 - Modify: `src/zig/core/hash/index.zig` (`swiss_rung`; `IndexSpec.sets` with the ruled default first; the `only_rung` kept as set 1 for the A/B), `src/zig/core/hash/hash_test.zig` (dispatch test), `docs/hash-strategies.md`
@@ -211,7 +224,7 @@
 
 ---
 
-### Task 9: The str sites and ptr — runs only for sites the ruling names
+### Task 9: The str sites and ptr — NOT RUN: every site the task covers is cold in the survey (s1, s6, s3/s4, p1 all below 5 percent in every workload)
 
 **Files:**
 - Modify: `src/core/hash_internal_strategies.h` (`MVM_HASH_INTERNAL_SC_WEAKHASH`, `_HASH_DESERIALIZE`, `_HASHATTRSTORE`, as ruled), `src/zig/core/hash/fixkey.zig` (a `swiss_rung` and `default_set`, only if a fixkey site is ruled; the census expects none), `src/moar.c:203` (`MVM_str_hash_build_strategy(..., MVM_HASH_INTERNAL_SC_WEAKHASH)`), `src/6model/reprs/MVMHash.c:192` (deserialize: the macro in place of `hash_strategy_default` only if ruled, since the override must keep applying to user hashes: the site uses `tc->instance->hash_strategy_default ? that : MACRO`), `src/6model/reprs/HashAttrStore.c:33,96` (same pattern), `src/zig/core/hash/ptr.zig` (`swiss_rung` and a `default_set`, only if p1 is ruled), `docs/hash-strategies.md`
@@ -224,6 +237,25 @@
 - [ ] **Step 2: Switch, A/B** (two prefixes through `hash-ab.sh --ladder=<site>`, 7 rounds), decide by the win rule, record, plan row. A C-engine build (`-Dzig-impl=false`) still passes `zig build test`.
 - [ ] **Step 3: Spectest gate** if s6 or any site reaching every program is kept (spec 5.3).
 - [ ] **Step 4: Commit** MoarVM ("Internal str tables: <sites> on <strategies>"); traces and the pointer.
+
+---
+
+### Task 9b: Small then Swiss as the default ladder (set 0) — the user's amendment at the stop
+
+**Files:**
+- Modify: `src/zig/core/hash/str.zig` (`standard` becomes `{ small.Tier(.{ .max_capacity = small_threshold }) from 0, swiss.Tier(.{}) from small_threshold }`; the old Small-then-Robin-Hood ladder is kept as a non-default set `standard_rh` for the in-process comparison tests only; `large_only`, `swiss_only`, `ordered_only` unchanged; `strategy_sets` unchanged), `src/zig/core/hash/test_spec.zig` (`standard_test_set` likewise, and a `standard_rh_test_set`), `src/zig/core/hash/test/str_test.zig` and `table.zig`'s own tests (every test that names the second rung as Robin Hood, checks a rung index after migration, or relies on Robin Hood's block layout is updated to the Swiss rung; the MVMIter descending-iteration-with-delete protocol test must pass unchanged), `src/zig/core/hash/hash_test.zig` if a set-count test changes, `docs/hash-strategies.md` (the DEFAULT row and the LOOKUP section: LOOKUP now differs from the default only below 65 entries), `docs/zig-build.md` (the Hash engine paragraph naming the ladder)
+- Record: `traces/llm/bench/internals-set0-ladder.md` (+ raw TSVs `internals-set0-{nqp,capi}-{base,head}.tsv`, load log), `traces/llm/bench/internals-set0-spectest.txt`
+
+**Interfaces:**
+- Consumes: `swiss.Tier(.{})` (has `insertKnownAbsent` and `setSalt`, so `table.zig`'s migration and the engine salt work unchanged), `tools/bench/hash-ab.sh`, the base prefix `/tmp/claude-1000/internals-base-prefix` (1478311f6 default build with its `hash-bench` exe) and `tune-zig-prefix` for HEAD.
+- Produces: set 0 = Small (up to 64) then Swiss; the migration out of Small lands in a Swiss block sized for the 65th insert (the builder picks the initial `log2_slots`, at least 128 slots so the 7/8 load limit holds 65 without an immediate grow); every observable contract of the default ladder kept (iteration descending, delete-at-current safe, verbatim block copy works, `MVM_str_hash_shallow_copy`, serialization unaffected).
+
+- [ ] **Step 1: Failing tests.** In `test/str_test.zig`: `"the default ladder migrates from Small into Swiss at the 65th insert"` (build with 0 expected, insert 65 keys, `StrTable.rung(h) == 1` and the header's set is 0, every key fetches, fsck 0), `"default ladder: MVMIter protocol survives the Swiss rung"` (insert 200, iterate with delete-at-current to empty, every key seen exactly once), `"default ladder: shallow copy of a Swiss-rung table is independent"`, `"default ladder: random ops against std.AutoHashMap across the migration"` (seed 0x5eed, 20,000 ops, keys below 4,096). Run `zig build unit-test`. Expected: FAIL on the rung/set assertions.
+- [ ] **Step 2: Flip the ladder** in `str.zig` and `test_spec.zig`; fix the tests that encoded Robin Hood as the second rung; PASS; `zig build test` for `-Dzig-impl=true` and `false`, with and without `-Dhash-stats=true`; `zig build strategy-test -Dnqp-prefix=/tmp/claude-1000/tune-zig-prefix` (after installing HEAD there); `zig fmt --check`.
+- [ ] **Step 3: Ladder A/B, both levels.** HEAD default build into `tune-zig-prefix` plus `zig build hash-bench-exe --prefix /tmp/claude-1000/tune-zig-prefix`. `hash-ab.sh --rounds=7 --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all --variant=base:/tmp/claude-1000/internals-base-prefix/lib:/tmp/claude-1000/internals-base-prefix/bin/hash-bench --variant=head:/tmp/claude-1000/tune-zig-prefix/lib:/tmp/claude-1000/tune-zig-prefix/bin/hash-bench`, then the resize cells `--sizes=49,97` the same way into a second directory. Record `internals-set0-ladder.md` in the format of `bakeoff-final-nqp.md` (header, per-op tables with ratio and spreads per cell, verdicts).
+- [ ] **Step 4: Decide.** Rule (the user's at the stop): the 16-64 cells (and 4) must be within the round spread or within 5 percent of base on every op (the Small tier is identical; any disjoint loss there is a dispatch or migration-sizing regression to fix, not to accept); the 65-and-up cells are expected to match the scoreboard's Swiss column (hits 0.88-0.99, misses 0.80-0.83, inserts 0.78-0.86, deletes 0.88-0.97, overwrite 0.78-0.89, iterate 0.72, clone 0.61-0.81); the resize cells 49/97 and `insert_nth` at 65 (the migration) are reported with their ratios; memory is a reported column. If 16-64 loses with disjoint spreads after one bounded fix attempt (migration target size, dispatch), the ladder flip is reverted and the record says why. Write the decision into this plan's "## Assignment results".
+- [ ] **Step 5: Spectest gate** (set 0 reaches every program): base vs HEAD interleaved, three runs each in the order base HEAD HEAD base base HEAD, `tools/bench/timev.py`, roast fb1d87214, `.precomp` removed, `TEST_JOBS=24`, stats off, load under 2.0 before each; zero new failures, wall not slower beyond spread, peak RSS not worse; the ratio against the 3 percent target reported. Record `internals-set0-spectest.txt` in the format of `bakeoff-final-spectest.txt`. (This run doubles as Task 10's final spectest if Task 9b is the last code change; Task 10 then only re-checks the ladder guard.)
+- [ ] **Step 6: Docs and commit.** `docs/hash-strategies.md`, `docs/zig-build.md`; commit MoarVM ("Default hash ladder: Small then Swiss"); traces ("internals: set 0 ladder and spectest") and the pointer.
 
 ---
 
