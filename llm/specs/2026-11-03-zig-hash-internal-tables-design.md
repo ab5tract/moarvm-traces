@@ -1,7 +1,7 @@
 # Zig hash engine, campaign 3: internal tables on their own strategies
 
-Date: 2026-11-03. Status: shape approved in conversation, document awaiting
-the user's approval; builder check done, its
+Date: 2026-11-03. Status: approved by the user (who renamed `Spec` to
+`KeySpec` throughout); builder check done, its
 eight questions folded in (decisions 6 and 7, sections 4.1, 4.2, 5.2, 5.3,
 6.2, 7 and 8), each marked "(my call)" where the author settled it.
 Follows: the hash layout bake-off (`2026-11-03-zig-hash-layout-bakeoff-design.md`,
@@ -41,8 +41,8 @@ and the 3 percent is a target, not a gate.
    Task 9 for naming).
 2. **All five kinds are in scope, porting included** (the user's ruling on the
    census's E3). A site gets the layout its numbers favour even where that
-   means instantiating the Swiss or array tier for a new `Spec` (key type).
-   The tiers are already generic over `Spec` (section 3), so a "port" is a
+   means instantiating the Swiss or array tier for a new `KeySpec` (key type).
+   The tiers are already generic over `KeySpec` (section 3), so a "port" is a
    new tier set in the kind's file plus whatever the kind's hash and key
    conventions need.
 3. **The sealed fixed-key layout stays deleted.** It was deleted by the user
@@ -92,7 +92,7 @@ and the 3 percent is a target, not a gate.
    policy layer and must compile to nothing when off.
 9. **No new hash functions** (the bake-off's decision 8 stands). Where a
    kind's cached code is narrower than the Swiss tier needs (uni's 32-bit
-   `hash_val`, section 3), the kind's `Spec.hash` *widens* the cached code
+   `hash_val`, section 3), the kind's `KeySpec.hash` *widens* the cached code
    to 64 bits with a fixed mixing step; it does not rehash the key.
 
 ## 3. Verified facts (checked 2026-11-03 on `zig-hash-engine` 1478311f6)
@@ -101,7 +101,7 @@ The engine (`src/zig/core/hash/`):
 
 - `tier.zig`: every table's control block starts with
   `Header { tier: u8, set: u8, entry_size: u8, stale: u8, cur_items: u32 }`
-  (8 bytes). `set` indexes the kind's comptime `Spec.sets`; a set is a ladder
+  (8 bytes). `set` indexes the kind's comptime `KeySpec.sets`; a set is a ladder
   of `TierEntry { tier, from }`. There is **no spare byte** in the header for
   a site id.
 - `tier.zig` also carries a **reserved log hook**: `log_hook_enabled = false`,
@@ -111,7 +111,11 @@ The engine (`src/zig/core/hash/`):
   the natural seam for the survey's instrumentation, but it fires on insert
   and delete only; the survey needs fetch, iterate and build/demolish too.
 - Tiers are generic: `small.zig`, `robinhood.zig`, `swiss.zig`, `ordered.zig`
-  each export `Tier(...)` instantiated with a `Spec` (`Key`, `Ctx`,
+  each export `Tier(...)` instantiated with a `KeySpec` (this document's name
+  for what the source still spells `comptime Spec: type`, with per-kind
+  instances `StrSpec`, `UniSpec`, `FixKeySpec`, ...; the user renamed the
+  concept, and the builder may rename the parameter when touching those
+  files) (`Key`, `Ctx`,
   `entry_size` or `runtime_entry_size`, `hash(ctx, key) u64`, `eql`,
   `allocator`, `publish`, `sets`).
 - `str.zig`: `sets = { standard, large_only, swiss_only, ordered_only }`,
@@ -195,7 +199,7 @@ Per table kind and per creation site, over each workload of 4.3:
   site; and the process's total cycles from instance start to teardown, so
   each site's share of process time and of hash time can be reported. A
   "hash-engine cycle" is one spent between the exported function's entry
-  and its return (my call): that includes `Spec.hash` and `Spec.eql`
+  and its return (my call): that includes `KeySpec.hash` and `KeySpec.eql`
   callbacks (for index and fixkey the string code is cached on the string,
   so this is cheap; for str the code is cached too), the allocator and the
   rehash in grow and migration, and the Small rung's linear scan. It
@@ -311,7 +315,7 @@ plausible. Nothing in section 5 starts before that ruling.
 
 ### 5.1 Ports
 
-A layout is ported to a kind by adding a tier set to that kind's `Spec.sets`
+A layout is ported to a kind by adding a tier set to that kind's `KeySpec.sets`
 (`uni.zig`, `index.zig`, `fixkey.zig`, `ptr.zig`) and selecting it at build.
 Expected from the census, confirmed or struck by the survey:
 
@@ -424,7 +428,7 @@ innermost, misses dominating); an SC-handle benchmark for s1 is unlikely to
 be needed (its lookups are per module load). The plan names them after the
 survey. A C-API companion for a kind other than str is required only when
 that kind has a hot site; whether it is written by generalising `bench.zig`
-over `Spec` or as a one-off per kind is the builder's choice, budgeted as
+over `KeySpec` or as a one-off per kind is the builder's choice, budgeted as
 one task per hot kind (my call).
 
 ### 6.3 Ladder guard
