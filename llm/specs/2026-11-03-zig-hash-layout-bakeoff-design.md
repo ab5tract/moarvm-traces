@@ -371,3 +371,31 @@ tier rehashes in place; how the fixed-key tier stores entries before seal (a
 staging Robin Hood rung in the same set is the obvious answer); the names
 proposed in section 8; the order the three candidates are built in (the
 census may suggest one); and every file and function name not fixed above.
+
+## Errata (2026-11-03, after the bake-off)
+
+The labels E1 and E4 are the census's (Task 1). Its E2 (the `overwrite`,
+`clone` and `iterate_delete` ladder ops) became a plan amendment, and its E3
+(uni and index tables) is out of scope by section 10, so neither changes
+this text.
+
+- **E1 (section 4.2).** The array tier iterates the dense array *descending*, from the last position to the first, not "walks the dense array" forward. MVMIter deletes the current entry while holding the next one, and swap-remove moves the last entry into the hole. Walking downward, the moved entry has already been visited, so the walk stays correct. As a consequence the order a program can see before the first delete is *reverse* insertion order.
+- **E4 (section 5.3).** "MVMHash initialize" is wrong: an MVMHash's table is built lazily, on the first `bind_key` (and in deserialize), and both builds use the override.
+- **Stage-0 runner (section 7).** nqp's `stage0` predates the ops and cannot compile them (section 3 says so), so the op tests do not run on stage0.
+  - `tools/bench/t/strategy.nqp` runs on the installed `nqp-m` of a prefix that has the nqp branch `zig-hash-strategies`: `zig build strategy-test -Dnqp-prefix=<P>`, which `zig build test` also runs when `-Dnqp-prefix` is given.
+  - The `MVM_HASH_STRATEGY` override is exercised by the spectest gates and by `MVM_HASH_STRATEGY=<n> raku -e ...`, not by that script.
+- **Final names and numbers (section 8).** The user named the winners.
+  - `MVM_HASH_STRATEGY_DEFAULT` = 0 (Small then Robin Hood, unchanged).
+  - `MVM_HASH_STRATEGY_GENERAL` = 1: the Swiss-style tier (section 4.1, the scoreboard's strategy 1, set `swiss_only`).
+  - `MVM_HASH_STRATEGY_ORDERED` = 2: the array-ordered tier (section 4.2, the scoreboard's strategy 2, set `ordered_only`). It ships as the bare tier, with no composed set.
+  - `MVM_HASH_STRATEGY_COUNT` = 3. `str.zig`'s `strategy_sets` is `{ standard_set, general_set, ordered_set }`.
+  - The spectest records keep their column names: `bakeoff-spectest-s1.txt` is GENERAL and `-s2.txt` is ORDERED.
+  - MoarVM's `docs/hash-strategies.md` documents the strategies.
+- **Strategy 3 deleted (sections 4.3, 5.2, 5.3).** The fixed-key candidate is deleted by the user's decision, although it held a block (iterate and clone, 65-16384). It never won a lookup cell, its memory was 1.09-1.69x strategy 0's from 128 up, and strategies 1 and 2 beat it on the same ops.
+  - The seal mechanism went with it: the `hashseal` op (and its nqp mapping), `MVM_str_hash_seal`, `Table.seal` and the optional `initFrom` tier contract, the override's deserialize seal hook (section 5.3), `tiers/fixed.zig`, and the harness's `--seal` option and `bulk_load` op.
+  - Section 5.2's second op and section 7's seal tests therefore no longer exist.
+  - The scoreboard (`traces/llm/bench/bakeoff-scoreboard.md`) keeps the strategy-3 column as measured.
+- **Composed set (section 8).** One composed set was measured for GENERAL: Small then Swiss, the default ladder with the Swiss tier in place of Robin Hood. The rule was that it must keep every single-op block strategy 1 holds, and its 16-64 cells must be within 5 percent of strategy 0 or inside the round spread.
+  - It kept 4 of the 9 blocks: it lost lookup_hit, lookup_miss, delete, insert_nth and overwrite.
+  - It was 7-21 percent slower with disjoint spreads in several 16-64 cells, iterate_delete at all four.
+  - So it did not ship, and GENERAL is the bare Swiss tier. See `traces/llm/bench/bakeoff-composed-general.md`.
