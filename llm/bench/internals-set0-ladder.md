@@ -8,11 +8,11 @@ Commands (`tools/bench/hash-ab.sh`, 7 rounds, the variant order rotated per roun
         --variant=base:$B/lib:$B/bin/hash-bench --variant=head:$H/lib:$H/bin/hash-bench
     hash-ab.sh --rounds=7 --sizes=49,97 --runs=5 --nth=all --out=set0-resize  (the same variants)
 
-Both levels: nqp (`hash-bench.nqp`, each prefix's libmoar under the same nqp) and capi (the `hash-bench` exe). Cells: median of the 7 round medians, ratio head/base with [head min-max / base min-max] ns of the round medians, from `hash-compare.pl`. Verdict rule (the user's, for this task): 16-64 cells within the round spread (overlapping) or within 5 percent of base; 65 and up expected near the Swiss column of the scoreboard (hits 0.88-0.99, misses 0.80-0.83, inserts 0.78-0.86, deletes 0.88-0.97, overwrite 0.78-0.89, iterate 0.72, clone 0.61-0.81), judged pass when ratio < 1.05 or the spreads overlap; the size-4 cells are warm-up and not read; 49/97 are resize cells and insert_nth 65 is the migration cell, reported only. Machine idle: 1-minute load 0.84-1.19 at the run starts. Raw: `internals-set0-{nqp,capi}-{base,head}.tsv` (the harness's 7 columns, main and resize runs concatenated), `internals-set0-{nqp,capi}-raw.tsv` (with variant and round columns), `internals-set0-load.log`.
+Both levels: nqp (`hash-bench.nqp`, each prefix's libmoar under the same nqp) and capi (the `hash-bench` exe). Cells: median of the 7 round medians, ratio head/base; the brackets are the per-run min/max ns that `hash-compare.pl` prints (not the spread of the round medians). Verdicts were re-judged by the round medians (min-max over the 7 rounds per side, from the raw files) in fix round 1; where the bracket and the round medians disagree the round medians rule, from `hash-compare.pl`. Verdict rule (the user's, for this task): 16-64 cells within the round spread (overlapping) or within 5 percent of base; 65 and up expected near the Swiss column of the scoreboard (hits 0.88-0.99, misses 0.80-0.83, inserts 0.78-0.86, deletes 0.88-0.97, overwrite 0.78-0.89, iterate 0.72, clone 0.61-0.81), judged pass when ratio < 1.05 or the spreads overlap; the size-4 cells are warm-up and not read; 49/97 are resize cells and insert_nth 65 is the migration cell, reported only. Machine idle: 1-minute load 0.84-1.19 at the run starts. Raw: `internals-set0-{nqp,capi}-{base,head}.tsv` (the harness's 7 columns, main and resize runs concatenated), `internals-set0-{nqp,capi}-raw.tsv` (with variant and round columns), `internals-set0-load.log`.
 
 ## Verdict
 
-Kept. No cell fails: every 16-64 cell is within 5 percent of base or overlaps its spread, and the 65-and-up cells land on the scoreboard's Swiss column.
+Kept. No 16-64 cell fails when judged by the round medians: each is within 5 percent of base or overlaps (disjoint but within 5 percent: nqp clone 16 at 1.047, capi iterate 16/32/63/64 at 1.04; no 16-64 cell flipped). The 65-and-up cells land on the scoreboard's Swiss column except the nqp lookup_hit at 65 (1.26, disjoint) and lookup_hit/delete at 16384 (1.04), reported as losses.
 
 One fix attempt was used, and it worked. The first A/B of the flipped ladder (the same tree without `noinline` on Swiss's `highestLiveBelow`) read iterate at 16-64 as 1.05-1.09 at the nqp level and 1.06-1.08 at the C-API level, with disjoint spreads at 16, 32 and 64 (capi): the Swiss `next` had been inlined into the set-0 iteration dispatch and grew the Small rung's path. Making it `noinline` brought iterate 4-64 to 1.00-1.04 (capi) and 1.00-1.09 (nqp, overlapping) and kept the 65-and-up iterate at 0.72-0.75. The first run's compare files are kept in the scratchpad only; the table below is the full re-run after the fix.
 
@@ -20,7 +20,7 @@ Headline cells:
 
 - 16-64, worst per op (nqp / capi): insert 1.10 at 63 (overlap) / 0.94, lookup_miss 1.07 at 32 (overlap) / 0.96, delete 1.04 / 1.00, iterate 1.09 at 64 (overlap) / 1.04, clone 1.05 / not in the C-API harness, insert_nth 1.09 at 63 (overlap) / 0.96.
 - 65 to 16384 (nqp / capi): insert 0.82-0.88 / 0.74-0.81, lookup_hit 0.90-1.26 (65 is the noisy cell below) / 0.70-0.81, lookup_miss 0.82-0.91 / 0.58-0.60, delete 0.90-1.04 / 0.83-0.91, overwrite 0.92-1.02, iterate 0.73-0.75 / 0.72-0.73, clone 0.63-0.85, iterate_delete 0.81-0.85, insert_nth (128 up) 0.86-0.92 / 0.84-0.88. The nqp-level lookup and delete cells sit a little above the scoreboard's Swiss column at 1024-16384 (0.94-1.04), inside their spreads.
-- lookup_hit 65 at the nqp level reads 1.26 (spread 12.82-20.55 against 12.9-23.57, overlapping; the first run read 1.29): a noisy cell, the C-API level reads 0.73 there.
+- lookup_hit 65 at the nqp level is a loss: 1.26, round medians 16.29-18.57 ns (head) against 13.04-13.77 (base), disjoint (first run 1.29); the C-API level reads 0.73. It is a 65-and-up cell (a fresh migration), so the 4-64 verdict is untouched. Also at the nqp level, lookup_hit and delete at 16384 read 1.04 with disjoint round medians (small losses).
 - insert_nth 65, the migration into the 128-slot Swiss block: 0.69 nqp, 0.62 capi. The 97th insert_nth is 0.05 nqp and 0.01 capi because the base grows its 128-slot Robin Hood block (load limit 96) at the 97th while the Swiss block (limit 112) grows at the 113th.
 - 49 and 97: see the table; 97 is 0.47-0.56 on inserts and 0.67-0.68 on iterate.
 - Memory (capi, process maximum RSS after the insert block, median of rounds, head/base): 1.00 up to 64, 0.58 at 65, 0.29 at 97, 0.57 at 128, 0.67 at 256, 0.89 at 1024, 0.99 at 16384. The nqp-level RSS is the whole process and noisy.
@@ -47,12 +47,12 @@ Headline cells:
 | lookup_hit | 49 | 0.89 [11.17-48.56 / 11.2-52.11] | resize cell, reported |
 | lookup_hit | 63 | 1.00 [11.33-13.64 / 11.62-12.57] | pass (<=1.05) |
 | lookup_hit | 64 | 1.00 [11.25-12.16 / 11.51-13.08] | pass (<=1.05) |
-| lookup_hit | 65 | 1.26 [12.82-20.55 / 12.9-23.57] | pass (overlap) |
+| lookup_hit | 65 | 1.26 [12.82-20.55 / 12.9-23.57] | LOSS, disjoint round medians (16.29-18.57 / 13.04-13.77); reported, not passed |
 | lookup_hit | 97 | 0.99 [10.78-14.73 / 11.88-13.58] | resize cell, reported |
 | lookup_hit | 128 | 0.96 [11.34-21.4 / 12.83-15.42] | pass (<1.0) |
 | lookup_hit | 256 | 0.90 [11.54-13.17 / 12.9-17.07] | pass (<1.0) |
 | lookup_hit | 1024 | 0.95 [12.01-15.13 / 13.23-14.94] | pass (<1.0) |
-| lookup_hit | 16384 | 1.04 [14.86-17.13 / 14.51-15.31] | pass |
+| lookup_hit | 16384 | 1.04 [14.86-17.13 / 14.51-15.31] | small loss, disjoint round medians (1.04); reported |
 | lookup_miss | 4 | 1.05 [10.33-48.24 / 10.09-52.51] | warm-up, not read |
 | lookup_miss | 16 | 1.05 [9.84-11.19 / 9.62-11.23] | pass (<=1.05) |
 | lookup_miss | 32 | 1.07 [9.81-12.26 / 9.3-12.19] | pass (overlap) |
@@ -76,7 +76,7 @@ Headline cells:
 | delete | 128 | 0.92 [11.92-16.09 / 13.12-13.77] | pass (<1.0) |
 | delete | 256 | 0.90 [11.82-12.49 / 13.12-13.64] | pass (<1.0) |
 | delete | 1024 | 0.97 [12.77-14.52 / 13.3-14.52] | pass (<1.0) |
-| delete | 16384 | 1.04 [14.9-16.52 / 14.74-15.62] | pass |
+| delete | 16384 | 1.04 [14.9-16.52 / 14.74-15.62] | small loss, disjoint round medians (1.04); reported |
 | iterate | 4 | 1.17 [13.77-48.41 / 13.9-49.69] | warm-up, not read |
 | iterate | 16 | 1.00 [10.73-13.06 / 10.76-14.29] | pass (<=1.05) |
 | iterate | 32 | 1.00 [9.88-13.14 / 10.04-13.61] | pass (<=1.05) |
@@ -249,7 +249,12 @@ Memory (capi, process RSS after the insert block, median of rounds, head/base):
 | 1024 | 0.890 | 34848 / 39168 |
 | 16384 | 0.992 | 557088 / 561408 |
 
+## Open leads
+
+- nqp-level hit at 65 (fresh migration, 128 slots at 51 percent load) 1.26 while the C-API hit is 0.73; cause not investigated.
+
 ## Notes
 
 - nqp-level RSS figures are the whole nqp process and move with the GC heap, not the hash: not read.
 - The Small tier is the same code in both builds; the 16-64 differences that remain are code layout in the shared dispatch (iterate at 1.04 capi) and noise.
+- The 49-entry outliers (nqp iterate 2.40, overwrite 2.36, spreads like 9.87-37.89) are resize-cell noise: the 49 cells include a first-run warm-up that dominates the per-run range.
