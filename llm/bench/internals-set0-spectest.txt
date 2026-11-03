@@ -1,0 +1,98 @@
+# Set 0 ladder spectest: base 1478311f6 (Small then Robin Hood) against HEAD eb1537039 (Small then Swiss), both default builds in their prefixes (/tmp/claude-1000/internals-base-prefix, /tmp/claude-1000/tune-zig-prefix; the rakudo checkout is configured for the latter, the base runs put the base libmoar first with LD_LIBRARY_PATH), rakudo `make spectest`, TEST_JOBS=24, roast fb1d87214, t/spec/**/.precomp removed before every run, stats off. Timed by tools/bench/timev.py. Order base HEAD HEAD base base HEAD; the sixth run failed one socket test (below) and was repeated once as run 3b.
+
+base 1 start 23:17:44 load 1.06 1.37 1.06
+base 1 exit 0
+head 1 start 23:25:45 load 1.69 11.30 7.94
+head 1 exit 0
+head 2 start 23:33:35 load 1.87 13.74 12.10
+head 2 exit 0
+base 2 start 23:41:32 load 1.76 14.01 14.58
+base 2 exit 0
+base 3 start 23:49:22 load 1.80 13.92 15.87
+base 3 exit 0
+head 3 start 23:57:12 load 1.77 13.97 16.70
+head 3 exit 2
+head 3b start 00:05:17 load 1.71 13.68 17.16
+head 3b exit 0
+head 3 exit 2: t/spec/S32-io/IO-Socket-Async.t died after 26 of its 40 tests (Bad plan), under the 24-way parallel load; run in isolation with the same HEAD build it passed 40/40 six times out of six (and base 6/6). Not environmental in the .precomp sense; recorded as a flake of a socket test and repeated as run 3b, which passed.
+
+## run base 1 (base)
+	Command being timed: "make spectest"
+	User time (seconds): 4041.26
+	System time (seconds): 2450.38
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:51.44
+	Maximum resident set size (kbytes): 679656
+	Exit status: 0
+Files=1365, Tests=138715, 342 wallclock secs (35.31 usr  9.62 sys + 4001.34 cusr 2437.92 csys = 6484.19 CPU)
+Result: PASS
+
+## run head 1 (head)
+	Command being timed: "make spectest"
+	User time (seconds): 4089.37
+	System time (seconds): 2503.66
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:59.93
+	Maximum resident set size (kbytes): 681272
+	Exit status: 0
+Files=1365, Tests=138715, 351 wallclock secs (35.80 usr  9.82 sys + 4048.92 cusr 2490.93 csys = 6585.47 CPU)
+Result: PASS
+
+## run head 2 (head)
+	Command being timed: "make spectest"
+	User time (seconds): 4081.25
+	System time (seconds): 2493.86
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:56.45
+	Maximum resident set size (kbytes): 689864
+	Exit status: 0
+Files=1365, Tests=138715, 349 wallclock secs (35.38 usr  9.71 sys + 4041.36 cusr 2481.24 csys = 6567.69 CPU)
+Result: PASS
+
+## run base 2 (base)
+	Command being timed: "make spectest"
+	User time (seconds): 4041.79
+	System time (seconds): 2510.96
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:50.20
+	Maximum resident set size (kbytes): 680460
+	Exit status: 0
+Files=1365, Tests=138715, 342 wallclock secs (35.17 usr  9.46 sys + 4002.04 cusr 2498.65 csys = 6545.32 CPU)
+Result: PASS
+
+## run base 3 (base)
+	Command being timed: "make spectest"
+	User time (seconds): 4035.61
+	System time (seconds): 2472.42
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:49.95
+	Maximum resident set size (kbytes): 667812
+	Exit status: 0
+Files=1365, Tests=138715, 342 wallclock secs (35.14 usr  9.99 sys + 3995.80 cusr 2459.67 csys = 6500.60 CPU)
+Result: PASS
+
+## run head 3 (head (failed, see above))
+	Command being timed: "make spectest"
+	User time (seconds): 4093.89
+	System time (seconds): 2456.58
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:57.27
+	Maximum resident set size (kbytes): 667316
+	Exit status: 2
+Files=1365, Tests=138701, 349 wallclock secs (35.51 usr  9.45 sys + 4053.79 cusr 2444.32 csys = 6543.07 CPU)
+Result: FAIL
+
+## run head 3b (head (repeat of run 3))
+	Command being timed: "make spectest"
+	User time (seconds): 4097.29
+	System time (seconds): 2448.13
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:55.38
+	Maximum resident set size (kbytes): 689676
+	Exit status: 0
+Files=1365, Tests=138715, 347 wallclock secs (35.79 usr  9.54 sys + 4056.75 cusr 2435.94 csys = 6538.02 CPU)
+Result: PASS
+
+## comparison (medians of three clean runs per side: base 1, 2, 3; head 1, 2, 3b)
+base wall 5:50.20 (350.20 s; runs 351.44, 350.20, 349.95), RSS 679656 kB (679656, 680460, 667812).
+head wall 5:56.45 (356.45 s; runs 359.93, 356.45, 355.38), RSS 689676 kB (681272, 689864, 689676).
+wall ratio head/base 1.018 (+1.8 percent), inside the 3 percent target but outside the round spread (head 355.4-359.9 against base 350.0-351.4). User time 4081 against 4041 s (1.010), system time 2494 against 2473 s (1.008).
+RSS ratio 1.015; the failed run 3 had 667316 kB, so the RSS ranges overlap (base 667.8-680.5 MB, head 667.3-689.9 MB).
+Including the failed run 3 (357.27 s) the head median of four is 356.86 s, 1.019.
+Result PASS on all clean runs, Files=1365, Tests=138715 each.
+
+## failures
+Only t/spec/S32-io/IO-Socket-Async.t in head run 3 (see above); no failure in any base run, none in the head repeat.
