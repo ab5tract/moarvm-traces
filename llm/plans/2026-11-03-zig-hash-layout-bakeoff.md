@@ -293,63 +293,145 @@ Record: `traces/llm/bench/bakeoff-census.md` (Task 1, static read, no code chang
 
 ## Scoreboard
 
-Measured 2026-11-03 on d3d8dbf90, one prefix, 7 rounds with the strategy order rotated, `--runs=5 --nth=all --hint=0`, strategy 3 with `--seal` (its insert and insert_nth cells are n/a); load 0.69-1.18. Ratios are the strategy's median of round medians over strategy 0's in the same rounds (below 1 is faster); a win is at or below 0.90 with disjoint round spreads; a block is two or more adjacent winning ladder sizes (16 32 63 64 65 128 256 1024 16384). Records: `traces/llm/bench/bakeoff-scoreboard.md` (header, every table, the aggregator's Blocks list, the resize cells, the baseline check), `bakeoff-raw.tsv`, `bakeoff-raw-resize.tsv`, `bakeoff-load.log`.
+This scoreboard was measured 2026-11-03 on d263d4043, which carries the default-ladder dispatch fix 0113fddae. It supersedes the first scoreboard (traces 293a65a, on d3d8dbf90, where strategy 0's `clone` and `insert_nth` had regressed; see the last two paragraphs).
 
-The memory ratio is the ru_maxrss delta over a size's runs: below 65 it is a few pages or none, so its small-size values (strategy 3's 35.98 at 32 and 0.00 at 64-65) are page noise; from 128 up it reads as layout size.
+Method:
+- One prefix; 7 rounds with the strategy order rotated; `--runs=5 --nth=all --hint=0`.
+- Strategy 3 runs with `--seal`, so its insert and insert_nth cells are n/a.
+- Load was 0.76-1.24.
+- A ratio is the strategy's median of round medians over strategy 0's in the same rounds. Below 1 is faster.
+- A win is a ratio at or below 0.90 with disjoint round spreads.
+- A block is two or more adjacent winning ladder sizes (16 32 63 64 65 128 256 1024 16384).
 
-**Baseline check.** Strategy 0 agrees with its reference (`bakeoff-baseline-s0.tsv`) in 83 of 110 judged cells. All 27 that differ are slower. Seven of them are size 49, which is now the first size its process measures and carries warm-up. Nine ladder cells are out by more than 10 percent: `clone` at 16-128 and 16384 (1.11-2.27) and `insert_nth` at 128-256 (1.12-1.14). This is a same-direction move, either from the build (three more tiers in the dispatch) or from the machine. A slower strategy 0 there makes the other strategies' `clone` and `insert_nth` ratios look better by the same factor. Left to the controller.
+Records:
+- `traces/llm/bench/bakeoff-scoreboard.md`: the header, every table, the aggregator's Blocks list, the resize cells, the baseline check, and the regression A/Bs.
+- `bakeoff-raw.tsv` and `bakeoff-raw-resize.tsv`: the raw rows.
+- `bakeoff-load.log`: the load averages.
 
-**Default ladder A/B.** A same-machine A/B of the pre-tier build 4e37cbbbc against d3d8dbf90, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The strategies' `clone` and `insert_nth` ratios above are therefore measured against a slowed strategy 0.
+The memory ratio is the ru_maxrss delta over a size's runs. Below 65 that delta is a few pages or none, so small-size values such as strategy 3's 24.33 at 32 and 0.00 at 64-65 are page noise. From 128 up the ratio reads as layout size.
 
-**Default ladder fix (Task 8b).** The cause was inlining, not the tiers: with six sets `Table.dispatch` inlined every set's op through `resolve` and grew past LLVM's inlining threshold, so set 0's clone (`blockOf` in `shallowCopy`), iteration exports and grow-path `publish` each paid a call (49 outlined-dispatcher calls in the iteration paths against 0 before); and the migration's `Mover.visit` and the shared Robin Hood `hash` fell out of Small's drain loop (about 6 percent on the 64-to-65 insert). MoarVM 0113fddae keeps the set-0 switch inline in `dispatch` and calls the other sets out of line, keeps `lvalue` fully inline, and makes `visit` and its hash inline; set-0 semantics are unchanged. The same A/B against 4e37cbbbc is at parity: every judged cell within 5 percent or within the spread, clone 0.88-1.02, insert_nth 0.92-1.10 (overlapping). See `bakeoff-scoreboard.md`, "Default ladder A/B after the fix". The scoreboard's strategy ratios above were measured against the slowed build and were not re-run.
+**Baseline check.** Strategy 0 agrees with its reference (`bakeoff-baseline-s0.tsv`) in 99 of 110 judged cells.
+- 7 of the 11 that differ are at size 49. That size is now the first one its process measures, so it carries warm-up.
+- The other 4 are within 11 percent: insert 256 1.06, delete 32 1.05 and 63 1.07, and clone 97 0.89 (faster).
+- No ladder cell is out by more than 10 percent, and the `clone` and `insert_nth` drift of the first scoreboard is gone.
 
 ### Blocks (the aggregator's list, with ratio range and memory ratio range over the block's cells)
 
 **Strategy 1**
-- insert 128-16384: 0.77-0.84, mem 0.70-1.00
-- lookup_hit 128-256: 0.87-0.89, mem 0.70-0.73
-- lookup_miss 63-16384: 0.80-0.90, mem 0.70-2.07 (63-64 sit on the line at 0.89-0.90 with mem 1.81-2.07)
-- delete 65-256: 0.88-0.90, mem 0.70-0.73
-- iterate 65-16384: 0.68-0.69, mem 0.70-1.00
-- insert_nth 65-128: 0.03-0.81, mem 0.70-0.71 (0.03 is the 64-to-65 growth step strategy 0 pays, about 1080 ns)
-- bulk_load 128-16384: 0.81-0.87, mem 0.70-1.00
-- overwrite 65-16384: 0.79-0.89, mem 0.70-1.00
-- clone 65-16384: 0.58-0.75, mem 0.70-1.00
-- iterate_delete 65-16384: 0.78-0.83, mem 0.70-1.00
-- multi-op lookup_miss+delete+iterate+insert_nth+overwrite+clone+iterate_delete 65-128: 0.03-0.89, mem 0.70-0.71
-- multi-op lookup_miss+delete+iterate+overwrite+clone+iterate_delete 65-256: 0.58-0.90, mem 0.70-0.73
-- multi-op lookup_miss+iterate+overwrite+clone+iterate_delete 65-16384: 0.58-0.89, mem 0.70-1.00
-- multi-op insert+lookup_hit+lookup_miss+delete+iterate+bulk_load+overwrite+clone+iterate_delete 128-256: 0.58-0.90, mem 0.70-0.73 (every op it runs except insert_nth)
-- multi-op insert+lookup_miss+iterate+bulk_load+overwrite+clone+iterate_delete 128-16384: 0.58-0.89, mem 0.70-1.00
+- insert 128-16384: 0.78-0.86, mem 0.68-1.00
+- lookup_hit 65-256: 0.88-0.89, mem 0.68-0.73
+- lookup_miss 63-16384: 0.80-0.88, mem 0.68-2.07 (63-64 have mem 2.00-2.07)
+- delete 65-256: 0.88-0.89, mem 0.68-0.73
+- iterate 65-16384: 0.72-0.73, mem 0.68-1.00
+- insert_nth 65-1024: 0.02-0.87, mem 0.68-0.89. The 0.02 at 65 is the 64-to-65 growth step, which strategy 0 pays at about 1020 ns; the cells from 128 run 0.83-0.87.
+- bulk_load 128-16384: 0.83-0.87, mem 0.68-1.00
+- overwrite 65-16384: 0.78-0.89, mem 0.68-1.00
+- clone 65-256: 0.61-0.76, mem 0.68-0.73
+- iterate_delete 65-16384: 0.83-0.86, mem 0.68-1.00
+- multi-op lookup_hit+lookup_miss+delete+iterate+insert_nth+overwrite+clone+iterate_delete 65-256: 0.02-0.89, mem 0.68-0.73
+- multi-op lookup_miss+iterate+insert_nth+overwrite+iterate_delete 65-1024: 0.02-0.87, mem 0.68-0.89
+- multi-op lookup_miss+iterate+overwrite+iterate_delete 65-16384: 0.72-0.89, mem 0.68-1.00
+- multi-op insert+lookup_hit+lookup_miss+delete+iterate+insert_nth+bulk_load+overwrite+clone+iterate_delete 128-256: 0.61-0.89, mem 0.68-0.73 (all ten ops)
+- multi-op insert+lookup_miss+iterate+insert_nth+bulk_load+overwrite+iterate_delete 128-1024: 0.72-0.87, mem 0.68-0.89
+- multi-op insert+lookup_miss+iterate+bulk_load+overwrite+iterate_delete 128-16384: 0.72-0.89, mem 0.68-1.00
 
 **Strategy 2**
-- insert 128-16384: 0.60-0.66, mem 0.35-0.55
-- iterate 65-16384: 0.62-0.70, mem 0.35-0.74
-- bulk_load 128-16384: 0.69-0.72, mem 0.35-0.55
-- clone 65-16384: 0.33-0.53, mem 0.35-0.74
-- multi-op iterate+clone 65-16384: 0.33-0.70, mem 0.35-0.74
-- multi-op insert+iterate+bulk_load+clone 128-16384: 0.33-0.72, mem 0.35-0.55
+- insert 128-16384: 0.64-0.67, mem 0.34-0.58
+- iterate 65-16384: 0.66-0.75, mem 0.34-0.74
+- bulk_load 128-16384: 0.69-0.71, mem 0.34-0.58
+- overwrite 65-128: 0.84-0.90, mem 0.34-0.74
+- clone 65-16384: 0.51-0.70, mem 0.34-0.74
+- multi-op iterate+overwrite+clone 65-128: 0.51-0.90, mem 0.34-0.74
+- multi-op iterate+clone 65-16384: 0.51-0.75, mem 0.34-0.74
+- multi-op insert+iterate+bulk_load+clone 128-16384: 0.51-0.71, mem 0.34-0.58
 
-**Strategy 3** (sealed)
-- iterate 65-16384: 0.66-0.68, mem 1.11-1.65 from 128 up (0.00 at 65 is noise)
-- clone 65-16384: 0.52-0.69, same memory
-- multi-op iterate+clone 65-16384: 0.52-0.69, same memory
+**Strategy 3** (sealed). From 128 up its memory is 1.09-1.69; the 0.00 at 65 is noise.
+- iterate 65-16384: 0.71-0.73
+- clone 65-16384: 0.61-0.86
+- multi-op iterate+clone 65-16384: 0.61-0.86
 
-Lone wins (one ladder size, so not a block): strategy 1 insert_nth 1024 (0.76); strategy 2 lookup_hit 65 (0.85), lookup_miss 65 (0.83), overwrite 65 (0.84), insert_nth 65 (0.65); strategy 3 overwrite 65 (0.85).
+Lone wins (one ladder size, so not a block):
+- Strategy 1: clone 16384 (0.81; 1024 is 0.80 with overlapping spreads).
+- Strategy 2: lookup_miss 65 (0.82), insert_nth 65 (0.83).
+- Strategy 3: overwrite 65 (0.87).
 
-**Near-wins (note).** 0.90-0.95 without a win: strategy 1 delete 32, 63, 64, 1024 (0.93-0.95), iterate 63 (0.94), lookup_hit 1024 (0.92), overwrite 63-64 (0.91); strategy 2 clone 16 and 63 (0.93-0.94), insert_nth 16384 (0.92), lookup_hit 128 (0.95), overwrite 128 (0.92); strategy 3 lookup_hit 65 (0.95). At or below 0.90 but with overlapping spreads: strategy 1 lookup_hit 65 (0.88), insert_nth 256 and 16384 (0.80); strategy 2 insert_nth 128, 256, 1024 (0.71-0.89), iterate 63 (0.87), clone 64 (0.90); strategy 3 clone 64 (0.90). The insert_nth cells time a single insert, so their round spreads are wide for every strategy.
+**Near-wins (note).**
+- Between 0.90 and 0.95 without a win:
+  - Strategy 1: delete 63, 64 and 1024 (0.94-0.95); lookup_hit 63 and 1024 (0.93-0.94); overwrite 32, 63 and 64 (0.91-0.95).
+  - Strategy 2: clone 16 (0.91), insert_nth 256 (0.93), overwrite 256 (0.94).
+  - Strategy 3: lookup_hit 65 (0.95).
+- At or below 0.90 but with overlapping spreads:
+  - Strategy 1: clone 1024 (0.80), insert_nth 16384 (0.81).
+  - Strategy 2: insert_nth 128, 1024 and 16384 (0.57-0.77), clone 64 (0.89), lookup_hit 65 (0.90).
+- The insert_nth cells time a single insert, so their round spreads are wide for every strategy.
 
-**bulk_load (insert then `nqp::hashseal`, interpreted for every strategy).** Strategy 1 is slower to 65 (1.40-1.55 at 16-64, 1.00 at 65) and wins from 128 (0.81-0.87). Strategy 2 is slower to 65 (1.15-1.24 at 16-64, 1.03 at 65) and wins from 128 (0.69-0.72, mem 0.35-0.55). Strategy 3 pays for the build and then the seal: 2.78-3.22 at 16-64, 1.83 at 65, 1.43-1.52 from 128 to 16384. That is about 87-98 ns per entry at every ladder size, against strategy 0's 28-68.
+**bulk_load (insert then `nqp::hashseal`, interpreted for every strategy).**
 
-**Resize cells (49, 97; reported, never blocked).** At 97 strategy 0 grows past its Small tier inside the timed region and the others do not. Wins at 97: strategy 1 insert 0.58, insert_nth 0.02, bulk_load 0.68, iterate 0.63, overwrite 0.83, clone 0.32, iterate_delete 0.77. Strategy 2 insert 0.62, insert_nth 0.01, bulk_load 0.68, iterate 0.57, clone 0.38. Strategy 3 iterate 0.65, clone 0.37. Behind at 97: strategy 2 delete 1.56; strategy 3 delete 1.45, lookup_miss 1.25, bulk_load 1.48. At 49 the only win is strategy 3 lookup_hit (0.31), and that comes from strategy 0's bimodal warm-up rounds (49 is the first size in its process), not from a layout. Elsewhere at 49 strategies 1 and 2 are behind on insert (1.31-1.36) and bulk_load (1.23-1.25), and strategy 3 is behind on bulk_load (3.15).
+| | 16-64 | 65 | 128-16384 |
+|---|---:|---:|---:|
+| Strategy 1 | 1.37-1.60 | 1.05 | 0.83-0.87 (wins) |
+| Strategy 2 | 1.17-1.32 | 1.08 | 0.69-0.71 (wins), mem 0.34-0.58 |
+| Strategy 3 | 2.88-3.24 | 1.89 | 1.43-1.56 |
+
+Strategy 3 pays for the build and then the seal. That comes to about 88-99 ns per entry at every ladder size, against strategy 0's 28-67.
+
+**Resize cells (49, 97; reported, never blocked).**
+- At 97 strategy 0 grows past its Small tier inside the timed region; the others do not.
+- Wins at 97:
+  - Strategy 1: insert 0.63, insert_nth 0.01, bulk_load 0.69, iterate 0.67, clone 0.49.
+  - Strategy 2: insert 0.65, insert_nth 0.01, bulk_load 0.71, iterate 0.62, clone 0.45.
+  - Strategy 3: iterate 0.66, clone 0.46.
+- Behind at 97:
+  - Strategy 2: delete 1.59.
+  - Strategy 3: delete 1.46, bulk_load 1.55, lookup_miss 1.25, lookup_hit 1.13.
+- At 49 the only win is strategy 3's lookup_hit (0.32). It comes from strategy 0's bimodal warm-up rounds (49 is the first size in its process), not from a layout.
+- Elsewhere at 49:
+  - Strategies 1 and 2 are behind on insert (1.33-1.38) and bulk_load (1.27-1.33).
+  - Strategy 1 is behind on insert_nth (2.17).
+  - Strategy 3 is behind on bulk_load (3.27) and clone (1.72).
 
 ### Per strategy, in plain words
 
-**Strategy 1 (Swiss-style groups).** It is ahead on almost everything from 65 entries up. Iterate runs at about 0.68 and clone at 0.58-0.75. Lookup misses, overwrites, delete-while-iterating, insert and bulk load all run 10-20 percent faster from 128, with lookup hits 11-13 percent faster at 128-256. From 128 up it uses 70-86 percent of strategy 0's memory, and level (1.00) at 16384. It is behind below 65. There it pays 1.6-1.8x on insert, 1.4-1.55x on bulk_load, 1.2-1.4x on clone and 1.04-1.15x on lookup hits, with 1.8-3x the memory, because it has no small tier and strategy 0's Small tier is compact. At 16384 lookup_hit and delete are level with strategy 0 (0.98).
+**Strategy 1 (Swiss-style groups).**
+- From 65 entries up it is ahead on almost every op:
+  - Iterate runs at about 0.72.
+  - Clone runs at 0.61-0.76 to 256 and about 0.80 above.
+  - Lookup misses, overwrites and delete-while-iterating are 11-22 percent faster.
+  - Insert and bulk load are 13-22 percent faster from 128.
+  - Lookup hits and deletes are 11-12 percent faster at 65-256. Toward 16384 they fall back to level (0.93-0.99).
+  - From 128 to 1024 it uses 68-89 percent of strategy 0's memory, and the same amount at 16384.
+- Below 65 it is behind, because it has no small tier while strategy 0's Small tier is compact:
+  - insert 1.6-1.85x, bulk_load 1.4-1.6x, clone 1.5-1.9x, iterate 1.1-1.16x and delete-while-iterating 1.03-1.23x
+  - memory 2.0-2.2x
+  - Lookups are roughly level there (0.94-1.07).
 
-**Strategy 2 (array-ordered with a side index).** It is the fastest builder and the smallest table. From 128 up, insert runs at 0.60-0.66 and bulk_load at 0.69-0.72 on 35-55 percent of strategy 0's memory. Iterate runs at 0.62-0.70 and clone at 0.33-0.53 from 65. It is behind on delete at every size: 1.38-1.95 up to 128, then 1.76 at 256, 2.04 at 1024 and 2.19 at 16384. Lookups fall behind as the table grows: lookup_hit 1.08 at 1024 and 1.27 at 16384, lookup_miss 1.13-1.45 from 256. Delete-while-iterating is 1.08-1.34 except at 65-128 (level). Below 65, insert costs 1.2-1.36 and bulk_load 1.15-1.24, on the same memory as strategy 0 or more.
+**Strategy 2 (array-ordered with a side index).**
+- It is the fastest builder and the smallest table:
+  - From 128 up, insert runs at 0.64-0.67 and bulk_load at 0.69-0.71, on 34-58 percent of strategy 0's memory.
+  - From 65 up, iterate runs at 0.66-0.75 and clone at 0.51-0.70.
+  - Overwrite wins at 65-128.
+- It is behind on delete at every size: 1.40-1.94 up to 128, 1.73 at 256, 2.04 at 1024 and 2.18 at 16384.
+- Lookups fall behind as the table grows: lookup_hit 1.12 at 1024 and 1.30 at 16384; lookup_miss 1.13 at 256, 1.28 at 1024 and 1.48 at 16384.
+- Delete-while-iterating is 1.03-1.09 at 65-128 and 1.15-1.36 elsewhere.
+- Below 65 it is behind on building, on as much memory as strategy 0 or more (1.07-1.33):
+  - insert 1.25-1.37
+  - bulk_load 1.17-1.32
+  - clone up to 1.44
 
-**Strategy 3 (fixed keys, sealed; Robin Hood staging until the seal).** Once sealed it iterates at 0.66-0.68 and clones at 0.52-0.69 from 65 up. Overwrite at 65 is a lone win, and from 128 up overwrite (1.00-1.03, then 1.16 at 16384) and delete-while-iterating (1.01-1.02) are about level with strategy 0; below 65 delete-while-iterating costs 1.27-1.68. It is behind on every lookup at every size except 65: lookup_hit 1.17-1.49, lookup_miss 1.15-1.54. It is behind on delete at 1.26-1.94. Building it (bulk_load, insert plus seal) costs 1.4-3.2x. From 128 up it takes 1.1-1.65x strategy 0's memory.
+**Strategy 3 (fixed keys, sealed; Robin Hood staging until the seal).**
+- Once sealed, from 65 up, it iterates at 0.71-0.73 and clones at 0.61-0.86.
+- Overwrite at 65 is a lone win. From 128 up overwrite is 1.03-1.18 and delete-while-iterating 1.04-1.10.
+- It is behind on every lookup at every size except 65: lookup_hit 1.15-1.34 and lookup_miss 1.15-1.51.
+- It is behind on delete (1.27-1.91).
+- Building it (insert plus seal) costs 1.4-3.2x.
+- Below 65, iterate is 1.09-1.19 and clone 1.38-2.54.
+- From 128 up it takes 1.09-1.69x strategy 0's memory.
+
+### The default-ladder regression and its fix
+
+**Default ladder A/B.** A same-machine A/B of the pre-tier build 4e37cbbbc against d3d8dbf90, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The first scoreboard's `clone` and `insert_nth` ratios were therefore measured against a slowed strategy 0.
+
+**Default ladder fix (Task 8b).** The cause was inlining, not the tiers: with six sets `Table.dispatch` inlined every set's op through `resolve` and grew past LLVM's inlining threshold, so set 0's clone (`blockOf` in `shallowCopy`), iteration exports and grow-path `publish` each paid a call (49 outlined-dispatcher calls in the iteration paths against 0 before); and the migration's `Mover.visit` and the shared Robin Hood `hash` fell out of Small's drain loop (about 6 percent on the 64-to-65 insert). MoarVM 0113fddae keeps the set-0 switch inline in `dispatch` and calls the other sets out of line, keeps `lvalue` fully inline, and makes `visit` and its hash inline; set-0 semantics are unchanged. The same A/B against 4e37cbbbc is at parity: every judged cell within 5 percent or within the spread, clone 0.88-1.02, insert_nth 0.92-1.10 (overlapping). See `bakeoff-scoreboard.md`, "Default ladder A/B after the fix". The scoreboard above was re-run on the fixed build (d263d4043, Task 8c) and supersedes the first one.
 
 ## Incremental resize
 
