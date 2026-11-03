@@ -94,20 +94,20 @@ regardless. Shares of hash cycles, by workload:
 Nearest misses, all cold by decision 6 and below the line: f8 syscalls 3.4 (W1), s6 deserialize 0.8
 (W2), s1 SC weak hash 1.0 (W1), f1 1.3, f4 1.3, p1 0.5 (W3). `other` is 1.8 at most.
 
-Layout per site, from the bake-off scoreboard (`bakeoff-scoreboard.md`) and `docs/hash-strategies.md`:
+**Rule for per-table layout (controller ruling): a layout can be chosen per table only at the build call, keyed on the expected size known there. There is no mid-life switch.** Layout per site, from the bake-off scoreboard (`bakeoff-scoreboard.md`) and `docs/hash-strategies.md`:
 Swiss (LOOKUP) wins fetch hit, fetch miss, insert and iterate from 65 entries up (lookup miss 0.80-0.83,
-hit 0.88-0.93, insert 0.78-0.86 of the default's ns, iterate 0.72); APPEND wins insert, iterate and
+hit 0.88-0.99 (a win, ratio at most 0.9, only at 65-256; 0.93 at 1024 and 0.99 at 16384), insert 0.78-0.86 from 128 up (1.04 at 65), iterate 0.72); APPEND wins insert, iterate and
 clone but loses delete (1.4-2.2x slower); nothing beat the default below 65. "Default" below means
 the engine's own tiering (the Small rung, then the default layout).
 
 | site | surveyed size range and op mix | suggested layout | benchmark that will judge it |
 |---|---|---|---|
-| **s5** MVMHash (`MVMHash_bind_key`) | 99.8 percent of demolished tables end on the Small rung (at most 64 entries; 55 percent of W3's end at 4 or fewer); 0.14-4.1 percent of builds migrate past it. Mix (W3 counts): insert 403M, fetch hit 651M, fetch miss 289M, overwrite 10M, delete 2.2M, iterate 40M starts / 550M steps, copy 18M. Insert is 73 (W1), 33 (W2) and 73 (W3) percent of the site's cycles, and inside the insert the grow/migrate is 26 percent (W1), 13 (W2), 55 (W3). | **Default.** Every table the site makes is in the range where nothing beat the default; LOOKUP would only serve the 0.1-0.2 percent that reach 65 and would need a size-based switch the strategy API does not have. The lever the numbers show is not a layout but the growth path of 0-hint builds (all builds are `<=4`), which the plan can raise as a separate ruling (a size hint at `bind_key`'s lazy build). | nqp-level: `hash-bench.nqp` at sizes 4-64 (the default ladder, as the guard) plus an MVMHash-churn benchmark named at the ruling (build, bind 1-16 keys, read, drop; the shape of slurpy-named-arg and `Map` storage); C API: `hash-bench` at the same sizes |
-| **i2** lexical names (`MVM_bytecode_finish_frame`) | Sealable, presized exactly at deserialization, only fetched after. 94.6-98.6 percent of tables hold 64 or fewer entries (builds happen only above 5 lexicals); W3: 274M hits and 123M misses against 19M inserts. Misses are 31-37 percent of fetches in W2-W3 (outer-frame walk) and 2 percent in W1. | **Default** for the 94.6-98.6 percent. LOOKUP could help the 1.4-5.4 percent at 65 and up (miss 0.80-0.83), but those tables are rarer than the rung; the strategy would have to be chosen per table by size. Flag for the ruling: two layouts plausible only for the big frames. | a lexical-lookup benchmark to be written at the ruling: nqp code with N nested lexical scopes of 6-200 lexicals and a loop of `nqp::getlexdyn`/`getlex` by name (misses through outer frames); C API: a fetch-only ladder on the index kind at 16, 64, 65, 128 |
-| **i1** REPR registry | 47 core REPRs in one table (`<=64` bucket), built and filled once per process; 2640 fetches per process at startup (350 cycles each, cold). Its W1 share is 6.0 percent without the stats-init artifact, 3.6 in W3, 0.3 in W2. | **Default.** Strike from the hot list at the stop: the table is built once, startup-only (0.8 percent of W1's total cycles, about 0.4 without the artifact), and a 47-key table is under the 65 threshold. | startup wall (`raku -e ''`, `hash-ab.sh` ladder) if the user keeps it |
-| **u4** property values (`MVM_unicode_init`) | 115 tables built with hint 0, 5058 inserts per process (avg 44 per table; census: 5164 values), sealable, then fetch only (50 percent misses in W4). Grows 144 times per process (6370 cycles each) because there is no hint: 61 percent of the site's W1 cycles. | Mixed: LOOKUP for the tables at 65 entries and up, **default** below (the per-table size distribution is not measured: the tables live to teardown and leave no demolish row; the average is 44, so most are probably under 65, which needs checking against the census's 5164 values before a switch). A per-table size hint is the cheaper lever for the build. | uni-bench (property-value lookups, `pvalcode_hit`/`pvalcode_miss` rows) and its C-API twin |
-| **u1** property names (`generate_property_codes_by_names_aliases`) | one table, hint 4380, 4380 inserts, then fetch: W4 7.47M hits and 3.36M misses at 68 and 57 cycles; startup-lazy (built in 50 of 100 W1 processes (raku only), 2615 times across W3's 2624 files). | **LOOKUP**: 4380 entries is in the range where it wins hit 0.93-0.99 and miss 0.83 (1024 and 16384 cells) | uni-bench (`propcode_alias`, `propcode_hit`, `propcode_miss`) and `hash-ab.sh --ladder=uni` |
-| **u3** codepoint names (`generate_codepoints_by_name`) | one table of about 65K entries, hint 0 so it grows 24 times (2.1G cycles of the 2.5G insert cycles in W3, 395K cycles per grow in W4), then fetch with a real miss path (57 percent misses in W4). | **LOOKUP**, plus a size hint at the implicit build (a one-line change in the same task; its 24 grows per build are most of the site's cycles in W3: 2.1G of 2.5G) | uni-bench (`cpbyname_hit`, `cpbyname_miss`, `cpbyname_miss_prefix` rows) |
+| **s5** MVMHash (`MVMHash_bind_key`) | Of the tables the GC demolished, 99.8 percent ended on the Small rung (at most 64 entries; 55 percent of W3's at 4 or fewer). That is a demolished-tables figure. The better estimate of how many tables outgrow Small is the migration rate, 0.14-4.1 percent of builds (W1 4.1, W2 0.14, W3 2.45). W2 reconciles (10,579 migrations, 10,477 rung-1 demolishes); W3 does not (979K migrations against 89K rung-1 demolishes) because about 570K W3 tables were never demolished (39.91M built, 39.33M demolished; alive at exit), so the demolish histogram undercounts migrated tables there. Mix (W3 counts): insert 403M, fetch hit 651M, fetch miss 289M, overwrite 10M, delete 2.2M, iterate 40M starts / 550M steps, copy 18M. Insert is 73 (W1), 33 (W2) and 73 (W3) percent of the site's cycles, and inside the insert the grow/migrate is 26 percent (W1) and 13 (W2); W3's 55 is a contention-inflated outlier (26,580 cycles per grow against 1,122 in W1). **Caveat: these are shares of tables by size, not of lookups or cycles by table size (lookups are not binned by table size).** The 0.14-4.1 percent of big tables could carry a disproportionate share of the 940M W3 fetches. That is a measurement gap, not a settled point; the stop will offer a binned re-measurement. | **Default, provisionally.** The site builds with hint 0, so no size is known at the build call, and no mid-life switch exists: a layout change would apply to every MVMHash, almost all of which are in the range where nothing beat the default. Hence stay on default, subject to the caveat. The lever the numbers show for growth (13-26 percent of insert cycles, W2/W1) is a growth path or size hint at `bind_key`'s lazy build, a separate ruling. | nqp-level: `hash-bench.nqp` at sizes 4-64 (the default ladder, as the guard) plus an MVMHash-churn benchmark named at the ruling (build, bind 1-16 keys, read, drop; the shape of slurpy-named-arg and `Map` storage); C API: `hash-bench` at the same sizes |
+| **i2** lexical names (`MVM_bytecode_finish_frame`) | Sealable, presized exactly at deserialization, only fetched after. 94.6-98.6 percent of tables hold 64 or fewer entries (a table is built only above 5 lexicals, `bytecode.c:667`); W3: 274M hits and 123M misses against 19M inserts. Misses are 31-37 percent of fetches in W2-W3 (outer-frame walk) and 2 percent in W1. **Caveat: this is a share of tables by size, not of lookups or cycles by table size.** The 1.4-5.4 percent of tables at 65 and up could carry a disproportionate share of the 397M W3 fetches; that is a measurement gap, and the stop will offer a binned re-measurement. | **Default for the 94.6-98.6 percent** (nothing beat it below 65). `num_lexicals` is known at the build call, so a per-frame choice (LOOKUP where it is 65 or more) is implementable. Whether the 1.4-5.4 percent of frames at 65 and up justify it (miss 0.80-0.83 of the default's ns) is the user's ruling. | a lexical-lookup benchmark to be written at the ruling: nqp code with N nested lexical scopes of 6-200 lexicals and a loop of `nqp::getlexdyn`/`getlex` by name (misses through outer frames); C API: a fetch-only ladder on the index kind at 16, 64, 65, 128 |
+| **i1** REPR registry | 47 core REPRs in one table (`<=64` bucket), built and filled once per process; 2640 fetches per process at startup (350 cycles each, cold). Its W1 share is 6.0 percent without the stats-init artifact; in W3 the artifact is just as large (the build is about 78 percent of i1's W3 cycles, 38.5G of 49.0G), so the corrected W3 share is about 0.8 percent, not 3.6; W2 0.3. | **Default.** Strike from the hot list at the stop: the table is built once, startup-only (0.8 percent of W1's total cycles, about 0.4 without the artifact), and a 47-key table is under the 65 threshold. | startup wall (`raku -e ''`, `hash-ab.sh` ladder) if the user keeps it |
+| **u4** property values (`MVM_unicode_init`) | 115 tables built with hint 0, 5058 inserts per process (avg 44 per table; census: 5164 values), sealable, then fetch only (50 percent misses in W4). Grows 144 times per process (6370 cycles each) because there is no hint: 61 percent of the site's W1 cycles. | Per build: LOOKUP where the pre-counted size is 65 or more, default below (a per-build choice at the site: `MVM_unicode_init` can pre-count each of the 115 property tables from the static array before building it). The size distribution is not measured (the tables live to teardown and leave no demolish row; the average is 44, so most are probably under 65), but the pre-count makes it known at the build. A size hint at the same call is the cheaper lever for the grows. | uni-bench (property-value lookups, `pvalcode_hit`/`pvalcode_miss` rows) and its C-API twin |
+| **u1** property names (`generate_property_codes_by_names_aliases`) | one table, hint 4380, 4380 inserts, then fetch: W4 7.47M hits and 3.36M misses at 68 and 57 cycles; startup-lazy (built in 50 of 100 W1 processes (raku only), 2615 times across W3's 2624 files). | **LOOKUP**: 4380 entries is in the range where the scoreboard's 1024 and 16384 cells give hit 0.93 and 0.99 (not a win by the 0.9 rule) and miss 0.83 (a win); 4380 lies between them | uni-bench (`propcode_alias`, `propcode_hit`, `propcode_miss`) and `hash-ab.sh --ladder=uni` |
+| **u3** codepoint names (`generate_codepoints_by_name`) | one table of about 52K entries (1.87M inserts over 36 builds in W3; 103.7K over 2 in W4), hint 0 so it grows 24 times (2.1G cycles of the 2.5G insert cycles in W3, 395K cycles per grow in W4), then fetch with a real miss path (57 percent misses in W4). | **LOOKUP**, plus a size hint at the implicit build (a one-line change in the same task; its 24 grows per build are most of the site's cycles in W3: 2.1G of 2.5G) | uni-bench (`cpbyname_hit`, `cpbyname_miss`, `cpbyname_miss_prefix` rows) |
 | **u2** sequence names | one table, hint 3680, fetch only (`strfromname_seq`); 2.1 percent in W4 and absent from W1-W2. | **LOOKUP** with u1 (same shape), no separate benchmark beyond uni-bench | uni-bench `strfromname_seq` |
 
 ### W4: does the benchmark drive u1-u4?
@@ -124,7 +124,7 @@ Hash cycles over the process's total cycles, from the aggregator's `## Hash shar
 the stats build). **The counted cycles include the counting**, so the measured share is an upper
 bound. The lower bound applies the overhead factor of internals-survey-overhead.md: hash cycles
 divided by f, total cycles reduced by the same amount (all the counting cost is assumed to lie inside the
-counted window, which makes the bound conservative). f = 2.3 is the fetch-dominated C-API figure,
+counted window, which makes the bound conservative). f = 2.3 is the fetch-dominated C-API figure (it understates the correction for insert-dominated sites such as s5, 59-73 percent inserts, whose overhead is 1.2-1.7x, so for them the 3.49 column is the safe bound),
 f = 3.49 the worst cell.
 
 | workload | measured (upper bound) | f = 2.3 | f = 3.49 (lower bound) | hash cycles / total cycles |
@@ -143,7 +143,7 @@ whole-system gate of the plan (the 3 percent target of decision 8) is of the sam
 hash share itself: a per-site layout change cannot move whole-system wall time by more than the
 site's share of that, for instance s5's 81 percent of 4.4 is 3.5 percent of W3's cycles and at most
 about 1.5 percent after the overhead adjustment. Iteration and copy cycles are not in the hash cycles
-(see above): s5's 550M iterator steps in W3 at about 40 cycles would add about 22G, 0.07 percent of
+(see above): s5's 550M iterator steps in W3 at an assumed 40 cycles per step (an assumption, not measured) would add about 22G, 0.07 percent of
 W3's cycles, and do not change the picture.
 
 ## The census's open questions
@@ -160,12 +160,11 @@ W3's cycles, and do not change the picture.
    (979,329 of 39.9M). Of the tables the GC demolished with their maximum recorded, **0.19 percent in
    W2 and 0.23 in W3** ended on the second rung (W1 demolishes none: processes end before a table is
    freed). Every build is a hint-0 lazy build (`<=4`), so nearly all of s5's growth is within the Small
-   rung: 187,747 grows in W2 and 16.7M in W3 (0.42 per build), which are 13 and 55 percent of s5's insert
-   cycles. Growing is where s5's insert cycles go, not the layout.
+   rung: 187,747 grows in W2 and 16.7M in W3 (0.42 per build), which are 13 percent (W2) of s5's insert cycles (W3's 55 percent is contention-inflated; W1 26). Growing is where s5's insert cycles go, not the layout.
 3. **Is the SC weak hash's per-GC iteration visible?** In counts, yes; in cycles, not measurably. s1
    (the `sc_weakhash`, iterated every GC to mark keys) shows 0 iterations in W1, 1,733 starts and 40.8K
    steps in W2, 12.6K starts and **3.27M steps in W3** (about 260 entries per iteration), 8 starts in
-   W4. Iteration cycles are not counted; at about 40 cycles per step that is about 130M cycles, 0.0004
+   W4. Iteration cycles are not counted; at an assumed 40 cycles per step (not measured) that is about 130M cycles, 0.0004
    percent of W3's total, against s1's counted 3.68G (0.3 percent of hash cycles). Its real cost is
    the mutexed insert, overwrite and fetch path: 2700 cycles per insert and overwrite in W3 against
    760 in W1 (lock contention and contention-inflated cycles), still 0.3 percent of hash cycles.
@@ -173,7 +172,7 @@ W3's cycles, and do not change the picture.
 
 ## Sites, in census order
 
-Per cell: count / cycles / cycles per op. Shares are of the workload's hash cycles and of its total cycles (W3's cycles are contention-inflated, see above). Bucket labels are the ladder: `<=4 <=16 <=32 <=64 <=65 <=128 <=256 <=1024 <=16384 more`; build size is the size hint requested, demolish is the maximum item count of a demolished table by set and rung (rung 0 = Small). No demolish row means no table of the site was freed by the GC before exit.
+Per cell: count / cycles / cycles per op. Shares are of the workload's hash cycles and of its total cycles (W3's cycles are contention-inflated, see above). The lifetime class is derived from the counters: "no rung migration counted" does not mean the table is small (u1-u3 hold 4,380 to 52K entries and are never demolished; uni and index tables have no Small rung to leave). Bucket labels are the ladder: `<=4 <=16 <=32 <=64 <=65 <=128 <=256 <=1024 <=16384 more`; build size is the size hint requested, demolish is the maximum item count of a demolished table by set and rung (rung 0 = Small). No demolish row means no table of the site was freed by the GC before exit.
 
 ### s1 MVM_vm_create_instance (src/moar.c:203)
 
@@ -202,10 +201,10 @@ Per cell: count / cycles / cycles per op. Shares are of the workload's hash cycl
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
 - W3: churning (52.8K deletes against 148.3K inserts); grew past the Small rung (44 migrations in 2624 builds, 1.68%)
-- W4: built-and-never-deleted; stayed on the Small rung
+- W4: built-and-never-deleted; no rung migration counted
 
 ### s2 [census: bytecode.c:777 debug locals (debug server only)]
 
@@ -284,10 +283,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### s7 [census: nativecall_libffi.c:85 callback cache]
 
@@ -324,10 +323,10 @@ Absent in all four workloads.
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### u2 generate_property_codes_by_seq_names (src/strings/unicode_ops.c:930)
 
@@ -353,8 +352,8 @@ Lifetime class:
 Lifetime class:
 - W1: absent in this workload
 - W2: absent in this workload
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### u3 generate_codepoints_by_name (src/strings/unicode_db.c:129559)
 
@@ -381,8 +380,8 @@ Lifetime class:
 Lifetime class:
 - W1: absent in this workload
 - W2: absent in this workload
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### u4 MVM_unicode_init (src/strings/unicode_ops.c:959)
 
@@ -408,10 +407,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: never looked up; built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: never looked up; built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### f1 MVM_vm_create_instance (src/moar.c:186)
 
@@ -434,10 +433,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: never looked up; built-and-never-deleted; stayed on the Small rung
-- W2: never looked up; built-and-never-deleted; stayed on the Small rung
-- W3: never looked up; built-and-never-deleted; stayed on the Small rung
-- W4: never looked up; built-and-never-deleted; stayed on the Small rung
+- W1: never looked up; built-and-never-deleted; no rung migration counted
+- W2: never looked up; built-and-never-deleted; no rung migration counted
+- W3: never looked up; built-and-never-deleted; no rung migration counted
+- W4: never looked up; built-and-never-deleted; no rung migration counted
 
 ### f2 MVM_vm_create_instance (src/moar.c:187)
 
@@ -485,9 +484,9 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
 - W4: never looked up; built-and-never-deleted
 
 ### f4 MVM_vm_create_instance (src/moar.c:195)
@@ -512,9 +511,9 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
 - W4: never looked up; built-and-never-deleted
 
 ### f5 MVM_vm_create_instance (src/moar.c:199)
@@ -540,9 +539,9 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
 - W4: never looked up; built-and-never-deleted
 
 ### f6 MVM_vm_create_instance (src/moar.c:207)
@@ -568,10 +567,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### f7 MVM_vm_create_instance (src/moar.c:210)
 
@@ -594,10 +593,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: never looked up; built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: never looked up; built-and-never-deleted; no rung migration counted
 
 ### f8 MVM_disp_syscall_setup (src/disp/syscall.c:1671)
 
@@ -621,10 +620,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### i1 MVM_vm_create_instance (src/moar.c:182)
 
@@ -648,10 +647,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### i2 MVM_bytecode_finish_frame (src/core/bytecode.c:667)
 
@@ -677,10 +676,10 @@ Lifetime class:
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: built-and-never-deleted; stayed on the Small rung
-- W3: built-and-never-deleted; stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: built-and-never-deleted; no rung migration counted
+- W3: built-and-never-deleted; no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
 ### i3 [census: MVMStaticFrame.c:73 copy_to (shallow copy)]
 
@@ -709,10 +708,10 @@ Absent in all four workloads.
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: churning (216.7K deletes against 217.7K inserts); stayed on the Small rung
-- W3: churning (5.98M deletes against 6.45M inserts); stayed on the Small rung
-- W4: churning (10 deletes against 10 inserts); stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: churning (216.7K deletes against 217.7K inserts); no rung migration counted
+- W3: churning (5.98M deletes against 6.45M inserts); no rung migration counted
+- W4: churning (10 deletes against 10 inserts); no rung migration counted
 
 ### p2 [census: heapsnapshot.c:746 seen set]
 
@@ -739,8 +738,8 @@ Absent in all four workloads.
 - W4 demolish: none recorded
 
 Lifetime class:
-- W1: built-and-never-deleted; stayed on the Small rung
-- W2: churning (1581 deletes against 0 inserts); stayed on the Small rung
-- W3: churning (840 deletes against 0 inserts); stayed on the Small rung
-- W4: built-and-never-deleted; stayed on the Small rung
+- W1: built-and-never-deleted; no rung migration counted
+- W2: churning (1581 deletes against 0 inserts); no rung migration counted
+- W3: churning (840 deletes against 0 inserts); no rung migration counted
+- W4: built-and-never-deleted; no rung migration counted
 
