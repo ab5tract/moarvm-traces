@@ -1,0 +1,117 @@
+# Spectest: base (C engine, zig cc, no LTO) vs Zig engine with LTO, interleaved on one rakudo tree
+# 2026-11-03, MoarVM 7cf5516e7 (code identical to 1f9de9998), roast fb1d87214, TEST_JOBS=24, libmoar.so swapped via LD_LIBRARY_PATH
+# base: zig build install -Dzig-impl=false -Dlto=false into /tmp/claude-1000/tune-c-nolto-prefix; ziglto: the installed default build in tune-zig-prefix
+
+HEAD 7cf5516e7 09:53:33 load 15.29 21.36 13.91
+install base (C, no LTO) exit=0 16s
+base: This is MoarVM version 2026.09-136-g7cf5516e7 built with JIT support
+dynamic MVM_str_hash_ symbols: 6;plt calls to MVM_str_hash_: 27;definitions of MVM_str_hash_fetch_nocheck: 0;call sites of MVM_str_hash_fetch_nocheck: 0;
+ziglto: This is MoarVM version 2026.09-134-g1f9de9998 built with JIT support
+dynamic MVM_str_hash_ symbols: 22;plt calls to MVM_str_hash_: 0;definitions of MVM_str_hash_fetch_nocheck: 1;call sites of MVM_str_hash_fetch_nocheck: 5;
+base maps: /tmp/claude-1000/tune-c-nolto-prefix/lib/libmoar.so smoke: 299 300
+ziglto maps: /tmp/claude-1000/tune-zig-prefix/lib/libmoar.so smoke: 299 300
+roast before fb1d87214
+settle exit=0 roast fb1d87214 09:53:52
+load settled 1.85 13.64 12.08 09:55:52
+run 1 base start 09:55:52 load 1.85 13.64 12.08 roast fb1d87214
+run 1 base exit 0 end 10:00:54
+  Test Summary Report
+  Files=1365, Tests=138715, 294 wallclock secs (35.81 usr  8.81 sys + 4364.13 cusr 1077.64 csys = 5486.39 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:01.19
+  	Maximum resident set size (kbytes): 712348
+run 2 ziglto start 10:00:54 load 13.31 20.39 15.99 roast fb1d87214
+run 2 ziglto exit 0 end 10:05:49
+  Test Summary Report
+  Files=1365, Tests=138715, 288 wallclock secs (36.40 usr  8.63 sys + 4278.26 cusr 1036.83 csys = 5360.12 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.62
+  	Maximum resident set size (kbytes): 690104
+run 3 ziglto start 10:05:49 load 13.75 23.17 18.92 roast fb1d87214
+run 3 ziglto exit 0 end 10:10:45
+  Test Summary Report
+  Files=1365, Tests=138715, 288 wallclock secs (36.06 usr  8.77 sys + 4255.55 cusr 1038.04 csys = 5338.42 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.37
+  	Maximum resident set size (kbytes): 688768
+run 4 base start 10:10:45 load 12.93 23.38 20.66 roast fb1d87214
+run 4 base exit 0 end 10:15:48
+  Test Summary Report
+  Files=1365, Tests=138715, 296 wallclock secs (36.38 usr  8.55 sys + 4389.77 cusr 1074.90 csys = 5509.60 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:03.25
+  	Maximum resident set size (kbytes): 709472
+run 5 base start 10:15:48 load 12.44 23.46 22.01 roast fb1d87214
+run 5 base exit 0 end 10:20:51
+  Test Summary Report
+  Files=1365, Tests=138715, 295 wallclock secs (36.24 usr  8.35 sys + 4387.70 cusr 1070.98 csys = 5503.27 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:02.82
+  	Maximum resident set size (kbytes): 707156
+run 6 ziglto start 10:20:51 load 13.24 23.81 23.10 roast fb1d87214
+run 6 ziglto exit 0 end 10:25:46
+  Test Summary Report
+  Files=1365, Tests=138715, 287 wallclock secs (36.33 usr  8.57 sys + 4296.08 cusr 1012.31 csys = 5353.29 CPU)
+  Result: PASS
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.02
+  	Maximum resident set size (kbytes): 705468
+DONE
+
+## spec-1-base
+	Command being timed: "make spectest"
+	User time (seconds): 4404.46
+	System time (seconds): 1089.34
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:01.19
+	Maximum resident set size (kbytes): 712348
+	Exit status: 0
+
+## spec-2-ziglto
+	Command being timed: "make spectest"
+	User time (seconds): 4319.15
+	System time (seconds): 1048.47
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.62
+	Maximum resident set size (kbytes): 690104
+	Exit status: 0
+
+## spec-3-ziglto
+	Command being timed: "make spectest"
+	User time (seconds): 4296.29
+	System time (seconds): 1049.65
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.37
+	Maximum resident set size (kbytes): 688768
+	Exit status: 0
+
+## spec-4-base
+	Command being timed: "make spectest"
+	User time (seconds): 4430.94
+	System time (seconds): 1086.16
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:03.25
+	Maximum resident set size (kbytes): 709472
+	Exit status: 0
+
+## spec-5-base
+	Command being timed: "make spectest"
+	User time (seconds): 4428.67
+	System time (seconds): 1082.12
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:02.82
+	Maximum resident set size (kbytes): 707156
+	Exit status: 0
+
+## spec-6-ziglto
+	Command being timed: "make spectest"
+	User time (seconds): 4337.14
+	System time (seconds): 1023.66
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:55.02
+	Maximum resident set size (kbytes): 705468
+	Exit status: 0
+
+## Zig LTO vs Zig no-LTO, the two runs before the restart (lto-vs-nolto/run.log)
+run 1 lto start 09:41:22 load 1.78 0.52 0.22 roast fb1d87214
+run 1 lto exit 0 end 09:46:15
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:52.76
+  	Maximum resident set size (kbytes): 692504
+run 2 nolto start 09:46:15 load 14.46 15.52 7.25 roast fb1d87214
+run 2 nolto exit 0 end 09:51:12
+  	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:57.24
+  	Maximum resident set size (kbytes): 692256
+run 3 nolto start 09:51:12 load 12.84 20.74 12.35 roast fb1d87214

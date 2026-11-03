@@ -1488,5 +1488,20 @@ Medians: C 4:58.83 and 719,584 kbytes; Zig 4:55.92 and 704,192. Zig / C: wall 0.
 
 Raku level (`post-lto-raku.md`, `post-lto-raku-reps.md`, raw `post-lto-raku-reps.tsv`): `hash-bench.sh --raku-c --raku-zig` once (it also re-ran the C-API microbenchmark; Robin Hood iterate there is 1.30-1.34 as in Task 8, two export calls per element from outside libmoar) and ten more alternating invocations, eleven per engine. Medians (ratio of medians): Small insert 0.75-0.82 except 63 at 1.18, lookups 0.94-1.00, delete 0.92-0.98, iterate 0.90-1.00; Robin Hood insert 0.91-1.03 except 256 at 1.23 and 65536 at 1.52, lookups 0.96-1.03 (65 hit 1.19), delete 0.98-1.04, iterate 0.73-1.11; the migration 2.84 (Task 9: 3.75). The four cells above 1.1 are bimodal between invocations on both engines (insert at 63: Zig 103-110 ns in 4 runs and 166-171 in 7, C 137-146 in 8 and 226-229 in 3), the Zig stack landing in the slow mode more often.
 
+#### Base (C engine, no LTO) against the Zig engine with LTO (2026-11-03)
+
+The user asked what the default Zig build buys over the build a plain `--cc=zig` user gets without LTO. Six interleaved `make spectest` runs on the same rakudo tree, same recipe as above (roast `fb1d87214`, `TEST_JOBS=24`, `libmoar.so` swapped through `LD_LIBRARY_PATH`, load under 2 before the first run), base = `zig build install -Dzig-impl=false -Dlto=false` into a third prefix, Zig = the installed default build. Record: `traces/llm/bench/post-lto-base-vs-ziglto-spectest.txt`.
+
+| run | engine | wall | peak RSS (kbytes) | result |
+|---|---|---|---|---|
+| 1 | base C, no LTO | 5:01.19 | 712,348 | PASS |
+| 2 | Zig, LTO | 4:55.62 | 690,104 | PASS |
+| 3 | Zig, LTO | 4:55.37 | 688,768 | PASS |
+| 4 | base C, no LTO | 5:03.25 | 709,472 | PASS |
+| 5 | base C, no LTO | 5:02.82 | 707,156 | PASS |
+| 6 | Zig, LTO | 4:55.02 | 705,468 | PASS |
+
+Medians: base 5:02.82 and 709,472 kbytes; Zig LTO 4:55.37 and 690,104. Zig LTO / base: wall 0.975, peak RSS 0.973. All six runs passed every test. The Zig runs are tight (4:55.02 to 4:55.62) and so are the base runs (5:01.19 to 5:03.25); the two ranges do not overlap. The Task 9 figures (Zig 0.89 of C) were sequential runs with a minute of session drift and are superseded by this and the previous table. Two runs of a Zig-LTO against Zig-no-LTO pairing that was stopped when the user asked for the base pairing instead are in the same record: 4:52.76 against 4:57.24, one pair, inside the noise of the tables above.
+
 Two checks (same prefixes, same session). (1) Both engines rebuilt with `-Dlto=false`, six alternating reps: the four cells read 0.76, 0.97, 0.82 and 0.99 with tight spreads (Zig 63 insert 106-109 ns in all six), every other cell as above (`post-lto-raku-nolto-reps.*`). (2) On the LTO builds, eight invocations of `--sizes=63,256,65536 --runs=3` plain, with `MVM_SPESH_BLOCKING=1` and with `MVM_JIT_DISABLE=1` (`post-lto-raku-spesh-diag.txt`): blocking spesh removes the spread on both engines (Zig 63 insert 94-109, C 133-144, ratio about 0.72; plain Zig 104-139, C 147-182), and without the JIT both engines sit together at 176-227. So the slow mode is a spesh timing race in the Raku-level loop, not the hash engine, and the LTO builds change the race's odds (both engines; in the full-ladder reps the Zig stack lost it more often). Not pursued here; the lead is which frame's specialisation lands late (spesh log on a slow and a fast invocation).
 
