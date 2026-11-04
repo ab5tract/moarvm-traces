@@ -293,6 +293,25 @@ Guardrails for every build and benchmark round: `pgrep -af "context-bench|rakudo
 
 ---
 
+### Task 9e: Bisect the C-API delete shift between 1478311f6 and 6bbd4612e (added 2026-11-04 from Task 9d's ladder guard)
+
+**Files:**
+- Record: `traces/llm/bench/internals-delete-bisect.md` (+ raw `internals-delete-bisect-*`); this plan ("## Assignment results": a row "C-API delete shift" with the culprit and the outcome)
+- Modify (only if Step 3 finds a fix): the file(s) the culprit commit touched on the delete path; `docs/hash-strategies.md` or `docs/zig-build.md` only if the fix changes something they describe
+
+**What is known** (`internals-set0-revert-ladder.md`): with the engine ladder byte-identical to 6bbd4612e (Small then Robin Hood, as in 1478311f6), the C-API `delete` cell at 65, 128, 256, 1024 and 16384 entries reads 1.06-1.08 of the 1478311f6 prefix with disjoint round-median spreads in two runs with the order swapped (about 8.0 versus 8.5 ns per op). No other C-API cell reproduces; the nqp cells are noise. Everything else in the ladder is within rule. Task 10's acceptance rule is "within spread or 5 percent on every default-ladder cell", so this blocks acceptance.
+
+**Suspects** (`git log --oneline 1478311f6..6bbd4612e`): the commits that touch `src/zig/core/hash/` outside the strategy tests: 0f8531b6a (`-Dhash-stats` option and the statistics module), a375403d1 (statistics hooks and site attribution in the engine), c642db6ae (stats binning of fetches by table size), 74158b566 (uni Swiss tier set, `MVM_uni_hash_build_strategy` entry point, `uni.widen`). The others are traces, tools/bench or stats-test-only. Verify this classification with `git show --stat` before relying on it.
+
+- [ ] **Step 1: Pin the cell.** Reproduce the shift once more with the two prefixes that exist (`/tmp/claude-1000/internals-base-prefix` = 1478311f6, `/tmp/claude-1000/tune-zig-prefix` = HEAD): C-API only, `--sizes=128,1024`, 5 interleaved rounds, `--runs=5`, `--nth=threshold` (the resize cells are not needed), delete op read from the raw rows. Record the ratio and the round-median spreads. If it does not reproduce, stop: report NEEDS_CONTEXT with the numbers.
+- [ ] **Step 2: Bisect by prefix.** For each suspect commit in order (oldest first), with the tree clean: `git checkout --detach <sha>`; `rm -f src/gen/config.h src/gen/config.c src/gen/config.o`; `zig build install --prefix /tmp/claude-1000/bisect-<sha7>`; `git checkout zig-hash-internals`. If `zig build hash-bench-exe` does not exist at that commit, copy `/tmp/claude-1000/tune-zig-prefix/bin/hash-bench` into the prefix's `bin` (it links libmoar dynamically; confirm with `ldd` under that prefix's `LD_LIBRARY_PATH`). Then one `hash-ab.sh` run with all built variants plus base and head as variants, C-API, `--sizes=128,1024 --rounds=5 --runs=5 --nth=threshold`. The culprit is the first commit whose delete cell is disjoint above base while its predecessor's is within spread. Skip building a suspect that cannot change the delete path (say why) only if the bisect already brackets the culprit. Binary search is fine instead of oldest-first if it saves builds. Each build is an LTO link of every core: one at a time, load under 2.0 first, the eval-server check (`pgrep -af "context-bench|rakudo-image|eval-serve|native-eval"` empty) before each build and round.
+- [ ] **Step 3: Diagnose.** Read the culprit commit's diff on the delete path (`MVM_str_hash_delete*` through `table.zig` to the Robin Hood tier): name the instruction(s) or layout change that cost 0.5 ns per delete (a runtime check of a stats flag, a header field that moved the entries block, an extra load, a lost inline). `perf annotate`/`perf report --no-children` of the C-API bench at 1024 on the predecessor and the culprit prefixes is the tool; `perf_event_paranoid` is 2 so user-space only. If a fix is plain (a `comptime` guard instead of a runtime check, a field moved back, an inline restored) and keeps `-Dhash-stats` builds working, implement it on the branch, `zig fmt --check`, `zig build unit-test` and `zig build test` with and without `-Dhash-stats`, rebuild HEAD into `tune-zig-prefix` (plus `hash-bench-exe`), and rerun Step 1's cell: expected within spread of base. If no plain fix exists, do not tune: record the diagnosis and stop at DONE_WITH_CONCERNS.
+- [ ] **Step 4: Record and commits.** `internals-delete-bisect.md` (header as `bakeoff-baseline-check.md`; the Step 1 cell; the bisect table: commit, what it touches, delete 128 and 1024 ratio with spreads, verdict; the diagnosis with the perf evidence; the fix and its re-measurement, or the reason there is none). Plan row as above. Commit MoarVM only if a fix was made ("Hash engine: <what the fix is>"); traces ("internals: delete bisect"); the pointer. Remove the `bisect-*` prefixes when done.
+
+Guardrails: one build at a time; never `pkill -f`; any new wrapper gets a dry run under `ulimit -v 400000`; long runs with `run_in_background: true`; the tree ends on `zig-hash-internals` with only `tools/lib/MAST/Ops.rakumod` untracked.
+
+---
+
 ### Task 10: Whole-system acceptance, documentation, errata
 
 **Files:**
