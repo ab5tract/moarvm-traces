@@ -275,6 +275,24 @@ Order: Task 7, then Task 9b, then Task 10.
 
 ---
 
+### Task 9d: Revert the set 0 flip (added 2026-11-04; the user ruled "revert" on Task 9c's data)
+
+**Files:**
+- Modify: `src/zig/core/hash/str.zig`, `src/zig/core/hash/table.zig`, `src/zig/core/hash/test_spec.zig`, `src/zig/core/hash/tiers/swiss.zig`, `src/zig/core/hash/test/str_test.zig` (the files eb1537039 and 8af1eb116 touched), `docs/hash-strategies.md`, `docs/zig-build.md`, this plan ("## Assignment results": the Task 9b row's result column)
+- Record: `traces/llm/bench/internals-set0-revert-ladder.md` (+ raw `internals-set0-revert-*`)
+
+**Interfaces:** set 0 (`standard`) of `StrSpec.sets` is Small then Robin Hood again, exactly the tier ladder of 6bbd4612e; sets 1 (LOOKUP, Swiss) and 2 (APPEND) unchanged; the engine's set count stays 4 or fewer; nothing in the C API or the nqp ops changes.
+
+- [ ] **Step 1: Engine.** Return the engine to the tier ladder of 6bbd4612e: `git diff 6bbd4612e HEAD -- src/zig/core/hash/` is the reference for what to undo. Undo by hand (not a blind `git revert`): the set 0 definition in `str.zig`/`table.zig`, the `noinline` on Swiss `highestLiveBelow` in `tiers/swiss.zig` and its comment (its only beneficiary was the flipped set's iteration dispatch; the bake-off measured LOOKUP without it), and the Small-to-Swiss migration path in `table.zig` if it exists only for set 0. Keep: the Small-to-Robin-Hood migration test from 8af1eb116 (it now tests the real set 0; delete `standard_rh_test_set` from `test_spec.zig` if it then duplicates set 0), and the Small-then-Swiss ladder tests from `str_test.zig` only if they can run against a test-only set in `test_spec.zig` named `small_then_swiss_test_set` (not in `StrSpec.sets`); if keeping them needs engine code that Step 1 removes, delete the tests instead and say so in the report. `zig fmt --check` on every touched Zig file.
+- [ ] **Step 2: Docs.** `docs/hash-strategies.md`: the default's second rung is Robin Hood again (the sentences at "Until 2026-11-03 the second rung was Robin Hood", "Since the default ladder moved to Small then Swiss", and "Measured later as set 0 itself ... is now the default" are rewritten), with one sentence saying Small then Swiss was measured as set 0 and reverted on 2026-11-04 because it cost 3.1 percent of spectest wall with no nameable fix (`traces/llm/bench/internals-set0-ladder.md`, `internals-set0-investigation.md`). `docs/zig-build.md`: undo whatever eb1537039 changed there that described the flipped ladder.
+- [ ] **Step 3: Suites.** `zig build unit-test` and `zig build test` (both `-Dzig-impl`, with and without `-Dhash-stats`); default build of HEAD into `/tmp/claude-1000/tune-zig-prefix` (`rm -f src/gen/config.h src/gen/config.c src/gen/config.o; zig build install --prefix /tmp/claude-1000/tune-zig-prefix; zig build hash-bench-exe --prefix /tmp/claude-1000/tune-zig-prefix`); `zig build strategy-test -Dnqp-prefix=/tmp/claude-1000/tune-zig-prefix`. All green, output pristine.
+- [ ] **Step 4: Ladder guard.** Base prefix `/tmp/claude-1000/internals-base-prefix` (1478311f6, Small then Robin Hood, built today, with `bin/hash-bench` copied from the head build) against the Step 3 head build: `tools/bench/hash-ab.sh --rounds=5 --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all --variant=base:/tmp/claude-1000/internals-base-prefix/lib:/tmp/claude-1000/internals-base-prefix/bin/hash-bench --variant=head:/tmp/claude-1000/tune-zig-prefix/lib:/tmp/claude-1000/tune-zig-prefix/bin/hash-bench --out=<new dir>`. Expected: every cell within the round spread or within 5 percent (both builds are Small then Robin Hood; 1478311f6 to HEAD differ only in the uni sized builds and the engine entry points). Record `internals-set0-revert-ladder.md` (header as `bakeoff-baseline-check.md`: date, shas, build flags, CPU, load, commands, raw files; verdict per cell that fails the rule, if any). No spectest in this task: Task 10 Step 2 runs the full A/B.
+- [ ] **Step 5: Plan row and commits.** The Task 9b row's result column in "## Assignment results" becomes: "reverted 2026-11-04 by the user's ruling on Task 9c's data (`internals-set0-investigation.md`: 3.1 percent spectest wall, no nameable fix); Swiss stays LOOKUP (set 1)". Commit MoarVM ("Default hash ladder: back to Small then Robin Hood"), traces ("internals: set 0 reverted, ladder guard"), then the submodule pointer in MoarVM ("traces: set 0 revert ladder").
+
+Guardrails for every build and benchmark round: `pgrep -af "context-bench|rakudo-image|eval-serve|native-eval"` must print nothing and the 1-minute load must be under 2.0 (wait, polling every 5 minutes, if not); one build at a time; never `pkill -f`; any new wrapper script gets a dry run under `ulimit -v 400000` first; long runs with `run_in_background: true`, no polling sleeps.
+
+---
+
 ### Task 10: Whole-system acceptance, documentation, errata
 
 **Files:**
