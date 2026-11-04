@@ -79,3 +79,35 @@ unrelated commit's lottery again. Nothing was changed on the branch.
 Recommendation for Task 10: waive the delete cell at 65-and-up on this
 diagnosis (identical machine code, moved), or have the user decide on a
 build-wide alignment setting.
+
+## Confirmation (2026-11-04, final-review fix wave)
+
+The whole-branch review asked for an experiment: take the uni Swiss set (the
+code 74158b566 added) out of the shipped engine and see whether the shift goes
+with it. `swiss_rung`, its set index and the strategy-1 entry of
+`MVM_uni_hash_build_strategy` are now compiled out of `libmoar` unless
+`-Duni-swiss` is given (unit tests always have them; `uni.swiss_enabled` in
+`src/zig/core/hash/uni.zig`). No internal site used the set. The head prefix was
+rebuilt from that tree and measured against the 1478311f6 prefix with one
+`hash-bench` exe for both variants:
+`hash-ab.sh --sizes=65,128,1024 --rounds=7 --runs=5 --nth=threshold --variant=base:... --variant=head:...`
+(run a: base first; run b: head first; load 1.13 or under at every start).
+Raw: `internals-delete-confirm-{a,b}/`.
+
+| capi delete | before (final ladder a / b, with the Swiss set) | run a (base first) | run b (head first) |
+|---|---|---|---|
+| 65 | 1.067 overlap / 1.062 | 1.04 [8.21-17.58 / 7.88-15.00] | head/base 1.05 (base/head 0.95), ranges [8.05-13.92 / 8.19-20.66] overlap |
+| 128 | 1.061 / 1.053, disjoint | 1.02 [8.11-8.68 / 7.90-8.48] | head/base 1.03 (base/head 0.97) [7.93-8.42 / 8.09-10.30] |
+| 1024 | 1.071 / 1.058, disjoint | 1.01 [8.12-12.79 / 7.90-8.48] | head/base 1.02 (base/head 0.98) [7.92-8.30 / 8.10-10.53] |
+
+(Run a prints head over base with [head / base] ranges; run b has the head first,
+so its compare file prints base over head with [base / head] ranges.) Every
+delete cell is within 5 percent or overlaps, in both orders. The shift went with the
+Swiss set.
+
+New `libmoar.so`: `MVM_str_hash_delete_nocheck` is at 0x7c4e00 (mod 32 = 0) and its probe
+loop (the `ja/add/dec/sub/inc; movzbl; cmp; jne` loop) starts at 0x7c4f00 (mod 32 = 0), again 32-byte
+aligned like c642db6 (the loop sat at mod 32 = 16 in 74158b5). That supports the
+code-placement attribution: the function body is unchanged, and it is aligned
+again once the uni Swiss instantiation no longer sits ahead of it. The delete
+exception of Task 10 is therefore resolved by the gate; it is not needed.
