@@ -1,0 +1,1115 @@
+
+/tmp/claude-1000/bisect-c642db6/lib/libmoar.so:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .text:
+
+00000000007c4ba0 <MVM_str_hash_delete_nocheck@@Base>:
+  7c4ba0:	push   rbp
+  7c4ba1:	push   r15
+  7c4ba3:	push   r14
+  7c4ba5:	push   r13
+  7c4ba7:	push   r12
+  7c4ba9:	push   rbx
+  7c4baa:	sub    rsp,0x98
+  7c4bb1:	mov    r10,QWORD PTR [rsi]
+  7c4bb4:	test   r10,r10
+  7c4bb7:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4bbd:	mov    ecx,DWORD PTR [r10]
+  7c4bc0:	test   ecx,0xff00ff80
+  7c4bc6:	mov    QWORD PTR [rsp+0x18],rdi
+  7c4bcb:	mov    QWORD PTR [rsp+0x10],r10
+  7c4bd0:	mov    QWORD PTR [rsp+0x8],rdx
+  7c4bd5:	je     7c4d69 <MVM_str_hash_delete_nocheck@@Base+0x1c9>
+  7c4bdb:	cmp    ecx,0x1000000
+  7c4be1:	jae    7c5cb3 <MVM_str_hash_delete_nocheck@@Base+0x1113>
+  7c4be7:	test   cl,cl
+  7c4be9:	js     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4bef:	movzx  eax,ch
+  7c4bf2:	lea    rsi,[rip+0xffffffffffc15f1f]        # 3dab18 <ltm_prime_tab@@Base+0x8498>
+  7c4bf9:	movsxd rax,DWORD PTR [rsi+rax*4]
+  7c4bfd:	add    rax,rsi
+  7c4c00:	jmp    rax
+  7c4c02:	mov    rax,QWORD PTR [rdx+0x28]
+  7c4c06:	test   cl,0x7f
+  7c4c09:	je     7c566a <MVM_str_hash_delete_nocheck@@Base+0xaca>
+  7c4c0f:	test   rax,rax
+  7c4c12:	jne    7c4c2b <MVM_str_hash_delete_nocheck@@Base+0x8b>
+  7c4c14:	mov    rsi,rdx
+  7c4c17:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c4c1c:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4c21:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4c26:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4c2b:	cmp    DWORD PTR [r10+0x4],0x0
+  7c4c30:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4c36:	movzx  esi,BYTE PTR [r10+0x18]
+  7c4c3b:	mov    ecx,0x1
+  7c4c40:	xor    rax,QWORD PTR [r10+0x8]
+  7c4c44:	shlx   ebx,ecx,esi
+  7c4c49:	movabs rcx,0x9e3779b97f4a7c15
+  7c4c53:	imul   rcx,rax
+  7c4c57:	movzx  eax,BYTE PTR [r10+0x15]
+  7c4c5c:	shrx   rax,rcx,rax
+  7c4c61:	shrx   r14d,eax,esi
+  7c4c66:	movzx  r13d,BYTE PTR [r10+0x2]
+  7c4c6b:	lea    r12d,[r14+0x1]
+  7c4c6f:	imul   r12,r13
+  7c4c73:	neg    r12
+  7c4c76:	bzhi   r15d,eax,esi
+  7c4c7b:	mov    DWORD PTR [rsp+0x20],esi
+  7c4c7f:	bts    r15d,esi
+  7c4c83:	mov    rbp,0xffffffffffffffe0
+  7c4c8a:	sub    rbp,r10
+  7c4c8d:	sub    rbp,r14
+  7c4c90:	add    r14,0x20
+  7c4c94:	jmp    7c4cb2 <MVM_str_hash_delete_nocheck@@Base+0x112>
+  7c4c96:	cs nop WORD PTR [rax+rax*1+0x0]
+  7c4ca0:	ja     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4ca6:	add    r15d,ebx
+  7c4ca9:	dec    rbp
+  7c4cac:	sub    r12,r13
+  7c4caf:	inc    r14
+  7c4cb2:	movzx  eax,BYTE PTR [r10+r14*1]
+  7c4cb7:	cmp    r15d,eax
+  7c4cba:	jne    7c4ca0 <MVM_str_hash_delete_nocheck@@Base+0x100>
+  7c4cbc:	mov    rsi,QWORD PTR [r10+r12*1]
+  7c4cc0:	test   rsi,rsi
+  7c4cc3:	je     7c4ca6 <MVM_str_hash_delete_nocheck@@Base+0x106>
+  7c4cc5:	cmp    rdx,rsi
+  7c4cc8:	je     7c4cf5 <MVM_str_hash_delete_nocheck@@Base+0x155>
+  7c4cca:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c4ccd:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c4cd0:	jne    7c4ca6 <MVM_str_hash_delete_nocheck@@Base+0x106>
+  7c4cd2:	xor    edx,edx
+  7c4cd4:	mov    r8,QWORD PTR [rsp+0x8]
+  7c4cd9:	xor    r9d,r9d
+  7c4cdc:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c4ce1:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4ce6:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4ceb:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4cf0:	test   rax,rax
+  7c4cf3:	je     7c4ca6 <MVM_str_hash_delete_nocheck@@Base+0x106>
+  7c4cf5:	add    r12,r10
+  7c4cf8:	lea    rcx,[r10+r14*1]
+  7c4cfc:	mov    eax,0x2
+  7c4d01:	mov    edx,DWORD PTR [rsp+0x20]
+  7c4d05:	shlx   edx,eax,edx
+  7c4d0a:	movzx  esi,BYTE PTR [rcx+0x1]
+  7c4d0e:	cmp    edx,esi
+  7c4d10:	ja     7c5396 <MVM_str_hash_delete_nocheck@@Base+0x7f6>
+  7c4d16:	mov    r9,rdi
+  7c4d19:	lea    rdi,[r10+r14*1]
+  7c4d1d:	xor    eax,eax
+  7c4d1f:	mov    r8,rax
+  7c4d22:	add    rax,r10
+  7c4d25:	sub    sil,bl
+  7c4d28:	mov    BYTE PTR [r14+rax*1],sil
+  7c4d2c:	movzx  esi,BYTE PTR [r14+rax*1+0x2]
+  7c4d32:	lea    rax,[r8+0x1]
+  7c4d36:	cmp    sil,dl
+  7c4d39:	jae    7c4d1f <MVM_str_hash_delete_nocheck@@Base+0x17f>
+  7c4d3b:	lea    rbx,[rdi+r8*1]
+  7c4d3f:	inc    rbx
+  7c4d42:	cmp    r13d,0x10
+  7c4d46:	jne    7c58e6 <MVM_str_hash_delete_nocheck@@Base+0xd46>
+  7c4d4c:	lea    rcx,[rbx+rbp*1]
+  7c4d50:	cmp    rcx,0x1
+  7c4d54:	adc    rbp,rbx
+  7c4d57:	cmp    rcx,0x8
+  7c4d5b:	jae    7c5bde <MVM_str_hash_delete_nocheck@@Base+0x103e>
+  7c4d61:	mov    rdi,r9
+  7c4d64:	jmp    7c5c32 <MVM_str_hash_delete_nocheck@@Base+0x1092>
+  7c4d69:	mov    rax,QWORD PTR [rdx+0x28]
+  7c4d6d:	test   cl,0x7f
+  7c4d70:	je     7c4d8b <MVM_str_hash_delete_nocheck@@Base+0x1eb>
+  7c4d72:	test   rax,rax
+  7c4d75:	je     7c4eb5 <MVM_str_hash_delete_nocheck@@Base+0x315>
+  7c4d7b:	cmp    DWORD PTR [r10+0x4],0x0
+  7c4d80:	jne    7c4ed7 <MVM_str_hash_delete_nocheck@@Base+0x337>
+  7c4d86:	jmp    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4d8b:	test   rax,rax
+  7c4d8e:	jne    7c4da7 <MVM_str_hash_delete_nocheck@@Base+0x207>
+  7c4d90:	mov    rsi,rdx
+  7c4d93:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c4d98:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4d9d:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4da2:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4da7:	shr    rax,0x38
+  7c4dab:	mov    esi,DWORD PTR [r10+0x4]
+  7c4daf:	mov    ecx,DWORD PTR [r10+0x8]
+  7c4db3:	mov    r13d,DWORD PTR [r10+0xc]
+  7c4db7:	add    r13,r10
+  7c4dba:	movzx  ebp,BYTE PTR [r10+0x2]
+  7c4dbf:	cmp    ecx,0x20
+  7c4dc2:	mov    QWORD PTR [rsp+0x20],rsi
+  7c4dc7:	je     7c54a2 <MVM_str_hash_delete_nocheck@@Base+0x902>
+  7c4dcd:	cmp    ecx,0x10
+  7c4dd0:	je     7c53cf <MVM_str_hash_delete_nocheck@@Base+0x82f>
+  7c4dd6:	cmp    ecx,0x8
+  7c4dd9:	jne    7c556f <MVM_str_hash_delete_nocheck@@Base+0x9cf>
+  7c4ddf:	test   rsi,rsi
+  7c4de2:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4de8:	vmovd  xmm0,eax
+  7c4dec:	mov    ecx,esi
+  7c4dee:	and    cl,0x7
+  7c4df1:	mov    al,0xff
+  7c4df3:	shl    al,cl
+  7c4df5:	vpbroadcastb xmm0,xmm0
+  7c4dfa:	vmovdqa XMMWORD PTR [rsp+0x50],xmm0
+  7c4e00:	not    al
+  7c4e02:	xor    ebx,ebx
+  7c4e04:	movzx  r14d,al
+  7c4e08:	vmovq  xmm0,QWORD PTR [r10+rbx*1+0x10]
+  7c4e0f:	vpcmpeqb xmm0,xmm0,XMMWORD PTR [rsp+0x50]
+  7c4e15:	vpmovmskb eax,xmm0
+  7c4e19:	mov    ecx,esi
+  7c4e1b:	sub    ecx,ebx
+  7c4e1d:	cmp    ecx,0x8
+  7c4e20:	mov    r15d,0xff
+  7c4e26:	cmovb  r15d,r14d
+  7c4e2a:	and    r15b,al
+  7c4e2d:	jne    7c4e5c <MVM_str_hash_delete_nocheck@@Base+0x2bc>
+  7c4e2f:	add    rbx,0x8
+  7c4e33:	mov    rsi,QWORD PTR [rsp+0x20]
+  7c4e38:	cmp    rbx,rsi
+  7c4e3b:	jb     7c4e08 <MVM_str_hash_delete_nocheck@@Base+0x268>
+  7c4e3d:	jmp    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4e42:	data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+  7c4e50:	lea    eax,[r15-0x1]
+  7c4e54:	and    al,r15b
+  7c4e57:	mov    r15d,eax
+  7c4e5a:	je     7c4e2f <MVM_str_hash_delete_nocheck@@Base+0x28f>
+  7c4e5c:	movzx  eax,r15b
+  7c4e60:	xor    r12d,r12d
+  7c4e63:	tzcnt  r12d,eax
+  7c4e68:	or     r12d,ebx
+  7c4e6b:	mov    rax,r12
+  7c4e6e:	imul   rax,rbp
+  7c4e72:	mov    rsi,QWORD PTR [r13+rax*1+0x0]
+  7c4e77:	test   rsi,rsi
+  7c4e7a:	je     7c4e50 <MVM_str_hash_delete_nocheck@@Base+0x2b0>
+  7c4e7c:	cmp    rdx,rsi
+  7c4e7f:	je     7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c4e85:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c4e88:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c4e8b:	jne    7c4e50 <MVM_str_hash_delete_nocheck@@Base+0x2b0>
+  7c4e8d:	xor    edx,edx
+  7c4e8f:	mov    r8,QWORD PTR [rsp+0x8]
+  7c4e94:	xor    r9d,r9d
+  7c4e97:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c4e9c:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4ea1:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4ea6:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4eab:	test   rax,rax
+  7c4eae:	je     7c4e50 <MVM_str_hash_delete_nocheck@@Base+0x2b0>
+  7c4eb0:	jmp    7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c4eb5:	mov    rsi,rdx
+  7c4eb8:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c4ebd:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4ec2:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4ec7:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4ecc:	cmp    DWORD PTR [r10+0x4],0x0
+  7c4ed1:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4ed7:	movzx  esi,BYTE PTR [r10+0x18]
+  7c4edc:	mov    ecx,0x1
+  7c4ee1:	xor    rax,QWORD PTR [r10+0x8]
+  7c4ee5:	shlx   ebx,ecx,esi
+  7c4eea:	movabs rcx,0x9e3779b97f4a7c15
+  7c4ef4:	imul   rcx,rax
+  7c4ef8:	movzx  eax,BYTE PTR [r10+0x15]
+  7c4efd:	shrx   rax,rcx,rax
+  7c4f02:	shrx   r14d,eax,esi
+  7c4f07:	movzx  r13d,BYTE PTR [r10+0x2]
+  7c4f0c:	lea    r12d,[r14+0x1]
+  7c4f10:	imul   r12,r13
+  7c4f14:	neg    r12
+  7c4f17:	bzhi   r15d,eax,esi
+  7c4f1c:	mov    DWORD PTR [rsp+0x20],esi
+  7c4f20:	bts    r15d,esi
+  7c4f24:	mov    rbp,0xffffffffffffffe0
+  7c4f2b:	sub    rbp,r10
+  7c4f2e:	sub    rbp,r14
+  7c4f31:	add    r14,0x20
+  7c4f35:	jmp    7c4f52 <MVM_str_hash_delete_nocheck@@Base+0x3b2>
+  7c4f37:	nop    WORD PTR [rax+rax*1+0x0]
+  7c4f40:	ja     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c4f46:	add    r15d,ebx
+  7c4f49:	dec    rbp
+  7c4f4c:	inc    r14
+  7c4f4f:	sub    r12,r13
+  7c4f52:	movzx  eax,BYTE PTR [r10+r14*1]
+  7c4f57:	cmp    r15d,eax
+  7c4f5a:	jne    7c4f40 <MVM_str_hash_delete_nocheck@@Base+0x3a0>
+  7c4f5c:	mov    rsi,QWORD PTR [r10+r12*1]
+  7c4f60:	test   rsi,rsi
+  7c4f63:	je     7c4f46 <MVM_str_hash_delete_nocheck@@Base+0x3a6>
+  7c4f65:	cmp    rdx,rsi
+  7c4f68:	je     7c4f95 <MVM_str_hash_delete_nocheck@@Base+0x3f5>
+  7c4f6a:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c4f6d:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c4f70:	jne    7c4f46 <MVM_str_hash_delete_nocheck@@Base+0x3a6>
+  7c4f72:	xor    edx,edx
+  7c4f74:	mov    r8,QWORD PTR [rsp+0x8]
+  7c4f79:	xor    r9d,r9d
+  7c4f7c:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c4f81:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c4f86:	mov    r10,QWORD PTR [rsp+0x10]
+  7c4f8b:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c4f90:	test   rax,rax
+  7c4f93:	je     7c4f46 <MVM_str_hash_delete_nocheck@@Base+0x3a6>
+  7c4f95:	lea    rcx,[r10+r14*1]
+  7c4f99:	add    r12,r10
+  7c4f9c:	mov    eax,0x2
+  7c4fa1:	mov    edx,DWORD PTR [rsp+0x20]
+  7c4fa5:	shlx   edx,eax,edx
+  7c4faa:	movzx  esi,BYTE PTR [rcx+0x1]
+  7c4fae:	cmp    edx,esi
+  7c4fb0:	ja     7c5396 <MVM_str_hash_delete_nocheck@@Base+0x7f6>
+  7c4fb6:	mov    r9,rdi
+  7c4fb9:	lea    rdi,[r10+r14*1]
+  7c4fbd:	xor    eax,eax
+  7c4fbf:	nop
+  7c4fc0:	mov    r8,rax
+  7c4fc3:	add    rax,r10
+  7c4fc6:	sub    sil,bl
+  7c4fc9:	mov    BYTE PTR [r14+rax*1],sil
+  7c4fcd:	movzx  esi,BYTE PTR [r14+rax*1+0x2]
+  7c4fd3:	lea    rax,[r8+0x1]
+  7c4fd7:	cmp    sil,dl
+  7c4fda:	jae    7c4fc0 <MVM_str_hash_delete_nocheck@@Base+0x420>
+  7c4fdc:	lea    rbx,[rdi+r8*1]
+  7c4fe0:	inc    rbx
+  7c4fe3:	cmp    r13d,0x10
+  7c4fe7:	jne    7c58e6 <MVM_str_hash_delete_nocheck@@Base+0xd46>
+  7c4fed:	lea    rcx,[rbx+rbp*1]
+  7c4ff1:	cmp    rcx,0x1
+  7c4ff5:	adc    rbp,rbx
+  7c4ff8:	cmp    rcx,0x8
+  7c4ffc:	jae    7c5910 <MVM_str_hash_delete_nocheck@@Base+0xd70>
+  7c5002:	mov    rdi,r9
+  7c5005:	jmp    7c5964 <MVM_str_hash_delete_nocheck@@Base+0xdc4>
+  7c500a:	mov    rax,QWORD PTR [rdx+0x28]
+  7c500e:	test   rax,rax
+  7c5011:	jne    7c502a <MVM_str_hash_delete_nocheck@@Base+0x48a>
+  7c5013:	mov    rsi,rdx
+  7c5016:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c501b:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5020:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5025:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c502a:	cmp    DWORD PTR [r10+0x4],0x0
+  7c502f:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5035:	xor    rax,QWORD PTR [r10+0x8]
+  7c5039:	lea    rcx,[r10+0x20]
+  7c503d:	mov    QWORD PTR [rsp+0x40],rcx
+  7c5042:	mov    r8,rax
+  7c5045:	shr    r8,0x39
+  7c5049:	movzx  ecx,BYTE PTR [r10+0x14]
+  7c504e:	mov    esi,0x1
+  7c5053:	shlx   rcx,rsi,rcx
+  7c5058:	lea    r13,[r10+rcx*1]
+  7c505c:	add    r13,0x20
+  7c5060:	movzx  ebp,BYTE PTR [r10+0x2]
+  7c5065:	shr    ecx,0x4
+  7c5068:	dec    ecx
+  7c506a:	mov    QWORD PTR [rsp+0x78],rcx
+  7c506f:	and    eax,ecx
+  7c5071:	vmovd  xmm0,r8d
+  7c5076:	vpbroadcastb xmm0,xmm0
+  7c507b:	vmovdqa XMMWORD PTR [rsp+0x80],xmm0
+  7c5084:	mov    QWORD PTR [rsp+0x48],0x0
+  7c508d:	mov    QWORD PTR [rsp+0x20],rax
+  7c5092:	mov    r15d,eax
+  7c5095:	shl    r15,0x4
+  7c5099:	mov    rax,QWORD PTR [rsp+0x40]
+  7c509e:	vmovdqu xmm0,XMMWORD PTR [rax+r15*1]
+  7c50a4:	vmovdqa XMMWORD PTR [rsp+0x50],xmm0
+  7c50aa:	vpcmpeqb xmm0,xmm0,XMMWORD PTR [rsp+0x80]
+  7c50b3:	vpmovmskb ebx,xmm0
+  7c50b7:	test   ebx,ebx
+  7c50b9:	je     7c512f <MVM_str_hash_delete_nocheck@@Base+0x58f>
+  7c50bb:	mov    rax,QWORD PTR [rsp+0x20]
+  7c50c0:	mov    r12d,eax
+  7c50c3:	shl    r12d,0x4
+  7c50c7:	jmp    7c50da <MVM_str_hash_delete_nocheck@@Base+0x53a>
+  7c50c9:	nop    DWORD PTR [rax+0x0]
+  7c50d0:	lea    eax,[rbx-0x1]
+  7c50d3:	and    ax,bx
+  7c50d6:	mov    ebx,eax
+  7c50d8:	je     7c512f <MVM_str_hash_delete_nocheck@@Base+0x58f>
+  7c50da:	xor    r14d,r14d
+  7c50dd:	tzcnt  r14d,ebx
+  7c50e2:	or     r14d,r12d
+  7c50e5:	mov    rax,r14
+  7c50e8:	imul   rax,rbp
+  7c50ec:	mov    rsi,QWORD PTR [r13+rax*1+0x0]
+  7c50f1:	test   rsi,rsi
+  7c50f4:	je     7c50d0 <MVM_str_hash_delete_nocheck@@Base+0x530>
+  7c50f6:	cmp    rdx,rsi
+  7c50f9:	je     7c539e <MVM_str_hash_delete_nocheck@@Base+0x7fe>
+  7c50ff:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c5102:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c5105:	jne    7c50d0 <MVM_str_hash_delete_nocheck@@Base+0x530>
+  7c5107:	xor    edx,edx
+  7c5109:	mov    r8,QWORD PTR [rsp+0x8]
+  7c510e:	xor    r9d,r9d
+  7c5111:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5116:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c511b:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5120:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5125:	test   rax,rax
+  7c5128:	je     7c50d0 <MVM_str_hash_delete_nocheck@@Base+0x530>
+  7c512a:	jmp    7c539e <MVM_str_hash_delete_nocheck@@Base+0x7fe>
+  7c512f:	vmovdqa xmm0,XMMWORD PTR [rsp+0x50]
+  7c5135:	vpcmpeqb xmm0,xmm0,XMMWORD PTR [rip+0xffffffffffc0ba53]        # 3d0b90 <MVM_running_threads_context@@Base+0x390b60>
+  7c513d:	vpmovmskb eax,xmm0
+  7c5141:	test   eax,eax
+  7c5143:	mov    rax,QWORD PTR [rsp+0x20]
+  7c5148:	jne    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c514e:	mov    rcx,QWORD PTR [rsp+0x48]
+  7c5153:	add    eax,ecx
+  7c5155:	inc    eax
+  7c5157:	inc    ecx
+  7c5159:	and    eax,DWORD PTR [rsp+0x78]
+  7c515d:	mov    QWORD PTR [rsp+0x48],rcx
+  7c5162:	jmp    7c508d <MVM_str_hash_delete_nocheck@@Base+0x4ed>
+  7c5167:	mov    r8,QWORD PTR [rdx+0x28]
+  7c516b:	test   r8,r8
+  7c516e:	jne    7c518a <MVM_str_hash_delete_nocheck@@Base+0x5ea>
+  7c5170:	mov    rsi,rdx
+  7c5173:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c5178:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c517d:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5182:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5187:	mov    r8,rax
+  7c518a:	cmp    DWORD PTR [r10+0x4],0x0
+  7c518f:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5195:	movzx  ecx,BYTE PTR [r10+0x11]
+  7c519a:	lea    r15,[r10+0x18]
+  7c519e:	movzx  eax,BYTE PTR [r10+0x10]
+  7c51a3:	mov    esi,0xffffffff
+  7c51a8:	shlx   r13d,esi,eax
+  7c51ad:	not    r13d
+  7c51b0:	cmp    ecx,0x1
+  7c51b3:	mov    QWORD PTR [rsp+0x20],r8
+  7c51b8:	je     7c56bc <MVM_str_hash_delete_nocheck@@Base+0xb1c>
+  7c51be:	cmp    ecx,0x2
+  7c51c1:	jne    7c5782 <MVM_str_hash_delete_nocheck@@Base+0xbe2>
+  7c51c7:	mov    r12d,DWORD PTR [r10+0x8]
+  7c51cb:	xor    r12d,r8d
+  7c51ce:	and    r12d,r13d
+  7c51d1:	movzx  ecx,WORD PTR [r10+r12*2+0x18]
+  7c51d7:	test   cx,cx
+  7c51da:	je     7c583b <MVM_str_hash_delete_nocheck@@Base+0xc9b>
+  7c51e0:	mov    esi,0x2
+  7c51e5:	shlx   rbx,rsi,rax
+  7c51ea:	add    rbx,r15
+  7c51ed:	movzx  r14d,BYTE PTR [r10+0x2]
+  7c51f2:	jmp    7c5208 <MVM_str_hash_delete_nocheck@@Base+0x668>
+  7c51f4:	inc    r12d
+  7c51f7:	and    r12d,r13d
+  7c51fa:	movzx  ecx,WORD PTR [r15+r12*2]
+  7c51ff:	test   cx,cx
+  7c5202:	je     7c583b <MVM_str_hash_delete_nocheck@@Base+0xc9b>
+  7c5208:	dec    ecx
+  7c520a:	movzx  eax,cx
+  7c520d:	imul   rax,r14
+  7c5211:	mov    rbp,QWORD PTR [rbx+rax*1]
+  7c5215:	test   rbp,rbp
+  7c5218:	je     7c51f4 <MVM_str_hash_delete_nocheck@@Base+0x654>
+  7c521a:	mov    rax,QWORD PTR [rbp+0x28]
+  7c521e:	test   rax,rax
+  7c5221:	jne    7c523f <MVM_str_hash_delete_nocheck@@Base+0x69f>
+  7c5223:	mov    rsi,rbp
+  7c5226:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c522b:	mov    r8,QWORD PTR [rsp+0x20]
+  7c5230:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5235:	mov    r10,QWORD PTR [rsp+0x10]
+  7c523a:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c523f:	cmp    rax,r8
+  7c5242:	jne    7c51f4 <MVM_str_hash_delete_nocheck@@Base+0x654>
+  7c5244:	cmp    rdx,rbp
+  7c5247:	je     7c5280 <MVM_str_hash_delete_nocheck@@Base+0x6e0>
+  7c5249:	mov    ecx,DWORD PTR [rbp+0x24]
+  7c524c:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c524f:	jne    7c51f4 <MVM_str_hash_delete_nocheck@@Base+0x654>
+  7c5251:	mov    rsi,rbp
+  7c5254:	xor    edx,edx
+  7c5256:	mov    r8,QWORD PTR [rsp+0x8]
+  7c525b:	xor    r9d,r9d
+  7c525e:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5263:	mov    r8,QWORD PTR [rsp+0x20]
+  7c5268:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c526d:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5272:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5277:	test   rax,rax
+  7c527a:	je     7c51f4 <MVM_str_hash_delete_nocheck@@Base+0x654>
+  7c5280:	mov    BYTE PTR [rsp+0x34],0x1
+  7c5285:	lea    rax,[rsp+0x34]
+  7c528a:	jmp    7c585d <MVM_str_hash_delete_nocheck@@Base+0xcbd>
+  7c528f:	mov    rax,QWORD PTR [rdx+0x28]
+  7c5293:	test   rax,rax
+  7c5296:	jne    7c52af <MVM_str_hash_delete_nocheck@@Base+0x70f>
+  7c5298:	mov    rsi,rdx
+  7c529b:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c52a0:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c52a5:	mov    r10,QWORD PTR [rsp+0x10]
+  7c52aa:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c52af:	cmp    DWORD PTR [r10+0x4],0x0
+  7c52b4:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c52ba:	movzx  esi,BYTE PTR [r10+0x18]
+  7c52bf:	mov    ecx,0x1
+  7c52c4:	xor    rax,QWORD PTR [r10+0x8]
+  7c52c8:	shlx   ebx,ecx,esi
+  7c52cd:	movabs rcx,0x9e3779b97f4a7c15
+  7c52d7:	imul   rcx,rax
+  7c52db:	movzx  eax,BYTE PTR [r10+0x15]
+  7c52e0:	shrx   rax,rcx,rax
+  7c52e5:	shrx   r14d,eax,esi
+  7c52ea:	movzx  r13d,BYTE PTR [r10+0x2]
+  7c52ef:	lea    r12d,[r14+0x1]
+  7c52f3:	imul   r12,r13
+  7c52f7:	neg    r12
+  7c52fa:	bzhi   r15d,eax,esi
+  7c52ff:	mov    DWORD PTR [rsp+0x20],esi
+  7c5303:	bts    r15d,esi
+  7c5307:	mov    rbp,0xffffffffffffffe0
+  7c530e:	sub    rbp,r10
+  7c5311:	sub    rbp,r14
+  7c5314:	add    r14,0x20
+  7c5318:	jmp    7c5332 <MVM_str_hash_delete_nocheck@@Base+0x792>
+  7c531a:	nop    WORD PTR [rax+rax*1+0x0]
+  7c5320:	ja     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5326:	add    r15d,ebx
+  7c5329:	dec    rbp
+  7c532c:	sub    r12,r13
+  7c532f:	inc    r14
+  7c5332:	movzx  eax,BYTE PTR [r10+r14*1]
+  7c5337:	cmp    r15d,eax
+  7c533a:	jne    7c5320 <MVM_str_hash_delete_nocheck@@Base+0x780>
+  7c533c:	mov    rsi,QWORD PTR [r10+r12*1]
+  7c5340:	test   rsi,rsi
+  7c5343:	je     7c5326 <MVM_str_hash_delete_nocheck@@Base+0x786>
+  7c5345:	cmp    rdx,rsi
+  7c5348:	je     7c5375 <MVM_str_hash_delete_nocheck@@Base+0x7d5>
+  7c534a:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c534d:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c5350:	jne    7c5326 <MVM_str_hash_delete_nocheck@@Base+0x786>
+  7c5352:	xor    edx,edx
+  7c5354:	mov    r8,QWORD PTR [rsp+0x8]
+  7c5359:	xor    r9d,r9d
+  7c535c:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5361:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5366:	mov    r10,QWORD PTR [rsp+0x10]
+  7c536b:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5370:	test   rax,rax
+  7c5373:	je     7c5326 <MVM_str_hash_delete_nocheck@@Base+0x786>
+  7c5375:	add    r12,r10
+  7c5378:	lea    rcx,[r10+r14*1]
+  7c537c:	mov    eax,0x2
+  7c5381:	mov    edx,DWORD PTR [rsp+0x20]
+  7c5385:	shlx   edx,eax,edx
+  7c538a:	movzx  esi,BYTE PTR [rcx+0x1]
+  7c538e:	cmp    edx,esi
+  7c5390:	jbe    7c5890 <MVM_str_hash_delete_nocheck@@Base+0xcf0>
+  7c5396:	mov    rbx,rcx
+  7c5399:	jmp    7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c539e:	mov    rax,QWORD PTR [rsp+0x40]
+  7c53a3:	vmovdqu xmm0,XMMWORD PTR [rax+r15*1]
+  7c53a9:	vpcmpeqb xmm0,xmm0,XMMWORD PTR [rip+0xffffffffffc0b7df]        # 3d0b90 <MVM_running_threads_context@@Base+0x390b60>
+  7c53b1:	vpmovmskb ecx,xmm0
+  7c53b5:	mov    al,0x80
+  7c53b7:	test   ecx,ecx
+  7c53b9:	jne    7c53c1 <MVM_str_hash_delete_nocheck@@Base+0x821>
+  7c53bb:	inc    DWORD PTR [r10+0x10]
+  7c53bf:	mov    al,0xfe
+  7c53c1:	mov    BYTE PTR [r10+r14*1+0x20],al
+  7c53c6:	dec    DWORD PTR [r10+0x4]
+  7c53ca:	jmp    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c53cf:	test   rsi,rsi
+  7c53d2:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c53d8:	vmovd  xmm0,eax
+  7c53dc:	vpbroadcastb xmm0,xmm0
+  7c53e1:	vmovdqa XMMWORD PTR [rsp+0x50],xmm0
+  7c53e7:	mov    eax,esi
+  7c53e9:	and    al,0xf
+  7c53eb:	mov    ecx,0xffffffff
+  7c53f0:	shlx   ebx,ecx,eax
+  7c53f5:	not    ebx
+  7c53f7:	xor    r14d,r14d
+  7c53fa:	vmovdqa xmm0,XMMWORD PTR [rsp+0x50]
+  7c5400:	vpcmpeqb xmm0,xmm0,XMMWORD PTR [r10+r14*1+0x10]
+  7c5407:	vpmovmskb eax,xmm0
+  7c540b:	mov    ecx,esi
+  7c540d:	sub    ecx,r14d
+  7c5410:	cmp    ecx,0x10
+  7c5413:	mov    r15d,0xffff
+  7c5419:	cmovb  r15d,ebx
+  7c541d:	and    r15d,eax
+  7c5420:	jne    7c544d <MVM_str_hash_delete_nocheck@@Base+0x8ad>
+  7c5422:	add    r14,0x10
+  7c5426:	mov    rsi,QWORD PTR [rsp+0x20]
+  7c542b:	cmp    r14,rsi
+  7c542e:	jb     7c53fa <MVM_str_hash_delete_nocheck@@Base+0x85a>
+  7c5430:	jmp    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5435:	data16 cs nop WORD PTR [rax+rax*1+0x0]
+  7c5440:	lea    eax,[r15-0x1]
+  7c5444:	and    ax,r15w
+  7c5448:	mov    r15d,eax
+  7c544b:	je     7c5422 <MVM_str_hash_delete_nocheck@@Base+0x882>
+  7c544d:	xor    r12d,r12d
+  7c5450:	tzcnt  r12d,r15d
+  7c5455:	or     r12d,r14d
+  7c5458:	mov    rax,r12
+  7c545b:	imul   rax,rbp
+  7c545f:	mov    rsi,QWORD PTR [r13+rax*1+0x0]
+  7c5464:	test   rsi,rsi
+  7c5467:	je     7c5440 <MVM_str_hash_delete_nocheck@@Base+0x8a0>
+  7c5469:	cmp    rdx,rsi
+  7c546c:	je     7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c5472:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c5475:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c5478:	jne    7c5440 <MVM_str_hash_delete_nocheck@@Base+0x8a0>
+  7c547a:	xor    edx,edx
+  7c547c:	mov    r8,QWORD PTR [rsp+0x8]
+  7c5481:	xor    r9d,r9d
+  7c5484:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5489:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c548e:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5493:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5498:	test   rax,rax
+  7c549b:	je     7c5440 <MVM_str_hash_delete_nocheck@@Base+0x8a0>
+  7c549d:	jmp    7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c54a2:	test   rsi,rsi
+  7c54a5:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c54ab:	vmovd  xmm0,eax
+  7c54af:	vpbroadcastb ymm0,xmm0
+  7c54b4:	vmovdqu YMMWORD PTR [rsp+0x50],ymm0
+  7c54ba:	mov    eax,0xffffffff
+  7c54bf:	shlx   ebx,eax,esi
+  7c54c4:	not    ebx
+  7c54c6:	xor    r14d,r14d
+  7c54c9:	vmovdqu ymm0,YMMWORD PTR [rsp+0x50]
+  7c54cf:	vpcmpeqb ymm0,ymm0,YMMWORD PTR [r10+r14*1+0x10]
+  7c54d6:	vpmovmskb eax,ymm0
+  7c54da:	mov    ecx,esi
+  7c54dc:	sub    ecx,r14d
+  7c54df:	cmp    ecx,0x20
+  7c54e2:	mov    r15d,0xffffffff
+  7c54e8:	cmovb  r15d,ebx
+  7c54ec:	and    r15d,eax
+  7c54ef:	jne    7c5517 <MVM_str_hash_delete_nocheck@@Base+0x977>
+  7c54f1:	add    r14,0x20
+  7c54f5:	mov    rsi,QWORD PTR [rsp+0x20]
+  7c54fa:	cmp    r14,rsi
+  7c54fd:	jb     7c54c9 <MVM_str_hash_delete_nocheck@@Base+0x929>
+  7c54ff:	jmp    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5504:	data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+  7c5510:	blsr   r15d,r15d
+  7c5515:	je     7c54f1 <MVM_str_hash_delete_nocheck@@Base+0x951>
+  7c5517:	xor    r12d,r12d
+  7c551a:	tzcnt  r12d,r15d
+  7c551f:	or     r12d,r14d
+  7c5522:	mov    rax,r12
+  7c5525:	imul   rax,rbp
+  7c5529:	mov    rsi,QWORD PTR [r13+rax*1+0x0]
+  7c552e:	test   rsi,rsi
+  7c5531:	je     7c5510 <MVM_str_hash_delete_nocheck@@Base+0x970>
+  7c5533:	cmp    rdx,rsi
+  7c5536:	je     7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c553c:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c553f:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c5542:	jne    7c5510 <MVM_str_hash_delete_nocheck@@Base+0x970>
+  7c5544:	xor    edx,edx
+  7c5546:	mov    r8,QWORD PTR [rsp+0x8]
+  7c554b:	xor    r9d,r9d
+  7c554e:	vzeroupper
+  7c5551:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5556:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c555b:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5560:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5565:	test   rax,rax
+  7c5568:	je     7c5510 <MVM_str_hash_delete_nocheck@@Base+0x970>
+  7c556a:	jmp    7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c556f:	test   rsi,rsi
+  7c5572:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5578:	vmovd  xmm0,eax
+  7c557c:	vpbroadcastb ymm0,xmm0
+  7c5581:	vmovdqu YMMWORD PTR [rsp+0x50],ymm0
+  7c5587:	mov    rax,0xffffffffffffffff
+  7c558e:	shlx   rbx,rax,rsi
+  7c5593:	not    rbx
+  7c5596:	xor    r14d,r14d
+  7c5599:	vmovdqu ymm1,YMMWORD PTR [rsp+0x50]
+  7c559f:	vpcmpeqb ymm0,ymm1,YMMWORD PTR [r10+r14*1+0x10]
+  7c55a6:	vpmovmskb eax,ymm0
+  7c55aa:	vpcmpeqb ymm0,ymm1,YMMWORD PTR [r10+r14*1+0x30]
+  7c55b1:	vpmovmskb ecx,ymm0
+  7c55b5:	shl    rcx,0x20
+  7c55b9:	or     rcx,rax
+  7c55bc:	mov    eax,esi
+  7c55be:	sub    eax,r14d
+  7c55c1:	cmp    eax,0x40
+  7c55c4:	mov    r15,0xffffffffffffffff
+  7c55cb:	cmovb  r15,rbx
+  7c55cf:	and    r15,rcx
+  7c55d2:	jne    7c55f7 <MVM_str_hash_delete_nocheck@@Base+0xa57>
+  7c55d4:	add    r14,0x40
+  7c55d8:	mov    rsi,QWORD PTR [rsp+0x20]
+  7c55dd:	cmp    r14,rsi
+  7c55e0:	jb     7c5599 <MVM_str_hash_delete_nocheck@@Base+0x9f9>
+  7c55e2:	jmp    7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c55e7:	nop    WORD PTR [rax+rax*1+0x0]
+  7c55f0:	blsr   r15,r15
+  7c55f5:	je     7c55d4 <MVM_str_hash_delete_nocheck@@Base+0xa34>
+  7c55f7:	xor    r12d,r12d
+  7c55fa:	tzcnt  r12,r15
+  7c55ff:	or     r12,r14
+  7c5602:	mov    eax,r12d
+  7c5605:	imul   rax,rbp
+  7c5609:	mov    rsi,QWORD PTR [r13+rax*1+0x0]
+  7c560e:	test   rsi,rsi
+  7c5611:	je     7c55f0 <MVM_str_hash_delete_nocheck@@Base+0xa50>
+  7c5613:	cmp    rdx,rsi
+  7c5616:	je     7c5646 <MVM_str_hash_delete_nocheck@@Base+0xaa6>
+  7c5618:	mov    ecx,DWORD PTR [rsi+0x24]
+  7c561b:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c561e:	jne    7c55f0 <MVM_str_hash_delete_nocheck@@Base+0xa50>
+  7c5620:	xor    edx,edx
+  7c5622:	mov    r8,QWORD PTR [rsp+0x8]
+  7c5627:	xor    r9d,r9d
+  7c562a:	vzeroupper
+  7c562d:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5632:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5637:	mov    r10,QWORD PTR [rsp+0x10]
+  7c563c:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5641:	test   rax,rax
+  7c5644:	je     7c55f0 <MVM_str_hash_delete_nocheck@@Base+0xa50>
+  7c5646:	cmp    r12d,0xffffffff
+  7c564a:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5650:	mov    ebx,DWORD PTR [r10+0x4]
+  7c5654:	dec    ebx
+  7c5656:	cmp    r12d,ebx
+  7c5659:	je     7c5a63 <MVM_str_hash_delete_nocheck@@Base+0xec3>
+  7c565f:	mov    rcx,rdi
+  7c5662:	mov    edi,r12d
+  7c5665:	jmp    7c5a71 <MVM_str_hash_delete_nocheck@@Base+0xed1>
+  7c566a:	test   rax,rax
+  7c566d:	jne    7c5686 <MVM_str_hash_delete_nocheck@@Base+0xae6>
+  7c566f:	mov    rsi,rdx
+  7c5672:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c5677:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c567c:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5681:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5686:	shr    rax,0x38
+  7c568a:	mov    ecx,DWORD PTR [r10+0x8]
+  7c568e:	cmp    ecx,0x20
+  7c5691:	je     7c5a2b <MVM_str_hash_delete_nocheck@@Base+0xe8b>
+  7c5697:	cmp    ecx,0x10
+  7c569a:	je     7c5a1b <MVM_str_hash_delete_nocheck@@Base+0xe7b>
+  7c56a0:	mov    rsi,rdi
+  7c56a3:	cmp    ecx,0x8
+  7c56a6:	jne    7c5a3b <MVM_str_hash_delete_nocheck@@Base+0xe9b>
+  7c56ac:	movzx  ecx,al
+  7c56af:	mov    rdi,r10
+  7c56b2:	call   7c1420 <MVM_str_hash_delete@@Base+0x13d0>
+  7c56b7:	jmp    7c5a46 <MVM_str_hash_delete_nocheck@@Base+0xea6>
+  7c56bc:	mov    r12d,DWORD PTR [r10+0x8]
+  7c56c0:	xor    r12d,r8d
+  7c56c3:	and    r12d,r13d
+  7c56c6:	movzx  ecx,BYTE PTR [r10+r12*1+0x18]
+  7c56cc:	test   cl,cl
+  7c56ce:	je     7c5847 <MVM_str_hash_delete_nocheck@@Base+0xca7>
+  7c56d4:	mov    esi,0x1
+  7c56d9:	shlx   rbx,rsi,rax
+  7c56de:	add    rbx,r15
+  7c56e1:	movzx  r14d,BYTE PTR [r10+0x2]
+  7c56e6:	jmp    7c56fb <MVM_str_hash_delete_nocheck@@Base+0xb5b>
+  7c56e8:	inc    r12d
+  7c56eb:	and    r12d,r13d
+  7c56ee:	movzx  ecx,BYTE PTR [r15+r12*1]
+  7c56f3:	test   cl,cl
+  7c56f5:	je     7c5847 <MVM_str_hash_delete_nocheck@@Base+0xca7>
+  7c56fb:	dec    cl
+  7c56fd:	movzx  eax,cl
+  7c5700:	imul   rax,r14
+  7c5704:	mov    rbp,QWORD PTR [rbx+rax*1]
+  7c5708:	test   rbp,rbp
+  7c570b:	je     7c56e8 <MVM_str_hash_delete_nocheck@@Base+0xb48>
+  7c570d:	mov    rax,QWORD PTR [rbp+0x28]
+  7c5711:	test   rax,rax
+  7c5714:	jne    7c5732 <MVM_str_hash_delete_nocheck@@Base+0xb92>
+  7c5716:	mov    rsi,rbp
+  7c5719:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c571e:	mov    r8,QWORD PTR [rsp+0x20]
+  7c5723:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5728:	mov    r10,QWORD PTR [rsp+0x10]
+  7c572d:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5732:	cmp    rax,r8
+  7c5735:	jne    7c56e8 <MVM_str_hash_delete_nocheck@@Base+0xb48>
+  7c5737:	cmp    rdx,rbp
+  7c573a:	je     7c5773 <MVM_str_hash_delete_nocheck@@Base+0xbd3>
+  7c573c:	mov    ecx,DWORD PTR [rbp+0x24]
+  7c573f:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c5742:	jne    7c56e8 <MVM_str_hash_delete_nocheck@@Base+0xb48>
+  7c5744:	mov    rsi,rbp
+  7c5747:	xor    edx,edx
+  7c5749:	mov    r8,QWORD PTR [rsp+0x8]
+  7c574e:	xor    r9d,r9d
+  7c5751:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5756:	mov    r8,QWORD PTR [rsp+0x20]
+  7c575b:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c5760:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5765:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c576a:	test   rax,rax
+  7c576d:	je     7c56e8 <MVM_str_hash_delete_nocheck@@Base+0xb48>
+  7c5773:	mov    BYTE PTR [rsp+0x2c],0x1
+  7c5778:	lea    rax,[rsp+0x2c]
+  7c577d:	jmp    7c585d <MVM_str_hash_delete_nocheck@@Base+0xcbd>
+  7c5782:	mov    r12d,DWORD PTR [r10+0x8]
+  7c5786:	xor    r12d,r8d
+  7c5789:	and    r12d,r13d
+  7c578c:	mov    esi,DWORD PTR [r10+r12*4+0x18]
+  7c5791:	test   esi,esi
+  7c5793:	je     7c5853 <MVM_str_hash_delete_nocheck@@Base+0xcb3>
+  7c5799:	shlx   rbx,rcx,rax
+  7c579e:	add    rbx,r15
+  7c57a1:	movzx  r14d,BYTE PTR [r10+0x2]
+  7c57a6:	jmp    7c57ba <MVM_str_hash_delete_nocheck@@Base+0xc1a>
+  7c57a8:	inc    r12d
+  7c57ab:	and    r12d,r13d
+  7c57ae:	mov    esi,DWORD PTR [r15+r12*4]
+  7c57b2:	test   esi,esi
+  7c57b4:	je     7c5853 <MVM_str_hash_delete_nocheck@@Base+0xcb3>
+  7c57ba:	dec    esi
+  7c57bc:	imul   rsi,r14
+  7c57c0:	mov    rbp,QWORD PTR [rbx+rsi*1]
+  7c57c4:	test   rbp,rbp
+  7c57c7:	je     7c57a8 <MVM_str_hash_delete_nocheck@@Base+0xc08>
+  7c57c9:	mov    rax,QWORD PTR [rbp+0x28]
+  7c57cd:	test   rax,rax
+  7c57d0:	jne    7c57ee <MVM_str_hash_delete_nocheck@@Base+0xc4e>
+  7c57d2:	mov    rsi,rbp
+  7c57d5:	call   9c2250 <MVM_string_compute_hash_code@plt>
+  7c57da:	mov    r8,QWORD PTR [rsp+0x20]
+  7c57df:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c57e4:	mov    r10,QWORD PTR [rsp+0x10]
+  7c57e9:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c57ee:	cmp    rax,r8
+  7c57f1:	jne    7c57a8 <MVM_str_hash_delete_nocheck@@Base+0xc08>
+  7c57f3:	cmp    rdx,rbp
+  7c57f6:	je     7c582f <MVM_str_hash_delete_nocheck@@Base+0xc8f>
+  7c57f8:	mov    ecx,DWORD PTR [rbp+0x24]
+  7c57fb:	cmp    ecx,DWORD PTR [rdx+0x24]
+  7c57fe:	jne    7c57a8 <MVM_str_hash_delete_nocheck@@Base+0xc08>
+  7c5800:	mov    rsi,rbp
+  7c5803:	xor    edx,edx
+  7c5805:	mov    r8,QWORD PTR [rsp+0x8]
+  7c580a:	xor    r9d,r9d
+  7c580d:	call   9c2260 <MVM_string_substrings_equal_nocheck@plt>
+  7c5812:	mov    r8,QWORD PTR [rsp+0x20]
+  7c5817:	mov    rdx,QWORD PTR [rsp+0x8]
+  7c581c:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5821:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5826:	test   rax,rax
+  7c5829:	je     7c57a8 <MVM_str_hash_delete_nocheck@@Base+0xc08>
+  7c582f:	mov    BYTE PTR [rsp+0x3c],0x1
+  7c5834:	lea    rax,[rsp+0x3c]
+  7c5839:	jmp    7c585d <MVM_str_hash_delete_nocheck@@Base+0xcbd>
+  7c583b:	mov    BYTE PTR [rsp+0x30],0x0
+  7c5840:	lea    rax,[rsp+0x30]
+  7c5845:	jmp    7c585d <MVM_str_hash_delete_nocheck@@Base+0xcbd>
+  7c5847:	mov    BYTE PTR [rsp+0x28],0x0
+  7c584c:	lea    rax,[rsp+0x28]
+  7c5851:	jmp    7c585d <MVM_str_hash_delete_nocheck@@Base+0xcbd>
+  7c5853:	mov    BYTE PTR [rsp+0x38],0x0
+  7c5858:	lea    rax,[rsp+0x38]
+  7c585d:	test   BYTE PTR [rax],0x1
+  7c5860:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5866:	movzx  ecx,BYTE PTR [r10+0x11]
+  7c586b:	mov    eax,r12d
+  7c586e:	cmp    ecx,0x2
+  7c5871:	mov    r13,r15
+  7c5874:	mov    rsi,rdi
+  7c5877:	je     7c599e <MVM_str_hash_delete_nocheck@@Base+0xdfe>
+  7c587d:	cmp    ecx,0x1
+  7c5880:	jne    7c59a5 <MVM_str_hash_delete_nocheck@@Base+0xe05>
+  7c5886:	movzx  ebx,BYTE PTR [r15+rax*1]
+  7c588b:	jmp    7c59a9 <MVM_str_hash_delete_nocheck@@Base+0xe09>
+  7c5890:	mov    r9,rdi
+  7c5893:	lea    rdi,[r10+r14*1]
+  7c5897:	xor    eax,eax
+  7c5899:	nop    DWORD PTR [rax+0x0]
+  7c58a0:	mov    r8,rax
+  7c58a3:	add    rax,r10
+  7c58a6:	sub    sil,bl
+  7c58a9:	mov    BYTE PTR [r14+rax*1],sil
+  7c58ad:	movzx  esi,BYTE PTR [r14+rax*1+0x2]
+  7c58b3:	lea    rax,[r8+0x1]
+  7c58b7:	cmp    sil,dl
+  7c58ba:	jae    7c58a0 <MVM_str_hash_delete_nocheck@@Base+0xd00>
+  7c58bc:	lea    rbx,[rdi+r8*1]
+  7c58c0:	inc    rbx
+  7c58c3:	cmp    r13d,0x10
+  7c58c7:	jne    7c58e6 <MVM_str_hash_delete_nocheck@@Base+0xd46>
+  7c58c9:	lea    rcx,[rbx+rbp*1]
+  7c58cd:	cmp    rcx,0x1
+  7c58d1:	adc    rbp,rbx
+  7c58d4:	cmp    rcx,0x8
+  7c58d8:	jae    7c5b52 <MVM_str_hash_delete_nocheck@@Base+0xfb2>
+  7c58de:	mov    rdi,r9
+  7c58e1:	jmp    7c5ba6 <MVM_str_hash_delete_nocheck@@Base+0x1006>
+  7c58e6:	mov    rdx,rbx
+  7c58e9:	sub    rdx,rcx
+  7c58ec:	imul   rdx,r13
+  7c58f0:	sub    r12,rdx
+  7c58f3:	add    r13,r12
+  7c58f6:	mov    rdi,r13
+  7c58f9:	mov    rsi,r12
+  7c58fc:	call   79a1f0 <uv_exepath@@Base+0x160>
+  7c5901:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5906:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c590b:	jmp    7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c5910:	cmp    rax,0x1
+  7c5914:	mov    rcx,rax
+  7c5917:	adc    rcx,0x0
+  7c591b:	and    rcx,0xfffffffffffffff8
+  7c591f:	mov    rdi,r9
+  7c5922:	vmovdqu ymm0,YMMWORD PTR [r12-0x80]
+  7c5929:	vmovdqu ymm1,YMMWORD PTR [r12-0x60]
+  7c5930:	vmovups ymm2,YMMWORD PTR [r12-0x40]
+  7c5937:	vmovups ymm3,YMMWORD PTR [r12-0x20]
+  7c593e:	vmovups YMMWORD PTR [r12-0x10],ymm3
+  7c5945:	vmovups YMMWORD PTR [r12-0x30],ymm2
+  7c594c:	vmovdqu YMMWORD PTR [r12-0x50],ymm1
+  7c5953:	vmovdqu YMMWORD PTR [r12-0x70],ymm0
+  7c595a:	add    r12,0xffffffffffffff80
+  7c595e:	add    rcx,0xfffffffffffffff8
+  7c5962:	jne    7c5922 <MVM_str_hash_delete_nocheck@@Base+0xd82>
+  7c5964:	test   bpl,0x7
+  7c5968:	je     7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c596e:	cmp    rax,0x1
+  7c5972:	adc    rax,0x0
+  7c5976:	and    eax,0x7
+  7c5979:	shl    eax,0x4
+  7c597c:	xor    ecx,ecx
+  7c597e:	xchg   ax,ax
+  7c5980:	vmovdqu xmm0,XMMWORD PTR [r12+rcx*1-0x10]
+  7c5987:	vmovdqu XMMWORD PTR [r12+rcx*1],xmm0
+  7c598d:	add    rcx,0xfffffffffffffff0
+  7c5991:	mov    rdx,rax
+  7c5994:	add    rdx,rcx
+  7c5997:	jne    7c5980 <MVM_str_hash_delete_nocheck@@Base+0xde0>
+  7c5999:	jmp    7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c599e:	movzx  ebx,WORD PTR [r15+rax*2]
+  7c59a3:	jmp    7c59a9 <MVM_str_hash_delete_nocheck@@Base+0xe09>
+  7c59a5:	mov    ebx,DWORD PTR [r15+rax*4]
+  7c59a9:	mov    rdi,r10
+  7c59ac:	mov    edx,r12d
+  7c59af:	mov    r15,rsi
+  7c59b2:	call   7c1640 <MVM_str_hash_delete@@Base+0x15f0>
+  7c59b7:	mov    rdx,QWORD PTR [rsp+0x10]
+  7c59bc:	mov    eax,DWORD PTR [rdx+0x4]
+  7c59bf:	lea    ebp,[rax-0x1]
+  7c59c2:	cmp    ebx,eax
+  7c59c4:	jne    7c59e2 <MVM_str_hash_delete_nocheck@@Base+0xe42>
+  7c59c6:	movzx  r15d,BYTE PTR [rdx+0x2]
+  7c59cb:	movzx  eax,BYTE PTR [rdx+0x10]
+  7c59cf:	movzx  ecx,BYTE PTR [rdx+0x11]
+  7c59d3:	shlx   rbx,rcx,rax
+  7c59d8:	mov    edi,ebp
+  7c59da:	mov    r14,rdx
+  7c59dd:	jmp    7c5b2c <MVM_str_hash_delete_nocheck@@Base+0xf8c>
+  7c59e2:	lea    r14d,[rbx-0x1]
+  7c59e6:	mov    rdi,rdx
+  7c59e9:	mov    rsi,r15
+  7c59ec:	mov    edx,ebp
+  7c59ee:	call   7c1760 <MVM_str_hash_delete@@Base+0x1710>
+  7c59f3:	mov    rdx,QWORD PTR [rsp+0x10]
+  7c59f8:	movzx  ecx,BYTE PTR [rdx+0x11]
+  7c59fc:	mov    eax,eax
+  7c59fe:	cmp    ecx,0x2
+  7c5a01:	je     7c5acd <MVM_str_hash_delete_nocheck@@Base+0xf2d>
+  7c5a07:	cmp    ecx,0x1
+  7c5a0a:	mov    rsi,r13
+  7c5a0d:	jne    7c5ad8 <MVM_str_hash_delete_nocheck@@Base+0xf38>
+  7c5a13:	mov    BYTE PTR [rsi+rax*1],bl
+  7c5a16:	jmp    7c5adb <MVM_str_hash_delete_nocheck@@Base+0xf3b>
+  7c5a1b:	movzx  ecx,al
+  7c5a1e:	mov    rsi,rdi
+  7c5a21:	mov    rdi,r10
+  7c5a24:	call   7c1530 <MVM_str_hash_delete@@Base+0x14e0>
+  7c5a29:	jmp    7c5a46 <MVM_str_hash_delete_nocheck@@Base+0xea6>
+  7c5a2b:	movzx  ecx,al
+  7c5a2e:	mov    rsi,rdi
+  7c5a31:	mov    rdi,r10
+  7c5a34:	call   7c11d0 <MVM_str_hash_delete@@Base+0x1180>
+  7c5a39:	jmp    7c5a46 <MVM_str_hash_delete_nocheck@@Base+0xea6>
+  7c5a3b:	movzx  ecx,al
+  7c5a3e:	mov    rdi,r10
+  7c5a41:	call   7c12e0 <MVM_str_hash_delete@@Base+0x1290>
+  7c5a46:	cmp    eax,0xffffffff
+  7c5a49:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5a4e:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5a53:	je     7c5c9e <MVM_str_hash_delete_nocheck@@Base+0x10fe>
+  7c5a59:	mov    ebx,DWORD PTR [r10+0x4]
+  7c5a5d:	dec    ebx
+  7c5a5f:	cmp    eax,ebx
+  7c5a61:	jne    7c5a6c <MVM_str_hash_delete_nocheck@@Base+0xecc>
+  7c5a63:	mov    DWORD PTR [r10+0x4],ebx
+  7c5a67:	jmp    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5a6c:	mov    rcx,rdi
+  7c5a6f:	mov    edi,eax
+  7c5a71:	mov    esi,ebx
+  7c5a73:	movzx  eax,BYTE PTR [r10+rsi*1+0x10]
+  7c5a79:	mov    BYTE PTR [r10+rdi*1+0x10],al
+  7c5a7e:	movzx  edx,BYTE PTR [r10+0x2]
+  7c5a83:	mov    eax,DWORD PTR [r10+0xc]
+  7c5a87:	add    rax,r10
+  7c5a8a:	imul   rdi,rdx
+  7c5a8e:	add    rdi,rax
+  7c5a91:	imul   rsi,rdx
+  7c5a95:	add    rsi,rax
+  7c5a98:	cmp    rdx,0x10
+  7c5a9c:	jne    7c5ab2 <MVM_str_hash_delete_nocheck@@Base+0xf12>
+  7c5a9e:	vmovdqu xmm0,XMMWORD PTR [rsi]
+  7c5aa2:	vmovdqu XMMWORD PTR [rdi],xmm0
+  7c5aa6:	mov    rdi,rcx
+  7c5aa9:	mov    DWORD PTR [r10+0x4],ebx
+  7c5aad:	jmp    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5ab2:	vzeroupper
+  7c5ab5:	call   79a590 <uv_exepath@@Base+0x500>
+  7c5aba:	mov    r10,QWORD PTR [rsp+0x10]
+  7c5abf:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5ac4:	mov    DWORD PTR [r10+0x4],ebx
+  7c5ac8:	jmp    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5acd:	mov    rsi,r13
+  7c5ad0:	mov    WORD PTR [r13+rax*2+0x0],bx
+  7c5ad6:	jmp    7c5adb <MVM_str_hash_delete_nocheck@@Base+0xf3b>
+  7c5ad8:	mov    DWORD PTR [rsi+rax*4],ebx
+  7c5adb:	movzx  eax,BYTE PTR [rdx+0x10]
+  7c5adf:	shlx   rbx,rcx,rax
+  7c5ae4:	lea    rcx,[rsi+rbx*1]
+  7c5ae8:	mov    eax,r14d
+  7c5aeb:	movzx  r15d,BYTE PTR [rdx+0x2]
+  7c5af0:	imul   rax,r15
+  7c5af4:	add    rax,rcx
+  7c5af7:	mov    edi,ebp
+  7c5af9:	mov    rsi,r15
+  7c5afc:	imul   rsi,rdi
+  7c5b00:	add    rsi,rcx
+  7c5b03:	cmp    r15,0x10
+  7c5b07:	jne    7c5b16 <MVM_str_hash_delete_nocheck@@Base+0xf76>
+  7c5b09:	vmovdqu xmm0,XMMWORD PTR [rsi]
+  7c5b0d:	vmovdqu XMMWORD PTR [rax],xmm0
+  7c5b11:	mov    r15b,0x10
+  7c5b14:	jmp    7c5b27 <MVM_str_hash_delete_nocheck@@Base+0xf87>
+  7c5b16:	mov    r14,rdi
+  7c5b19:	mov    rdi,rax
+  7c5b1c:	mov    rdx,r15
+  7c5b1f:	call   79a590 <uv_exepath@@Base+0x500>
+  7c5b24:	mov    rdi,r14
+  7c5b27:	mov    r14,QWORD PTR [rsp+0x10]
+  7c5b2c:	add    r13,rbx
+  7c5b2f:	movzx  edx,r15b
+  7c5b33:	imul   rdi,rdx
+  7c5b37:	add    rdi,r13
+  7c5b3a:	xor    esi,esi
+  7c5b3c:	call   79a170 <uv_exepath@@Base+0xe0>
+  7c5b41:	mov    DWORD PTR [r14+0x4],ebp
+  7c5b45:	mov    rdi,QWORD PTR [rsp+0x18]
+  7c5b4a:	mov    r10,r14
+  7c5b4d:	jmp    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5b52:	cmp    rax,0x1
+  7c5b56:	mov    rcx,rax
+  7c5b59:	adc    rcx,0x0
+  7c5b5d:	and    rcx,0xfffffffffffffff8
+  7c5b61:	mov    rdi,r9
+  7c5b64:	vmovdqu ymm0,YMMWORD PTR [r12-0x80]
+  7c5b6b:	vmovdqu ymm1,YMMWORD PTR [r12-0x60]
+  7c5b72:	vmovups ymm2,YMMWORD PTR [r12-0x40]
+  7c5b79:	vmovups ymm3,YMMWORD PTR [r12-0x20]
+  7c5b80:	vmovups YMMWORD PTR [r12-0x10],ymm3
+  7c5b87:	vmovups YMMWORD PTR [r12-0x30],ymm2
+  7c5b8e:	vmovdqu YMMWORD PTR [r12-0x50],ymm1
+  7c5b95:	vmovdqu YMMWORD PTR [r12-0x70],ymm0
+  7c5b9c:	add    r12,0xffffffffffffff80
+  7c5ba0:	add    rcx,0xfffffffffffffff8
+  7c5ba4:	jne    7c5b64 <MVM_str_hash_delete_nocheck@@Base+0xfc4>
+  7c5ba6:	test   bpl,0x7
+  7c5baa:	je     7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c5bb0:	cmp    rax,0x1
+  7c5bb4:	adc    rax,0x0
+  7c5bb8:	and    eax,0x7
+  7c5bbb:	shl    eax,0x4
+  7c5bbe:	xor    ecx,ecx
+  7c5bc0:	vmovdqu xmm0,XMMWORD PTR [r12+rcx*1-0x10]
+  7c5bc7:	vmovdqu XMMWORD PTR [r12+rcx*1],xmm0
+  7c5bcd:	add    rcx,0xfffffffffffffff0
+  7c5bd1:	mov    rdx,rax
+  7c5bd4:	add    rdx,rcx
+  7c5bd7:	jne    7c5bc0 <MVM_str_hash_delete_nocheck@@Base+0x1020>
+  7c5bd9:	jmp    7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c5bde:	cmp    rax,0x1
+  7c5be2:	mov    rcx,rax
+  7c5be5:	adc    rcx,0x0
+  7c5be9:	and    rcx,0xfffffffffffffff8
+  7c5bed:	mov    rdi,r9
+  7c5bf0:	vmovdqu ymm0,YMMWORD PTR [r12-0x80]
+  7c5bf7:	vmovdqu ymm1,YMMWORD PTR [r12-0x60]
+  7c5bfe:	vmovups ymm2,YMMWORD PTR [r12-0x40]
+  7c5c05:	vmovups ymm3,YMMWORD PTR [r12-0x20]
+  7c5c0c:	vmovups YMMWORD PTR [r12-0x10],ymm3
+  7c5c13:	vmovups YMMWORD PTR [r12-0x30],ymm2
+  7c5c1a:	vmovdqu YMMWORD PTR [r12-0x50],ymm1
+  7c5c21:	vmovdqu YMMWORD PTR [r12-0x70],ymm0
+  7c5c28:	add    r12,0xffffffffffffff80
+  7c5c2c:	add    rcx,0xfffffffffffffff8
+  7c5c30:	jne    7c5bf0 <MVM_str_hash_delete_nocheck@@Base+0x1050>
+  7c5c32:	test   bpl,0x7
+  7c5c36:	je     7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+  7c5c38:	cmp    rax,0x1
+  7c5c3c:	adc    rax,0x0
+  7c5c40:	and    eax,0x7
+  7c5c43:	shl    eax,0x4
+  7c5c46:	xor    ecx,ecx
+  7c5c48:	vmovdqu xmm0,XMMWORD PTR [r12+rcx*1-0x10]
+  7c5c4f:	vmovdqu XMMWORD PTR [r12+rcx*1],xmm0
+  7c5c55:	add    rcx,0xfffffffffffffff0
+  7c5c59:	mov    rdx,rax
+  7c5c5c:	add    rdx,rcx
+  7c5c5f:	jne    7c5c48 <MVM_str_hash_delete_nocheck@@Base+0x10a8>
+  7c5c61:	mov    BYTE PTR [rbx],0x0
+  7c5c64:	mov    eax,DWORD PTR [r10+0x4]
+  7c5c68:	dec    eax
+  7c5c6a:	mov    DWORD PTR [r10+0x4],eax
+  7c5c6e:	cmp    DWORD PTR [r10+0x10],0x0
+  7c5c73:	jne    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5c75:	movzx  ecx,BYTE PTR [r10+0x16]
+  7c5c7a:	cmp    eax,ecx
+  7c5c7c:	jae    7c5c97 <MVM_str_hash_delete_nocheck@@Base+0x10f7>
+  7c5c7e:	movzx  eax,BYTE PTR [r10+0x14]
+  7c5c83:	mov    ecx,0x1
+  7c5c88:	shlx   eax,ecx,eax
+  7c5c8d:	shr    eax,0x2
+  7c5c90:	lea    eax,[rax+rax*2]
+  7c5c93:	mov    DWORD PTR [r10+0x10],eax
+  7c5c97:	cmp    BYTE PTR [r10+0x3],0x0
+  7c5c9c:	jne    7c5cb8 <MVM_str_hash_delete_nocheck@@Base+0x1118>
+  7c5c9e:	add    rsp,0x98
+  7c5ca5:	pop    rbx
+  7c5ca6:	pop    r12
+  7c5ca8:	pop    r13
+  7c5caa:	pop    r14
+  7c5cac:	pop    r15
+  7c5cae:	pop    rbp
+  7c5caf:	vzeroupper
+  7c5cb2:	ret
+  7c5cb3:	call   7c1410 <MVM_str_hash_delete@@Base+0x13c0>
+  7c5cb8:	vzeroupper
+  7c5cbb:	call   7c1800 <MVM_str_hash_delete@@Base+0x17b0>
+
+Disassembly of section .plt:

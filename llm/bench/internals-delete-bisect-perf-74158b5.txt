@@ -1,0 +1,10 @@
+    5.78 :   7c5dbd: test   $0x7f,%cl
+    8.20 :   7c5f85: jmp    7c5fa2 <MVM_str_hash_delete_nocheck@@Base+0x3b2>
+    5.83 :   7c5f9f: sub    %r13,%r12
+   13.24 :   7c5faa: jne    7c5f90 <MVM_str_hash_delete_nocheck@@Base+0x3a0>
+   34.46 :   7c5fb0: test   %rsi,%rsi
+    5.72 :   7c6000: ja     7c63e6 <MVM_str_hash_delete_nocheck@@Base+0x7f6>
+    5.82 :   7c6009: lea    (%r10,%r14,1),%rdi
+    7.46 :   7c6041: cmp    $0x1,%rcx
+    7.76 :   7c69d7: vmovdqu %xmm0,(%r12,%rcx,1)
+    5.73 :   7c69dd: add    $0xfffffffffffffff0,%rcx

@@ -1,0 +1,7 @@
+   12.26 :   7c4bc6: mov    %rdi,0x18(%rsp)
+   12.48 :   7c4f10: imul   %r13,%r12
+   12.47 :   7c4f46: add    %ebx,%r15d
+   12.68 :   7c4f5a: jne    7c4f40 <MVM_str_hash_delete_nocheck@@Base+0x3a0>
+   25.09 :   7c4f60: test   %rsi,%rsi
+   12.64 :   7c5968: je     7c5c61 <MVM_str_hash_delete_nocheck@@Base+0x10c1>
+   12.39 :   7c5c97: cmpb   $0x0,0x3(%r10)

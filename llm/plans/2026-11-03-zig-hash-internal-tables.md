@@ -377,3 +377,7 @@ Task 9c findings (investigation of the Task 9b spectest shortfall; record `trace
 - Not the hash operations and not memory: the head runs 12-14 percent more instructions at the same IPC (sprintf-f 242.6-246.9 G against 216.1-218.3 G), every hash-operation count rises by the same 15-18 percent (stats build), per-op cycles are equal or lower, engine symbols are 2.2-2.5 percent of samples on both builds, the compile phase and startup are equal, `MVM_SPESH_DISABLE=1` keeps the gap (15.5 percent), Swiss blocks are 0.29-0.67 of Robin Hood's from 65 entries up. Which work grows is not identified (open lead: an order-dependent code path over a 65-or-more-entry hash).
 - nqp lookup_hit at 65 (1.26) reproduces only with `--nth=all` plus a size above 65 in the list (1.23-1.31); with `--nth=threshold`, or sizes ending at 65, it reads 0.92-0.98; the C-API cell is 0.72-0.77 in every shape: a state-dependent real slowdown of the head, mechanism unknown.
 - Recommendation in the record: revert the flip (no nameable fix); the optional follow-up is the order-dependence diagnostic.
+
+| item | culprit | result |
+|---|---|---|
+| C-API delete shift (Task 9e) | 74158b566 (uni Swiss tier set); 54866bf06, a375403d1, c642db6ae within spread | delete 128/1024 1.10/1.06 of base (head 1.10/1.08); `MVM_str_hash_delete_nocheck` is instruction-identical to its predecessor, moved by 0x1050 bytes, hot probe loop from 32-byte aligned to offset 16: code placement, no source fix; no change made. Record `internals-delete-bisect.md` |
