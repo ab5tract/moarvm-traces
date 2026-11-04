@@ -131,3 +131,7 @@ Each file task: port, unit tests, the swap line in `build/sources.list`, `zig bu
 - The crc-getter program from the user's blog post is the proving ground.
 - The hundred-million stall is recorded as the reference behaviour, not investigated.
 - The full-Zig build stack stays deferred.
+
+## Errata
+
+- 2026-11-04, user ruling during Task 2: section 7 (the hundred-million reference stall) and the stall reproduction in Task 10 are struck: "let's ignore the 100 million bench after all. it's going to take way too long". The proving ground stays the one- and ten-million sizes of section 6.
