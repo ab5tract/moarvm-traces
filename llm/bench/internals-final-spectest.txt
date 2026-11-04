@@ -1,0 +1,83 @@
+# Final spectest A/B (Task 10): base 1478311f6 against HEAD 421aec8b9, both default builds in their prefixes (/tmp/claude-1000/internals-base-prefix, /tmp/claude-1000/tune-zig-prefix; the rakudo checkout is configured for the latter, base runs put the base libmoar first with LD_LIBRARY_PATH, head runs leave it unset), rakudo `make -o spectest_update spectest` (so roast stays at fb1d87214), TEST_JOBS=24, t/spec/**/.precomp removed before every run, stats off. Timed by tools/bench/timev.py. Order base HEAD HEAD base base HEAD. Driver: internals-final-scripts/spectest-drive.sh. A run starts only when no context-bench/rakudo-image/eval-serve/native-eval process exists and the 1-minute load is under 2.0.
+
+run 1 base start 13:39:25 load 0.43 0.59 0.79
+run 1 base exit 	Exit status: 0
+run 2 head start 13:49:02 load 0.21 5.25 5.07
+run 2 head exit 	Exit status: 0
+run 3 head start 13:58:39 load 0.19 6.09 7.54
+run 3 head exit 	Exit status: 0
+run 4 base start 14:08:16 load 0.22 6.11 8.76
+run 4 base exit 	Exit status: 0
+run 5 base start 14:17:53 load 0.11 6.11 9.42
+run 5 base exit 	Exit status: 0
+run 6 head start 14:27:30 load 0.21 6.20 9.84
+run 6 head exit 	Exit status: 0
+
+## run 1 (base)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4633.88
+	System time (seconds): 384.61
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:37.00
+	Maximum resident set size (kbytes): 1028656
+	Exit status: 0
+Files=1365, Tests=138715, 270 wallclock secs (35.96 usr  7.78 sys + 4593.37 cusr 374.25 csys = 5011.36 CPU)
+Result: PASS
+
+## run 2 (head)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4627.45
+	System time (seconds): 388.85
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:36.33
+	Maximum resident set size (kbytes): 1027600
+	Exit status: 0
+Files=1365, Tests=138715, 269 wallclock secs (36.06 usr  7.83 sys + 4586.82 cusr 378.44 csys = 5009.15 CPU)
+Result: PASS
+
+## run 3 (head)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4643.52
+	System time (seconds): 389.12
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:37.47
+	Maximum resident set size (kbytes): 1026648
+	Exit status: 0
+Files=1365, Tests=138715, 270 wallclock secs (36.51 usr  7.48 sys + 4602.51 cusr 379.02 csys = 5025.52 CPU)
+Result: PASS
+
+## run 4 (base)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4612.98
+	System time (seconds): 381.58
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:35.96
+	Maximum resident set size (kbytes): 1025956
+	Exit status: 0
+Files=1365, Tests=138715, 268 wallclock secs (36.04 usr  7.67 sys + 4572.23 cusr 371.39 csys = 4987.33 CPU)
+Result: PASS
+
+## run 5 (base)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4627.82
+	System time (seconds): 384.62
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:36.99
+	Maximum resident set size (kbytes): 1026748
+	Exit status: 0
+Files=1365, Tests=138715, 270 wallclock secs (36.23 usr  7.65 sys + 4586.95 cusr 374.40 csys = 5005.23 CPU)
+Result: PASS
+
+## run 6 (head)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4645.24
+	System time (seconds): 391.65
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:38.25
+	Maximum resident set size (kbytes): 1027264
+	Exit status: 0
+Files=1365, Tests=138715, 271 wallclock secs (36.12 usr  8.14 sys + 4604.73 cusr 380.73 csys = 5029.72 CPU)
+Result: PASS
+
+## comparison (medians of three per side)
+base walls [277.0, 275.96, 276.99], median 276.99 s; head walls [276.33, 277.47, 278.25], median 277.47 s
+base RSS [1028656, 1025956, 1026748], median 1026748 kB; head RSS [1027600, 1026648, 1027264], median 1027264 kB
+wall ratio head/base 1.0017 (spreads: base 275.96-277.00, head 276.33-278.25, overlapping)
+RSS ratio head/base 1.0005
+All six runs: exit 0, Files=1365, Tests=138715, Result: PASS (zero failures, zero new failures).
+The 3 percent target is met: the wall ratio is 1.0017 and the RSS ratio 1.0005, both inside 1.03 (and inside the 1.00 +- spread).
+Note: absolute figures (wall about 277 s, RSS about 1.03 GB) differ from the earlier records (wall 296-350 s, RSS 680-710 MB), which were taken on other days with other machine state; only the A/B within this record is comparable.

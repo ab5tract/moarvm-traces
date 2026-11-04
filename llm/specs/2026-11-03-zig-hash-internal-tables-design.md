@@ -1,6 +1,6 @@
 # Zig hash engine, campaign 3: internal tables on their own strategies
 
-Date: 2026-11-03. Status: approved by the user (who renamed `Spec` to
+Date: 2026-11-03. Status: executed; see the plan's Acceptance. Approved by the user (who renamed `Spec` to
 `KeySpec` throughout); builder check done, its
 eight questions folded in (decisions 6 and 7, sections 4.1, 4.2, 5.2, 5.3,
 6.2, 7 and 8), each marked "(my call)" where the author settled it.
@@ -546,3 +546,13 @@ Subagent-driven, as the bake-off: plan at
 standing instruction since bake-off Task 10; fix-loop escalation one tier
 up), work on the MoarVM worktree branch `zig-hash-internals`, traces commits
 in the submodule with the pointer bumped in MoarVM.
+
+## Errata (2026-11-04, Task 10)
+
+- **Section 3 (the unicode ops).** The nqp op for the codepoint-name table (u3) is `nqp::codepointfromname`; `nqp::getcpbyname` is the moarop it maps to (`getcpbyname` in `src/core/oplist`). `tools/bench/uni-bench.nqp` uses `codepointfromname`.
+- **Section 4.2 (output).** The dump is written by an `atexit` handler, not "at instance teardown" (`MVM_vm_destroy_instance`) (any process that exits normally reaches it). The directory is `MVM_HASH_STATS`'s value, one `<pid>.tsv` per process.
+- **Section 4.1 (probe lengths).** Not measured. No engine hook calls `stats.probe`, because reporting probe counts would have meant changing the set-0 tiers (ruled in Task 2); cycles per fetch (hit and miss) stand in, and the `probe` row stays defined in the dump format but is never written.
+- **Section 3 / 4.2 (the Header).** The site id lives in a stats-only extension of `Header` (`tier.zig`): 8 bytes in a plain build, 16 with `-Dhash-stats`, so absolute cycle figures of the survey carry a small layout bias.
+- **Sections 4.1 and 5 (lookups by table size).** Added by the user at the Task 6 stop (Task 5b): fetches are binned by the table's entry count at the fetch (`internals-survey-binned.md`). The survey's s5 and i2 conclusions rest on these shares, not on table counts alone.
+- **Section 5.1 and 5.3 (assignment).** Rulings that changed it: i2 closed (Task 8 not run); s5's Small-then-Swiss as set 0 was added as Task 9b, measured, and reverted by the user's ruling on Task 9c's data (Task 9d, `internals-set0-investigation.md`); u1-u4 kept their explicit sized builds and the `MVM_uni_hash_build_strategy` entry point but Swiss won none of them, so no internal site leaves the default (`internals-uni-bench.md`); the old Task 9 (cold str/fixkey/ptr sites) did not run.
+- **Section 6.3 (ladder guard).** One recorded exception, ruled 2026-11-04 after Task 9e: the C-API `delete` cells at 65 entries and up may read up to 1.10 of base, a code-placement effect of 74158b566 (`internals-delete-bisect.md`). Nothing is judged from a single run (`internals-final-ladder.md`).
