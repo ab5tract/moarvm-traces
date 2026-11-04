@@ -259,6 +259,22 @@ Order: Task 7, then Task 9b, then Task 10.
 
 ---
 
+### Task 9c: Where does the set-0 flip lose the spectest? (added 2026-11-04; the user asked for data before ruling on Task 9b)
+
+**Files:**
+- Record: `traces/llm/bench/internals-set0-investigation.md` (+ raw files `internals-set0-inv-*`); this plan ("## Assignment results": the Task 9b row gains the investigation's findings; no keep/revert yet)
+- No source changes. Both prefixes exist: base `/tmp/claude-1000/internals-base-prefix` (1478311f6, Small then Robin Hood) and head `/tmp/claude-1000/tune-zig-prefix` (the flipped ladder, HEAD of the branch).
+
+**Interfaces:** consumes Task 9b's records and prefixes; produces the data the user rules from.
+
+- [ ] **Step 1: Confirm the shortfall.** One more interleaved spectest pair in the order base, head, head, base (`timev.py`, `TEST_JOBS=24`, roast fb1d87214, `.precomp` removed, load under 2.0, stats off). Report the four walls and RSS beside Task 9b's six; state whether the 1.8 percent holds on the combined medians and whether the spreads stay disjoint.
+- [ ] **Step 2: Map the 65-entry hit regression.** `hash-ab.sh --rounds=5 --runs=5 --sizes=65,66,70,80,96,112,113,128,200,256 --nth=threshold` base vs head, both levels. Report the nqp `lookup_hit` ratio per size (where does 1.26 start and end: only 65, the whole 128-slot range 65-112, or beyond?) and the C-API ratio beside it. Then `perf record -g` (user space, `perf_event_paranoid` is 2) of `hash-bench.nqp --sizes=65 --runs=20` on each prefix (`LD_LIBRARY_PATH` set), `perf report --no-children --sort symbol` top 15 symbols each; and the same for the C-API bench at 65. Name the symbol(s) that differ, and whether the nqp-level path reaches a different function than the C-API path (e.g. `MVM_str_hash_fetch` vs `_nocheck`, an inline-header path, spesh-specialised code, or the salt/stale check).
+- [ ] **Step 3: Which spectest files lose?** One spectest per build with per-file timings (`make spectest HARNESS_VERBOSE=...` or `prove --timer`; whichever the rakudo harness supports, else `TEST_JOBS=1` is NOT acceptable: use the harness's own per-file timing or wrap each test file's run with `timev.py` through a custom `t/harness6`-compatible loop over the file list of `t/spectest.data` at `TEST_JOBS=24`). Rank files by head−base wall delta; report the 20 largest deltas and the 20 largest ratios with their base times, and the sum of deltas over those 20 against the total delta. Then `perf record` (system-wide not available; per process is) of the top 3 files on each build, `perf report` top symbols each, and the hash-engine share of samples (symbols `MVM_str_hash_*`, `swiss`, `robinhood`, `small`, `table`, GC mark `MVM_gc_*`).
+- [ ] **Step 4: Memory.** For the top 3 files, `MVM_HASH_STATS` is not needed; use `/usr/bin/time -v` or `timev.py` for peak RSS per build, and the stats build's `demolish` histogram from Task 5's W3 (`internals-survey-w3-report.md`) to count how many s5 tables sit at 65-112 entries (the 128-slot Swiss range), 113-224 (256 slots) etc.; compute the Swiss vs Robin Hood block sizes for those ranges (Swiss: 32 + slots + slots × entry_size; Robin Hood: from `robinhood.zig`'s layout) and the implied RSS delta against the measured 1.5 percent (about 10 MB).
+- [ ] **Step 5: Record and recommend.** `internals-set0-investigation.md` with every table above, a one-paragraph diagnosis (what the data supports: a specific hot path, GC, memory, noise), and a recommendation among keep / fix-then-remeasure / revert with the fix named if there is one. Append the findings to the Task 9b row in "## Assignment results". Commit traces ("internals: set 0 investigation") and the pointer.
+
+---
+
 ### Task 10: Whole-system acceptance, documentation, errata
 
 **Files:**
