@@ -1,0 +1,15 @@
+     7.23%  [.] MVM_str_hash_fetch_nocheck           -      -            
+     6.45%  [.] MVM_str_hash_fetch_nocheck           -      -            
+     5.85%  [.] MVM_str_hash_delete_nocheck          -      -            
+     4.50%  [.] MVM_str_hash_next_nocheck            -      -            
+     3.75%  [.] bench.main                           -      -            
+     3.65%  [.] MVM_str_hash_delete_nocheck          -      -            
+     3.31%  [.] MVM_str_hash_next_nocheck            -      -            
+     2.88%  [.] mi_free                              -      -            
+     2.76%  [.] 0x00000000007c1ff1                   -      -            
+     2.37%  [.] 0x00000000007c1fcd                   -      -            
+     2.21%  [.] 0x00000000007c202a                   -      -            
+     2.14%  [.] 0x00000000007c1fd4                   -      -            
+     1.89%  [.] 0x0000000000799467                   -      -            
+     1.68%  [.] MVM_string_substrings_equal_nocheck  -      -            
+     1.52%  [.] 0x00000000007c2001                   -      -            

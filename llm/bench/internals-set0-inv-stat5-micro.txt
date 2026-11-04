@@ -1,0 +1,10 @@
+preflip 3.960G  :: use Test; plan 3000; for ^3000 { is-deeply sprintf("%+8.2f", 2.71), " 
+tune-zig 3.937G  :: use Test; plan 3000; for ^3000 { is-deeply sprintf("%+8.2f", 2.71), " 
+preflip 2.229G  :: use Test; plan 3000; for ^3000 { ok True, "d$_" }
+tune-zig 2.249G  :: use Test; plan 3000; for ^3000 { ok True, "d$_" }
+preflip 2.436G  :: use Test; plan 300; for ^300 { subtest "t$_" => { plan 2; ok True; ok 
+tune-zig 2.426G  :: use Test; plan 300; for ^300 { subtest "t$_" => { plan 2; ok True; ok 
+preflip 2.767G  :: my $s=0; for ^3000 { $s += "-+0 ".comb.permutations>>.join.elems }; sa
+tune-zig 2.765G  :: my $s=0; for ^3000 { $s += "-+0 ".comb.permutations>>.join.elems }; sa
+preflip 4.425G  :: my $s=0; for ^6000 { $s += sprintf("%+8.2f", 2.71).chars }; say $s
+tune-zig 4.443G  :: my $s=0; for ^6000 { $s += sprintf("%+8.2f", 2.71).chars }; say $s

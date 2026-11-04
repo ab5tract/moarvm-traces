@@ -1,0 +1,7 @@
+preflip-s1 =0.00G instructions:u=249.68G cycles:u=192.45G 
+head-s1 =0.00G instructions:u=248.03G cycles:u=191.71G 
+preflip-s2 =0.00G instructions:u=249.94G cycles:u=198.18G 
+head-s2 =0.00G instructions:u=249.90G cycles:u=191.01G 
+preflip-nospesh =0.00G instructions:u=377.08G cycles:u=247.32G 
+head-nospesh =0.00G instructions:u=435.70G cycles:u=275.36G 
+done

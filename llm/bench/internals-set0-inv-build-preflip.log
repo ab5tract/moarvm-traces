@@ -1,0 +1,1 @@
+zig build install --prefix /tmp/claude-1000/preflip-prefix  99.68s user 8.54s system 176% cpu 1:01.20 total

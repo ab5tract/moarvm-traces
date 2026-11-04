@@ -1,0 +1,1 @@
+zig build install -Dhash-stats=true --prefix /tmp/claude-1000/stats-preflip  121.83s user 8.60s system 160% cpu 1:21.25 total

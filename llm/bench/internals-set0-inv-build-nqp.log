@@ -1,0 +1,35 @@
++++ Preparing MOAR build directories
+++++++ Building MOAR backend
++++ Compiling	gen/moar/stage1/MASTOps.moarvm
++++ Compiling	gen/moar/stage1/MASTNodes.moarvm
++++ Compiling	gen/moar/stage1/NQPHLL.moarvm
++++ Compiling	gen/moar/stage1/QAST.moarvm
++++ Compiling	gen/moar/stage1/NQPP6QRegex.moarvm
++++ Creating	stage 1 NQP
++++ Generating	gen/moar/stage2/nqpmo.nqp
++++ Compiling	gen/moar/stage2/nqpmo.moarvm
++++ Compiling	gen/moar/stage2/ModuleLoader.moarvm
++++ Generating	gen/moar/stage2/NQPCORE.setting
++++ Compiling	gen/moar/stage2/NQPCORE.setting.moarvm
++++ Generating	gen/moar/stage2/QASTNode.nqp
++++ Compiling	gen/moar/stage2/QASTNode.moarvm
++++ Generating	gen/moar/stage2/QRegex.nqp
++++ Compiling	gen/moar/stage2/QRegex.moarvm
++++ Generating	gen/moar/stage2/NQPHLL.nqp
++++ Generating	gen/moar/stage2/MASTNodes.nqp
++++ Compiling	gen/moar/stage2/MASTOps.moarvm
++++ Compiling	gen/moar/stage2/MASTNodes.moarvm
++++ Compiling	gen/moar/stage2/NQPHLL.moarvm
++++ Generating	gen/moar/stage2/QAST.nqp
++++ Compiling	gen/moar/stage2/QAST.moarvm
++++ Generating	gen/moar/stage2/NQPP6QRegex.nqp
++++ Compiling	gen/moar/stage2/NQPP6QRegex.moarvm
++++ Creating	stage 2 NQP
++++ Installing MOAR stage 2 files locally
++++ Compiling	NQPP5QRegex.moarvm
++++ Creating MOAR installation directories
++++ Installing into /tmp/claude-1000/tune-zig-prefix
++++ Installing MOAR specifics
++++ Compiling MOAR default runner
++++ Installing default runner
+make install  20.95s user 0.61s system 126% cpu 17.039 total

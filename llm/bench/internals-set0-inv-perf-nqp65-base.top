@@ -1,0 +1,15 @@
+    13.50%  [.] MVM_interp_run                                        -      -            
+     7.25%  [.] MVM_spesh_inline                                      -      -            
+     3.96%  [.] MVM_disp_program_run                                  -      -            
+     3.66%  [.] MVMHash_bind_key                                      -      -            
+     3.21%  [.] MVM_str_hash_fetch                                    -      -            
+     2.19%  [.] MVM_str_hash_delete                                   -      -            
+     1.65%  [.] MVM_repr_at_pos_o                                     -      -            
+     1.47%  [.] 0x00000000008e66fa                                    -      -            
+     1.40%  [.] MVM_VMArray_at_pos                                    -      -            
+     0.92%  [.] MVM_spesh_stats_update                                -      -            
+     0.92%  [.] MVM_args_set_result_int                               -      -            
+     0.89%  [.] MVM_frame_dispatch                                    -      -            
+     0.88%  [.] MVM_repr_shift_o                                      -      -            
+     0.79%  [.] 0x00000000008e10a6                                    -      -            
+     0.73%  [.] MVM_iterkey_s                                         -      -            

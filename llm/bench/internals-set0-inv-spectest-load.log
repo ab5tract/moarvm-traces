@@ -1,0 +1,9 @@
+base run1 roast fb1d87214 start 11:20:39 load 1.28 2.05 1.19 2/964 13806
+base run1 exit 0
+head run2 roast fb1d87214 start 11:27:30 load 1.85 9.91 6.41 1/961 31106
+head run2 exit 0
+head run3 roast fb1d87214 start 11:34:30 load 1.75 11.88 9.87 1/950 48449
+head run3 exit 0
+base run4 roast fb1d87214 start 11:41:30 load 1.73 12.45 12.08 1/952 65833
+base run4 exit 0
+done

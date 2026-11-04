@@ -1,0 +1,6 @@
+zig	65	insert	30.60	3824	26.37	36.98
+zig	65	lookup_hit	7.87	3824	7.76	8.04
+zig	65	lookup_miss	8.26	3824	8.11	8.57
+zig	65	delete	8.22	3824	8.02	9.26
+zig	65	iterate	11.21	3824	11.03	12.37
+zig	65	insert_nth	1082.49	3824	1019.93	1220.19

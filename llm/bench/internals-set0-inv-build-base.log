@@ -1,0 +1,5 @@
+info: access the help menu with "zig build -h"
+error: no step named 'hash-bench-exe'
+error: the following build command failed with exit code 1:
+.zig-cache/o/b2b4181f88dfd574f31ffa2f257e2587/build /usr/bin/zig /usr/lib/zig /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM .zig-cache /home/longwalker/.cache/zig --seed 0x8b8f2ec9 -Z6c44f9b2f907aacc hash-bench-exe --prefix /tmp/claude-1000/internals-base-prefix
+( zig build install --prefix /tmp/claude-1000/internals-base-prefix && zig   )  102.20s user 8.79s system 178% cpu 1:02.02 total

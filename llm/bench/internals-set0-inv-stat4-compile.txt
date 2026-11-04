@@ -1,0 +1,6 @@
+preflip-prefix | --target=parse t/spec/S32-str/sprintf-f.t | 5.225G
+preflip-prefix | --target=optimize t/spec/S32-str/sprintf-f.t | 5.244G
+preflip-prefix | -e use\ v6.e.PREVIEW;use\ Test;plan\ 1;ok\ 1 | 1.055G0.000G0.000G0.000G
+tune-zig-prefix | --target=parse t/spec/S32-str/sprintf-f.t | 5.250G
+tune-zig-prefix | --target=optimize t/spec/S32-str/sprintf-f.t | 5.190G
+tune-zig-prefix | -e use\ v6.e.PREVIEW;use\ Test;plan\ 1;ok\ 1 | 1.054G0.000G0.000G0.000G

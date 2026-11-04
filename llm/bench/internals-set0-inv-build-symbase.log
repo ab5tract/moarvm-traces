@@ -1,0 +1,1 @@
+zig build install -Dstrip=false --prefix /tmp/claude-1000/sym-base  124.44s user 9.53s system 164% cpu 1:21.40 total

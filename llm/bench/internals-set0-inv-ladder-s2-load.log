@@ -1,0 +1,21 @@
+round 1 base nqp load 1.85
+round 1 base capi load 1.85
+round 1 head nqp load 1.85
+round 1 head capi load 1.78
+round 2 head nqp load 1.78
+round 2 head capi load 1.78
+round 2 base nqp load 1.78
+round 2 base capi load 1.78
+round 3 base nqp load 1.78
+round 3 base capi load 1.78
+round 3 head nqp load 1.78
+round 3 head capi load 1.78
+round 4 head nqp load 1.78
+round 4 head capi load 1.72
+round 4 base nqp load 1.72
+round 4 base capi load 1.72
+round 5 base nqp load 1.72
+round 5 base capi load 1.72
+round 5 head nqp load 1.72
+round 5 head capi load 1.72
+end load 1.72

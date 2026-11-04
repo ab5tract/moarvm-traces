@@ -1,0 +1,6 @@
+	Command being timed: "./rakudo-m t/spec/S32-str/sprintf-b.t"
+	User time (seconds): 56.08
+	System time (seconds): 0.16
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:55.50
+	Maximum resident set size (kbytes): 451388
+	Exit status: 0

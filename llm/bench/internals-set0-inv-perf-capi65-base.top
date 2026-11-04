@@ -1,0 +1,15 @@
+    16.06%  [.] MVM_str_hash_fetch_nocheck               -      -            
+     9.18%  [.] MVM_str_hash_delete_nocheck              -      -            
+     5.61%  [.] MVM_str_hash_next_nocheck                -      -            
+     5.27%  [.] bench.main                               -      -            
+     2.34%  [.] __tls_get_addr                           -      -            
+     2.02%  [.] mi_free                                  -      -            
+     1.88%  [.] MVM_str_hash_current_nocheck             -      -            
+     1.67%  [.] 0x00000000007c1b3e                       -      -            
+     1.62%  [.] 0x00000000007c0bd8                       -      -            
+     1.60%  [.] bench_str_at_end                         -      -            
+     1.52%  [.] 0x00000000007c0d5e                       -      -            
+     1.50%  [.] bench_str_current_nocheck                -      -            
+     1.42%  [.] MVM_str_hash_lvalue_fetch_nocheck        -      -            
+     1.37%  [.] 0x00000000007c0ef0                       -      -            
+     1.31%  [.] 0x00000000007991b9                       -      -            

@@ -1,0 +1,19 @@
+sprintf-f base 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:34.54 Maximum resident set size (kbytes): 425240 
+sprintf-x base 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:54.09 Maximum resident set size (kbytes): 446860 
+sprintf-f preflip 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:33.87 Maximum resident set size (kbytes): 425464 
+sprintf-x preflip 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:54.56 Maximum resident set size (kbytes): 454076 
+sprintf-f head 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:40.38 Maximum resident set size (kbytes): 427024 
+sprintf-x head 1 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:59.91 Maximum resident set size (kbytes): 445232 
+sprintf-f base 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:34.73 Maximum resident set size (kbytes): 429000 
+sprintf-x base 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:53.66 Maximum resident set size (kbytes): 453920 
+sprintf-f preflip 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:34.67 Maximum resident set size (kbytes): 430996 
+sprintf-x preflip 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:53.83 Maximum resident set size (kbytes): 452940 
+sprintf-f head 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:38.22 Maximum resident set size (kbytes): 427672 
+sprintf-x head 2 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:59.59 Maximum resident set size (kbytes): 445428 
+sprintf-f base 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:33.69 Maximum resident set size (kbytes): 456724 
+sprintf-x base 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:53.13 Maximum resident set size (kbytes): 448552 
+sprintf-f preflip 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:34.54 Maximum resident set size (kbytes): 426100 
+sprintf-x preflip 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:56.20 Maximum resident set size (kbytes): 451820 
+sprintf-f head 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:39.23 Maximum resident set size (kbytes): 427848 
+sprintf-x head 3 Elapsed (wall clock) time (h:mm:ss or m:ss): 1:00.40 Maximum resident set size (kbytes): 441356 
+done

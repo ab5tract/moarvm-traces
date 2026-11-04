@@ -1,0 +1,15 @@
+    18.94%  [.] MVM_interp_run                                       -      -            
+     5.54%  [.] MVMHash_bind_key                                     -      -            
+     5.42%  [.] MVM_str_hash_delete                                  -      -            
+     5.07%  [.] MVM_str_hash_fetch                                   -      -            
+     3.03%  [.] MVM_disp_program_run                                 -      -            
+     2.90%  [.] MVM_repr_at_pos_o                                    -      -            
+     2.22%  [.] MVM_VMArray_at_pos                                   -      -            
+     2.22%  [.] MVM_spesh_inline                                     -      -            
+     1.59%  [.] MVM_args_set_result_int                              -      -            
+     1.54%  [.] MVM_iterkey_s                                        -      -            
+     1.24%  [.] __tls_get_addr                                       -      -            
+     1.16%  [.] MVM_repr_bind_key_o                                  -      -            
+     0.98%  [.] mi_free                                              -      -            
+     0.97%  [.] MVM_str_hash_demolish                                -      -            
+     0.89%  [.] MVM_repr_shift_o                                     -      -            

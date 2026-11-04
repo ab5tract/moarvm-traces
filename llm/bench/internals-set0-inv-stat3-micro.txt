@@ -1,0 +1,9 @@
+internals-base-prefix | say 1 | 0.997G
+internals-base-prefix | my $s=0; for ^300 { $s += sprintf("%.3f", $_ * 1.1).chars }; say $s | 1.631G
+internals-base-prefix | my %h; %h{$_} = $_ for ^200; my $s=0; for ^20000 { $s += %h{$_ % 200} }; say $s | 1.467G
+preflip-prefix | say 1 | 0.997G
+preflip-prefix | my $s=0; for ^300 { $s += sprintf("%.3f", $_ * 1.1).chars }; say $s | 1.636G
+preflip-prefix | my %h; %h{$_} = $_ for ^200; my $s=0; for ^20000 { $s += %h{$_ % 200} }; say $s | 1.456G
+tune-zig-prefix | say 1 | 0.995G
+tune-zig-prefix | my $s=0; for ^300 { $s += sprintf("%.3f", $_ * 1.1).chars }; say $s | 1.629G
+tune-zig-prefix | my %h; %h{$_} = $_ for ^200; my $s=0; for ^20000 { $s += %h{$_ % 200} }; say $s | 1.466G

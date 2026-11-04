@@ -1,0 +1,7 @@
+    81.54%         27947  libmoar.so          
+    17.92%          6116  [JIT] tid 107701    
+     0.31%           107  ld-linux-x86-64.so.2
+     0.12%            44  libc.so.6           
+     0.10%            48  [unknown]           
+     0.01%             3  [vdso]              
+     0.00%             1  libperl6_ops_moar.so

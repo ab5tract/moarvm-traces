@@ -1,0 +1,13 @@
+sprintf-f base 1 load 0.97 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:34.37 Maximum resident set size (kbytes): 428676 
+sprintf-f head 2 load 0.99 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:38.42 Maximum resident set size (kbytes): 422524 
+sprintf-f head 3 load 0.99 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:39.31 Maximum resident set size (kbytes): 420380 
+sprintf-f base 4 load 1.00 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:33.86 Maximum resident set size (kbytes): 430940 
+sprintf-b base 5 load 1.05 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:54.50 Maximum resident set size (kbytes): 454460 
+sprintf-b head 6 load 1.02 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:58.11 Maximum resident set size (kbytes): 454604 
+sprintf-b head 7 load 1.13 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:57.72 Maximum resident set size (kbytes): 450872 
+sprintf-b base 8 load 1.05 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:55.50 Maximum resident set size (kbytes): 451388 
+sprintf-x base 9 load 1.02 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:56.28 Maximum resident set size (kbytes): 458336 
+sprintf-x head 10 load 1.01 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:59.06 Maximum resident set size (kbytes): 449460 
+sprintf-x head 11 load 1.00 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:59.75 Maximum resident set size (kbytes): 446180 
+sprintf-x base 12 load 1.04 Elapsed (wall clock) time (h:mm:ss or m:ss): 0:54.02 Maximum resident set size (kbytes): 456132 
+done
