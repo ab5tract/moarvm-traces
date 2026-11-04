@@ -1,6 +1,6 @@
 # Zig port of the MoarVM garbage collector: design
 
-Status: draft 2026-11-04, brainstormed with the user; awaiting approval. Campaign 4 of the Zig migration (after the hash engine, its tuning and bake-off, and the internal-tables campaign). The full-Zig build stack (migration phases 3-6) is deferred; this campaign runs on the existing `-Dzig-impl` build of MoarVM with nqp and rakudo built by the Perl path, as the hash campaigns did.
+Status: approved by the user 2026-11-04 ("let's go!") after the builder check; plan `traces/llm/plans/2026-11-04-zig-gc-port.md`. Campaign 4 of the Zig migration (after the hash engine, its tuning and bake-off, and the internal-tables campaign). The full-Zig build stack (migration phases 3-6) is deferred; this campaign runs on the existing `-Dzig-impl` build of MoarVM with nqp and rakudo built by the Perl path, as the hash campaigns did.
 
 ## 1. Intent
 
