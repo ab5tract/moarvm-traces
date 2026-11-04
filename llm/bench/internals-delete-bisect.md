@@ -5,7 +5,7 @@ under 2.0 (`internals-delete-bisect-ab1-load.log`). The C-API bench is one
 executable (`hash-bench`, md5 a5e1aa6f..., identical in the base and head
 prefixes), run against each variant's libmoar through `LD_LIBRARY_PATH`.
 `tools/bench/hash-ab.sh`, C-API ladder, `--sizes=128,1024 --rounds=5 --runs=5
---nth=threshold`. Ratios are variant / base (1478311f6), delete op only.
+--nth=threshold`. Ratios are variant / base (1478311f6), delete op only. Shas: base 1478311f6; suspects built 54866bf06, a375403d1, c642db6ae, 74158b566; engine reference 6bbd4612e; head 13fb96acc.
 
 ## Step 1: the cell reproduces
 
@@ -30,18 +30,25 @@ uni_exports.zig, C entry point). Built 54866bf06, a375403d1, c642db6ae,
 01d11e6c2 not built (their predecessor-bracketing makes them unnecessary:
 54866bf06 includes them and is at base).
 
-| commit | touches | delete 128 | delete 1024 | verdict |
+| commit | touches | delete 128 (round medians, ns; ratio) | delete 1024 (round medians; ratio) | verdict |
 |---|---|---|---|---|
-| 54866bf06 (stats option, module) | build, stats.zig | 1.00 [7.90-19.21 / 7.77-9.16] | 1.00 [7.91-9.39 / 7.93-8.40] | at base |
-| a375403d1 (stats hooks in engine) | table.zig, tiers, exports | 1.04 [7.89-21.07 / 7.77-9.16] | 1.01 [7.96-22.04 / 7.93-8.40] | within spread |
-| c642db6ae (stats bin by size) | stats.zig, table.zig | 1.03 [7.95-13.21 / 7.77-9.16] | 1.01 [7.97-21.33 / 7.93-8.40] | within spread |
-| **74158b566 (uni Swiss tier set)** | uni.zig, uni_exports.zig, uni_hash_table.c, unicode_*.c | 1.10 [8.35-11.04 / 7.77-9.16] | 1.06 [8.30-10.55 / 7.93-8.40] | **culprit: disjoint above base** |
-| head (6bbd4612e engine) | | 1.10 [8.68-15.31 / 7.77-9.16] | 1.08 [8.44-15.71 / 7.93-8.40] | same as culprit |
+| base 1478311f6 | | 8.00-8.81 | 7.97-8.14 | |
+| 54866bf06 (stats option, module) | build, stats.zig | 7.99-8.66; 1.00 | 8.06-8.22; 1.00 | at base |
+| a375403d1 (stats hooks in engine) | table.zig, tiers, exports | 8.00-11.23; 1.04 | 8.07-8.43; 1.01 | overlaps base (thinly at 1024: 8.07-8.14) |
+| c642db6ae (stats bin by size) | stats.zig, table.zig | 8.03-9.07; 1.03 | 8.07-8.56; 1.01 | overlaps base (thinly at 1024: 8.07-8.14) |
+| 74158b566 (uni Swiss tier set) | uni.zig, uni_exports.zig, uni_hash_table.c, unicode_*.c | 8.45-8.97; 1.10 | 8.50-9.03; 1.06 | 1024: disjoint above base; 128: overlaps base (base round 2 is 8.81, elevated in every variant) |
+| head (6bbd4612e engine, 13fb96acc) | | 8.79-9.06; 1.10 | 8.52-8.93; 1.08 | overlaps the culprit |
 
-Raw: `-ab1-capi-raw.tsv`, `-ab1-capi-compare.md`. Round medians of delete at 1024:
-base 7.97-8.14, 54866bf 8.06-8.22, a375403 8.07-8.43, c642db6 8.07-8.56,
-74158b5 8.50-9.03. The predecessor of the culprit is within spread, the culprit
-is not, and the head equals the culprit: the shift is one step.
+Raw: `-ab1-capi-raw.tsv`, `-ab1-capi-compare.md` (its per-run min-max
+brackets are far wider than the round medians and are not used here). The
+bracket rests on the 1024 column and on the medians (1.10 against 1.03 at 128):
+at 1024 the culprit (8.50-9.03) is disjoint above base (7.97-8.14), while its
+predecessor c642db6 (8.07-8.56) is not, and overlaps the culprit only at the
+edge (8.50-8.56). At 128 the culprit does not clear base by the round-median
+rule. The head reads 8.75 against the culprit's 8.54 at 1024 (1.08 against
+1.06); their ranges overlap (8.52-8.93 against 8.50-9.03), so head and culprit
+overlap and the 0.2 ns difference is unexplained and within noise. The shift
+enters with 74158b566 and does not grow past it by a measurable amount.
 
 ## Step 3: diagnosis
 
@@ -54,11 +61,15 @@ extra code before it is the Swiss instantiation for the uni kind, which LTO
 places ahead of the str functions). No fields, flags, loads, or inlining
 differ. `perf annotate` (user space) of the 1024 bench (`-perf-*.txt`): the hot
 probe loop is `ja/add/dec/inc/sub; movzx; cmp; jne` followed by `mov rsi,[r10+r12]; test rsi,rsi`; in c642db6 it sits at 0x7c4f40 (32-byte
-aligned; 25 percent of the function's samples on the test at 0x7c4f60), in 74158b5 at 0x7c5f90 (mod 32 = 16;
-34 percent of the samples on the test at 0x7c5fb0, 13 percent on the jne),
-and `MVM_str_hash_delete_nocheck` goes from 6.9 to 13.4 percent of the run.
-A pure code placement effect (the loop moved to a different 32-byte fetch
-window), 0.5 ns per delete.
+aligned; 25 percent of the annotated samples on the test at 0x7c4f60), in 74158b5 at 0x7c5f90 (mod 32 = 16;
+34 percent of the annotated samples on the test at 0x7c5fb0, 13 percent on the jne; `-perf-*.txt`).
+(Function-level shares of the run are not cited: the symbols could no longer be resolved after the prefixes were removed.)
+Consistent with a code-placement effect (the loop in a different 32-byte fetch
+window), 0.5 ns per delete. The data does not exclude: an inlining change at
+delete's callers (the C-API wrapper or the nqp op), a changed layout of the hash
+header or the uni tables, or uop-cache, branch-predictor or aliasing effects of
+the moved loop as against a fetch-window effect. No alignment experiment was
+run because the brief forbade tuning.
 
 No fix: there is no source change that corrects it. Pinning it would be
 function or loop alignment (`-falign-functions`, `-mllvm -align-all-nofallthru-blocks`
