@@ -1889,7 +1889,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 - `-Dsystem-libuv`, `-Dsystem-libtommath`, `-Dsystem-libffi` are deferred to phase 5.
 - The `[core]` section of `build/sources.list` lists `src/gen/config.c` so the Perl Makefile is unchanged; `build/zig/moar.zig` filters it out and uses its own generated file.
 - The zig build fails fast when a Perl-generated `src/gen/config.h` exists, because it would shadow the generated header through `src/moar.h`'s quote include (found in Task 7).
-- Recorded after the final whole-branch review (fix wave 9cb9448f1..a506c3a02):
+- Recorded after the final whole-branch review (fix wave 3c9c1d43e..cf1580c5c):
   - `moar.pc` installs to `share/pkgconfig`, where `make install` puts it; the plan text above that says `lib/pkgconfig` is superseded.
   - RUNPATH order is `$ORIGIN/../lib` first, then `<prefix>/lib`, so staged and DESTDIR installs load the sibling library.
   - `--prefix` must be absolute; the build fails fast otherwise (Perl's Configure.pl makes it absolute with `rel2abs`).

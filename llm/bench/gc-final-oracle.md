@@ -3,16 +3,16 @@
 ```
 GC final oracle record (Task 10, step 1)
 Date:          2026-11-08, 12:47-13:04 CET
-MoarVM:        zig-gc-port at e0444fc47 (the last port commit is 5abaf4507; e0444fc47 adds only a traces pointer)
-Traces:        3349236 (before this record)
-Prefixes:      base = /tmp/claude-1000/gc-c-oracle (139d404ed, the C collector with the Zig hash engine;
+MoarVM:        zig-gc-port at 338211de6 (the last port commit is 8513443e6; 338211de6 adds only a traces pointer)
+Traces:        f5b1132 (before this record)
+Prefixes:      base = /tmp/claude-1000/gc-c-oracle (96d049123, the C collector with the Zig hash engine;
                zig build install, -Dgc-debug=1, LTO, ReleaseFast, x86-64-v3; rebuilt 2026-11-08 after the reboot)
-               head = /tmp/claude-1000/gc-z-oracle (e0444fc47, the Zig collector; zig build install -Dgc-debug=1,
+               head = /tmp/claude-1000/gc-z-oracle (338211de6, the Zig collector; zig build install -Dgc-debug=1,
                otherwise the same options; rebuilt by this task from HEAD, 59 s)
                (paths of equal length; both version strings 22 characters: 2026.09-211-g139d404ed, 2026.09-228-ge0444fc47)
-Runner:        /home/longwalker/code/raku/x.core/zmoarz/rakudo/rakudo-m (rakudo zig-build-spec at 3d626b9b24;
+Runner:        /home/longwalker/code/raku/x.core/zmoarz/rakudo/rakudo-m (rakudo zig-build-spec at 042608fb82;
                execs /tmp/claude-1000/tune-zig-prefix/bin/moar, libmoar from LD_LIBRARY_PATH);
-               nqp zig-hash-strategies at 287d13264 (installed in /tmp/claude-1000/tune-zig-prefix)
+               nqp zig-hash-strategies at 41e7210ba (installed in /tmp/claude-1000/tune-zig-prefix)
 CPU:           AMD Ryzen 9 5900X (24 threads), 32 GB, no swap; Zig 0.16.0
 Environment:   MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 MVM_GC_LOG=<out>/<side>-<i>.log
                RAKULIB=tools/bench/gc/lib,/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib

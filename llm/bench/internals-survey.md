@@ -5,8 +5,8 @@ Measurement only; no production code changed. Spec section 4 of
 
 ```
 Date:        2026-11-03
-MoarVM:      zig-hash-internals at 1919eddda (no source change; the aggregator needed no fix)
-traces:      29be364 (parent of the "internals: survey" commit)
+MoarVM:      zig-hash-internals at a94812c74 (no source change; the aggregator needed no fix)
+traces:      d4b3706 (parent of the "internals: survey" commit)
 nqp/rakudo:  tune-zig-prefix's installs (rakudo checkout configured against it; roast fb1d87214)
 Builds:      default  zig build install --prefix /tmp/claude-1000/tune-zig-prefix
                       zig build hash-bench-exe --prefix /tmp/claude-1000/tune-zig-prefix

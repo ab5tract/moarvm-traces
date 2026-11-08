@@ -69,7 +69,7 @@ Taken in the brainstorm (2026-11-02); the plan does not re-litigate them.
 ## 3. Verified facts about the current tables
 
 From a read of the C on branch `zig-port-step0` (line numbers as of
-`c22ec7d86`). The design relies on these.
+`6eee90c04`). The design relies on these.
 
 ### 3.1 API surface
 

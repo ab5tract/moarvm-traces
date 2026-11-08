@@ -1,6 +1,6 @@
 # Set 0 revert ladder guard (Task 9d), 2026-11-04
 
-Base: 1478311f6 (default ladder Small then Robin Hood), prefix `/tmp/claude-1000/internals-base-prefix`. Head: bfbf3c6cc (the revert; `src/zig/core/hash/` is byte-identical to 6bbd4612e), prefix `/tmp/claude-1000/tune-zig-prefix`. Both the default build (zig impl, LTO, x86-64-v3, stats off); the same `bin/hash-bench` (copied from the head build) drives both. CPU AMD Ryzen 9 5900X. 1-minute load 0.80-1.06 at run starts.
+Base: 1e88a52fb (default ladder Small then Robin Hood), prefix `/tmp/claude-1000/internals-base-prefix`. Head: db611b1b8 (the revert; `src/zig/core/hash/` is byte-identical to 73255e81e), prefix `/tmp/claude-1000/tune-zig-prefix`. Both the default build (zig impl, LTO, x86-64-v3, stats off); the same `bin/hash-bench` (copied from the head build) drives both. CPU AMD Ryzen 9 5900X. 1-minute load 0.80-1.06 at run starts.
 
 Commands (two runs, the variant order swapped in the second):
 
@@ -33,4 +33,4 @@ Cells outside the rule (round-median min-max, head over base):
 | b | capi | delete 16384 | 1.07 | 8.68-8.8 | 9.15-9.39 |
 | b | capi | iterate 4 | 1.06 | 7.1-7.46 | 7.48-7.64 |
 
-Reading: the nqp-level cells are not reproducible between runs (different cells each time, wide base spreads: noise, mostly the single-sample clone and insert_nth cells). The C-API delete cells at 65 and up (the Robin Hood rung) reproduce in both runs with the order swapped: head 1.06-1.08 of base, disjoint by 0.3-0.5 ns of about 8. Small-rung cells (4-64) pass at the capi level except iterate 4 in run b (1.06, not in run a). Not tuned. Both builds are Small then Robin Hood; 1478311f6 to HEAD differ in the uni sized builds and the engine entry points (and whatever else the campaign changed outside `src/zig/core/hash/str.zig`), so the delete shift has a source outside the ladder and is open.
+Reading: the nqp-level cells are not reproducible between runs (different cells each time, wide base spreads: noise, mostly the single-sample clone and insert_nth cells). The C-API delete cells at 65 and up (the Robin Hood rung) reproduce in both runs with the order swapped: head 1.06-1.08 of base, disjoint by 0.3-0.5 ns of about 8. Small-rung cells (4-64) pass at the capi level except iterate 4 in run b (1.06, not in run a). Not tuned. Both builds are Small then Robin Hood; 1e88a52fb to HEAD differ in the uni sized builds and the engine entry points (and whatever else the campaign changed outside `src/zig/core/hash/str.zig`), so the delete shift has a source outside the ladder and is open.

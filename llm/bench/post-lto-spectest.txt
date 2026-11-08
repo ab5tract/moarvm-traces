@@ -1,4 +1,4 @@
-# Post-campaign spectest runs with LTO on by default (MoarVM 1f9de9998, rakudo make spectest, TEST_JOBS=24, roast fb1d87214), six interleaved runs C Z Z C C Z on one rakudo tree, libmoar.so chosen through LD_LIBRARY_PATH; both moars from zig build install (C engine -Dzig-impl=false), both with LTO. Timed by the wait4 stand-in for GNU time -v.
+# Post-campaign spectest runs with LTO on by default (MoarVM 697559998, rakudo make spectest, TEST_JOBS=24, roast fb1d87214), six interleaved runs C Z Z C C Z on one rakudo tree, libmoar.so chosen through LD_LIBRARY_PATH; both moars from zig build install (C engine -Dzig-impl=false), both with LTO. Timed by the wait4 stand-in for GNU time -v.
 
 run 1 c start 22:25:17 load 1.38 1.03 0.67 roast fb1d87214
 run 1 c exit 2 end 22:30:15

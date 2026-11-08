@@ -1,4 +1,4 @@
-# main ladder run (--sizes=4,16,32,63,64,65,128,256,1024,16384) on d263d4043 (dispatch fix 0113fddae), 1-minute load before each strategy run
+# main ladder run (--sizes=4,16,32,63,64,65,128,256,1024,16384) on 8ef7442fb (dispatch fix 59b800554), 1-minute load before each strategy run
 round 1 strategy 0 load 1.19
 round 1 strategy 1 load 1.19
 round 1 strategy 2 load 1.19
@@ -27,7 +27,7 @@ round 7 strategy 2 load 1.17
 round 7 strategy 3 load 1.17
 round 7 strategy 0 load 1.17
 round 7 strategy 1 load 1.16
-# resize cells run (--sizes=49,97) on d263d4043, 1-minute load before each strategy run
+# resize cells run (--sizes=49,97) on 8ef7442fb, 1-minute load before each strategy run
 round 1 strategy 0 load 0.76
 round 1 strategy 1 load 0.76
 round 1 strategy 2 load 0.76

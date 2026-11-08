@@ -1,4 +1,4 @@
-# Raku-level benchmark after LTO became the default (MoarVM 1f9de9998), tools/bench/hash-bench.raku on the Task 9 prefixes with their moar reinstalled from zig build install (C engine -Dzig-impl=false)
+# Raku-level benchmark after LTO became the default (MoarVM 697559998), tools/bench/hash-bench.raku on the Task 9 prefixes with their moar reinstalled from zig build install (C engine -Dzig-impl=false)
 
 ## LTO builds (the defaults): hash-bench.sh invocation plus 10 reps, engine order alternating; 11 invocations per engine (post-lto-raku-reps.tsv). Cells: ratio of medians [min-max of the per-invocation ratios]
 

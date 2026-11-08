@@ -1,4 +1,4 @@
-# Bake-off final spectest with the default (no MVM_HASH_STRATEGY): MoarVM c4df263dc, rakudo make spectest, TEST_JOBS=24, roast fb1d87214, installed into tune-zig-prefix from HEAD (nqp and rakudo rebuilt in Task 9 against this oplist). Timed by the wait4 stand-in for GNU time -v. Three runs, the first and second not clean for environmental reasons, the third the measurement.
+# Bake-off final spectest with the default (no MVM_HASH_STRATEGY): MoarVM 8c9bbf623, rakudo make spectest, TEST_JOBS=24, roast fb1d87214, installed into tune-zig-prefix from HEAD (nqp and rakudo rebuilt in Task 9 against this oplist). Timed by the wait4 stand-in for GNU time -v. Three runs, the first and second not clean for environmental reasons, the third the measurement.
 
 run 1 start 14:37:17 load 0.39 0.91 1.02
 run 1 exit 2: stale t/spec/**/.precomp ('Missing or wrong version of dependency gen/moar/stage2/NQPHLL.nqp' in t/spec/S06-operator-overloading/imported-subs.t, the known environmental failure); all .precomp directories removed afterwards

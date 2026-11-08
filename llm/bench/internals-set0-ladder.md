@@ -1,6 +1,6 @@
-# Set 0 ladder: Small then Swiss against Small then Robin Hood (MoarVM eb1537039, 2026-11-03)
+# Set 0 ladder: Small then Swiss against Small then Robin Hood (MoarVM f0e68afff, 2026-11-03)
 
-Task 9b of the internal-tables campaign. Base is 1478311f6 (default ladder Small then Robin Hood), head is eb1537039 (default ladder Small then Swiss; the build in the prefix is that commit's tree, installed before the commit). Both are the default build (`zig build install --prefix <p>`, zig impl, LTO, x86-64-v3, stats off). CPU AMD Ryzen 9 5900X. Prefixes: base `/tmp/claude-1000/internals-base-prefix`, head `/tmp/claude-1000/tune-zig-prefix`.
+Task 9b of the internal-tables campaign. Base is 1e88a52fb (default ladder Small then Robin Hood), head is f0e68afff (default ladder Small then Swiss; the build in the prefix is that commit's tree, installed before the commit). Both are the default build (`zig build install --prefix <p>`, zig impl, LTO, x86-64-v3, stats off). CPU AMD Ryzen 9 5900X. Prefixes: base `/tmp/claude-1000/internals-base-prefix`, head `/tmp/claude-1000/tune-zig-prefix`.
 
 Commands (`tools/bench/hash-ab.sh`, 7 rounds, the variant order rotated per round, load waited under 2.0):
 

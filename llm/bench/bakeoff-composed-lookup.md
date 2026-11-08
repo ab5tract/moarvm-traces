@@ -11,7 +11,7 @@ of Robin Hood: Small (`max_capacity` 64) from 0, `tiers/swiss.zig` from 64,
 so a hash is in Small to 64 entries and Swiss from 65. It was built into
 the string table as set 4 and exposed as a temporary strategy 3
 (`MVM_HASH_STRATEGY_SMALL_SWISS`), after the fixed-key strategy 3 had been
-deleted (MoarVM 84cebcbbc). The measured build is 84cebcbbc plus that set
+deleted (MoarVM 02257560b). The measured build is 02257560b plus that set
 (the MoarVM commit that bumps this record), default options, LTO on,
 installed into one prefix with the nqp of branch zig-hash-strategies.
 

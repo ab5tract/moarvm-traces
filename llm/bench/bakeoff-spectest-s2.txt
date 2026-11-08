@@ -1,7 +1,7 @@
 # Bake-off strategy 2 (array-ordered tier) whole-system gate, 2026-11-03.
 # rakudo make spectest with MVM_HASH_STRATEGY=2 TEST_JOBS=24, every MVMHash
 # and HashAttrStore built through the ordered_only set. MoarVM zig-hash-bakeoff
-# (0edbaaf21 + the strategy 2 tier) installed into the tune-zig-prefix; nqp
+# (2d9b5a573 + the strategy 2 tier) installed into the tune-zig-prefix; nqp
 # zig-hash-strategies; roast fb1d87214. Load average before the start 1.19.
 
 Files=1365, Tests=138715, 298 wallclock secs (36.55 usr  8.34 sys + 4290.66 cusr 1022.85 csys = 5358.40 CPU)

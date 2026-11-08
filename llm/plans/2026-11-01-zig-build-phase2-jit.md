@@ -18,7 +18,7 @@
 - Equivalence requirements: `emit.c` byte-identical to the Perl build's (same dynasm, same relative input paths so `#line` directives match); `core_templates.h` byte-identical from line 2 onward (line 1 names the generating program); `tile_pattern.h` identical from line 2 onward after `tools/canonicalize-tile-table.pl` renumbers the Perl output's rulesets canonically (rulesets sorted lexicographically by their sorted rule-number lists). The Zig tiler emits that canonical numbering directly.
 - `-Djit` defaults to `true` on x86_64-linux; `-Djit=false` keeps building the stub as in phase 1. The phase-1 "not implemented" fatal goes away.
 - All build-time tools are built for `b.graph.host`, not the target.
-- Commits go on MoarVM branch `zig-build-phase2` (created from `zig-build-phase1` at `7b106ff79`). Commit message trailer: `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` (or the trailer the implementer's own instructions specify).
+- Commits go on MoarVM branch `zig-build-phase2` (created from `zig-build-phase1` at `66d1c5d74`). Commit message trailer: `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` (or the trailer the implementer's own instructions specify).
 - Working directory for every command: the MoarVM checkout (`rakudo/nqp/MoarVM`). `$SCRATCH` means `/tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/529300be-8495-4763-892d-134053416824/scratchpad`.
 - Perl is available on this machine for verification; a system MoarVM 2025.08 exists at `/usr/lib/libmoar.so`, so a `moar --version` printing `2025.08` means the wrong library was loaded.
 
@@ -73,7 +73,7 @@ rm -f src/gen/config.h src/gen/config.c src/gen/config.o
 zig build test --summary all 2>&1 | tail -3
 ls -la src/jit/x64/emit.c
 ```
-Expected: HEAD is `7b106ff79` or later on `zig-build-phase2`; the phase-1 build and tests pass; the Perl-generated `src/jit/x64/emit.c` exists (it is the reference for this task; if it is missing, generate it once with `perl Configure.pl --optimize --prefix=/home/longwalker/code/raku/x.core/zmoarz/rakudo/install && make src/jit/x64/emit.c && rm -f src/gen/config.h src/gen/config.c src/gen/config.o`).
+Expected: HEAD is `66d1c5d74` or later on `zig-build-phase2`; the phase-1 build and tests pass; the Perl-generated `src/jit/x64/emit.c` exists (it is the reference for this task; if it is missing, generate it once with `perl Configure.pl --optimize --prefix=/home/longwalker/code/raku/x.core/zmoarz/rakudo/install && make src/jit/x64/emit.c && rm -f src/gen/config.h src/gen/config.c src/gen/config.o`).
 
 - [ ] **Step 2: Write `build/zig/jit.zig` with `addDynasm`**
 

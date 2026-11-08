@@ -5,7 +5,7 @@ Date: 2026-11-03. Status: executed; see the plan's Acceptance. Approved by the u
 eight questions folded in (decisions 6 and 7, sections 4.1, 4.2, 5.2, 5.3,
 6.2, 7 and 8), each marked "(my call)" where the author settled it.
 Follows: the hash layout bake-off (`2026-11-03-zig-hash-layout-bakeoff-design.md`,
-merged on `zig-hash-engine` at 1478311f6 with the LOOKUP and APPEND strategies).
+merged on `zig-hash-engine` at 1e88a52fb with the LOOKUP and APPEND strategies).
 Precedes: Rakudo syntax for user hashes (campaign 4).
 
 ## 1. Intent
@@ -95,7 +95,7 @@ and the 3 percent is a target, not a gate.
    `hash_val`, section 3), the kind's `KeySpec.hash` *widens* the cached code
    to 64 bits with a fixed mixing step; it does not rehash the key.
 
-## 3. Verified facts (checked 2026-11-03 on `zig-hash-engine` 1478311f6)
+## 3. Verified facts (checked 2026-11-03 on `zig-hash-engine` 1e88a52fb)
 
 The engine (`src/zig/core/hash/`):
 
@@ -122,7 +122,7 @@ The engine (`src/zig/core/hash/`):
   `standard_set = 0`, `lookup_set = 2`, `append_set = 3`;
   `strategy_sets = { standard_set, lookup_set, append_set }`;
   `MVM_str_hash_build_strategy` picks the set. Dispatch on set 0 is the inline
-  switch, other sets `never_inline` (bake-off 0113fddae).
+  switch, other sets `never_inline` (bake-off 59b800554).
 - `uni.zig`: `Table(UniSpec)` over `MVMUniHashEntry { const char *key; u32
   hash_val; i32 value }`; `Key` is the first two fields; `hash` returns the
   cached **32-bit** `hash_val` (FNV-1a times the 32-bit Fibonacci constant,
@@ -523,7 +523,7 @@ bench; the REPR campaigns.
    sentence about the other kinds; `docs/zig-build.md` documents
    `-Dhash-stats` and `MVM_HASH_STATS`.
 9. All of it on MoarVM branch `zig-hash-internals` (from `zig-hash-engine`
-   1478311f6), the records in `traces/llm/bench/`, the spec and plan in
+   1e88a52fb), the records in `traces/llm/bench/`, the spec and plan in
    `traces/llm/`, merged fast-forward into `zig-hash-engine` when the user
    says so.
 
@@ -555,4 +555,4 @@ in the submodule with the pointer bumped in MoarVM.
 - **Section 3 / 4.2 (the Header).** The site id lives in a stats-only extension of `Header` (`tier.zig`): 8 bytes in a plain build, 16 with `-Dhash-stats`, so absolute cycle figures of the survey carry a small layout bias.
 - **Sections 4.1 and 5 (lookups by table size).** Added by the user at the Task 6 stop (Task 5b): fetches are binned by the table's entry count at the fetch (`internals-survey-binned.md`). The survey's s5 and i2 conclusions rest on these shares, not on table counts alone.
 - **Section 5.1 and 5.3 (assignment).** Rulings that changed it: i2 closed (Task 8 not run); s5's Small-then-Swiss as set 0 was added as Task 9b, measured, and reverted by the user's ruling on Task 9c's data (Task 9d, `internals-set0-investigation.md`); u1-u4 kept their explicit sized builds and the `MVM_uni_hash_build_strategy` entry point but Swiss won none of them, so no internal site leaves the default (`internals-uni-bench.md`); the old Task 9 (cold str/fixkey/ptr sites) did not run.
-- **Section 6.3 (ladder guard).** One recorded exception, ruled 2026-11-04 after Task 9e: the C-API `delete` cells at 65 entries and up may read up to 1.10 of base, a code-placement effect of 74158b566 (`internals-delete-bisect.md`). Nothing is judged from a single run (`internals-final-ladder.md`).
+- **Section 6.3 (ladder guard).** One recorded exception, ruled 2026-11-04 after Task 9e: the C-API `delete` cells at 65 entries and up may read up to 1.10 of base, a code-placement effect of 5e63c0c16 (`internals-delete-bisect.md`). Nothing is judged from a single run (`internals-final-ladder.md`).

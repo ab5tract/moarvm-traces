@@ -3,7 +3,7 @@
 Static read of every creation site of `MVMStrHashTable`, `MVMUniHashTable`,
 `MVMFixKeyHashTable`, `MVMIndexHashTable` and `MVMPtrHashTable` in the C tree
 (`src/`, excluding the table implementations and `src/zig/`), on branch
-`zig-hash-bakeoff` at 09bf93ed7. Campaign spec:
+`zig-hash-bakeoff` at bb896782e. Campaign spec:
 `traces/llm/specs/2026-11-03-zig-hash-layout-bakeoff-design.md`, section 9.
 No code was changed.
 

@@ -1,5 +1,5 @@
 
-/tmp/claude-1000/bisect-74158b5/lib/libmoar.so:     file format elf64-x86-64
+/tmp/claude-1000/bisect-5e63c0c/lib/libmoar.so:     file format elf64-x86-64
 
 
 Disassembly of section .init:

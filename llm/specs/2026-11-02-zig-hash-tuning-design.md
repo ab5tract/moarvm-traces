@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-02
 **Status:** approved (builder-checked; the two open questions were settled as decisions 7 and 8)
-**Builds on:** the Zig hash engine (`traces/llm/specs/2026-11-02-zig-hash-engine-design.md`, branch `zig-hash-engine`, head `a5ea2a419`), its recorded results (`traces/llm/plans/2026-11-02-zig-hash-engine.md`, "Benchmark results"), the boundary spikes (branch `zig-hash-spike-boundary`, report `/tmp/claude-1000/hash-spike-boundary-report.md`, summarised in §3), and the profile recon (branch `zig-hash-spike-profile`, report `/tmp/claude-1000/hash-profile-report.md`; its attribution is recorded by the plan's first task, §6).
+**Builds on:** the Zig hash engine (`traces/llm/specs/2026-11-02-zig-hash-engine-design.md`, branch `zig-hash-engine`, head `df87577ea`), its recorded results (`traces/llm/plans/2026-11-02-zig-hash-engine.md`, "Benchmark results"), the boundary spikes (branch `zig-hash-spike-boundary`, report `/tmp/claude-1000/hash-spike-boundary-report.md`, summarised in §3), and the profile recon (branch `zig-hash-spike-profile`, report `/tmp/claude-1000/hash-profile-report.md`; its attribution is recorded by the plan's first task, §6).
 **Campaign:** 1 of 3 (then: strategies in the VM; the Rakudo `Hash[:strategy, :size]` syntax; then REPRs).
 
 ## 1. Intent

@@ -3,17 +3,17 @@
 ```
 Task 9c of the internal-tables campaign. Investigation only: no MoarVM source changed.
 Date:          2026-11-04, 11:10-13:15 CET
-MoarVM:        zig-hash-internals; head 0b581f32e (engine tree identical to eb1537039's, plus the Swiss noinline comment
-               and the Small-to-Robin-Hood migration test), base 1478311f6 (Small then Robin Hood), pre-flip 6bbd4612e
-               (= eb1537039^, Small then Robin Hood with every other campaign change). moar --version: 2026.09-195-g0b581f32e
-nqp:           zig-hash-strategies at 287d13264; rakudo 3d626b9b24 (v2026.09-233); roast fb1d87214 (verified before every run)
+MoarVM:        zig-hash-internals; head 7ceb04425 (engine tree identical to f0e68afff's, plus the Swiss noinline comment
+               and the Small-to-Robin-Hood migration test), base 1e88a52fb (Small then Robin Hood), pre-flip 73255e81e
+               (= f0e68afff^, Small then Robin Hood with every other campaign change). moar --version: 2026.09-195-g0b581f32e
+nqp:           zig-hash-strategies at 41e7210ba; rakudo 042608fb82 (v2026.09-233); roast fb1d87214 (verified before every run)
 Build flags:   default `zig build install --prefix <P>` (zig impl, LTO, ReleaseFast, x86-64-v3, stripped, stats off);
                symbol builds add -Dstrip=false, stats builds -Dhash-stats=true (own prefixes, used only where stated)
 CPU:           AMD Ryzen 9 5900X (12 cores, 24 threads), 32 GB, no swap
 Prefixes:      base /tmp/claude-1000/internals-base-prefix, head /tmp/claude-1000/tune-zig-prefix, pre-flip /tmp/claude-1000/preflip-prefix,
                symbols /tmp/claude-1000/sym-{base,head}, stats /tmp/claude-1000/stats-{preflip,head}
                (rebuilt: the reboot of 2026-11-04 wiped /tmp/claude-1000). Build times: head 1:46, base 1:02, nqp `make install` 17 s;
-               rakudo-m needed no rebuild. The base hash-bench exe is the head's (the `hash-bench-exe` step postdates 1478311f6);
+               rakudo-m needed no rebuild. The base hash-bench exe is the head's (the `hash-bench-exe` step postdates 1e88a52fb);
                it links libmoar dynamically and `ldd` with the base LD_LIBRARY_PATH resolves the base lib.
 Spectest:      `TEST_JOBS=24 make -o spectest_update spectest` (the `-o spectest_update` keeps roast pinned; plain `make spectest`
                pulls roast to origin/master), .precomp removed before every run, load under 2.0 and no eval-server bench running
@@ -35,9 +35,9 @@ the walls sit within 3 percent of the pre-reboot ones, see the caveat in Step 1)
 
 - The shortfall is real and bigger than Task 9b's: head is 1.031 of base on the combined timev walls (1.035 on the harness's own
   clock), spreads disjoint. Peak RSS is not worse (0.997).
-- The flip is the cause (no pre-flip spectest was run; this rests on the two heaviest sprintf files and sprintf-f counters). A build of 6bbd4612e (the parent of the flip: Small then Robin Hood, every other campaign change in) times
+- The flip is the cause (no pre-flip spectest was run; this rests on the two heaviest sprintf files and sprintf-f counters). A build of 73255e81e (the parent of the flip: Small then Robin Hood, every other campaign change in) times
   like the base on the two heaviest sprintf files (34.3 s vs 34.3 s on sprintf-f, 54.9 s vs 53.6 s on sprintf-x) and the head is 10-14 percent
-  slower on them. Not the 22 other commits between 1478311f6 and the flip.
+  slower on them. Not the 22 other commits between 1e88a52fb and the flip.
 - The loss concentrates in a few long CPU-bound files that sit on the parallel run's critical path: sprintf-f/b/x/e/a/c/u/d, and
   S17-supply/batch.t. 739 of 1365 files are slower, the 20 largest deltas hold 74 percent of the summed delta.
 - It is not the hash operations. In the sprintf-f run the head executes 12-14 percent more instructions at the same IPC (242.6-246.9 G vs
@@ -358,9 +358,9 @@ So the head's tables are smaller than the base's in every bin from 65 up (0.29-0
 
 | build | instructions G | cycles G | IPC | branch-miss G | L1d-miss G | cache-miss G | dTLB-miss M | task-clock s |
 |---|---|---|---|---|---|---|---|---|
-| base 1478311f6 | 216.06, 218.27 | 165.36, 171.87 | 1.31, 1.27 | 1.21, 1.23 | 5.16, 5.21 | 3.15, 3.18 | 26.8, 28.7 | 34.9, 36.3 |
-| pre-flip 6bbd4612e | 216.52, 216.48 | 166.59, 167.37 | 1.30, 1.29 | 1.23, 1.24 | 5.20, 5.19 | 3.24, 3.20 | 25.0, 25.1 | 35.2, 35.4 |
-| head 0b581f32e | 242.58, 246.93 | 187.37, 189.23 | 1.29, 1.31 | 1.38, 1.41 | 5.84, 5.92 | 3.63, 3.64 | 30.5, 30.9 | 39.6, 40.0 |
+| base 1e88a52fb | 216.06, 218.27 | 165.36, 171.87 | 1.31, 1.27 | 1.21, 1.23 | 5.16, 5.21 | 3.15, 3.18 | 26.8, 28.7 | 34.9, 36.3 |
+| pre-flip 73255e81e | 216.52, 216.48 | 166.59, 167.37 | 1.30, 1.29 | 1.23, 1.24 | 5.20, 5.19 | 3.24, 3.20 | 25.0, 25.1 | 35.2, 35.4 |
+| head 7ceb04425 | 242.58, 246.93 | 187.37, 189.23 | 1.29, 1.31 | 1.38, 1.41 | 5.84, 5.92 | 3.63, 3.64 | 30.5, 30.9 | 39.6, 40.0 |
 
 Every counter rises 12-17 percent together and the IPC does not move: the head executes more instructions, it does not execute them worse (no cache, TLB or branch effect that is out of proportion). Narrowing it down (`internals-set0-inv-stat2-env-nospesh.txt`, `-stat3-micro.txt`, `-stat4-compile.txt`, `-stat5-micro.txt`; user instructions, G):
 

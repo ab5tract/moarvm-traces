@@ -1,8 +1,8 @@
 # Spectest: base (C engine, zig cc, no LTO) vs Zig engine with LTO, interleaved on one rakudo tree
-# 2026-11-03, MoarVM 7cf5516e7 (code identical to 1f9de9998), roast fb1d87214, TEST_JOBS=24, libmoar.so swapped via LD_LIBRARY_PATH
+# 2026-11-03, MoarVM fc1ba7753 (code identical to 697559998), roast fb1d87214, TEST_JOBS=24, libmoar.so swapped via LD_LIBRARY_PATH
 # base: zig build install -Dzig-impl=false -Dlto=false into /tmp/claude-1000/tune-c-nolto-prefix; ziglto: the installed default build in tune-zig-prefix
 
-HEAD 7cf5516e7 09:53:33 load 15.29 21.36 13.91
+HEAD fc1ba7753 09:53:33 load 15.29 21.36 13.91
 install base (C, no LTO) exit=0 16s
 base: This is MoarVM version 2026.09-136-g7cf5516e7 built with JIT support
 dynamic MVM_str_hash_ symbols: 6;plt calls to MVM_str_hash_: 27;definitions of MVM_str_hash_fetch_nocheck: 0;call sites of MVM_str_hash_fetch_nocheck: 0;

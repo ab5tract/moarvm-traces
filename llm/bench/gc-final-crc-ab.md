@@ -3,15 +3,15 @@
 ```
 GC final crc-getter A/B record (Task 10, step 2)
 Date:          2026-11-08, 13:04-13:26 CET (plain 13:04:09-13:14:43, --bad-packages 13:14:43-13:25:57)
-MoarVM:        zig-gc-port at e0444fc47 (the last port commit is 5abaf4507)
-Traces:        3349236 (before this record)
-Prefixes:      base = /tmp/claude-1000/gc-c-base (139d404ed, the C collector with the Zig hash engine; zig build install,
+MoarVM:        zig-gc-port at 338211de6 (the last port commit is 8513443e6)
+Traces:        f5b1132 (before this record)
+Prefixes:      base = /tmp/claude-1000/gc-c-base (96d049123, the C collector with the Zig hash engine; zig build install,
                default options: LTO, ReleaseFast, x86-64-v3, -Dgc-debug=0, nursery 16 MiB)
-               head = /tmp/claude-1000/gc-z-base (e0444fc47, the Zig collector; zig build install, default options;
+               head = /tmp/claude-1000/gc-z-base (338211de6, the Zig collector; zig build install, default options;
                rebuilt by this task from HEAD, 56 s)
-Runner:        /home/longwalker/code/raku/x.core/zmoarz/rakudo/rakudo-m (rakudo zig-build-spec at 3d626b9b24;
+Runner:        /home/longwalker/code/raku/x.core/zmoarz/rakudo/rakudo-m (rakudo zig-build-spec at 042608fb82;
                execs /tmp/claude-1000/tune-zig-prefix/bin/moar, libmoar from LD_LIBRARY_PATH);
-               nqp zig-hash-strategies at 287d13264
+               nqp zig-hash-strategies at 41e7210ba
 CPU:           AMD Ryzen 9 5900X (24 threads), 32 GB, no swap
 Program:       tools/bench/gc/crc-getter.raku (the user's program, verbatim), spesh and precompilation on
 Commands:      tools/bench/gc/ab.sh --base=/tmp/claude-1000/gc-c-base/lib --head=/tmp/claude-1000/gc-z-base/lib \

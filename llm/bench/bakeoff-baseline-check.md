@@ -1,11 +1,11 @@
 # Bake-off baseline check (strategy 0), 2026-11-03
 
 Informational (controller ruling): the build's default CPU level became
-x86-64-v3 (commit 2d43de657) after the ladder record was taken on the generic
+x86-64-v3 (commit d2688ff48) after the ladder record was taken on the generic
 baseline CPU, so cells may move for that reason alone; an out-of-band cell
 does not stop the campaign.
 
-**Run.** MoarVM `zig-hash-bakeoff` at c4add6e4c plus the Task 4 harness, nqp
+**Run.** MoarVM `zig-hash-bakeoff` at c4e0ccc73 plus the Task 4 harness, nqp
 `zig-hash-strategies` (ops mapped), installed in one prefix (LTO, x86-64-v3),
 AMD Ryzen 9 5900X. `tools/bench/hash-bakeoff.sh --strategies=0 --rounds=5`
 with its defaults (`--sizes=4,16,32,63,64,65,128,256,1024,16384,49,97
@@ -27,7 +27,7 @@ min-max spread or within 5 percent of its median.
 
 **Columns beyond the check** (5 rounds each, same sizes, load 0.10, not
 committed): *presized / hint 0* is the earlier run with `--hint=size` over
-this one; *hint 0 / no call* is this run over the harness as at c4add6e4c
+this one; *hint 0 / no call* is this run over the harness as at c4e0ccc73
 (no hashstrategy call, without the four new phases).
 
 ## Hint 0 against the record (the reference)

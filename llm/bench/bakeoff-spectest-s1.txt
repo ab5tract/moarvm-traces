@@ -1,7 +1,7 @@
 # Bake-off strategy 1 (Swiss-style tier) whole-system gate, 2026-11-03.
 # rakudo make spectest with MVM_HASH_STRATEGY=1 TEST_JOBS=24, every MVMHash
 # and HashAttrStore built through the swiss_only set. MoarVM zig-hash-bakeoff
-# (dd3da0553 + the strategy 1 tier) installed into the tune-zig-prefix; nqp
+# (d2d7e9d5a + the strategy 1 tier) installed into the tune-zig-prefix; nqp
 # zig-hash-strategies; roast fb1d87214. Load average before the start 0.94.
 
 Files=1365, Tests=138695, 293 wallclock secs (35.40 usr  8.54 sys + 4236.07 cusr 1068.83 csys = 5348.84 CPU)

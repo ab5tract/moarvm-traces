@@ -2,8 +2,8 @@
 
 ```
 Date:      2026-11-04
-Base:      1478311f6 (zig-hash-engine), prefix /tmp/claude-1000/internals-base-prefix
-Head:      421aec8b9 (zig-hash-internals, default build: zig impl, LTO, x86-64-v3, stats off), prefix /tmp/claude-1000/tune-zig-prefix
+Base:      1e88a52fb (zig-hash-engine), prefix /tmp/claude-1000/internals-base-prefix
+Head:      ebcce9e3f (zig-hash-internals, default build: zig impl, LTO, x86-64-v3, stats off), prefix /tmp/claude-1000/tune-zig-prefix
 CPU:       AMD Ryzen 9 5900X
 Harness:   one hash-bench exe for both variants: internals-base-prefix/bin/hash-bench (md5 a5e1aa6f...). The head build's own
            hash-bench (md5 5b08dcc7...) was not used because it differs from the base copy; one exe across variants is the control.
@@ -49,4 +49,4 @@ Neither cell is outside the rule in both focused runs, and each was outside in o
 
 ## Verdict
 
-The guard passes: no cell is outside the rule in both of its two-run readings, and the `delete` cells at 65 and up, which read at most 1.073 on the ungated head, are now within the rule in both orders after the gate (`internals-delete-bisect.md`, "## Confirmation"). The ladder rows above were measured on 421aec8b9 before the gate; the gated tree changes only the uni kind (`internals-uni-widen-compare.md`: uni cells 0.91-1.02).
+The guard passes: no cell is outside the rule in both of its two-run readings, and the `delete` cells at 65 and up, which read at most 1.073 on the ungated head, are now within the rule in both orders after the gate (`internals-delete-bisect.md`, "## Confirmation"). The ladder rows above were measured on ebcce9e3f before the gate; the gated tree changes only the uni kind (`internals-uni-widen-compare.md`: uni cells 0.91-1.02).

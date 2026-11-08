@@ -3,13 +3,13 @@
 ```
 GC oracle repeatability record (Task 2, step 4)
 Date:          2026-11-04, 19:55-22:17 CET
-MoarVM:        zig-gc-port at 139d404ed (Task 1: -Dgc-debug, -Dnursery-size, MVM_GC_LOG, MVM_GC_DEBUG_RSS);
+MoarVM:        zig-gc-port at 96d049123 (Task 1: -Dgc-debug, -Dnursery-size, MVM_GC_LOG, MVM_GC_DEBUG_RSS);
                scripts from the Task 2 commit (tools/bench/gc/oracle.sh, crc-sequential.raku)
 Prefixes:      base = head = /tmp/claude-1000/gc-c-oracle (zig build install, -Dgc-debug=1, C collector,
-               LTO, ReleaseFast, x86-64-v3; built by Task 1 from 139d404ed)
+               LTO, ReleaseFast, x86-64-v3; built by Task 1 from 96d049123)
 Runner:        /home/longwalker/code/raku/x.core/zmoarz/rakudo/rakudo-m (in-tree rakudo, branch zig-build-spec
-               at 3d626b9b24; execs /tmp/claude-1000/tune-zig-prefix/bin/moar, libmoar from LD_LIBRARY_PATH);
-               nqp zig-hash-strategies at 287d13264 (installed in /tmp/claude-1000/tune-zig-prefix)
+               at 042608fb82; execs /tmp/claude-1000/tune-zig-prefix/bin/moar, libmoar from LD_LIBRARY_PATH);
+               nqp zig-hash-strategies at 41e7210ba (installed in /tmp/claude-1000/tune-zig-prefix)
 CPU:           AMD Ryzen 9 5900X (24 threads), 32 GB, no swap
 Environment:   MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 MVM_GC_LOG=<out>/<side>-<i>.log
                RAKULIB=tools/bench/gc/lib,/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib

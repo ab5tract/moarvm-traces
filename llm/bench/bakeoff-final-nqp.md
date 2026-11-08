@@ -1,4 +1,4 @@
-# Bake-off final: default ladder against the C engine (HEAD c4df263dc, 2026-11-03)
+# Bake-off final: default ladder against the C engine (HEAD 8c9bbf623, 2026-11-03)
 
 Recipe of `tuning-lto-default-nqp.md`: two builds of the branch head, zig-lto (`zig build install --prefix <p>`, the default build) and c-lto (`-Dzig-impl=false`), each prefix's own `bin/moar` with nqp's stage0 (tune-zig-prefix's share/nqp/lib), `hash-bench.nqp --engine=<v> --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all` and `--sizes=49,97`, 9 rounds, the variant order rotated per round, no `--strategy` (the default ladder, set 0). Cells: median of the 9 round medians, ratio [zig-lto min-max / c-lto min-max of the round medians] ns, from `hash-compare.pl`. Verdict rule as that record's: ratio <= 1.05 or overlapping spreads; the 4-size cells are warm-up and not read; insert_nth 65 is the migration cell (judged by the 97th, see the resize rows). Two complete runs (run 1 rounds 1-9, run 2 rounds 2-10 of the rotation), the machine idle (1-min load 0.7-1.25 at the round starts). The tables give the spread of the round medians; to reproduce the exact spreads by re-running `hash-compare.pl` on the raw TSVs, drop the round column and use only the harness's column 4 (the round median) as the ns column. Raw: `bakeoff-final-nqp-r<run>-<variant>.tsv` (variant, round, then the harness's columns; the resize file's rows appended), load logs `bakeoff-final-nqp-r<run>-load.log`.
 
@@ -248,12 +248,12 @@ overwrite, clone, iterate_delete have no tuning-record baseline. The same rule a
 
 ## Open leads for the next tuning round
 
-- overwrite 65-16384 at 1.15-1.20 against C (zig about 20.4-22.4 ns vs c 17.1-19.2): the lvalue fetch of a present key. Pre-existing: set 0 is unchanged against the campaign's start (the 8b A/B, scoreboard "Default ladder A/B after the fix", overwrite 1.01-1.03 versus 4e37cbbbc).
+- overwrite 65-16384 at 1.15-1.20 against C (zig about 20.4-22.4 ns vs c 17.1-19.2): the lvalue fetch of a present key. Pre-existing: set 0 is unchanged against the campaign's start (the 8b A/B, scoreboard "Default ladder A/B after the fix", overwrite 1.01-1.03 versus b2155d7b6).
 - clone 65/128 at 1.13-1.21 against C. Pre-existing per the same A/B.
 
 ## Attribution check 1: baseline CPU pair (negative)
 
-The coordinator's first hypothesis was that the x86-64-v3 CPU default (commit 2d43de657) tightened the C side and exposed the cells. Both engines were rebuilt with `-Dcpu=baseline` (zig-base, c-base), 9 interleaved rounds, twice, sizes 64,65,128,256, load 1.6-1.85. insert_nth, ratio [zig-base / c-base]:
+The coordinator's first hypothesis was that the x86-64-v3 CPU default (commit d2688ff48) tightened the C side and exposed the cells. Both engines were rebuilt with `-Dcpu=baseline` (zig-base, c-base), 9 interleaved rounds, twice, sizes 64,65,128,256, load 1.6-1.85. insert_nth, ratio [zig-base / c-base]:
 
 | size | run A | run B |
 |---:|---|---|
@@ -262,9 +262,9 @@ The coordinator's first hypothesis was that the x86-64-v3 CPU default (commit 2d
 
 Stated plainly: at the baseline CPU level the 256 cell fails with disjoint spreads at the same 1.11-1.12 ratio and the 128 cell passes only by a hair of overlap. The CPU default is not the cause.
 
-## Attribution check 2: branch base 09bf93ed7 against HEAD (the deciding A/B)
+## Attribution check 2: branch base bb896782e against HEAD (the deciding A/B)
 
-zig-lto built from the branch base 09bf93ed7 (git worktree, `-Dcpu=x86_64_v3` to match HEAD's default CPU) and the HEAD zig-lto prefix, 9 interleaved rounds (order rotated, `bakeoff-final-nqp-ab-load.log`, load 0.8-1.0), sizes 64,65,128,256, `--runs=5 --nth=all`, no strategy. Both ran the same harness copy with the `nqp::hashstrategy(nqp::hash(), ...)` call replaced by `nqp::hash()` (the base moar has no such op; strategy 0 is the plain hash) under nqp's original stage0. `hash-compare.pl`, HEAD over base:
+zig-lto built from the branch base bb896782e (git worktree, `-Dcpu=x86_64_v3` to match HEAD's default CPU) and the HEAD zig-lto prefix, 9 interleaved rounds (order rotated, `bakeoff-final-nqp-ab-load.log`, load 0.8-1.0), sizes 64,65,128,256, `--runs=5 --nth=all`, no strategy. Both ran the same harness copy with the `nqp::hashstrategy(nqp::hash(), ...)` call replaced by `nqp::hash()` (the base moar has no such op; strategy 0 is the plain hash) under nqp's original stage0. `hash-compare.pl`, HEAD over base:
 
 ### insert
 

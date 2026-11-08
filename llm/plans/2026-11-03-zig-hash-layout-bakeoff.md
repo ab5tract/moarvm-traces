@@ -8,12 +8,12 @@
 
 **Tech Stack:** Zig 0.16 (`@Vector(16, u8)` for the group probe), C (ops, REPR build sites), NQP (harness, op tests, two mapping lines), Perl (aggregator, as `hash-compare.pl`), the rakudo spectest.
 
-**Spec:** `traces/llm/specs/2026-11-03-zig-hash-layout-bakeoff-design.md` (traces 5cd0d29). Earlier campaigns' specs and plans in the same directories are context for the tier contract and the measurement protocol.
+**Spec:** `traces/llm/specs/2026-11-03-zig-hash-layout-bakeoff-design.md` (traces 14c0999). Earlier campaigns' specs and plans in the same directories are context for the tier contract and the measurement protocol.
 
 ## Global Constraints
 
 - Set 0 of the string table (`standard`: Small then Robin Hood), `tiers/small.zig`, `tiers/robinhood.zig`, the set-0 dispatch and the migration path do not change (spec decision 5, section 10). Any diff to them is a plan violation unless a task names it.
-- MoarVM work on branch `zig-hash-bakeoff` from `zig-hash-engine` (14452a8d3 or later). nqp work on branch `zig-hash-strategies` created from nqp 305ff2f77 (the checkout is on a detached HEAD there); nothing is committed in the rakudo checkout.
+- MoarVM work on branch `zig-hash-bakeoff` from `zig-hash-engine` (3cb1b7911 or later). nqp work on branch `zig-hash-strategies` created from nqp 305ff2f77 (the checkout is on a detached HEAD there); nothing is committed in the rakudo checkout.
 - New ops are appended at the end of `src/core/oplist`, never inserted, so every existing opcode number is unchanged and nqp's stage0 keeps running (Task 3 verifies).
 - Builds: default options (`zig build install --prefix <P>`, LTO on, `-Doptimize=ReleaseFast`); before any `zig build` without `-Dconfig-h`: `rm -f src/gen/config.h src/gen/config.c src/gen/config.o`. Long runs go to background scripts logging under the scratchpad.
 - The win rule (spec decision 2): a cell wins at ratio at or below 0.90 to the baseline with disjoint round spreads; a strategy needs a contiguous block (one op over adjacent sizes, or several ops over the same adjacent sizes). Memory is a reported column, not a gate.
@@ -293,7 +293,7 @@ Record: `traces/llm/bench/bakeoff-census.md` (Task 1, static read, no code chang
 
 ## Scoreboard
 
-This scoreboard was measured 2026-11-03 on d263d4043, which carries the default-ladder dispatch fix 0113fddae. It supersedes the first scoreboard (traces 293a65a, on d3d8dbf90, where strategy 0's `clone` and `insert_nth` had regressed; see the last two paragraphs).
+This scoreboard was measured 2026-11-03 on 8ef7442fb, which carries the default-ladder dispatch fix 59b800554. It supersedes the first scoreboard (traces 378ca72, on aa5a1a739, where strategy 0's `clone` and `insert_nth` had regressed; see the last two paragraphs).
 
 Method:
 - One prefix; 7 rounds with the strategy order rotated; `--runs=5 --nth=all --hint=0`.
@@ -429,9 +429,9 @@ Strategy 3 pays for the build and then the seal. That comes to about 88-99 ns pe
 
 ### The default-ladder regression and its fix
 
-**Default ladder A/B.** A same-machine A/B of the pre-tier build 4e37cbbbc against d3d8dbf90, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The first scoreboard's `clone` and `insert_nth` ratios were therefore measured against a slowed strategy 0.
+**Default ladder A/B.** A same-machine A/B of the pre-tier build b2155d7b6 against aa5a1a739, with strategy 0 only and the builds alternated within each of 5 rounds, finds that set 0 regressed. `clone` is 1.12-1.39 slower at 32-16384 and `insert_nth` 1.15 slower at 128-256, with disjoint spreads; the other ops are within 5 percent. See `bakeoff-scoreboard.md`, "Default ladder A/B: pre-tier build against the bake-off build". The first scoreboard's `clone` and `insert_nth` ratios were therefore measured against a slowed strategy 0.
 
-**Default ladder fix (Task 8b).** The cause was inlining, not the tiers: with six sets `Table.dispatch` inlined every set's op through `resolve` and grew past LLVM's inlining threshold, so set 0's clone (`blockOf` in `shallowCopy`), iteration exports and grow-path `publish` each paid a call (49 outlined-dispatcher calls in the iteration paths against 0 before); and the migration's `Mover.visit` and the shared Robin Hood `hash` fell out of Small's drain loop (about 6 percent on the 64-to-65 insert). MoarVM 0113fddae keeps the set-0 switch inline in `dispatch` and calls the other sets out of line, keeps `lvalue` fully inline, and makes `visit` and its hash inline; set-0 semantics are unchanged. The same A/B against 4e37cbbbc is at parity: every judged cell within 5 percent or within the spread, clone 0.88-1.02, insert_nth 0.92-1.10 (overlapping). See `bakeoff-scoreboard.md`, "Default ladder A/B after the fix". The scoreboard above was re-run on the fixed build (d263d4043, Task 8c) and supersedes the first one.
+**Default ladder fix (Task 8b).** The cause was inlining, not the tiers: with six sets `Table.dispatch` inlined every set's op through `resolve` and grew past LLVM's inlining threshold, so set 0's clone (`blockOf` in `shallowCopy`), iteration exports and grow-path `publish` each paid a call (49 outlined-dispatcher calls in the iteration paths against 0 before); and the migration's `Mover.visit` and the shared Robin Hood `hash` fell out of Small's drain loop (about 6 percent on the 64-to-65 insert). MoarVM 59b800554 keeps the set-0 switch inline in `dispatch` and calls the other sets out of line, keeps `lvalue` fully inline, and makes `visit` and its hash inline; set-0 semantics are unchanged. The same A/B against b2155d7b6 is at parity: every judged cell within 5 percent or within the spread, clone 0.88-1.02, insert_nth 0.92-1.10 (overlapping). See `bakeoff-scoreboard.md`, "Default ladder A/B after the fix". The scoreboard above was re-run on the fixed build (8ef7442fb, Task 8c) and supersedes the first one.
 
 ## Incremental resize
 
@@ -445,11 +445,11 @@ Strategy 3 pays for the build and then the seal. That comes to about 88-99 ns pe
 - *Expected*: `insert_nth` at 65 (and at each APPEND doubling) falls to roughly the cost of the entry copy; every other cell unchanged except lookups of tables caught mid-move.
 - *Rule*: insert_nth wins (<= 0.90, disjoint spreads) on two adjacent ladder sizes, and no cell loses (>= 1.05, disjoint spreads).
 
-**Outcome: reverted.** MoarVM eb49b1253 measured as temporary strategy 3 against strategy 2, 7 rounds (`bakeoff-incremental.md`). insert_nth wins at 65 only (0.63; 64 is 1.40 and 128 is 0.82 with overlapping spreads), so the win condition fails; four cells lose: lookup_hit 65 (1.24), lookup_miss 65 (1.32), delete 65 (1.11), insert 16384 (1.12). A table of 65 entries has just grown, so it is mid-move for its whole read phase and pays two probes per miss, plus 1.30x memory. The tier code and temporary strategy 3 are removed; APPEND stays as shipped.
+**Outcome: reverted.** MoarVM 83153bbb5 measured as temporary strategy 3 against strategy 2, 7 rounds (`bakeoff-incremental.md`). insert_nth wins at 65 only (0.63; 64 is 1.40 and 128 is 0.82 with overlapping spreads), so the win condition fails; four cells lose: lookup_hit 65 (1.24), lookup_miss 65 (1.32), delete 65 (1.11), insert 16384 (1.12). A table of 65 entries has just grown, so it is mid-move for its whole read phase and pays two probes per miss, plus 1.30x memory. The tier code and temporary strategy 3 are removed; APPEND stays as shipped.
 
 ## Acceptance
 
-Spec section 12, checked on the final branch head (MoarVM c4df263dc), 2026-11-03. Evidence files are under `traces/llm/bench/` unless a path is given.
+Spec section 12, checked on the final branch head (MoarVM 8c9bbf623), 2026-11-03. Evidence files are under `traces/llm/bench/` unless a path is given.
 
 | # | Criterion | Verdict | Evidence |
 |---|---|---|---|

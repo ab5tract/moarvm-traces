@@ -1,14 +1,14 @@
 # Bake-off records: header
 
-**This scoreboard supersedes the one measured before the default-ladder fix.** The first scoreboard (traces 293a65a) was measured on d3d8dbf90. On that build strategy 0's `clone` and `insert_nth` had regressed (see the A/B sections at the end), so every strategy's ratio in those ops was taken against a slowed base. This one is measured on d263d4043, which carries the dispatch fix 0113fddae ("Hash table: keep set 0's dispatch and migration inline with six sets"). Every ratio here is against the repaired strategy 0.
+**This scoreboard supersedes the one measured before the default-ladder fix.** The first scoreboard (traces 378ca72) was measured on aa5a1a739. On that build strategy 0's `clone` and `insert_nth` had regressed (see the A/B sections at the end), so every strategy's ratio in those ops was taken against a slowed base. This one is measured on 8ef7442fb, which carries the dispatch fix 59b800554 ("Hash table: keep set 0's dispatch and migration inline with six sets"). Every ratio here is against the repaired strategy 0.
 
 ```
 Hash layout bake-off scoreboard (Task 8c, re-run after the default-ladder fix)
 Date:          2026-11-03, 13:15-13:17 CET
-MoarVM:        zig-hash-bakeoff at d263d4043 (fix 0113fddae; strategies 0-3 built in; LTO, x86-64-v3), AMD Ryzen 9 5900X
+MoarVM:        zig-hash-bakeoff at 8ef7442fb (fix 59b800554; strategies 0-3 built in; LTO, x86-64-v3), AMD Ryzen 9 5900X
                (moar --version: 2026.09-159-gd263d4043)
-nqp:           zig-hash-strategies at aa4ef121e (hashstrategy/hashseal mapped)
-Prefix:        /tmp/claude-1000/tune-zig-prefix (installed once from d263d4043; strategy.nqp 108/108 ok)
+nqp:           zig-hash-strategies at 17b68f9f6 (hashstrategy/hashseal mapped)
+Prefix:        /tmp/claude-1000/tune-zig-prefix (installed once from 8ef7442fb; strategy.nqp 108/108 ok)
 Roast:         not applicable (nqp-level harness, tools/bench/hash-bench.nqp)
 Rounds:        7 per run, strategy order rotated per round
 Sizes:         main run 4,16,32,63,64,65,128,256,1024,16384; resize run 49,97 (a process of its own)
@@ -432,11 +432,11 @@ This compares strategy 0's cells here, cell by cell, with the campaign's strateg
 
 # History of the default-ladder regression
 
-These two A/B sections were measured before this scoreboard. The first found the regression on d3d8dbf90; the second confirmed the fix 0113fddae against the same pre-tier build.
+These two A/B sections were measured before this scoreboard. The first found the regression on aa5a1a739; the second confirmed the fix 59b800554 against the same pre-tier build.
 
 ## Default ladder A/B: pre-tier build against the bake-off build
 
-Asked by the controller to attribute the baseline check's slower strategy-0 `clone` and `insert_nth` cells. **pretier** is 4e37cbbbc (Task 4: the ops and the harness, no candidate tiers), built with default options from a temporary worktree into a scratch prefix. **current** is d3d8dbf90 in `/tmp/claude-1000/tune-zig-prefix`. Both ran with the same `nqp-m` and bytecode (`/tmp/claude-1000/tune-zig-prefix/bin/nqp-m`); only `LD_LIBRARY_PATH` changed. `LD_DEBUG=libs` confirmed the intended `libmoar.so` was loaded each time. The command was `LD_LIBRARY_PATH=<prefix>/lib nqp-m tools/bench/hash-bench.nqp --engine=<label> --strategy=0 --hint=0 --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`. There were 5 rounds with both builds in each round, and the order alternated per round (odd rounds pretier first). Load was 0.79-0.84. Cells are the median of round medians and [min-max] of the round medians. The marks are ratio above 1.10 or below 0.90 with disjoint spreads; size 4 is warm-up.
+Asked by the controller to attribute the baseline check's slower strategy-0 `clone` and `insert_nth` cells. **pretier** is b2155d7b6 (Task 4: the ops and the harness, no candidate tiers), built with default options from a temporary worktree into a scratch prefix. **current** is aa5a1a739 in `/tmp/claude-1000/tune-zig-prefix`. Both ran with the same `nqp-m` and bytecode (`/tmp/claude-1000/tune-zig-prefix/bin/nqp-m`); only `LD_LIBRARY_PATH` changed. `LD_DEBUG=libs` confirmed the intended `libmoar.so` was loaded each time. The command was `LD_LIBRARY_PATH=<prefix>/lib nqp-m tools/bench/hash-bench.nqp --engine=<label> --strategy=0 --hint=0 --sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`. There were 5 rounds with both builds in each round, and the order alternated per round (odd rounds pretier first). Load was 0.79-0.84. Cells are the median of round medians and [min-max] of the round medians. The marks are ratio above 1.10 or below 0.90 with disjoint spreads; size 4 is warm-up.
 
 **Verdict: set 0 regressed.** With the machine held fixed, strategy 0 is slower on the bake-off build than before the tiers were added:
 - `clone` is out at 32, 65, 128, 256, 1024 and 16384 (1.12-1.39, disjoint spreads; 16 and 64 are 1.20-1.23 with overlapping spreads).
@@ -549,9 +549,9 @@ Asked by the controller to attribute the baseline check's slower strategy-0 `clo
 
 ## Default ladder A/B after the fix
 
-The regression above, found and fixed (MoarVM 0113fddae, `src/zig/core/hash/table.zig` only). **Cause:** with `StrSpec.sets` grown from 2 to 6, `Table.dispatch` (a plain `fn` that inlined every set's op through `resolve`) became too large for LLVM to inline into its callers, so set 0's clone (`blockOf` in `shallowCopy`: a call plus a jump table on the set byte), the iteration exports (`first`/`next`/`current`/`at_start`: 49 calls to outlined dispatchers in the bake-off build, 0 in 4e37cbbbc) and the grow path's `publish` paid a call each. Separately, the migration's `Mover.visit` and the Robin Hood `hash` (now shared by four sets) stopped being inlined into Small's drain loop, which cost the 64-to-65 migration about 6 percent (65th-insert microbenchmark, 20000 tables x 40 runs: 1250 ns pretier against 1325 ns). **Fix:** `dispatch` keeps the set-0 switch inline and calls the other sets out of line (`dispatchOtherCall`, `never_inline`); `lvalue` keeps all sets inline (`dispatchInline`, the previous body); `Mover.visit` is `inline` and forces the hash inline. Set-0 semantics are unchanged; the microbenchmark is at parity after it (1399-1481 against 1430-1471 ns).
+The regression above, found and fixed (MoarVM 59b800554, `src/zig/core/hash/table.zig` only). **Cause:** with `StrSpec.sets` grown from 2 to 6, `Table.dispatch` (a plain `fn` that inlined every set's op through `resolve`) became too large for LLVM to inline into its callers, so set 0's clone (`blockOf` in `shallowCopy`: a call plus a jump table on the set byte), the iteration exports (`first`/`next`/`current`/`at_start`: 49 calls to outlined dispatchers in the bake-off build, 0 in b2155d7b6) and the grow path's `publish` paid a call each. Separately, the migration's `Mover.visit` and the Robin Hood `hash` (now shared by four sets) stopped being inlined into Small's drain loop, which cost the 64-to-65 migration about 6 percent (65th-insert microbenchmark, 20000 tables x 40 runs: 1250 ns pretier against 1325 ns). **Fix:** `dispatch` keeps the set-0 switch inline and calls the other sets out of line (`dispatchOtherCall`, `never_inline`); `lvalue` keeps all sets inline (`dispatchInline`, the previous body); `Mover.visit` is `inline` and forces the hash inline. Set-0 semantics are unchanged; the microbenchmark is at parity after it (1399-1481 against 1430-1471 ns).
 
-Same recipe as above: pretier 4e37cbbbc rebuilt into a scratch prefix, **current** is 0113fddae installed into `/tmp/claude-1000/tune-zig-prefix`, same `nqp-m`, `LD_LIBRARY_PATH` swapped, strategy 0, `--sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`, 5 rounds alternated, load 0.99-1.07. Marks: ratio above 1.10 or below 0.90 with disjoint spreads (bold), or beyond 5 percent with disjoint spreads.
+Same recipe as above: pretier b2155d7b6 rebuilt into a scratch prefix, **current** is 59b800554 installed into `/tmp/claude-1000/tune-zig-prefix`, same `nqp-m`, `LD_LIBRARY_PATH` swapped, strategy 0, `--sizes=4,16,32,63,64,65,128,256,1024,16384 --runs=5 --nth=all`, 5 rounds alternated, load 0.99-1.07. Marks: ratio above 1.10 or below 0.90 with disjoint spreads (bold), or beyond 5 percent with disjoint spreads.
 
 **Verdict: set 0 is back at parity.** Every judged cell is within 5 percent or within the spread; the only disjoint mark is clone 32, faster (0.95). Clone is 0.88-1.02 and insert_nth 0.92-1.10 (overlapping spreads beyond 1.05: insert_nth 64 1.10 and 16384 1.09, the single-insert cells with wide spreads). Iterate 63-64 read 1.11-1.14 with overlapping spreads: the pretier rounds are bimodal there (9.4 or 10.9), current sits on the upper mode, and the A/B above had them at 0.98-0.99. An intermediate build with only the dispatch change (two A/B runs) already fixed clone and insert_nth 128-256 but left insert_nth 65 at 1.05 and 1.08 (disjoint in one run), which the `visit` change closed.
 
@@ -660,9 +660,9 @@ Same recipe as above: pretier 4e37cbbbc rebuilt into a scratch prefix, **current
 
 ### Post-fix call counts
 
-These count calls and tail jumps from each set-0 export into hash-engine helpers that LTO outlined. Each export's body runs up to its int3 padding. PLT calls, the noreturn `MVM_oops`/panic stubs and compiler_rt `memcpy` are left out. **hot** means the helper switches on the set byte with set 0 included, so set 0 pays the call. **cold** means the helper is `dispatchOtherCall`: it opens with a switch on set-1, covers sets 1-5 only, and is reached only after the inline `set != 0` test. Builds: 4e37cbbbc (pretier), 7d055755c (pre-fix) and the installed fix. The installed fix's instruction stream is identical to a fresh HEAD (15e9838f3) build once addresses are normalised.
+These count calls and tail jumps from each set-0 export into hash-engine helpers that LTO outlined. Each export's body runs up to its int3 padding. PLT calls, the noreturn `MVM_oops`/panic stubs and compiler_rt `memcpy` are left out. **hot** means the helper switches on the set byte with set 0 included, so set 0 pays the call. **cold** means the helper is `dispatchOtherCall`: it opens with a switch on set-1, covers sets 1-5 only, and is reached only after the inline `set != 0` test. Builds: b2155d7b6 (pretier), d3e0fd2de (pre-fix) and the installed fix. The installed fix's instruction stream is identical to a fresh HEAD (6b06ef033) build once addresses are normalised.
 
-| export | 4e37cbbbc hot | 7d055755c hot | fix hot | fix cold |
+| export | b2155d7b6 hot | d3e0fd2de hot | fix hot | fix cold |
 |---|---:|---:|---:|---:|
 | shallow_copy | 0 | 1 | 0 | 2 |
 | allocated_size | 0 | 1 | 0 | 2 |
@@ -675,11 +675,11 @@ These count calls and tail jumps from each set-0 export into hash-engine helpers
 | start | 0 | 0 | 0 | 1 |
 | library-wide: sites calling into outlined `first`/`next`/`current`/`at_start`/`start` helpers | 0 | 52 (all hot) | 0 | 72 (all cold) |
 
-The library-wide figure counts tail jumps as well as calls, which is why it is 52 for 7d055755c rather than the 49 calls given above.
+The library-wide figure counts tail jumps as well as calls, which is why it is 52 for d3e0fd2de rather than the 49 calls given above.
 
 ### iterate 63/64 rerun
 
-The same recipe with `--sizes=63,64 --runs=5 --nth=all` and 9 rounds, alternated: pretier is 4e37cbbbc rebuilt into a scratch prefix, current is the installed fix. Load was 0.16-0.23, and nothing else was running. 63 is the first size the process measures, so its spreads carry warm-up.
+The same recipe with `--sizes=63,64 --runs=5 --nth=all` and 9 rounds, alternated: pretier is b2155d7b6 rebuilt into a scratch prefix, current is the installed fix. Load was 0.16-0.23, and nothing else was running. 63 is the first size the process measures, so its spreads carry warm-up.
 
 **Verdict: parity.** iterate is 0.89 at 63 and 1.01 at 64, both with overlapping spreads, and every other row is within 5 percent or within its spread. The 1.11-1.14 seen in the A/B above was the pretier build's bimodality at these sizes, not a shift.
 

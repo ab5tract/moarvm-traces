@@ -1,4 +1,4 @@
-# Task 9: nqp-level harness under -Dlto, tuned engine (HEAD 56470b51a), 12 rotated rounds, --sizes=16,64,128,256,1024,16384 --runs=5 (16 is the warm-up). Load 1.28-1.73.
+# Task 9: nqp-level harness under -Dlto, tuned engine (HEAD 7d633b146), 12 rotated rounds, --sizes=16,64,128,256,1024,16384 --runs=5 (16 is the warm-up). Load 1.28-1.73.
 # Builds: zig build --prefix <scratch>/<v> install with -Dzig-impl=true -Dlto (zig-lto), -Dzig-impl=true (zig), -Dzig-impl=false (c), -Dzig-impl=false -Dlto (c-lto).
 
 iterate: median of the round medians, ratio [compared min-max / base min-max] ns

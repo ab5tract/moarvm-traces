@@ -3,11 +3,11 @@
 ```
 GC final suites record (Task 10, step 5)
 Date:          2026-11-08, 14:07-14:37 CET
-MoarVM:        zig-gc-port at e0444fc47 (the last port commit is 5abaf4507); traces 3349236 before this record
-Prefixes:      gc-c-base, gc-c-stress (139d404ed: the C collector with the Zig hash engine);
-               gc-z-base (e0444fc47), gc-z-stress (5abaf4507, the same MoarVM sources as e0444fc47), all under /tmp/claude-1000;
+MoarVM:        zig-gc-port at 338211de6 (the last port commit is 8513443e6); traces f5b1132 before this record
+Prefixes:      gc-c-base, gc-c-stress (96d049123: the C collector with the Zig hash engine);
+               gc-z-base (338211de6), gc-z-stress (8513443e6, the same MoarVM sources as 338211de6), all under /tmp/claude-1000;
                base = default options, stress = -Dgc-debug=1 -Dnursery-size=524288
-Runner:        nqp zig-hash-strategies 287d13264 and rakudo zig-build-spec 3d626b9b24, installed against
+Runner:        nqp zig-hash-strategies 41e7210ba and rakudo zig-build-spec 042608fb82, installed against
                /tmp/claude-1000/tune-zig-prefix; the collector chosen by LD_LIBRARY_PATH=<prefix>/lib
 CPU:           AMD Ryzen 9 5900X (24 threads), 32 GB, no swap; Zig 0.16.0
 Drivers:       gc-final-suites-driver.sh (Zig suites and script checks; load < 2.0 before each),
@@ -16,7 +16,7 @@ Raw:           gc-final-suites-raw/: zig-suites.tsv, maketest-summary.tsv, <proj
                verdicts), the --summary all outputs, prove.out, perl-c.out, allc-test.out
 ```
 
-## Zig suites (MoarVM checkout at e0444fc47)
+## Zig suites (MoarVM checkout at 338211de6)
 
 | command | exit | output | summary |
 |---|---:|---|---|

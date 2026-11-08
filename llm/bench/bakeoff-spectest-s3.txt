@@ -2,8 +2,8 @@
 # rakudo make spectest with MVM_HASH_STRATEGY=3 TEST_JOBS=24: every MVMHash
 # and HashAttrStore built through the fixed_staging set (Robin Hood), and
 # every hash MVMHash's deserialize fills sealed into the fixed_sealed set
-# (the setting's included). MoarVM zig-hash-bakeoff (53980a8d7 + the
-# strategy 3 tier, committed as 770ffac9c) installed into the
+# (the setting's included). MoarVM zig-hash-bakeoff (1d7949446 + the
+# strategy 3 tier, committed as 051fd8b95) installed into the
 # tune-zig-prefix; nqp zig-hash-strategies; roast fb1d87214. Load average
 # before the start 2.03 (the preceding zig builds settling; the run itself
 # was not slowed: 292 s wallclock against strategy 2's 298 s).

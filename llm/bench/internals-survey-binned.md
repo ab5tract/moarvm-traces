@@ -6,9 +6,9 @@ rulings rested on shares of TABLES by size. This record bins every FETCH by the 
 
 ```
 Date:        2026-11-03
-MoarVM:      zig-hash-internals at ac4436f44 plus the Task 5b change (stats.zig `fetches` histogram and
+MoarVM:      zig-hash-internals at 0adcc2ce1 plus the Task 5b change (stats.zig `fetches` histogram and
              `countFetch`, table.zig `fetch` hook, hash-stats.pl, docs/zig-build.md; committed after this record)
-traces:      dcd5831 (parent of the "internals: lookups binned by table size" commit)
+traces:      ab05235 (parent of the "internals: lookups binned by table size" commit)
 nqp/rakudo:  tune-zig-prefix's binaries (rakudo checkout configured against it); roast fb1d87214
 Build:       stats  rm -f src/gen/config.{h,c,o}; zig build install --prefix /tmp/claude-1000/stats-zig-prefix -Dhash-stats=true
              default build check: zig build; objdump -d zig-out/lib/libmoar.so --disassemble=MVM_str_hash_fetch_nocheck | grep -c rdtsc -> 0

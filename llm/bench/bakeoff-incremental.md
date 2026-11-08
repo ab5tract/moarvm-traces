@@ -22,7 +22,7 @@ random-op runs against `std.AutoHashMap` (one grow-heavy); RED before the implem
 
 ## Measurement
 
-MoarVM eb49b1253 (flag + temporary strategy 3 = set 4, `ordered.Tier(.{ .incremental = true })`),
+MoarVM 83153bbb5 (flag + temporary strategy 3 = set 4, `ordered.Tier(.{ .incremental = true })`),
 default options, LTO on, installed in /tmp/claude-1000/tune-zig-prefix with the nqp of branch
 zig-hash-strategies.
 `tools/bench/hash-bakeoff.sh --strategies=2,3 --rounds=7` with the defaults (`--runs=5

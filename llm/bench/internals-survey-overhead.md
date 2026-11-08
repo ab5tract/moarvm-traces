@@ -1,6 +1,6 @@
 # Internal tables survey: instrumentation overhead bound (2026-11-03)
 
-**Run.** MoarVM `zig-hash-internals` at 1919eddda (traces 29be364), default
+**Run.** MoarVM `zig-hash-internals` at a94812c74 (traces d4b3706), default
 build (LTO, x86-64-v3) in `/tmp/claude-1000/tune-zig-prefix` against the stats
 build (`-Dhash-stats=true`, same flags) in `/tmp/claude-1000/stats-zig-prefix`,
 both rebuilt at HEAD after `rm -f src/gen/config.{h,c,o}`. AMD Ryzen 9 5900X.
