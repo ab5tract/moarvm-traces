@@ -16,7 +16,7 @@
 - **No behaviour change.** No file under `src/*.c`, `src/**/*.h` (other than `src/zig/moar_c.h`) or `build/sources.list` changes. The oracle must be byte-identical between the 0.17 C collector and the 0.17 Zig collector, and between the 0.16 C collector (`/tmp/claude-1000/gc-c-oracle`) and the 0.17 C collector. Every test suite must produce the same list of test names and the same pass/skip verdicts as the 0.16 build of the parent commit.
 - **Deprecated-API policy:** every API the 0.17.0 release notes list as deprecated or renamed is replaced by its new form, even when the old name still compiles (the point of the migration is that 0.18 does not break the tree again). The only exception is `std.builtin.OptimizeMode` in the `translate_c` package's own option type, which is not ours.
 - Builds: `rm -f src/gen/config.h src/gen/config.c src/gen/config.o` before any `zig build` without `-Dconfig-h`; 1-minute load under 2.0 before every build, test run or benchmark round (poll every 60 s; record the value); anything that can grow runs under `systemd-run --user --scope -q -p MemoryMax=8G <cmd>` (32 GB machine, no swap, no oomd); kill by PID only, never `pkill -f`/`pgrep -f`.
-- Prefix names in an A/B pair must have equal length (the install path is baked into libmoar's config strings and changes allocation sizes): the 0.17 prefixes are `/tmp/claude-1000/z17-c-oracle`, `z17-z-oracle`, `z17-c-base`, `z17-z-base`, `z17-c-stress`, `z17-z-stress` (compare with each other), and the surviving 0.16 prefixes `gc-c-oracle`, `gc-c-base`, `gc-z-base`, `gc-c-stress`, `gc-z-stress` (compare `gc-c-*` with `gc-z-*`, and `gc-?-oracle` logs with `z17-?-oracle` logs, which the oracle filters by content, not path).
+- Prefix names in an A/B pair must have equal length (the install path is baked into libmoar's config strings and changes allocation sizes): the 0.17 prefixes are `/tmp/claude-1000/g7-c-oracle`, `g7-z-oracle`, `g7-c-base`, `g7-z-base`, `g7-c-stress`, `g7-z-stress` (compare with each other), and the surviving 0.16 prefixes `gc-c-oracle`, `gc-c-base`, `gc-z-base`, `gc-c-stress`, `gc-z-stress` (compare `gc-c-*` with `gc-z-*`, and `gc-?-oracle` logs with `z17-?-oracle` logs, which the oracle filters by content, not path).
 - Measurement conventions as in the GC plan: interleaved rounds, rotated variant order, medians of at least five runs per round, spreads are min and max of round medians, load recorded before every run; spectest recipe `TEST_JOBS=24 python3 <MoarVM>/tools/bench/timev.py <out>.time make -o spectest_update spectest` in the rakudo checkout with roast pinned at fb1d87214 and `.precomp` removed before each run; `MVM_SPESH_BLOCKING`/`MVM_SPESH_DISABLE` untouched.
 - `zig fmt --check src/zig build.zig build/zig tools/zig` clean after every task (0.17's formatter); `perl -c` on touched Perl, `sh -n` on touched shell; test output pristine.
 - Commit messages: imperative subject, body with the reasoning, then the two attribution lines exactly as the dispatching session gives them.
@@ -180,23 +180,23 @@ Run: `perl Configure.pl --prefix=/tmp/claude-1000/z017/perl --cc=zig --zig=/usr/
 
 - [ ] **Step 1: Build the six 0.17 prefixes**
 
-`zig build install --prefix /tmp/claude-1000/z17-c-oracle -Dzig-impl=false -Dgc-debug=1`, `z17-z-oracle -Dgc-debug=1`, `z17-c-base -Dzig-impl=false`, `z17-z-base`, `z17-c-stress -Dzig-impl=false -Dgc-debug=1 -Dnursery-size=524288`, `z17-z-stress -Dgc-debug=1 -Dnursery-size=524288`; load under 2.0 before each; record `moar --version` of each (equal-length strings). Install nqp and rakudo into each prefix exactly as `docs/zig-build.md` "Recipes the campaign used" says (the prefix builds and the nqp/rakudo per-prefix recipe); the oracle and the A/B need rakudo in the prefix, the nqp `make test` runs need nqp in it.
+`zig build install --prefix /tmp/claude-1000/g7-c-oracle -Dzig-impl=false -Dgc-debug=1`, `g7-z-oracle -Dgc-debug=1`, `g7-c-base -Dzig-impl=false`, `g7-z-base`, `g7-c-stress -Dzig-impl=false -Dgc-debug=1 -Dnursery-size=524288`, `g7-z-stress -Dgc-debug=1 -Dnursery-size=524288`; load under 2.0 before each; record `moar --version` of each (equal-length strings). No nqp or rakudo is installed into the prefixes: as `docs/zig-build.md` "Recipes the campaign used" says, the scripts reach the prefix through `LD_LIBRARY_PATH=<P>/lib` with the rakudo and nqp built against `/tmp/claude-1000/tune-zig-prefix` (a path of equal length), exactly as the 0.16 prefixes are used.
 
 - [ ] **Step 2: Oracle matrix**
 
-Cells: (a) `z17-c-oracle` vs `z17-z-oracle`, 10 000 and 100 000, plain and `--bad-packages`, tiers 1 and 2 (8 cells); (b) `gc-c-oracle` (0.16 C) vs `z17-c-oracle`, the same 8 cells. Expected: all 16 exit 0 with byte-identical logs. A difference in (b) is a toolchain finding: stop, diff the first differing line, report.
+Cells: (a) `g7-c-oracle` vs `g7-z-oracle`, 10 000 and 100 000, plain and `--bad-packages`, tiers 1 and 2 (8 cells); (b) `gc-c-oracle` (0.16 C) vs `g7-c-oracle`, the same 8 cells. Expected: all 16 exit 0 with byte-identical logs. A difference in (b) is a toolchain finding: stop, diff the first differing line, report.
 
 - [ ] **Step 3: crc-getter A/B**
 
-`ab.sh --rounds=7 --runs=5 --volume=100000`, plain and `--bad-packages`, for the pairs `z17-c-base` vs `z17-z-base` (the new baseline) and `gc-c-base` vs `z17-c-base` (toolchain). Record medians, spreads and ratios in `z017-crc-ab.md` next to the 0.16 figures (plain 1.011/1.015, bad 1.003/1.005).
+`ab.sh --rounds=7 --runs=5 --volume=100000`, plain and `--bad-packages`, for the pairs `g7-c-base` vs `g7-z-base` (the new baseline) and `gc-c-base` vs `g7-c-base` (toolchain). Record medians, spreads and ratios in `z017-crc-ab.md` next to the 0.16 figures (plain 1.011/1.015, bad 1.003/1.005).
 
 - [ ] **Step 4: spectest A/B**
 
-Two pairs, six runs each in the order base head head base base head: `z17-c-base` vs `z17-z-base`, then `gc-c-base` vs `z17-c-base`. Roast at fb1d87214, `.precomp` removed, load recorded. Record wall and RSS medians, ratios, `Files=`/`Tests=` and the TODO-passed list; zero new failures against `gc-final-spectest.txt`'s summary.
+Two pairs, six runs each in the order base head head base base head: `g7-c-base` vs `g7-z-base`, then `gc-c-base` vs `g7-c-base`. Roast at fb1d87214, `.precomp` removed, load recorded. Record wall and RSS medians, ratios, `Files=`/`Tests=` and the TODO-passed list; zero new failures against `gc-final-spectest.txt`'s summary.
 
 - [ ] **Step 5: Suites under stress**
 
-nqp `make test` under `z17-c-stress` and `z17-z-stress` (the maketest driver recipe); rakudo `make test` under `z17-z-base`. Expected: the same per-file lists as `gc-final-suites-raw/` (150/13746 PASS; 599/11162 with the one pre-existing nativecall failure).
+nqp `make test` under `g7-c-stress` and `g7-z-stress` (the maketest driver recipe); rakudo `make test` under `g7-z-base`. Expected: the same per-file lists as `gc-final-suites-raw/` (150/13746 PASS; 599/11162 with the one pre-existing nativecall failure).
 
 - [ ] **Step 6: Records and commit**
 
@@ -227,3 +227,8 @@ Edit the docs section; `grep -n "0\.16" docs/zig-build.md` afterwards lists only
 - [ ] **Step 3: Commit, hand back**
 
 Commit docs in MoarVM, plan in traces, pointer in MoarVM. Hand back with the Outcome table and the Deviations list. The orchestrator runs the whole-branch review before any merge into `zig-hash-engine` (user's call).
+
+## Deviations (running list)
+
+- 2026-11-08, before Task 5: the 0.17 prefixes are named `g7-?-*`, not `z17-?-*`, so each cross-toolchain pair (`gc-c-base` vs `g7-c-base`, …) has equal-length names as the Global Constraints require; the plan's original names were one character longer than the 0.16 ones.
+- Tasks 1-4 deviations are in the ledger (`.superpowers/sdd/2026-11-08-zig-017-migration/progress.md`) and are copied here by Task 6.
