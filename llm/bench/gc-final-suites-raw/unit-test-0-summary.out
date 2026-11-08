@@ -1,0 +1,111 @@
+Build Summary: 68/68 steps succeeded; 328/342 tests passed (14 skipped)
+unit-test success
++- run test 7 pass (7 total) 10ms MaxRSS:21M
+|  +- compile test Debug native cached 26ms MaxRSS:107M
+|     +- options cached
++- run test 1 pass (1 total) 10ms MaxRSS:20M
+|  +- compile test Debug native cached 24ms MaxRSS:108M
+|     +- options (reused)
++- run test 3 pass (3 total) 7ms MaxRSS:21M
+|  +- compile test Debug native cached 21ms MaxRSS:107M
+|     +- options (reused)
++- run test 1 pass (1 total) 7ms MaxRSS:21M
+|  +- compile test Debug native cached 25ms MaxRSS:106M
+|     +- options (reused)
++- run test 3 pass (3 total) 6ms MaxRSS:20M
+|  +- compile test Debug native cached 23ms MaxRSS:106M
+|     +- options (reused)
++- run test 1 pass (1 total) 8ms MaxRSS:21M
+|  +- compile test Debug native cached 25ms MaxRSS:108M
+|     +- options (reused)
++- run test 3 pass (3 total) 9ms MaxRSS:18M
+|  +- compile test Debug native cached 16ms MaxRSS:106M
+|     +- options (reused)
++- run test 1 pass (1 total) 10ms MaxRSS:20M
+|  +- compile test Debug native cached 23ms MaxRSS:107M
+|     +- options (reused)
++- run test 1 pass (1 total) 9ms MaxRSS:20M
+|  +- compile test Debug native cached 25ms MaxRSS:108M
+|     +- options (reused)
++- run test 16 pass (16 total) 14ms MaxRSS:19M
+|  +- compile test Debug native cached 16ms MaxRSS:107M
+|     +- options (reused)
++- run test 8 pass (8 total) 12ms MaxRSS:21M
+|  +- compile test Debug native cached 22ms MaxRSS:108M
+|     +- options (reused)
++- run test 7 pass, 1 skip (8 total) 8ms MaxRSS:20M
+|  +- compile test Debug native cached 21ms MaxRSS:107M
+|     +- options (reused)
++- run test 54 pass, 1 skip (55 total) 15s MaxRSS:21M
+|  +- compile test Debug native cached 21ms MaxRSS:107M
+|     +- options (reused)
++- run test 54 pass, 1 skip (55 total) 16s MaxRSS:21M
+|  +- compile test Debug native cached 21ms MaxRSS:107M
+|     +- options (reused)
++- run test 3 pass, 1 skip (4 total) 7ms MaxRSS:20M
+|  +- compile test Debug native cached 25ms MaxRSS:105M
+|     +- options (reused)
++- run test 7 pass (7 total) 16ms MaxRSS:20M
+|  +- compile test Debug native cached 21ms MaxRSS:107M
+|     +- options (reused)
++- run test shim-test 10 pass (10 total) 91ms MaxRSS:59M
+|  +- compile test shim-test ReleaseFast native-native cached 27ms MaxRSS:108M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h cached
+|     +- WriteFile moar cached
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- compile lib moar ReleaseFast native-native cached 30ms MaxRSS:107M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile jit/core_templates.h cached
+|     |  |  +- run exe expr_template_compiler (core_templates.h) cached
+|     |  |  |  +- compile exe expr_template_compiler ReleaseSafe native cached 22ms MaxRSS:108M
+|     |  |  +- run exe tiler_table_generator (tile_pattern.h) cached
+|     |  |     +- compile exe tiler_table_generator ReleaseSafe native cached 22ms MaxRSS:108M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile obj moar_zig ReleaseFast native-native cached 24ms MaxRSS:108M
+|     |  |  +- options cached
+|     |  |  +- run exe fixup_translated (moar_c.zig) cached
+|     |  |     +- compile exe fixup_translated Debug native cached 17ms MaxRSS:106M
+|     |  |     +- translate-c cached 23ms MaxRSS:106M
+|     |  |        +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile lib uv ReleaseFast native-native cached 28ms MaxRSS:107M
+|     |  +- WriteFile cached
+|     |  +- compile lib tommath ReleaseFast native-native cached 32ms MaxRSS:107M
+|     |  +- WriteFile cached
+|     |  +- compile lib dyncall ReleaseFast native-native cached 29ms MaxRSS:107M
+|     |  +- WriteFile cached
+|     |  +- compile lib sha1 ReleaseFast native-native cached 29ms MaxRSS:107M
+|     |  +- WriteFile cached
+|     |  +- compile lib cmp ReleaseFast native-native cached 31ms MaxRSS:107M
+|     |  +- run exe minilua (emit.c) cached
+|     |  |  +- compile exe minilua ReleaseFast native cached 37ms MaxRSS:105M
+|     |  +- WriteFile config.c cached
+|     |  +- compile obj moar_zig ReleaseFast native-native (+2 more reused dependencies)
+|     |  +- compile lib uv ReleaseFast native-native (reused)
+|     |  +- compile lib tommath ReleaseFast native-native (reused)
+|     |  +- compile lib dyncall ReleaseFast native-native (reused)
+|     |  +- compile lib sha1 ReleaseFast native-native (reused)
+|     |  +- compile lib cmp ReleaseFast native-native (reused)
+|     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+|     +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
++- run test hash-str-test 103 pass, 7 skip (110 total) 1s MaxRSS:60M
+|  +- compile test hash-str-test ReleaseFast native-native cached 27ms MaxRSS:108M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- WriteFile moar (+2 more reused dependencies)
+|     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+|     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+|     +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
+|     +- options cached
+|     +- options (reused)
++- run test gc-test 45 pass, 3 skip (48 total) 591ms MaxRSS:75M
+   +- compile test gc-test ReleaseFast native-native cached 28ms MaxRSS:108M
+      +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+      +- WriteFile moar (+2 more reused dependencies)
+      +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+      +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+      +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
+      +- options (reused)
+

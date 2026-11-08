@@ -123,10 +123,10 @@
 - Modify: `build/sources.list`, `src/zig/root.zig`, `src/zig/gc/gc_test.zig`, `build.zig:128` (add `src/zig/gc/gen2.zig` to the pure unit-test roots only if its comptime tables can be tested without a VM; otherwise skip).
 
 **Interfaces:**
-- Produces (exported, `gen2.h` signatures): `MVM_gc_gen2_create(i) *MVMGen2Allocator`, `MVM_gc_gen2_allocate(al, size: MVMuint32) ?*anyopaque`, `MVM_gc_gen2_allocate_zeroed`, `MVM_gc_gen2_destroy(i, al)`, `MVM_gc_gen2_transfer(src_tc, dest_tc)`, `MVM_gc_gen2_compact_overflows(al)`. Bin geometry at comptime: `binOf(size)` = `(size >> MVM_GEN2_BIN_BITS) - 1` as `gen2.c:60-70` computes it, `sizeOfBin(bin)` = `(bin + 1) << MVM_GEN2_BIN_BITS`, pages of `MVM_GEN2_PAGE_ITEMS` items, overflows list growth from `MVM_GEN2_OVERFLOWS` 32 doubling, free-list threading through the first word of a freed item, the `MVM_CF_DEBUG_IN_GEN2_FREE_LIST` flag under `comptime c.MVM_GC_DEBUG != 0`.
+- Produces (exported, `gen2.h` signatures): `MVM_gc_gen2_create(i) *MVMGen2Allocator`, `MVM_gc_gen2_allocate(al, size: MVMuint32) ?*anyopaque`, `MVM_gc_gen2_allocate_zeroed`, `MVM_gc_gen2_destroy(i, al)`, `MVM_gc_gen2_transfer(src_tc, dest_tc)`, `MVM_gc_gen2_compact_overflows(al)`. Bin geometry at comptime: `binOf(size)` = `size >> MVM_GEN2_BIN_BITS`, less one when `size` is a multiple of 8, as `gen2.c:60-70` computes it (corrected at Task 10: this text first said `(size >> MVM_GEN2_BIN_BITS) - 1`, which is wrong for sizes that are not multiples of 8; the C rounds up, Task 5 followed the C), `sizeOfBin(bin)` = `(bin + 1) << MVM_GEN2_BIN_BITS`, pages of `MVM_GEN2_PAGE_ITEMS` items, overflows list growth from `MVM_GEN2_OVERFLOWS` 32 doubling, free-list threading through the first word of a freed item, the `MVM_CF_DEBUG_IN_GEN2_FREE_LIST` flag under `comptime c.MVM_GC_DEBUG != 0`.
 - Produces: `comptime` assertions that `sizeOfBin(MVM_GEN2_BINS - 1) == 320` and `@sizeOf(c.MVMGen2SizeClass) == 40`, `@sizeOf(c.MVMGen2Allocator) == 24`.
 
-- [ ] **Step 1: Write the failing tests**: `"bin geometry matches gen2.c"` (table of (size, bin, item size) for sizes 8, 16, 24, 320, and that 328 and above go to overflows), `"allocate returns page items in order and reuses the free list"`, `"allocate_zeroed zeroes"`, `"transfer moves every page and overflow to dest and leaves src empty"`, `"compact_overflows drops NULL entries and keeps order"`, `"destroy frees every page"` (count `MVM_malloc`/`MVM_free` through the test's own wrappers is not possible; assert `destroy` returns and a second `create` works).
+- [ ] **Step 1: Write the failing tests**: `"bin geometry matches gen2.c"` (table of (size, bin, item size) for sizes 8, 16, 24, 320, and that 321 and above go to overflows; corrected at Task 10 from 328), `"allocate returns page items in order and reuses the free list"`, `"allocate_zeroed zeroes"`, `"transfer moves every page and overflow to dest and leaves src empty"`, `"compact_overflows drops NULL entries and keeps order"`, `"destroy frees every page"` (count `MVM_malloc`/`MVM_free` through the test's own wrappers is not possible; assert `destroy` returns and a second `create` works).
 - [ ] **Step 2: Run `zig build unit-test`**; expected: FAIL.
 - [ ] **Step 3: Implement**, swap line, root import, rebuild; suites PASS.
 - [ ] **Step 4: Oracle** at 100 000, both tiers and settings; expected: exit 0.
@@ -218,8 +218,24 @@ As the Global Constraints state; records under `traces/llm/bench/gc-*` with: dat
 
 ## Acceptance
 
-(filled by Task 10)
+Task 10, 2026-11-08, MoarVM e0444fc47 (the last port commit 5abaf4507). Rows: the goals of the spec's section 2. Records under `traces/llm/bench/`.
+
+| goal (spec section 2) | verdict | evidence |
+|---|---|---|
+| Every C file in `src/gc/` replaced by Zig under `-Dzig-impl`, selectable along the ladder, the C files untouched except the three bounded kinds of edit | met: ten `[zig]` lines in `build/sources.list` (Tasks 3-9); `git diff 139d404ed e0444fc47 -- src/gc src/core src/moar.c` is empty, so the only C edits are Task 1's guards and debug-only instrumentation; the all-C fallback (`-Dzig-impl=false`) builds and passes `zig build test` | `bench/gc-final-suites.md` (the all-C row), `docs/zig-build.md` "Garbage collector" (the file map) |
+| Fidelity: collection-by-collection parity on the deterministic workload | met: eight cells (10 000 and 100 000, both settings, both tiers), exit 0 everywhere, each side repeatable, base and head byte-identical even before the tier filter | `bench/gc-final-oracle.md` |
+| Fidelity: nqp and rakudo test suites green under both builds, normal and stress | met: identical per-file lists in all four pairs; the one rakudo failure (`t/04-nativecall/02-simple-args.t` 17-18) is the same under every prefix, the C collector included | `bench/gc-final-suites.md` |
+| Fidelity: the spectest with zero new failures | met: six runs, all PASS, Files=1365, Tests=138715, identical summary lists | `bench/gc-final-spectest.txt` |
+| No regression: spectest wall and RSS within spread or 1 percent (the primary gate at the capped size) | met: wall 1.006, RSS 0.999 (medians of three) | `bench/gc-final-spectest.txt` |
+| No regression: crc-getter not slower, not larger (volume 100 000 by the 2026-11-08 cap) | not met in one setting: plain wall 1.011 and RSS 1.015, both just outside base's round spread; `--bad-packages` wall 1.003 and RSS 1.005, within spread. No win to investigate; not rerun, not tuned | `bench/gc-final-crc-ab.md` |
+| Zig features where they make the port clearer or safer, without changing behaviour (section 8) | met: comptime debug levels (`c.MVM_GC_DEBUG` blocks), typed seq_cst atomics with a C-site comment each (`atomic.zig`), comptime layout and gen2 geometry assertions, the layout probes, unit tests per file; the worklist stays the C ABI rather than a generic (the C macros share it) | `docs/zig-build.md` "Garbage collector", `bench/gc-final-suites.md` (unit tests) |
+| Reference record of the hundred-million stall, reproduced by the port | struck by the user on 2026-11-04 (spec section 7 erratum); no record | spec "Errata" |
 
 ## C observations for a later campaign
 
-(filled by the ports; never acted on in this campaign)
+Noticed while porting, ported as written (the Zig file's comment names each), never acted on in this campaign. No fix is proposed here.
+
+- `src/gc/orchestrate.c:802` and `:810` (`MVM_gc_global_destruction`, inside the loop over the other threads that starts at :798): both `MVM_cas` calls and the `MVM_load` at :817 operate on the caller's own `tc->gc_status`, not on `cur_thread->body.tc->gc_status`, so the other threads are never asked to suspend; the first CAS succeeds on the caller's own status (NONE) for the first other thread, and for every later one the third check finds the caller's own SUSPEND_REQUEST and breaks. Zig: `src/zig/gc/orchestrate.zig:1002-1005`.
+- `src/gc/roots.c:136-139` (`MVM_gc_root_add_instance_roots_to_worklist`): `subscriptions.GCEvent` is added twice, the second time under the description "VM Event SpeshOverviewEvent type"; `subscriptions.SpeshOverviewEvent` (`src/core/instance.h:122`, set in `src/moar.c:947-950`, read by `src/spesh/worker.c:129`) is never marked. Zig: `src/zig/gc/roots.zig:146-149`.
+- `src/gc/roots.c:233-237` (`MVM_gc_root_add_tc_roots_to_worklist`): the `mark_args` loop calls `MVM_gc_worklist_add` directly instead of `add_collectable`, so on the heap-snapshot path (worklist NULL, snapshot set) it would add to a NULL worklist rather than describe the roots to the snapshot. Zig: `src/zig/gc/roots.zig:243-246`.
+

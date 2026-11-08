@@ -1,0 +1,4 @@
+Build Summary: 2/2 steps succeeded
+strategy-test success
++- run strategy.nqp on the installed nqp success 119ms
+

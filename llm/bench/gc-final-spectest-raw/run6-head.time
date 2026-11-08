@@ -1,0 +1,6 @@
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4690.11
+	System time (seconds): 367.57
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:39.90
+	Maximum resident set size (kbytes): 1024772
+	Exit status: 0

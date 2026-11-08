@@ -1,0 +1,9 @@
+tools/bench/t/gc-oracle.t ........ ok
+tools/bench/t/hash-bakeoff.t ..... ok
+tools/bench/t/hash-bench-hint.t .. skipped: set HASH_BENCH_NQP to an nqp that maps nqp::hashstrategy
+tools/bench/t/hash-compare.t ..... ok
+tools/bench/t/hash-stats.t ....... ok
+tools/bench/t/uni-bench.t ........ skipped: set UNI_BENCH_NQP to an nqp
+All tests successful.
+Files=6, Tests=107, 21 wallclock secs ( 0.02 usr  0.01 sys + 20.59 cusr  0.25 csys = 20.87 CPU)
+Result: PASS

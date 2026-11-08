@@ -1,0 +1,129 @@
+Build Summary: 81/81 steps succeeded; 328/342 tests passed (14 skipped)
+test success
++- run installed moar --version cached
+|  +- install cached
+|     +- install moar cached
+|     |  +- compile lib moar ReleaseFast native-native cached 29ms MaxRSS:107M
+|     |     +- configure autoconf_at header build/config.h.in to gen/config.h cached
+|     |     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |     +- WriteFile jit/core_templates.h cached
+|     |     |  +- run exe expr_template_compiler (core_templates.h) cached
+|     |     |  |  +- compile exe expr_template_compiler ReleaseSafe native cached 17ms MaxRSS:108M
+|     |     |  +- run exe tiler_table_generator (tile_pattern.h) cached
+|     |     |     +- compile exe tiler_table_generator ReleaseSafe native cached 25ms MaxRSS:107M
+|     |     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |     +- WriteFile cached
+|     |     +- compile obj moar_zig ReleaseFast native-native cached 29ms MaxRSS:108M
+|     |     |  +- options cached
+|     |     |  +- run exe fixup_translated (moar_c.zig) cached
+|     |     |     +- compile exe fixup_translated Debug native cached 20ms MaxRSS:106M
+|     |     |     +- translate-c cached 22ms MaxRSS:107M
+|     |     |        +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |     +- WriteFile cached
+|     |     +- compile lib uv ReleaseFast native-native cached 29ms MaxRSS:106M
+|     |     +- WriteFile cached
+|     |     +- compile lib tommath ReleaseFast native-native cached 30ms MaxRSS:106M
+|     |     +- WriteFile cached
+|     |     +- compile lib dyncall ReleaseFast native-native cached 28ms MaxRSS:106M
+|     |     +- WriteFile cached
+|     |     +- compile lib sha1 ReleaseFast native-native cached 24ms MaxRSS:105M
+|     |     +- WriteFile cached
+|     |     +- compile lib cmp ReleaseFast native-native cached 27ms MaxRSS:106M
+|     |     +- run exe minilua (emit.c) cached
+|     |     |  +- compile exe minilua ReleaseFast native cached 28ms MaxRSS:107M
+|     |     +- WriteFile config.c cached
+|     |     +- compile obj moar_zig ReleaseFast native-native (+2 more reused dependencies)
+|     |     +- compile lib uv ReleaseFast native-native (reused)
+|     |     +- compile lib tommath ReleaseFast native-native (reused)
+|     |     +- compile lib dyncall ReleaseFast native-native (reused)
+|     |     +- compile lib sha1 ReleaseFast native-native (reused)
+|     |     +- compile lib cmp ReleaseFast native-native (reused)
+|     +- install moar cached
+|     |  +- compile exe moar ReleaseFast native-native cached 24ms MaxRSS:106M
+|     |     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+|     +- install tools/libmoar.so-gdb.py to libmoar.so-gdb.py cached
+|     +- install lib/MAST/Nodes.nqp to Nodes.nqp cached
+|     +- install lib/MAST/Ops.nqp to Ops.nqp cached
+|     +- install generated to moar.pc cached
+|        +- WriteFile moar.pc cached
++- run installed moar on nqp stage0 cached
+|  +- install (+6 more reused dependencies)
++- run installed moar with forced JIT cached
+|  +- install (+6 more reused dependencies)
++- unit-test success
+   +- run test 7 pass (7 total) 10ms MaxRSS:21M
+   |  +- compile test Debug native cached 20ms MaxRSS:108M
+   |     +- options cached
+   +- run test 1 pass (1 total) 8ms MaxRSS:21M
+   |  +- compile test Debug native cached 17ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 3 pass (3 total) 13ms MaxRSS:20M
+   |  +- compile test Debug native cached 21ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 1 pass (1 total) 8ms MaxRSS:18M
+   |  +- compile test Debug native cached 14ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 3 pass (3 total) 9ms MaxRSS:20M
+   |  +- compile test Debug native cached 21ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 1 pass (1 total) 10ms MaxRSS:21M
+   |  +- compile test Debug native cached 19ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 3 pass (3 total) 7ms MaxRSS:20M
+   |  +- compile test Debug native cached 18ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 1 pass (1 total) 7ms MaxRSS:21M
+   |  +- compile test Debug native cached 17ms MaxRSS:107M
+   |     +- options (reused)
+   +- run test 1 pass (1 total) 17ms MaxRSS:20M
+   |  +- compile test Debug native cached 23ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 16 pass (16 total) 17ms MaxRSS:21M
+   |  +- compile test Debug native cached 20ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 8 pass (8 total) 23ms MaxRSS:20M
+   |  +- compile test Debug native cached 22ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 7 pass, 1 skip (8 total) 13ms MaxRSS:20M
+   |  +- compile test Debug native cached 23ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 54 pass, 1 skip (55 total) 15s MaxRSS:21M
+   |  +- compile test Debug native cached 19ms MaxRSS:108M
+   |     +- options (reused)
+   +- run test 54 pass, 1 skip (55 total) 16s MaxRSS:21M
+   |  +- compile test Debug native cached 18ms MaxRSS:108M
+   |     +- options (reused)
+   +- run test 3 pass, 1 skip (4 total) 8ms MaxRSS:21M
+   |  +- compile test Debug native cached 21ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test 7 pass (7 total) 16ms MaxRSS:21M
+   |  +- compile test Debug native cached 18ms MaxRSS:106M
+   |     +- options (reused)
+   +- run test shim-test 10 pass (10 total) 88ms MaxRSS:59M
+   |  +- compile test shim-test ReleaseFast native-native cached 24ms MaxRSS:108M
+   |     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+   |     +- WriteFile moar cached
+   |     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+   |     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+   |     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+   |     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+   |     +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
+   +- run test hash-str-test 103 pass, 7 skip (110 total) 1s MaxRSS:61M
+   |  +- compile test hash-str-test ReleaseFast native-native cached 25ms MaxRSS:107M
+   |     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+   |     +- WriteFile moar (+2 more reused dependencies)
+   |     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+   |     +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+   |     +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
+   |     +- options cached
+   |     +- options (reused)
+   +- run test gc-test 45 pass, 3 skip (48 total) 584ms MaxRSS:74M
+      +- compile test gc-test ReleaseFast native-native cached 25ms MaxRSS:108M
+         +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+         +- WriteFile moar (+2 more reused dependencies)
+         +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+         +- compile lib moar ReleaseFast native-native (+24 more reused dependencies)
+         +- run exe fixup_translated (moar_c.zig) (+2 more reused dependencies)
+         +- options (reused)
+

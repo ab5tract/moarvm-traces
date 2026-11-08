@@ -1,0 +1,80 @@
+# GC final spectest A/B: C collector (base, /tmp/claude-1000/gc-c-base, 139d404ed) against Zig collector (head, /tmp/claude-1000/gc-z-base, e0444fc47; the last port commit is 5abaf4507), both zig build install with default options (LTO, ReleaseFast, x86-64-v3, -Dgc-debug=0). rakudo make -o spectest_update spectest, TEST_JOBS=24, roast fb1d87214 (verified before each run), .precomp under t/spec removed before each run, libmoar chosen by LD_LIBRARY_PATH=<prefix>/lib against the moar, nqp (287d13264) and rakudo (zig-build-spec 3d626b9b24) of /tmp/claude-1000/tune-zig-prefix (ldd confirmed each side). Timed by tools/bench/timev.py (the wait4 stand-in for GNU time -v). Order base head head base base head, one at a time, no harness shims. Driver: gc-final-spectest-driver.sh; raw: gc-final-spectest-raw/ (runs.log, run<N>-<side>.time, run<N>-<side>.log). 2026-11-08, AMD Ryzen 9 5900X, 32 GB, no swap; MoarVM e0444fc47, traces 3349236 before this record.
+
+run 1 base start 13:26:30 load 0.79 1.05 1.07
+run 2 head start 13:33:08 load 1.73 9.71 6.40
+run 3 head start 13:39:50 load 1.81 12.18 10.00
+run 4 base start 13:46:29 load 1.87 12.68 12.22
+run 5 base start 13:55:07 load 0.33 8.95 12.27
+run 6 head start 14:01:45 load 1.91 12.04 13.79
+(the driver waited for a 1-minute load under 2.0 before each run; the 5- and 15-minute averages still carried the previous run, as in bakeoff-final-spectest.txt; no moar process was running before any run)
+
+## run 1 (base: C collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4631.83
+	System time (seconds): 387.53
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:38.47
+	Maximum resident set size (kbytes): 1026576
+	Exit status: 0
+Files=1365, Tests=138715, 271 wallclock secs (36.02 usr  7.85 sys + 4591.31 cusr 376.91 csys = 5012.09 CPU)
+Result: PASS
+
+## run 2 (head: Zig collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4701.73
+	System time (seconds): 369.43
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:41.42
+	Maximum resident set size (kbytes): 1026900
+	Exit status: 0
+Files=1365, Tests=138715, 275 wallclock secs (36.61 usr  7.58 sys + 4660.64 cusr 359.10 csys = 5063.93 CPU)
+Result: PASS
+
+## run 3 (head: Zig collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4682.63
+	System time (seconds): 369.08
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:39.17
+	Maximum resident set size (kbytes): 1025404
+	Exit status: 0
+Files=1365, Tests=138715, 272 wallclock secs (36.18 usr  7.68 sys + 4641.92 cusr 358.70 csys = 5044.48 CPU)
+Result: PASS
+
+## run 4 (base: C collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4638.30
+	System time (seconds): 385.01
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:38.23
+	Maximum resident set size (kbytes): 1025032
+	Exit status: 0
+Files=1365, Tests=138715, 271 wallclock secs (36.71 usr  7.57 sys + 4596.98 cusr 374.76 csys = 5016.02 CPU)
+Result: PASS
+
+## run 5 (base: C collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4629.60
+	System time (seconds): 387.08
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:37.58
+	Maximum resident set size (kbytes): 1026928
+	Exit status: 0
+Files=1365, Tests=138715, 271 wallclock secs (36.28 usr  7.61 sys + 4588.83 cusr 376.69 csys = 5009.41 CPU)
+Result: PASS
+
+## run 6 (head: Zig collector)
+	Command being timed: "make -o spectest_update spectest"
+	User time (seconds): 4690.11
+	System time (seconds): 367.57
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:39.90
+	Maximum resident set size (kbytes): 1024772
+	Exit status: 0
+Files=1365, Tests=138715, 273 wallclock secs (36.12 usr  7.75 sys + 4649.41 cusr 357.17 csys = 5050.45 CPU)
+Result: PASS
+
+## medians of three per side
+base (runs 1, 4, 5): wall 278.47, 278.23, 277.58 s; median 278.23 s (4:38.23), spread 277.58-278.47. RSS 1026576, 1025032, 1026928 kB; median 1026576 kB, spread 1025032-1026928.
+head (runs 2, 3, 6): wall 281.42, 279.17, 279.90 s; median 279.90 s (4:39.90), spread 279.17-281.42. RSS 1026900, 1025404, 1024772 kB; median 1025404 kB, spread 1024772-1026900.
+ratio head/base of the medians: wall 1.006, RSS 0.999. (User CPU, not gated: base median 4631.83 s, head median 4690.11 s, 1.013.)
+
+## failures
+none: every run exit 0, Result: PASS, Files=1365, Tests=138715 (as bakeoff-final-spectest.txt). The Test Summary Report of every run lists the same 29 files, all "TODO passed" entries (Wstat 0, Failed 0); the six lists are identical.
+
+## gate
+Wall is outside base's spread but within 1 percent (1.006) and RSS is within base's spread (0.999), with zero new failures: the spectest gate passes.

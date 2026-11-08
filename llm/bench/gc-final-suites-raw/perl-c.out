@@ -1,0 +1,10 @@
+tools/bench/t/gc-oracle.t syntax OK
+tools/bench/t/hash-bakeoff.t syntax OK
+tools/bench/t/hash-bench-hint.t syntax OK
+tools/bench/t/hash-compare.t syntax OK
+tools/bench/t/hash-stats.t syntax OK
+tools/bench/t/uni-bench.t syntax OK
+tools/bench/hash-bakeoff.pl syntax OK
+tools/bench/hash-compare.pl syntax OK
+tools/bench/hash-stats.pl syntax OK
+tools/bench/uni-bench-keys.pl syntax OK

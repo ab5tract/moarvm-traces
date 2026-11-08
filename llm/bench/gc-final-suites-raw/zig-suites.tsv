@@ -1,0 +1,14 @@
+unit-test-0	exit 0	70s	load 0.55	bytes 0
+unit-test-0-summary	exit 0	17s	load 1.41	bytes 6106
+unit-test-1	exit 0	73s	load 1.54	bytes 0
+unit-test-1-summary	exit 0	16s	load 1.77	bytes 6100
+test-0	exit 0	70s	load 1.82	bytes 0
+test-0-summary	exit 0	17s	load 0.31	bytes 7342
+test-1	exit 0	72s	load 0.69	bytes 0
+test-1-summary	exit 0	17s	load 1.46	bytes 7330
+strategy-test	exit 0	0s	load 1.58	bytes 113
+prove	exit 0	21s	load 1.58	bytes 456
+fmt	exit 0	0s	load 1.41	bytes 0
+perl-c	exit 0	0s	load 1.41	bytes 381
+sh-n	exit 0	0s	load 1.41	bytes 0
+py-compile	exit 0	0s	load 1.41	bytes 0

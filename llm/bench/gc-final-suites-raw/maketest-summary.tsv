@@ -1,0 +1,8 @@
+nqp	c-base	exit 0	19s	load 0.90	Files=150, Tests=13746, 18 wallclock secs ( 0.39 usr  0.17 sys + 14.98 cusr  1.44 csys = 16.98 CPU)	Result: PASS
+nqp	z-base	exit 0	18s	load 0.84	Files=150, Tests=13746, 18 wallclock secs ( 0.44 usr  0.09 sys + 15.17 cusr  1.36 csys = 17.06 CPU)	Result: PASS
+rakudo	c-base	exit 2	124s	load 0.73	Files=599, Tests=11162, 124 wallclock secs ( 3.54 usr  1.00 sys + 857.10 cusr 70.44 csys = 932.08 CPU)	Result: FAIL
+rakudo	z-base	exit 2	129s	load 0.93	Files=599, Tests=11162, 129 wallclock secs ( 3.41 usr  1.10 sys + 887.81 cusr 68.43 csys = 960.75 CPU)	Result: FAIL
+nqp	c-stress	exit 0	20s	load 0.87	Files=150, Tests=13746, 19 wallclock secs ( 0.41 usr  0.13 sys + 17.21 cusr  1.33 csys = 19.08 CPU)	Result: PASS
+nqp	z-stress	exit 0	21s	load 0.83	Files=150, Tests=13746, 20 wallclock secs ( 0.40 usr  0.13 sys + 17.28 cusr  1.36 csys = 19.17 CPU)	Result: PASS
+rakudo	c-stress	exit 2	151s	load 0.91	Files=599, Tests=11162, 151 wallclock secs ( 3.51 usr  1.04 sys + 1073.38 cusr 58.87 csys = 1136.80 CPU)	Result: FAIL
+rakudo	z-stress	exit 2	154s	load 0.81	Files=599, Tests=11162, 154 wallclock secs ( 3.45 usr  0.95 sys + 1072.76 cusr 58.42 csys = 1135.58 CPU)	Result: FAIL
