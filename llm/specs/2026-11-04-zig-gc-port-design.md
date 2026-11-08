@@ -135,3 +135,4 @@ Each file task: port, unit tests, the swap line in `build/sources.list`, `zig bu
 ## Errata
 
 - 2026-11-04, user ruling during Task 2: section 7 (the hundred-million reference stall) and the stall reproduction in Task 10 are struck: "let's ignore the 100 million bench after all. it's going to take way too long". The proving ground stays the one- and ten-million sizes of section 6.
+- 2026-11-08, user ruling during Task 9: the crc-getter proving ground is capped at 100 000 objects for this campaign (oracle and A/B); the 1 000 000 and 10 000 000 sizes of section 6 are struck ("1 million objects will be useful for finding the bottleneck/bug but that's not what we are up to at the moment"). The spectest A/B becomes the primary performance gate.
