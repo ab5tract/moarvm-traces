@@ -1,6 +1,6 @@
 # Zig port of the MoarVM garbage collector: design
 
-Status: executed; see the plan's Acceptance (one open row: the crc-getter plain A/B at 100k missed its rule by 1.1 percent wall and 1.5 percent RSS with overlapping spreads, while the spectest gate passed; awaiting the user's ruling). Approved by the user 2026-11-04 ("let's go!") after the builder check; plan `traces/llm/plans/2026-11-04-zig-gc-port.md`. Campaign 4 of the Zig migration (after the hash engine, its tuning and bake-off, and the internal-tables campaign). The full-Zig build stack (migration phases 3-6) is deferred; this campaign runs on the existing `-Dzig-impl` build of MoarVM with nqp and rakudo built by the Perl path, as the hash campaigns did.
+Status: executed and accepted; see the plan's Acceptance. The one row outside its rule (crc-getter plain A/B at 100k: 1.1 percent wall, 1.5 percent RSS, spreads overlapping, spectest gate passed) was accepted by the user on 2026-11-08 as transitional: the line-by-line translation is the foundation, and the cost is expected to fall as the port moves to Zig-native shapes. Approved by the user 2026-11-04 ("let's go!") after the builder check; plan `traces/llm/plans/2026-11-04-zig-gc-port.md`. Campaign 4 of the Zig migration (after the hash engine, its tuning and bake-off, and the internal-tables campaign). The full-Zig build stack (migration phases 3-6) is deferred; this campaign runs on the existing `-Dzig-impl` build of MoarVM with nqp and rakudo built by the Perl path, as the hash campaigns did.
 
 ## 1. Intent
 
