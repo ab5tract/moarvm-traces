@@ -1,0 +1,126 @@
+# zig-017 spectest A/B (Task 5, Step 4): Z17/C17 wall 1.008, RSS 1.000; C17/C16 wall 0.976, RSS 1.004
+
+Pairs, each run six times in the order base head head base base head, one at a time:
+  new  = base g7-c-base (0.17: C collector + Zig hash engine), head g7-z-base (0.17: Zig collector)
+  tool = base gc-c-base (0.16: C collector + Zig hash engine, 96d049123), head g7-c-base (0.17, the same configuration)
+(z017-prefixes.md; all default options: LTO, ReleaseFast, x86-64-v3, -Dgc-debug=0.) rakudo make -o spectest_update spectest,
+TEST_JOBS=24, roast fb1d87214 (verified before each run), .precomp under t/spec removed before each run, libmoar chosen by
+LD_LIBRARY_PATH=<prefix>/lib against the moar, nqp (41e7210ba) and rakudo (zig-build-spec 042608fb82) of
+/tmp/claude-1000/tune-zig-prefix. Timed by tools/bench/timev.py; each run under systemd-run --user --scope -q -p MemoryMax=24G;
+no harness shims. Driver: z017-spectest-driver.sh (gc-final-spectest-driver.sh re-pointed); raw: z017-spectest-raw/{new,tool}/
+(runs.log, run<N>-<side>.time, run<N>-<side>.log). 2026-11-09 01:21-02:41 CET, AMD Ryzen 9 5900X, 32 GB, no swap;
+MoarVM zig-017 b1bbb9dd4, traces 175921d before this record. Zig 0.17.1 (clang 22.1.8) against Zig 0.16.0.
+
+Campaign 4 reference (gc-final-spectest.txt, Z16/C16): wall 1.006, RSS 0.999; base median 278.23 s / 1026576 kB,
+head 279.90 s / 1025404 kB; Files=1365, Tests=138715; 29 TODO-passed files; every run PASS.
+
+## Load before each run (1-, 5-, 15-minute; the driver waited for a 1-minute load under 2.0; no moar or rakudo process before any run)
+new  run 1 base start 01:21:23 load 1.16 1.17 1.17 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+new  run 2 head start 01:27:58 load 1.99 9.94 6.52 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+new  run 3 head start 01:34:32 load 1.84 12.17 9.99 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+new  run 4 base start 01:41:08 load 1.74 12.67 12.23 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+new  run 5 base start 01:48:41 load 0.84 10.92 13.07 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+new  run 6 head start 01:55:14 load 1.89 12.48 14.23 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+tool run 1 base start 02:01:49 load 1.97 13.22 15.24 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/gc-c-base/lib
+tool run 2 head start 02:08:27 load 1.75 13.28 15.88 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+tool run 3 head start 02:15:00 load 1.92 13.15 16.12 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+tool run 4 base start 02:22:32 load 0.98 10.97 15.38 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/gc-c-base/lib
+tool run 5 base start 02:29:11 load 1.91 12.49 15.77 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/gc-c-base/lib
+tool run 6 head start 02:36:50 load 0.79 10.68 15.10 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+
+## pair new: per run
+run 1 base: wall 274.40 (4:34.40) RSS 1026920 user 4577.93 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 268 wallclock secs (37.08 usr  7.50 sys + 4536.21 cusr 401.24 csys = 4982.03 CPU)
+run 2 head: wall 274.48 (4:34.48) RSS 1022900 user 4567.35 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 267 wallclock secs (36.64 usr  7.83 sys + 4526.27 cusr 386.58 csys = 4957.32 CPU)
+run 3 head: wall 275.37 (4:35.37) RSS 1024936 user 4564.78 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 269 wallclock secs (36.46 usr  7.75 sys + 4523.89 cusr 390.50 csys = 4958.60 CPU)
+run 4 base: wall 272.75 (4:32.75) RSS 1023368 user 4556.21 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 266 wallclock secs (36.43 usr  7.77 sys + 4515.30 cusr 399.65 csys = 4959.15 CPU)
+run 5 base: wall 272.73 (4:32.73) RSS 1024820 user 4554.19 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 265 wallclock secs (36.35 usr  7.53 sys + 4513.21 cusr 396.74 csys = 4953.83 CPU)
+run 6 head: wall 274.87 (4:34.87) RSS 1027992 user 4577.93 exit 2 Result: FAIL todo 29 (t/spec/S17-channel/basic.t test 29, see below)
+  Files=1365, Tests=138715, 267 wallclock secs (36.30 usr  7.77 sys + 4537.11 cusr 389.68 csys = 4970.86 CPU)
+
+## pair new: medians of three per side
+base: wall [274.4, 272.75, 272.73] median 272.75 spread 272.73-274.40; RSS [1026920, 1023368, 1024820] median 1024820 spread 1023368-1026920; user median 4556.21
+head: wall [274.48, 275.37, 274.87] median 274.87 spread 274.48-275.37; RSS [1022900, 1024936, 1027992] median 1024936 spread 1022900-1027992; user median 4567.35
+ratio head/base: wall 1.008 RSS 1.000 user 1.002
+
+## pair tool: per run
+run 1 base: wall 278.68 (4:38.68) RSS 1023256 user 4629.67 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 271 wallclock secs (36.55 usr  7.58 sys + 4588.46 cusr 381.60 csys = 5014.19 CPU)
+run 2 head: wall 272.31 (4:32.31) RSS 1026948 user 4544.24 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 265 wallclock secs (36.21 usr  7.87 sys + 4503.42 cusr 395.82 csys = 4943.32 CPU)
+run 3 head: wall 271.70 (4:31.70) RSS 1025836 user 4540.66 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 265 wallclock secs (36.50 usr  7.78 sys + 4499.70 cusr 396.62 csys = 4940.60 CPU)
+run 4 base: wall 279.02 (4:39.02) RSS 1018996 user 4630.88 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 272 wallclock secs (36.28 usr  7.73 sys + 4589.92 cusr 383.61 csys = 5017.54 CPU)
+run 5 base: wall 278.89 (4:38.89) RSS 1029556 user 4631.29 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 272 wallclock secs (36.53 usr  7.64 sys + 4590.18 cusr 386.16 csys = 5020.51 CPU)
+run 6 head: wall 272.47 (4:32.47) RSS 1027516 user 4555.21 exit 0 Result: PASS todo 29
+  Files=1365, Tests=138715, 265 wallclock secs (36.65 usr  7.75 sys + 4514.08 cusr 397.53 csys = 4956.01 CPU)
+
+## pair tool: medians of three per side
+base: wall [278.68, 279.02, 278.89] median 278.89 spread 278.68-279.02; RSS [1023256, 1018996, 1029556] median 1023256 spread 1018996-1029556; user median 4630.88
+head: wall [272.31, 271.7, 272.47] median 272.31 spread 271.70-272.47; RSS [1026948, 1025836, 1027516] median 1026948 spread 1025836-1027516; user median 4544.24
+ratio head/base: wall 0.976 RSS 1.004 user 0.981
+
+## Summary
+
+| pair | base median wall s [spread] | head median wall s [spread] | wall head/base | base median RSS kB [spread] | head median RSS kB [spread] | RSS head/base | user CPU head/base |
+|---|---|---|---:|---|---|---:|---:|
+| new (Z17/C17) | 272.75 [272.73-274.40] | 274.87 [274.48-275.37] | 1.008 | 1024820 [1023368-1026920] | 1024936 [1022900-1027992] | 1.000 | 1.002 |
+| tool (C17/C16) | 278.89 [278.68-279.02] | 272.31 [271.70-272.47] | 0.976 | 1023256 [1018996-1029556] | 1026948 [1025836-1027516] | 1.004 | 0.981 |
+| Campaign 4 (Z16/C16) | 278.23 [277.58-278.47] | 279.90 [279.17-281.42] | 1.006 | 1026576 [1025032-1026928] | 1025404 [1024772-1026900] | 0.999 | 1.013 |
+
+## Failures and the TODO-passed list
+
+Every run: Files=1365, Tests=138715 (as Campaign 4). The Test Summary Report of every one of the twelve runs lists the same
+29 TODO-passed files (Wstat 0, Failed 0), identical to Campaign 4's list. Eleven runs: exit 0, Result: PASS.
+
+Pair new, run 6 (head, g7-z-base): exit 2, Result: FAIL, one file: t/spec/S17-channel/basic.t (Wstat 256, Tests 29,
+Failed 1: test 29 "got all urls", the rakudo#1974 test, a Supply.throttle(3, ...) feeding a Channel and checked with
+is-deeply against one order). This is a known intermittent race of that test, recorded before on the C engine and the C
+collector (traces/llm/bench/tuning-t9-spectest.txt; plans/2026-11-02-zig-hash-tuning.md, the six-run table: "C run 2
+failed t/spec/S17-channel/basic.t test 29"). It passed in the other two g7-z-base runs and in all nine other runs; it was
+not re-run. Recorded as a known flake, not a new failure.
+
+## Reading (recorded, not gated)
+
+- Z17/C17: the Zig collector's spectest wall is 0.8 percent above the C collector's (head's whole spread above base's) and
+  RSS is equal (1.000, spreads overlapping); Campaign 4 on 0.16 read 1.006 / 0.999. Well under the plan's 1.03 threshold.
+- C17/C16: the same C configuration is 2.4 percent faster in wall time (user CPU 1.9 percent lower) on 0.17 than on 0.16,
+  RSS equal within the spreads. Much smaller than the crc-getter's 17 percent (z017-crc-ab.md): the spectest is dominated
+  by compilation and process start-up across 1365 files rather than the crc-getter's allocation-heavy loop.
+
+The 29 TODO-passed files (every run, and Campaign 4):
+t/spec/6.c/S04-declarations/my-6c.rakudo.moar
+t/spec/APPENDICES/A02-some-day-maybe/misc.rakudo.moar
+t/spec/S02-literals/adverbs.rakudo.moar
+t/spec/S02-literals/pairs.rakudo.moar
+t/spec/S02-literals/radix.rakudo.moar
+t/spec/S02-magicals/sub.rakudo.moar
+t/spec/S02-types/whatever.rakudo.moar
+t/spec/S03-operators/also.rakudo.moar
+t/spec/S04-declarations/my-6e.rakudo.moar
+t/spec/S04-declarations/smiley.t
+t/spec/S04-declarations/state.rakudo.moar
+t/spec/S05-modifier/ignorecase.rakudo.moar
+t/spec/S06-signature/code.rakudo.moar
+t/spec/S06-traits/precedence.rakudo.moar
+t/spec/S09-multidim/indexing.rakudo.moar
+t/spec/S09-typed-arrays/native-shape1-int.rakudo.moar
+t/spec/S09-typed-arrays/native-shape1-num.rakudo.moar
+t/spec/S09-typed-arrays/native-shape1-str.rakudo.moar
+t/spec/S12-attributes/smiley.rakudo.moar
+t/spec/S15-unicode-information/uniprop.rakudo.moar
+t/spec/S19-command-line-options/02-dash-n.rakudo.moar
+t/spec/S26-documentation/04-code.rakudo.moar
+t/spec/S26-documentation/07a-tables.rakudo.moar
+t/spec/S26-documentation/09-configuration.rakudo.moar
+t/spec/S26-documentation/block-leading-user-format.rakudo.moar
+t/spec/S26-documentation/wacky.t
+t/spec/S29-os/system.rakudo.moar
+t/spec/S32-basics/xxKEY.rakudo.moar
+t/spec/S32-exceptions/misc2.rakudo.moar

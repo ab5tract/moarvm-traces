@@ -1,0 +1,37 @@
+diff --git a/build/sources.list b/build/sources.list
+index c123bf5c8..0e9a36feb 100644
+--- a/build/sources.list
++++ b/build/sources.list
+@@ -210,13 +210,3 @@ src/zig/core/hash/ptr_exports.zig: src/core/ptr_hash_table.c
+ src/zig/core/hash/fixkey_exports.zig: src/core/fixkey_hash_table.c
+ src/zig/core/hash/index_exports.zig: src/core/index_hash_table.c
+ src/zig/core/hash/uni_exports.zig: src/core/uni_hash_table.c
+-src/zig/gc/worklist.zig: src/gc/worklist.c
+-src/zig/gc/allocation.zig: src/gc/allocation.c
+-src/zig/gc/gen2.zig: src/gc/gen2.c
+-src/zig/gc/roots.zig: src/gc/roots.c
+-src/zig/gc/collect.zig: src/gc/collect.c
+-src/zig/gc/wb.zig: src/gc/wb.c
+-src/zig/gc/objectid.zig: src/gc/objectid.c
+-src/zig/gc/finalize.zig: src/gc/finalize.c
+-src/zig/gc/debug.zig: src/gc/debug.c
+-src/zig/gc/orchestrate.zig: src/gc/orchestrate.c
+diff --git a/src/zig/root.zig b/src/zig/root.zig
+index fa5807800..736efd8a2 100644
+--- a/src/zig/root.zig
++++ b/src/zig/root.zig
+@@ -9,14 +9,4 @@ comptime {
+     _ = @import("core/hash/fixkey_exports.zig");
+     _ = @import("core/hash/index_exports.zig");
+     _ = @import("core/hash/uni_exports.zig");
+-    _ = @import("gc/worklist.zig");
+-    _ = @import("gc/allocation.zig");
+-    _ = @import("gc/gen2.zig");
+-    _ = @import("gc/roots.zig");
+-    _ = @import("gc/collect.zig");
+-    _ = @import("gc/wb.zig");
+-    _ = @import("gc/objectid.zig");
+-    _ = @import("gc/finalize.zig");
+-    _ = @import("gc/debug.zig");
+-    _ = @import("gc/orchestrate.zig");
+ }

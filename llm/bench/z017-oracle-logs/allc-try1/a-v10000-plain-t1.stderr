@@ -1,0 +1,10 @@
+oracle.sh: base run 1 (volume 10000, tier 1, load 0.65)
+oracle.sh: base run 2 (volume 10000, tier 1, load 0.68)
+oracle.sh: base run 3 (volume 10000, tier 1, load 0.79)
+oracle.sh: head run 1 (volume 10000, tier 1, load 0.81)
+oracle.sh: head run 2 (volume 10000, tier 1, load 0.91)
+oracle.sh: head run 3 (volume 10000, tier 1, load 0.92)
+oracle.sh: base not repeatable (tier 1): base-1 against base-2, first difference at
+line 3:
+  /tmp/claude-1000/z017/t5/oracle/a-v10000-plain-t1/base-1.cmp: seq=3 tid=1 coord=1 from=16777216 next=16777216 promoted=1850862 since_full=9722952 stables_freed=3 finalizing=0
+  /tmp/claude-1000/z017/t5/oracle/a-v10000-plain-t1/base-2.cmp: seq=3 tid=1 coord=1 from=16777216 next=16777216 promoted=1850670 since_full=9722760 stables_freed=3 finalizing=0

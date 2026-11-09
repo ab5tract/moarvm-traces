@@ -1,0 +1,12 @@
+run 1 base start 01:21:23 load 1.16 1.17 1.17 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+run 1 base end 01:25:58 exit 0
+run 2 head start 01:27:58 load 1.99 9.94 6.52 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+run 2 head end 01:32:32 exit 0
+run 3 head start 01:34:32 load 1.84 12.17 9.99 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+run 3 head end 01:39:08 exit 0
+run 4 base start 01:41:08 load 1.74 12.67 12.23 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+run 4 base end 01:45:41 exit 0
+run 5 base start 01:48:41 load 0.84 10.92 13.07 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-c-base/lib
+run 5 base end 01:53:13 exit 0
+run 6 head start 01:55:14 load 1.89 12.48 14.23 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/g7-z-base/lib
+run 6 head end 01:59:48 exit 2

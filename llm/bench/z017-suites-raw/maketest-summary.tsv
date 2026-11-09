@@ -1,0 +1,4 @@
+nqp	c-stress-allc	exit 0	36s	load 0.97	Files=150, Tests=13746, 19 wallclock secs ( 0.40 usr  0.13 sys + 16.53 cusr  1.31 csys = 18.37 CPU)	Result: PASS
+nqp	z-stress	exit 0	20s	load 1.31	Files=150, Tests=13746, 19 wallclock secs ( 0.39 usr  0.14 sys + 16.40 cusr  1.33 csys = 18.26 CPU)	Result: PASS
+rakudo	z-base	exit 2	125s	load 1.21	Files=599, Tests=11162, 125 wallclock secs ( 3.49 usr  1.00 sys + 848.81 cusr 70.95 csys = 924.25 CPU)	Result: FAIL
+nqp	c-stress	exit 0	20s	load 1.63	Files=150, Tests=13746, 19 wallclock secs ( 0.41 usr  0.13 sys + 16.10 cusr  1.25 csys = 17.89 CPU)	Result: PASS

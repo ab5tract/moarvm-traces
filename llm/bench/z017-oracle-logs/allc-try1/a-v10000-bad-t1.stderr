@@ -1,0 +1,10 @@
+oracle.sh: base run 1 (volume 10000 --bad-packages, tier 1, load 1.09)
+oracle.sh: base run 2 (volume 10000 --bad-packages, tier 1, load 1.15)
+oracle.sh: base run 3 (volume 10000 --bad-packages, tier 1, load 1.14)
+oracle.sh: head run 1 (volume 10000 --bad-packages, tier 1, load 1.13)
+oracle.sh: head run 2 (volume 10000 --bad-packages, tier 1, load 1.12)
+oracle.sh: head run 3 (volume 10000 --bad-packages, tier 1, load 1.11)
+oracle.sh: base and head differ (tier 1), first difference at
+line 1:
+  /tmp/claude-1000/z017/t5/oracle/a-v10000-bad-t1/base-1.cmp: seq=1 tid=1 coord=1 from=16777216 next=16777216 promoted=4368248 since_full=4368248 stables_freed=0 finalizing=1
+  /tmp/claude-1000/z017/t5/oracle/a-v10000-bad-t1/head-1.cmp: seq=1 tid=1 coord=1 from=16777216 next=16777216 promoted=4315128 since_full=4315128 stables_freed=0 finalizing=1
