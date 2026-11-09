@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** executed 2026-11-08/09 on branch zig-017 (tip 748c0bce9 + traces pointers); whole-branch review on fable done, fix wave applied and re-reviewed clean; awaiting the user's merge decision (zig-017 into zig-hash-engine).
+**Status:** executed 2026-11-08/09 on branch zig-017 (tip 748c0bce9 + traces pointers); whole-branch review on fable done, fix wave applied and re-reviewed clean; merged into zig-hash-engine by the user's decision on 2026-11-09 (fast-forward to 910c5262d).
 
 **Goal:** Build, test and ship MoarVM's Zig build graph, generators and ports on Zig 0.17.1 with no behaviour change, and re-baseline every performance record on the new toolchain so the next campaign (the Zig-native GC) starts from a clean 0.17 pair.
 
