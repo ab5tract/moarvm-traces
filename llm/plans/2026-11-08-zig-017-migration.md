@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Status:** executed 2026-11-08/09 on branch zig-017; awaiting the whole-branch review and the user's merge decision.
+
 **Goal:** Build, test and ship MoarVM's Zig build graph, generators and ports on Zig 0.17.1 with no behaviour change, and re-baseline every performance record on the new toolchain so the next campaign (the Zig-native GC) starts from a clean 0.17 pair.
 
 **Architecture:** Four layers break in turn and are fixed in turn: the build graph (`build.zig`, `build/zig/`), the translate-c step (the std step is deprecated; the `translate_c` package replaces it), the ports and their tests (`src/zig/`), and the verification harness (`zig build test`, the Perl `--zig` path, the bench tools). Then the C and Zig prefixes are rebuilt on 0.17 next to the surviving 0.16 prefixes, and one toolchain A/B separates the compiler's own drift (clang 22.1.8, the new Zig backend) from anything the migration changed.
@@ -231,4 +233,34 @@ Commit docs in MoarVM, plan in traces, pointer in MoarVM. Hand back with the Out
 ## Deviations (running list)
 
 - 2026-11-08, before Task 5: the 0.17 prefixes are named `g7-?-*`, not `z17-?-*`, so each cross-toolchain pair (`gc-c-base` vs `g7-c-base`, …) has equal-length names as the Global Constraints require; the plan's original names were one character longer than the 0.16 ones.
-- Tasks 1-4 deviations are in the ledger (`.superpowers/sdd/2026-11-08-zig-017-migration/progress.md`) and are copied here by Task 6.
+- 2026-11-08, Task 1: 0.17 knows the install prefix only at make time (`b.install_prefix` is gone), so `config.c` and `moar.pc` are rendered with a `@MOAR_PREFIX@` placeholder that the host tool `build/zig/fill_prefix.zig` fills at make time (option A; the moar rpath comes from the deployed lib path). The `--prefix` command line is unchanged and the baked strings are byte-identical for an absolute prefix; fill_prefix refuses a template without the token and a prefix containing `"`, `\` or a newline (0.16 C-escaped it), and the "--prefix must be absolute" check is gone (a relative prefix gives a relative RUNPATH entry; documented).
+- 2026-11-08, Task 1: the `config` entry of `nqp::backendconfig` keeps the legacy optimize spelling (`-Doptimize=ReleaseFast`, via `legacyOptimizeName` in `build/zig/config.zig`) instead of 0.17's `fast`, so the baked string's length, and so libmoar's allocation pattern, matches the 0.16 build and the cross-toolchain oracle compares compilers only; switch at 0.18.
+- 2026-11-08, Task 1: `DESTDIR` without `--prefix` installs under `/usr` on 0.17; upstream std behaviour, documented, not worked around.
+- 2026-11-08, Task 2: the `fixup_translated` pass matched 0 lines on the package's output (output byte-identical to input), so it was deleted with its wiring, docs clause and 3 unit tests instead of being ported.
+- 2026-11-08, Task 2: the acceptance "zig-objects exits 0" was carried by Task 3, since the only remaining errors were the ports' own `**` parse errors (no error originated in the translated view); Task 3 showed exit 0.
+- 2026-11-08, Task 2: 0.17 unpacks fetched packages into `zig-pkg/` in the checkout (not only the global cache); `.gitignore` gained it, and an offline build after one fetch was verified.
+- 2026-11-08, Task 3: 8 `[_]T{v} ** n` sites, not 7; `runtimeSafety(builtin.optimize)` instead of `builtin.mode` (deprecated); also `builtin.cpu` to `builtin.target.cpu`, `@intFromFloat` to `@trunc`, `DynamicBitSet` to `bit_set.Dynamic`, none of which the plan listed.
+- 2026-11-08, Task 3: `--summary all` prints no per-test names on either version, so the "same test names and verdicts" gate is per-test-root pass/skip/total equality plus a check that no `test "…"` declaration under `src/zig` changed.
+- 2026-11-08, Task 1 reopened by Task 3: 0.17 caches the configure phase and re-runs it only for registered inputs, and the graph registered none (the installed version string was stale). Fix round 2 (7c2ab8601) registers every configure-time read (`dependOnFileContents`/`FileMetadata`/`DirectoryContents`, the git-describe inputs under `.git`); a missing path is registered through its nearest existing ancestor, `poisonCache()` only when `.git` is a file.
+- 2026-11-08, Task 4: the Perl `--cc=zig` path with the default `--march=x86-64-v3` fails ("unknown CPU: 'x86'") on 0.16 as well as 0.17, a pre-existing Configure.pl defect; deferred to the final review's triage, the Perl path verified with `--march=x86_64_v3`.
+- 2026-11-08, Task 4/5: the strategy-test re-run against a 0.17 prefix was dropped: its `-Dnqp-prefix` form needs the prefix's own nqp, which the 0.17 prefixes do not have; the hash engine on 0.17 is covered by the unit tests, `zig build test` and the nqp/rakudo suites.
+- 2026-11-08, before Task 5: no nqp/rakudo per prefix; as with the 0.16 prefixes, each holds only moar and the runners pick libmoar with `LD_LIBRARY_PATH` against the tune-zig-prefix moar, nqp and rakudo.
+- 2026-11-08/09, Task 5: `-Dzig-impl=false` is all-C (hash engine too), unlike Campaign 4's C side (C collector + Zig hash engine), and an all-C oracle side is not even repeatable (the C string hash salts every table). The three `g7-c-*` prefixes were built from a scratch directory copy of the checkout with the gc lines dropped from `build/sources.list` and `src/zig/root.zig` (copy deleted, repository untouched; diff in `z017-prefixes-raw/cgc-tree.diff`); a build switch for that configuration goes to the next campaign.
+- 2026-11-08/09, Task 5: oracle groups (c) 0.16 Zig vs 0.17 Zig and (d) 0.16 C vs 0.17 Zig were added to (a) and (b), at 10k and 100k: 32 cells instead of 16.
+- 2026-11-09, after the Task 5 review: the one spectest failure (run 6, g7-z-base, `t/spec/S17-channel/basic.t` test 29, a known intermittent) was re-run by the controller 5x per 0.17 base prefix: 10/10 clean.
+
+## Outcome
+
+| check | result | record |
+|---|---|---|
+| configure on 0.17, 12 steps; version string tracks HEAD after the configure-input registration | yes (c05094570 + 7c2ab8601) | ledger, Task 1 and its fix round 2 |
+| unit-test names and verdicts = 0.16 reference, both levels | 332/346 (14 skip) at gc-debug 0, 335/346 (11 skip) at gc-debug 1, the 0.16 reference counts (fixup_translated's 3 tests removed, fill_prefix's 3 added); `test "…"` declarations unchanged except those two sets | ledger Tasks 3-4 (`/tmp/claude-1000/z017/unit-016-g*.txt` references) |
+| zig build test, both GC levels, and all-C | 105/105 at both levels, all-C 70/70 (0.16: 81/81, all-C 67; +3 fill_prefix, -2 fixup, +23 translate_c package steps) | ledger Task 4 |
+| exports unchanged | 114 `MVM_` symbols from `moar_zig.o`, identical to 0.16; libmoar export sets identical to the 0.16 prefixes (2850 at g7-c-base, 2852 at g7-c-oracle and g7-c-stress, each = its gc-c-* counterpart) | ledger Task 3, z017-prefixes.md |
+| oracle byte-identical, incl. 0.16 C vs 0.17 C | 32/32 cells: (a) 0.17 C vs 0.17 Zig, (b) 0.16 C vs 0.17 C, (c) 0.16 Zig vs 0.17 Zig, (d) 0.16 C vs 0.17 Zig; 10k and 100k, plain and --bad-packages, tiers 1-2 | z017-oracle.md |
+| crc-getter Z17/C17 and C17/C16 (wall / RSS) | Z17/C17 plain 1.022 / 0.994, --bad-packages 1.027 / 1.001 (0.16 Z16/C16: 1.011 / 1.015 and 1.003 / 1.005); C17/C16 plain 0.829 / 0.995, --bad-packages 0.827 / 1.014 (the C sides also differ in commit: the 0.16 one is 96d049123, without the interlude C fixes) | z017-crc-ab.md |
+| spectest Z17/C17 and C17/C16, zero new failures | Z17/C17 wall 1.008, RSS 1.000, user 1.002; C17/C16 wall 0.976, RSS 1.004, user 0.981; 12 runs, each Files=1365 Tests=138715, the same 29 TODO-passed files as Campaign 4; one `S17-channel/basic.t` flake, re-run 10/10 clean | z017-spectest.txt |
+| nqp and rakudo suites | nqp 150/13746 under both stress prefixes; rakudo 599/11162 with the pre-existing nativecall failure; per-file lists identical to Campaign 4 | z017-suites.md |
+| `zig fmt --check`; deprecated APIs | clean; every deprecated API replaced per the Global Constraints policy, the one exception as stated there (`std.builtin.OptimizeMode` in the `translate_c` package's own option type) | ledger, task reports |
+
+Both Z17/C17 crc-getter wall ratios are under the plan's 1.03 stop line but above the 0.16 ones (clang 22 improved the C collector more than Zig 0.17 improved the port), which is the starting point for the Zig-native GC campaign.
