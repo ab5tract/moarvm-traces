@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** executed 2026-11-08/09 on branch zig-017; awaiting the whole-branch review and the user's merge decision.
+**Status:** executed 2026-11-08/09 on branch zig-017 (tip 748c0bce9 + traces pointers); whole-branch review on fable done, fix wave applied and re-reviewed clean; awaiting the user's merge decision (zig-017 into zig-hash-engine).
 
 **Goal:** Build, test and ship MoarVM's Zig build graph, generators and ports on Zig 0.17.1 with no behaviour change, and re-baseline every performance record on the new toolchain so the next campaign (the Zig-native GC) starts from a clean 0.17 pair.
 
@@ -248,6 +248,7 @@ Commit docs in MoarVM, plan in traces, pointer in MoarVM. Hand back with the Out
 - 2026-11-08/09, Task 5: `-Dzig-impl=false` is all-C (hash engine too), unlike Campaign 4's C side (C collector + Zig hash engine), and an all-C oracle side is not even repeatable (the C string hash salts every table). The three `g7-c-*` prefixes were built from a scratch directory copy of the checkout with the gc lines dropped from `build/sources.list` and `src/zig/root.zig` (copy deleted, repository untouched; diff in `z017-prefixes-raw/cgc-tree.diff`); a build switch for that configuration goes to the next campaign.
 - 2026-11-08/09, Task 5: oracle groups (c) 0.16 Zig vs 0.17 Zig and (d) 0.16 C vs 0.17 Zig were added to (a) and (b), at 10k and 100k: 32 cells instead of 16.
 - 2026-11-09, after the Task 5 review: the one spectest failure (run 6, g7-z-base, `t/spec/S17-channel/basic.t` test 29, a known intermittent) was re-run by the controller 5x per 0.17 base prefix: 10/10 clean.
+- 2026-11-09, after the whole-branch review (fable; 0 Critical, 2 Important, 6 Minor): one fix wave, f0e9466c2 (the 0.17-deprecated `std.mem.indexOf*` family and `std.fmt.allocPrint` in build/zig and tools/zig renamed to `find*`/`Allocator.print`: the sweep in Task 3 covered src/zig only; the unused `Impl.translated` field dropped; a `runtime_safety` helper in tier.zig), 7570a6ac1 (Configure.pl: the pre-existing `--cc=zig --march=x86-64-v3` failure fixed by `s/-/_/g` on the zig cc path; `debug`/`fast` optimize names for the `--zig` path), 748c0bce9 (docs: a build without `--prefix` gets 0.17's build-root-relative `zig-out/lib` RUNPATH entry while config.c keeps the absolute path, so always pass an absolute `--prefix`; `-Doptimize=debug` rows; the fresh-clone offline claim verified under `unshare -rn`). Scoped re-review clean. Left as a follow-up: build/setup.pm:484 passes a no-op `-optimize=ReleaseFast` to zig cc (pre-existing, phase 1).
 
 ## Outcome
 
