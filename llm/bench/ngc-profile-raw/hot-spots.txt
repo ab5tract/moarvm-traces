@@ -1,0 +1,74 @@
+# processWorklist hot spots (perf annotate --stdio, lines >= 2 %), LTO plain round-1 samples
+## f: gc.collect.processWorklist (ng-f-syms)
+    4.25 :   7a3c57: test   $0x2,%al
+    4.09 :   7a3ce6: mov    0x0(%r13),%rax
+   37.10 :   7a4087: orb    $0x10,0xd(%r13)
+   42.01 :   7a4122: orb    $0x10,0xd(%r13)
+    3.84 :   7a4127: mov    0x8(%r15),%r14d
+## c: process_worklist (ng-c-syms)
+    6.97 :   86ba39: test   %r13,%r13
+    6.88 :   86ba47: test   $0x2,%al
+    6.09 :   86ba8a: cmp    (%r12),%ebp
+    6.11 :   86ba8e: jne    86bae9 <process_worklist+0x119>
+    6.91 :   86badd: mov    0x0(%r13),%rax
+   13.15 :   86bc0d: and    $0xfc,%al
+    6.85 :   86bc0f: or     $0x2,%al
+    6.90 :   86bc28: mov    0x1d0(%rax),%rax
+   26.86 :   86bc2f: test   %rax,%rax
+    6.19 :   86bc87: orb    $0x10,0xd(%r13)
+    7.08 :   86bcdd: jne    86bcb0 <process_worklist+0x2e0>
+
+# the instructions before the hot stores (objdump -d)
+## f
+  7a4060:	add    %cl,0x1(%rax)
+  7a4063:	out    %al,(%dx)
+  7a4064:	mov    %rsi,0x30(%r12)
+  7a4069:	movzwl 0xe(%r13),%edx
+  7a406e:	mov    %rbp,%rdi
+  7a4071:	mov    %r13,%rsi
+  7a4074:	call   79e110 <compiler_rt.memcpy.memcpyFast>
+  7a4079:	orb    $0x1,0xd(%rbp)
+  7a407d:	mov    %rbp,(%rbx)
+  7a4080:	mov    %rbp,0x0(%r13)
+  7a4084:	mfence
+  7a4087:	orb    $0x10,0xd(%r13)
+
+  7a410d:	cmpb   $0x1,0xc(%rsp)
+  7a4112:	jne    7a4118 <gc.collect.processWorklist+0x538>
+  7a4114:	orb    $0x8,0xd(%rbp)
+  7a4118:	mov    %rbp,(%rbx)
+  7a411b:	mov    %rbp,0x0(%r13)
+  7a411f:	mfence
+  7a4122:	orb    $0x10,0xd(%r13)
+## c
+  86bc6a:	call   a00e90 <MVM_gc_root_gen2_add@plt>
+  86bc6f:	cmpb   $0x1,0xc(%rsp)
+  86bc74:	jne    86bc7a <process_worklist+0x2aa>
+  86bc76:	orb    $0x8,0xd(%rbp)
+  86bc7a:	mov    %rbp,(%rbx)
+  86bc7d:	mov    %rbp,0x0(%r13)
+  86bc81:	lock orl $0x0,-0x40(%rsp)
+  86bc87:	orb    $0x10,0xd(%r13)
+
+# fence instructions in the whole libmoar (objdump -d | grep)
+ng-c-syms: mfence 0, lock or $0x0,..(%rsp) 37
+ng-f-syms: mfence 3, lock or $0x0,..(%rsp) 34
+      3   mfence in <gc.collect.processWorklist>:
+
+# callers of moar_c.MVM_gc_root_temp_push (ng-*-nlto, objdump -d)
+ng-c-nlto:
+      1   <MVM_intcache_for>:
+ng-f-nlto:
+      1   <MVM_gc_allocate_object>:
+      1   <MVM_gc_allocate_stable>:
+      1   <MVM_gc_allocate_type_object>:
+      1   <MVM_intcache_for>:
+
+# callers of moar_c.MVM_gc_root_temp_push (ng-*-syms, LTO)
+ng-c-syms:
+      1   <MVM_intcache_for>:
+ng-f-syms:
+      1   <MVM_gc_allocate_object>:
+      1   <MVM_gc_allocate_stable>:
+      1   <MVM_gc_allocate_type_object>:
+      1   <MVM_intcache_for>:

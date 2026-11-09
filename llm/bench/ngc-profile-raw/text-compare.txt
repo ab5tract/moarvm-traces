@@ -1,0 +1,49 @@
+# .text of each -syms build against its -base sibling (objcopy -O binary --only-section=.text, cmp)
+ng-c-syms .text 2657221 bytes sha256 20fb669c5c60d88a4507dd372c8d0ca20ed4a951c585369f861d682875c9eec8
+ng-c-base .text 2392021 bytes sha256 66e0705887ee266fdd3f237f3df11635f7a20b48bea5d24ddea66cf234b73cb6
+cmp ng-c-syms.text ng-c-base.text: ng-c-syms.text ng-c-base.text differ: byte 4, line 1
+ng-f-syms .text 2657717 bytes sha256 a4eb54b14c7fe8f6de236e8f203fd1c65cab36726e55eeda32d8439b1a6b9b25
+ng-f-base .text 2392517 bytes sha256 d9951fc531ed29615b8e51f87b3cb9ba7b50001990ab29c9599878540bd08cb1
+cmp ng-f-syms.text ng-f-base.text: ng-f-syms.text ng-f-base.text differ: byte 4, line 1
+
+# readelf -SW .text/.rodata
+ng-c-base:
+  [ 9] .rodata           PROGBITS        000000000023c040 23c040 4f43bc 00 AMS  0   0 64
+  [14] .text             PROGBITS        000000000076dab0 76cab0 247fd5 00  AX  0   0 16
+ng-c-syms:
+  [ 9] .rodata           PROGBITS        000000000023c400 23c400 4f88bc 00 AMS  0   0 64
+  [14] .text             PROGBITS        0000000000773c10 772c10 288bc5 00  AX  0   0 16
+ng-f-base:
+  [ 9] .rodata           PROGBITS        000000000023bcc0 23bcc0 4f43bc 00 AMS  0   0 64
+  [14] .text             PROGBITS        000000000076d860 76c860 2481c5 00  AX  0   0 16
+ng-f-syms:
+  [ 9] .rodata           PROGBITS        000000000023c080 23c080 4f88fc 00 AMS  0   0 64
+  [14] .text             PROGBITS        0000000000773a00 772a00 288db5 00  AX  0   0 16
+
+# nm -D -S --defined-only: exported sizes that differ, -base < against -syms >
+ng-c:
+1322c1322
+< MVM_index_hash_build 000000000000026a
+---
+> MVM_index_hash_build 0000000000000266
+2408c2408
+< s_mp_toom_mul 0000000000000f58
+---
+> s_mp_toom_mul 0000000000000f54
+ng-f:
+1322c1322
+< MVM_index_hash_build 000000000000026a
+---
+> MVM_index_hash_build 0000000000000266
+2408c2408
+< s_mp_toom_mul 0000000000000f58
+---
+> s_mp_toom_mul 0000000000000f54
+
+# function symbols in ng-c-syms by name prefix (std/Zig library code the stripped build does not need)
+248 functions, 241933 bytes
+00000000007e2280 0000000000001e52 t debug.Dwarf.expression.StackMachine(.{ .addr_size = 8, .endian = .little, .call_frame_context = true }).run
+00000000007b39a0 000000000000358b t debug.Dwarf.runLineNumberProgram
+00000000007d5e10 0000000000003f5d t debug.ElfFile.load
+00000000007ac340 0000000000005d59 t debug.printSourceAtAddress
+00000000007a1bf0 00000000000079f4 t debug.writeCurrentStackTrace

@@ -1,0 +1,4 @@
+ng-c-syms	exit 0	67s	load 0.05	opts -Dzig-gc=false -Dstrip=false	This is MoarVM version 2026.09-271-ge20b27af9 built with JIT support
+ng-f-syms	exit 0	59s	load 1.23	opts -Dstrip=false	This is MoarVM version 2026.09-271-ge20b27af9 built with JIT support
+ng-c-nlto	exit 0	22s	load 1.29	opts -Dzig-gc=false -Dlto=false -Dstrip=false	This is MoarVM version 2026.09-271-ge20b27af9 built with JIT support
+ng-f-nlto	exit 0	11s	load 1.46	opts -Dlto=false -Dstrip=false	This is MoarVM version 2026.09-271-ge20b27af9 built with JIT support
