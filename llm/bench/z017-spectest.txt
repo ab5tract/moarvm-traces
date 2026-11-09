@@ -124,3 +124,11 @@ t/spec/S26-documentation/wacky.t
 t/spec/S29-os/system.rakudo.moar
 t/spec/S32-basics/xxKEY.rakudo.moar
 t/spec/S32-exceptions/misc2.rakudo.moar
+
+## Re-run of the run-6 failure (controller, 2026-11-09, after the Task 5 review)
+t/spec/S17-channel/basic.t (no fudge directives) run five times per prefix with
+`LD_LIBRARY_PATH=/tmp/claude-1000/<prefix>/lib ./rakudo-m -Ilib t/spec/S17-channel/basic.t`
+in the rakudo checkout (roast fb1d87214), MemoryMax=8G scopes, 1-minute load 0.15:
+g7-z-base 5/5 exit 0, 29/29 ok; g7-c-base 5/5 exit 0, 29/29 ok (z017-spectest-raw/s17-rerun/summary.txt).
+The run-6 failure of test 29 ("got all urls", a Channel ordering race) is the known intermittent
+first recorded under the C engine in tuning-t9-spectest.txt:37-38; zero new failures stands.

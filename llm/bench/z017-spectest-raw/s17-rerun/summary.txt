@@ -1,0 +1,10 @@
+g7-z-base run 1 exit 0 load 0.15 29 ok 0 notok
+g7-z-base run 2 exit 0 load 0.15 29 ok 0 notok
+g7-z-base run 3 exit 0 load 0.15 29 ok 0 notok
+g7-z-base run 4 exit 0 load 0.15 29 ok 0 notok
+g7-z-base run 5 exit 0 load 0.15 29 ok 0 notok
+g7-c-base run 1 exit 0 load 0.15 29 ok 0 notok
+g7-c-base run 2 exit 0 load 0.15 29 ok 0 notok
+g7-c-base run 3 exit 0 load 0.15 29 ok 0 notok
+g7-c-base run 4 exit 0 load 0.15 29 ok 0 notok
+g7-c-base run 5 exit 0 load 0.15 29 ok 0 notok
