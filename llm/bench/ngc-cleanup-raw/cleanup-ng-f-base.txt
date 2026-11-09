@@ -1,0 +1,65 @@
+load 1.25 10:04:19
+| program | run | exit | last line `main returning` |
+|---|---|---|---|
+| running | 1 | 0 | yes |
+| running | 2 | 0 | yes |
+| running | 3 | 0 | yes |
+| running | 4 | 0 | yes |
+| running | 5 | 0 | yes |
+| running | 6 | 0 | yes |
+| running | 7 | 0 | yes |
+| running | 8 | 0 | yes |
+| running | 9 | 0 | yes |
+| running | 10 | 0 | yes |
+| running | 11 | 0 | yes |
+| running | 12 | 0 | yes |
+| running | 13 | 0 | yes |
+| running | 14 | 0 | yes |
+| running | 15 | 0 | yes |
+| running | 16 | 0 | yes |
+| running | 17 | 0 | yes |
+| running | 18 | 0 | yes |
+| running | 19 | 0 | yes |
+| running | 20 | 0 | yes |
+| blocked | 1 | 0 | yes |
+| blocked | 2 | 0 | yes |
+| blocked | 3 | 0 | yes |
+| blocked | 4 | 0 | yes |
+| blocked | 5 | 0 | yes |
+| blocked | 6 | 0 | yes |
+| blocked | 7 | 0 | yes |
+| blocked | 8 | 0 | yes |
+| blocked | 9 | 0 | yes |
+| blocked | 10 | 0 | yes |
+| blocked | 11 | 0 | yes |
+| blocked | 12 | 0 | yes |
+| blocked | 13 | 0 | yes |
+| blocked | 14 | 0 | yes |
+| blocked | 15 | 0 | yes |
+| blocked | 16 | 0 | yes |
+| blocked | 17 | 0 | yes |
+| blocked | 18 | 0 | yes |
+| blocked | 19 | 0 | yes |
+| blocked | 20 | 0 | yes |
+| three | 1 | 0 | yes |
+| three | 2 | 0 | yes |
+| three | 3 | 0 | yes |
+| three | 4 | 0 | yes |
+| three | 5 | 0 | yes |
+| three | 6 | 0 | yes |
+| three | 7 | 0 | yes |
+| three | 8 | 0 | yes |
+| three | 9 | 0 | yes |
+| three | 10 | 0 | yes |
+| three | 11 | 0 | yes |
+| three | 12 | 0 | yes |
+| three | 13 | 0 | yes |
+| three | 14 | 0 | yes |
+| three | 15 | 0 | yes |
+| three | 16 | 0 | yes |
+| three | 17 | 0 | yes |
+| three | 18 | 0 | yes |
+| three | 19 | 0 | yes |
+| three | 20 | 0 | yes |
+
+passed 60 of 60 (/tmp/claude-1000/ng-f-base)

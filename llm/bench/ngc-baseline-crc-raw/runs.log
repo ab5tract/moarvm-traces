@@ -1,0 +1,4 @@
+plain start 10:05:33 load 0.80 2.39 2.03
+plain end 10:14:22 exit 0
+bad start 10:14:22 load 1.02 1.31 1.62
+bad end 10:23:46 exit 0

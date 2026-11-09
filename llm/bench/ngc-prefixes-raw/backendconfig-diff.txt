@@ -1,0 +1,32 @@
+2c2
+< bindir=/tmp/claude-1000/g7-c-base/bin
+---
+> bindir=/tmp/claude-1000/ng-c-base/bin
+31c31
+< ldflags=-O3 -DNDEBUG -Wl,-rpath,"/tmp/claude-1000/g7-c-base/lib"
+---
+> ldflags=-O3 -DNDEBUG -Wl,-rpath,"/tmp/claude-1000/ng-c-base/lib"
+36c36
+< ldrpath=-Wl,-rpath,"/tmp/claude-1000/g7-c-base/lib"
+---
+> ldrpath=-Wl,-rpath,"/tmp/claude-1000/ng-c-base/lib"
+41c41
+< libdir=/tmp/claude-1000/g7-c-base/lib
+---
+> libdir=/tmp/claude-1000/ng-c-base/lib
+46c46
+< mastdir=/tmp/claude-1000/g7-c-base/share/nqp/lib/MAST
+---
+> mastdir=/tmp/claude-1000/ng-c-base/share/nqp/lib/MAST
+56c56
+< prefix=/tmp/claude-1000/g7-c-base
+---
+> prefix=/tmp/claude-1000/ng-c-base
+65c65
+< version=2026.09-257-gb1bbb9dd4
+---
+> version=2026.09-270-gf0582f365
+68c68
+< versionpatch=257
+---
+> versionpatch=270

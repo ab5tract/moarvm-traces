@@ -1,0 +1,12 @@
+ng-c-base	MVM_gc_collect	1627
+ng-c-base	MVM_gc_enter_from_allocator	1184
+ng-c-base	MVM_gc_root_add_permanent_desc	415
+g7-c-base	MVM_gc_collect	1627
+g7-c-base	MVM_gc_enter_from_allocator	1184
+g7-c-base	MVM_gc_root_add_permanent_desc	415
+ng-f-base	MVM_gc_collect	1441
+ng-f-base	MVM_gc_enter_from_allocator	1204
+ng-f-base	MVM_gc_root_add_permanent_desc	435
+ng-n-base	MVM_gc_collect	1441
+ng-n-base	MVM_gc_enter_from_allocator	1204
+ng-n-base	MVM_gc_root_add_permanent_desc	435

@@ -1,0 +1,9 @@
+ng-c-oracle	exit 0	73s	load 1.02	opts -Dzig-gc=false -Dgc-debug=1	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-c-base	exit 0	46s	load 1.31	opts -Dzig-gc=false	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-c-stress	exit 0	47s	load 0.90	opts -Dzig-gc=false -Dgc-debug=1 -Dnursery-size=524288	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-f-oracle	exit 0	40s	load 1.24	opts -Dgc-debug=1	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-f-base	exit 0	37s	load 1.12	opts 	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-f-stress	exit 0	40s	load 1.07	opts -Dgc-debug=1 -Dnursery-size=524288	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-n-oracle	exit 0	37s	load 1.09	opts -Dgc-debug=1	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-n-base	exit 0	35s	load 1.04	opts 	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
+ng-n-stress	exit 0	38s	load 1.02	opts -Dgc-debug=1 -Dnursery-size=524288	This is MoarVM version 2026.09-270-gf0582f365 built with JIT support
