@@ -1,4 +1,4 @@
-# ngc Task 2: profile before; collector share of the cycle gap 0.21 plain (0.12 bad): under a quarter, the stop rule fires
+# ngc Task 2: profile before; collector share of the cycle gap 0.21 plain (bad: not resolvable at this volume): under a quarter, the stop rule fires
 
 ```
 ngc profile record (Task 2, spec 7)
@@ -106,6 +106,8 @@ explained by misses counted here; the per-symbol view below finds a stall instru
 ## Samples, LTO (the -syms binaries), plain: top 40 per side
 
 `perf record -e cycles:u -F 4000`, one run per side and setting (round 1); `perf report --sort dso,symbol -n`.
+Every per-symbol share and delta in this record rests on that one sampled run per side and setting, scaled by
+the stat medians.
 Share % is perf's period-weighted overhead. JIT-compiled code (`[JIT] tid N`, one row per address in report.txt)
 and libc addresses without symbols are merged into one row per dso here. The --bad-packages and non-LTO top-40
 tables are in ngc-profile-raw/analysis-output.md.
@@ -294,14 +296,16 @@ round medians, each over five perf stat runs); collector share = (collector cycl
 | collector cycles c | 0.0415 x 35527891606 = 1474407502 | 0.0425 x 37803121150 = 1606632649 |
 | collector cycles f | 0.0484 x 37017096437 = 1791627468 | 0.0458 x 39618532654 = 1814528796 |
 | collector difference f - c | 317219966 | 207896147 |
-| **collector share** | **317219966 / 1489204831 = 0.213** | **207896147 / 1815411504 = 0.115** |
+| **collector share** | **317219966 / 1489204831 = 0.213** | 207896147 / 1815411504 = 0.115 (computed, not resolvable at this volume) |
 | without `moar_c.MVM_gc_root_temp_push` (exports and gc.* only) | 0.094 | 0.027 |
 
 The unresolvable rule: plain, the total-cycle difference (1.49e9) is larger than either side's spread, both of round
 medians (1.6e8, 4.4e8) and over all 15 runs (8.3e8, 1.11e9): **resolvable**. --bad-packages, the difference
-(1.82e9) exceeds both round-median spreads (2.1e8, 9.3e8) and the C side's 15-run spread (1.04e9) but not the f
-side's (2.34e9: f runs range 3.88e10-4.11e10, round 3 the slowest): resolvable on round medians, not on single runs. The plain setting, the
-tripwire's, carries the verdict.
+(1.82e9) is smaller than the f side's run-to-run spread over its 15 runs (2.34e9: f runs range 3.88e10-4.11e10,
+round 3 the slowest), so under spec 7's rule ("smaller than either side's run-to-run spread") **the --bad-packages
+gap is unresolvable at volume 100 000**; the f side's 15-run spread decided it (it does exceed the round-median
+spreads, 2.1e8 and 9.3e8, and the C side's 15-run spread, 1.04e9, but the rule takes either side). Its share 0.115
+is computed but not resolvable at this volume and carries no weight. The verdict rests on plain's 0.213 alone.
 
 Where the collector's part lies (plain, cycles from the delta table): `gc.collect.processWorklist` +2.56e8 against
 `process_worklist`, `moar_c.MVM_gc_root_temp_push` +1.78e8, offset by `MVM_gc_collect_free_nursery_uncopied`
@@ -312,8 +316,9 @@ Where the collector's part lies (plain, cycles from the delta table): `gc.collec
 (src/zig/gc/atomic.zig:116), at the forwarder-publishing site (`*item_ptr = new; item.forwarder = new; fence;
 flags2 |= MVM_CF_FORWARDER_VALID`; one site in the source, src/gc/collect.c:320, which the compiler duplicates into
 the gen2-promotion and nursery-copy paths on both sides). The C collector's `MVM_barrier()` there
-(`atomic_thread_fence(memory_order_seq_cst)`, src/moar.h:359) compiles to `lock orl $0x0,-0x40(%rsp)`, which on this Zen 3 is far cheaper (C's `process_worklist` is 0.05 % in total, its post-fence
-instruction 6.19 % of that). ng-f-syms has 3 `mfence` in the whole libmoar, all in `gc.collect.processWorklist`;
+(`atomic_thread_fence(memory_order_seq_cst)`, src/moar.h:359) compiles to `lock orl $0x0,-0x40(%rsp)`. What the data shows is the sample concentration, not a direct timing of the
+two fences: C's `process_worklist` is 0.05 % in total and its post-fence instruction 6.19 % of that, against the
+Zig function's 0.74 % with 79.1 % after the fence. ng-f-syms has 3 `mfence` in the whole libmoar, all in `gc.collect.processWorklist`;
 ng-c-syms has none (and 37 `lock or $0x0,...(%rsp)`). That is 0.791 x 0.74 % x 37017096437 = 2.17e8 cycles, 14.6 %
 of the plain gap, in one instruction.
 
@@ -354,8 +359,9 @@ reached through the PLT from C, `MVM_gc_allocate_nursery@plt` 0.04 %; under LTO 
 ## Finding
 
 On cycles:u at volume 100 000 the faithful port's gap to the C control is 4.19 % plain (4.80 % bad) on the
-profiled -syms pair, resolvable plain; the collector's functions hold 0.213 of it plain (0.115 bad), 0.094 / 0.027
-counting only the exports and the Zig-internal functions. Within the collector the gap lies in
+profiled -syms pair. Plain is resolvable and the collector's functions hold 0.213 of it (0.094 counting only the
+exports and the Zig-internal functions); the --bad-packages gap is not resolvable at this volume under spec 7's rule
+(smaller than the f side's run-to-run spread), its computed 0.115 counts for nothing. Within the collector the gap lies in
 `gc.collect.processWorklist` (+2.56e8 cycles plain, nearly all of it the `mfence` of `atomic.fence()` where C emits
 `lock or`) and in `moar_c.MVM_gc_root_temp_push`, the translated C inline that `allocation.zig`'s
 `MVM_gc_allocate_object`/`_stable`/`_type_object` call out of line (+1.78e8); `MVM_gc_allocate_nursery` reached
@@ -370,5 +376,7 @@ placement and cache effects of a different libmoar layout; the same-source -syms
 on placement alone. The non-LTO attribution pass suggests LTO hides some collector cost (about 0.45 on an assumed
 denominator), which is attribution only.
 
-**Stop rule (spec 11): the collector share is 0.213 plain (0.115 bad), under a quarter of the gap, so the rule fires:
-stop after Task 2 and report to the user.**
+**Stop rule (spec 11): the collector share is 0.213 plain, under a quarter of the gap, so the rule fires: stop after
+Task 2 and report to the user.** The verdict follows spec 7's measured (LTO) procedure and is not robust to build
+mode: the non-LTO attribution pass puts the collector near 0.45 of the gap on an assumed denominator, so a decision
+to stop should weigh that.

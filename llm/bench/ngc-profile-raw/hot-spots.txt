@@ -20,8 +20,6 @@
 
 # the instructions before the hot stores (objdump -d)
 ## f
-  7a4060:	add    %cl,0x1(%rax)
-  7a4063:	out    %al,(%dx)
   7a4064:	mov    %rsi,0x30(%r12)
   7a4069:	movzwl 0xe(%r13),%edx
   7a406e:	mov    %rbp,%rdi
