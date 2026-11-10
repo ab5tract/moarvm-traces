@@ -11,6 +11,7 @@
 #   group volume set tier exit seconds load_before lines raw_cmp
 # raw_cmp is "same" when cmp of the raw base-1.log and head-1.log is empty, else "differ".
 # Exit 0 when every cell exits 0 with identical raw logs, 1 otherwise.
+case $1 in --help|-h) sed -n '2,/^# Exit/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
 out=$1; [ $# -gt 0 ] && shift
 groups=${*:-a b}
 [ -n "$out" ] || { echo "usage: ngc-oracle-driver.sh OUTROOT [groups]" >&2; exit 64; }

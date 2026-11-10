@@ -1,0 +1,8 @@
+>>> INIT: 0.160024046s (100000 objects)
+RUN 1: 1.392520308s
+RUN 2: 1.38409105s
+RUN 3: 1.378602975s
+RUN 4: 1.388167461s
+RUN 5: 1.390934105s
+[ perf record: Woken up 5 times to write data ]
+[ perf record: Captured and wrote 1.229 MB /tmp/claude-1000/ngc/acc/profile/plain/c-r1/perf.data (30886 samples) ]

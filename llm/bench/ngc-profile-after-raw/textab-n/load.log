@@ -1,0 +1,33 @@
+warmup base load 1.33
+warmup head load 1.33
+round 1 base run 1 load 1.33
+round 1 base run 2 load 1.28
+round 1 base run 3 load 1.25
+round 1 base run 4 load 1.44
+round 1 base run 5 load 1.40
+round 1 head run 1 load 1.42
+round 1 head run 2 load 1.55
+round 1 head run 3 load 1.62
+round 1 head run 4 load 1.57
+round 1 head run 5 load 1.56
+round 2 head run 1 load 1.52
+round 2 head run 2 load 1.44
+round 2 head run 3 load 1.40
+round 2 head run 4 load 1.49
+round 2 head run 5 load 1.61
+round 2 base run 1 load 1.52
+round 2 base run 2 load 1.55
+round 2 base run 3 load 1.55
+round 2 base run 4 load 1.51
+round 2 base run 5 load 1.51
+round 3 base run 1 load 1.47
+round 3 base run 2 load 1.39
+round 3 base run 3 load 1.36
+round 3 base run 4 load 1.38
+round 3 base run 5 load 1.32
+round 3 head run 1 load 1.30
+round 3 head run 2 load 1.32
+round 3 head run 3 load 1.30
+round 3 head run 4 load 1.25
+round 3 head run 5 load 1.31
+end load 1.26

@@ -1,0 +1,11 @@
+2026-11-10 18:36:24 CET master start
+2026-11-10 19:24:00 CET oracle exit 0
+2026-11-10 19:51:29 CET crc exit 0
+2026-11-10 20:32:19 CET spectest exit 0
+2026-11-10 20:50:35 CET suites exit 0
+2026-11-10 20:52:53 CET cleanup ng-c-base: exit 0
+2026-11-10 20:53:11 CET cleanup ng-n-base: exit 0
+2026-11-10 20:53:28 CET cleanup ng-c-stress: exit 0
+2026-11-10 20:53:46 CET cleanup ng-n-stress: exit 0
+2026-11-10 21:10:06 CET profile exit 0
+2026-11-10 21:10:06 CET master end

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** draft, written 2026-11-09 with the spec; awaiting the user's approval of both.
+**Status:** executed 2026-11-09/10 on branch zig-native-gc; acceptance records traces/llm/bench/ngc-*; awaiting the whole-branch review and the user's merge decision
 
 **Goal:** Rewrite the faithful Zig port of `src/gc/` into native Zig shapes while the collector's decisions stay byte-identical to the C collector's, with a build switch for the C-collector control, a profile before and after, and the performance aim (crc-getter native/C at or under 1.00) reported honestly.
 
@@ -270,16 +270,34 @@ MoarVM `"GC native: view module, typed atomics, worklist and allocation"`; trace
 
 | check | result | record |
 |---|---|---|
-| `-Dzig-gc=false` control equals the Campaign 5 scratch control | | ngc-prefixes.md |
-| profile before: collector share of the gap, finding | | ngc-profile.md |
-| oracle (a) C vs native, (b) faithful vs native, (c) C vs faithful: 48 cells | | ngc-oracle.md |
-| unit tests, both levels; export set unchanged | | ledger |
-| crc-getter f/c and n/c, wall and RSS, plain and bad | | ngc-crc-ab.md |
-| spectest n/c wall and RSS, zero new failures | | ngc-spectest.txt |
-| suites and full-cleanup runs | | ngc-suites.md, ngc-cleanup.md |
-| profile after: what remains | | ngc-profile-after.md |
-| reading notes | | ngc-reading-notes.md |
+| `-Dzig-gc=false` control equals the Campaign 5 scratch control | equal (Task 1): ng-c-base equals Campaign 5's scratch control; exports 2850 = g7-c-base's | ngc-prefixes.md |
+| profile before: collector share of the gap, finding | f/c cycles +4.19 % plain (resolvable), collector share 0.213; bad +4.80 % not resolvable; finding: the `mfence` in processWorklist (+2.56e8, ~15 % of the gap) and the out-of-line translate-c temp-root push (+1.78e8); stop rule fired, user chose to continue with R5 (2026-11-10) | ngc-profile.md |
+| oracle (a) C vs native, (b) faithful vs native, (c) C vs faithful: 48 cells | 24/24 cells (8 per group; 48 compared logs) exit 0, every raw log pair byte-identical, both tiers, 10 000 and 100 000 | ngc-oracle.md |
+| unit tests, both levels; export set unchanged | from the ledger (Task 8, last Zig change): gc-test 61 + 5 skipped at -Dgc-debug=0, 66/66 at 1; zig build test 105/105; exports of ng-n-base equal ng-c-base's, 2850 names (re-checked at Task 9 with nm -D); 0 mfence | ledger |
+| crc-getter f/c and n/c, wall and RSS, plain and bad | f/c 1.027 / 0.990 plain, 1.033 / 0.983 bad; n/c 1.004 / 1.002 plain, 1.010 / 1.017 bad (C spreads 0.013 / 0.026 plain, 0.010 / 0.027 bad); aim met within spread on three of four measures, not met on bad wall (1.010 on the edge of a 0.0101 spread, above the C range) | ngc-crc-ab.md |
+| spectest n/c wall and RSS, zero new failures | wall 1.003, RSS 1.000 (head medians inside the base ranges): passes; Files=1365 Tests=138715 and the 29 TODO-passed files as Campaign 5; zero new failures (run 3 IO-Socket-Async.t exit 1 with no failed subtest, a flake per R12: 40/40 serial re-runs clean) | ngc-spectest.txt |
+| suites and full-cleanup runs | nqp and rakudo per-file lists identical C vs native at base and stress (rakudo: the pre-existing 02-simple-args.t 17-18 on all four); cleanup 240 of 240; crc-getter under both stress prefixes 10/10 exit 0 | ngc-suites.md, ngc-cleanup.md |
+| profile after: what remains | n/c cycles +1.90 % plain, +2.20 % bad on the -syms pair, unresolvable at volume 100 000 on both (shares 0.216 / 0.055 computed only); mfence stall and temp-root call gone; collector difference +3.17e8 -> +1.47e8, mostly the object allocator; -syms builds are different binaries (c -0.8 %, n +2.3 %) | ngc-profile-after.md |
+| reading notes | collected verbatim from Tasks 3-8, one section per file of src/zig/gc (12) | ngc-reading-notes.md |
 
 ## Deviations (running list)
 
-- (none yet)
+- Spec 5 says "16 cells per group" and the plan's file tasks say "32 cells" for groups (a)+(b): a group is 8 cells (2 volumes x 2 settings x 2 tiers); groups (a)+(b) are 16 cells, all three groups 24 (Task 1, Task 3); Task 9's brief said "48 cells", which is the number of compared logs (two per cell), not of cells.
+- Task 1: `cleanup.sh --stress` was undefined by the plan; implemented as 20x-allocation variants of the three programs (the interlude's "higher-allocation variants"); the -stress prefixes are run with the plain program set (Ruling R4).
+- Task 1: the tripwire threshold is baseline + C spread as spec 6 says; a crossing is a stop-and-measure (one 7-round re-run) before a revert ruling, because the C spread (0.4 %) is below the port's own 3-round noise (Ruling R3). No crossing occurred in Tasks 3-8.
+- Task 2: the `.text` of a `-Dstrip=false` build is not identical to its stripped sibling (Zig std.debug code is kept); ng-c-syms ran 1.5 % faster than ng-c-base, so the C side of the before-profile is labelled "taken on a different binary" per spec 7's fallback. `--bad-packages` is unresolvable at volume 100 000 under spec 7's rule.
+- Task 2: the stop rule fired (collector share 0.213 < 0.25); the user chose on 2026-11-10 to continue the full ladder on clarity grounds with the fence ruling (R5).
+- Task 3 (R5, user-approved): `atomic.fence()` on x86-64 emits `lock orl $0,-64(%rsp)` (clang's lowering of the same seq_cst fence) instead of `mfence`; the Atomics constraint "atomic.fence() stays as it is" was amended. The fence was ~15 % of the plain gap.
+- Task 3 (R6/R1): `moar.root` became the inline `TempRoot` helper mirroring roots.h `MVM_gc_root_temp_push`/`_pop`; it already existed (intcache.zig, finalize.zig use it), so those callers gained the inlined push too.
+- Task 3 (R7): `GcStatus`/`Status`/`Suspend` are defined in atomic.zig (a host test root that cannot import C) and re-exported + asserted in view.zig, not defined in view.zig as the plan said.
+- Task 3/8 (R8, R9): the `GcStatus` field is `suspend_state` (not `suspend`, a Zig keyword); `Suspend` is non-exhaustive (`_`).
+- Task 5: the plan's "40 description strings" was wrong: the C instance walk has 22 description sites (18 single-field roots + 4 subsystem/loop walks); golden list 22, `instance_roots.len` 18, `thread_roots.len` 10; the tables are joined from segments around the subsystem calls so the C order holds.
+- Task 6: collect.c has two `MVM_barrier` sites, not three; `std.ArrayListUnmanaged` is deprecated in 0.17, `std.ArrayList` (same type) is used; (R10) `moar.mvm_allocator`'s `remap` is `MVM_realloc` so the `WorkToPass` growth is the C's operation sequence (first entry `MVM_malloc(16)` as C's `realloc(NULL,16)`, then `MVM_realloc(16k)`).
+- Task 7: the plan's `wb.hit(tc, update_root, referenced)` had the C arity wrong; `hit(tc, update_root)` and `hitBy(tc, update_root, referenced)` follow wb.c. (R11) wb.h's static-inline write barriers are mirrored as `pub inline fn`s in wb.zig. The plan's `objectid.useAllocation` returning `*anyopaque` was wrong: it returns `?*anyopaque` so the export keeps the C's NULL contract (fix round 1).
+- Task 8: the plan's "118 atomic sites" was Campaign 4's count over all files; orchestrate.zig has 68 (67 in orchestrate.c + GCDEBUG_LOG's load); all mapped in task-8-atomics.tsv.
+- Task 8: the harness forced the implementer's hand-back twice mid-stage-2; the controller read stage2.out and resumed it; no change to the evidence.
+- Tripwire wall n/c per file task: T3 1.005, T4 1.005, T5 1.001, T6 1.008 (1.016 after R10), T7 1.019 (1.024 after the fix), T8 1.003; RSS 1.002, 1.014, 0.988, 1.005/1.003, 1.006, 1.013. The acceptance A/B is the number.
+- Task 9: `ngc-crc-ab-driver.sh` did not exist (Task 1 and the tripwires ran ab.sh through z017-style drivers); Task 9 wrote it three-sided, with the runs.log exit column fixed (it now records ab.sh's status, not date's). `ngc-oracle-driver.sh` gained `--help`.
+- Task 9: `ngc-suites.md` and `ngc-cleanup.md` already held Task 1's control records; the acceptance results are appended to them as "Acceptance (Task 9)" sections (raw in `ngc-suites-acc-raw/`, `ngc-cleanup-acc-raw/`) instead of replacing them. All eight suites were run fresh (none cited from Task 8). Spec 9's "full crc-getter under both stress prefixes at acceptance" was not in the brief's steps; it was run (5 + 5, `ngc-acceptance-stress.sh`) and recorded in `ngc-cleanup.md`.
+- Task 9: the after-profile's `.text` fallback labels both sides "a different binary" (ng-c-syms 0.8 % faster than ng-c-base, ng-n-syms 2.3 % slower than ng-n-base), and its gap is unresolvable under spec 7's rule on both settings.
+- Task 9: two deferred minors fixed in files the task touched: the docs wording "Without `-Dzig-gc=true`" (now "With `-Dzig-gc=false`"), and a pointer in `ngc-task6-tripwire.md` from its pre-R10 "Spec 8 h evidence" section to the R10 re-run.

@@ -1,0 +1,9 @@
+>>> INIT: 0.093898972s (100000 objects)
+RUN 1: 1.53625858s
+RUN 2: 1.51624916s
+RUN 3: 1.529339485s
+RUN 4: 1.533698489s
+RUN 5: 1.543060584s
+<<< 50000 packages with bad addresses found. Alert the Elves!
+[ perf record: Woken up 6 times to write data ]
+[ perf record: Captured and wrote 1.335 MB /tmp/claude-1000/ngc/acc/profile/bad/n-r1/perf.data (33601 samples) ]

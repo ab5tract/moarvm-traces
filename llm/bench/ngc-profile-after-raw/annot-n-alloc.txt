@@ -1,0 +1,344 @@
+ Percent |	Source code & Disassembly of libmoar.so for cycles:u (567 samples, percent: local period)
+---------------------------------------------------------------------------------------------------------
+         :
+         :
+         :
+         : 3      Disassembly of section .text:
+         :
+         : 5      0000000000806440 <gc.allocation.allocateObject>:
+         : 6      return obj;
+         : 7      }
+         :
+         : 9      /// Allocates a new object, and points it at the specified STable.
+         : 83     pub fn allocateObject(tc: Tc, st: STable) Object {
+    0.18 :   806440: push   %rbp
+    0.13 :   806441: push   %r15
+    0.71 :   806443: push   %r14
+    3.56 :   806445: push   %r13
+    1.61 :   806447: push   %r12
+    0.00 :   806449: push   %rbx
+   10.52 :   80644a: push   %rax
+    2.51 :   80644b: mov    %rdi,%rbx
+         : 92     // MVMROOT(tc, st) { ... }
+         : 93     var rooted_st = st;
+    0.30 :   80644e: mov    %rsi,(%rsp)
+         : 95     inline fn tempPush(tc: *ThreadContext, obj_ref: [*c][*c]Collectable) void {
+         : 96     if (comptime c.MVM_TEMP_ROOT_DEBUG != 0) {
+         : 97     if (obj_ref == null)
+         : 98     c.MVM_panic(c.MVM_exitcode_gcroots, "Illegal attempt to add null object address as a temporary root");
+         : 99     }
+         : 100    if (tc.num_temproots < c.MVM_TEMP_ROOT_BASE_ALLOC) {
+    1.97 :   806452: mov    0x60(%rdi),%eax
+    0.36 :   806455: cmp    $0x10,%rax
+    0.18 :   806459: jae    80649c <gc.allocation.allocateObject+0x5c>
+         : 104    @branchHint(.likely);
+         : 105    tc.temproots[tc.num_temproots] = obj_ref;
+    0.00 :   80645b: mov    0x70(%rbx),%rcx
+    0.00 :   80645f: mov    %rsp,%rdx
+    0.00 :   806462: mov    %rdx,(%rcx,%rax,8)
+         : 109    tc.num_temproots += 1;
+   13.96 :   806466: incl   0x60(%rbx)
+         : 111    const r = moar.root(tc, &rooted_st);
+         : 112    defer r.pop(tc);
+         : 113    const obj = view.asObject(allocateZeroed(tc, rooted_st.size));
+    0.54 :   806469: mov    (%rsp),%rax
+    2.15 :   80646d: mov    0x20(%rax),%r15d
+    0.18 :   806471: cmpl   $0x0,0x58(%rbx)
+    0.00 :   806475: je     8064b5 <gc.allocation.allocateObject+0x75>
+    0.00 :   806477: mov    0x48(%rbx),%rdi
+         :
+         : 120    /// Allocates space using the second generation allocator and returns a
+         : 121    /// pointer to the allocated space. Promises the memory will be zeroed,
+         : 107    pub fn allocateZeroed(al: Gen2, size: u32) *anyopaque {
+         : 108    const a = allocate(al, size);
+    0.00 :   80647b: mov    %r15d,%esi
+    0.00 :   80647e: call   7a99e0 <gc.gen2.allocate>
+    0.00 :   806483: mov    %rax,%r14
+         : 112    @memset(@as([*]u8, @ptrCast(a))[0..size], 0);
+    0.12 :   806486: mov    %rax,%rdi
+    0.00 :   806489: xor    %esi,%esi
+    0.00 :   80648b: mov    %r15,%rdx
+    0.00 :   80648e: call   79dea0 <compiler_rt.fastMemset>
+         : 117    view.flags2(view.asCol(a)).* = .{ .second_gen = true };
+    0.00 :   806493: movb   $0x2,0xd(%r14)
+    0.00 :   806498: mov    $0x2,%al
+    0.00 :   80649a: jmp    80650f <gc.allocation.allocateObject+0xcf>
+    0.00 :   80649c: mov    %rsp,%rsi
+         : 122    fn addTcRootsToWorklistExport(tc: [*c]c.MVMThreadContext, worklist: [*c]c.MVMGCWorklist, snapshot: [*c]c.MVMHeapSnapshotState) callconv(.c) void {
+         : 123    addTcRootsToWorklist(tc, worklist, snapshot);
+         : 124    }
+         :
+         : 126    fn tempPushSlowExport(tc: [*c]c.MVMThreadContext, obj_ref: [*c][*c]c.MVMCollectable) callconv(.c) void {
+         : 127    tempPushSlow(tc, @ptrCast(obj_ref));
+    0.00 :   80649f: mov    %rbx,%rdi
+    0.00 :   8064a2: call   7aa930 <gc.roots.tempPushSlow>
+    0.00 :   8064a7: mov    (%rsp),%rax
+    0.00 :   8064ab: mov    0x20(%rax),%r15d
+    0.00 :   8064af: cmpl   $0x0,0x58(%rbx)
+    0.00 :   8064b3: jne    806477 <gc.allocation.allocateObject+0x37>
+         : 134    if (tc.gc_status != 0)
+    0.00 :   8064b5: cmpq   $0x0,0x40(%rbx)
+    0.00 :   8064ba: je     8064c4 <gc.allocation.allocateObject+0x84>
+         : 137    orchestrate.enterFromInterrupt(tc);
+    0.00 :   8064bc: mov    %rbx,%rdi
+    0.00 :   8064bf: call   7a14c0 <gc.orchestrate.enterFromInterrupt>
+         : 140    if (size == 0)
+    0.00 :   8064c4: test   %r15,%r15
+    8.96 :   8064c7: je     806719 <gc.allocation.allocateObject+0x2d9>
+         : 143    while (@intFromPtr(tc.nursery_alloc) + size >= @intFromPtr(tc.nursery_alloc_limit)) {
+    0.00 :   8064cd: mov    0x30(%rbx),%r14
+    0.36 :   8064d1: lea    (%r15,%r14,1),%rax
+    0.88 :   8064d5: cmp    0x38(%rbx),%rax
+    0.00 :   8064d9: jb     806506 <gc.allocation.allocateObject+0xc6>
+    0.00 :   8064db: cmp    $0x1000000,%r15d
+         : 149    if (size > c.MVM_NURSERY_SIZE)
+    0.00 :   8064e2: ja     80672c <gc.allocation.allocateObject+0x2ec>
+    0.00 :   8064e8: nopl   0x0(%rax,%rax,1)
+         : 152    orchestrate.enterFromAllocator(tc);
+    0.00 :   8064f0: mov    %rbx,%rdi
+    0.00 :   8064f3: call   7a1080 <gc.orchestrate.enterFromAllocator>
+         : 155    while (@intFromPtr(tc.nursery_alloc) + size >= @intFromPtr(tc.nursery_alloc_limit)) {
+    0.00 :   8064f8: mov    0x30(%rbx),%r14
+    0.00 :   8064fc: lea    (%r15,%r14,1),%rax
+    0.00 :   806500: cmp    0x38(%rbx),%rax
+    0.00 :   806504: jae    8064f0 <gc.allocation.allocateObject+0xb0>
+         : 160    tc.nursery_alloc = @ptrFromInt(@intFromPtr(allocated) + size);
+    0.00 :   806506: mov    %rax,0x30(%rbx)
+    0.18 :   80650a: movzbl 0xd(%r14),%eax
+         : 163    obj.header.size = @truncate(rooted_st.size);
+    3.76 :   80650f: mov    (%rsp),%r13
+    0.18 :   806513: movzwl 0x20(%r13),%ecx
+    0.00 :   806518: mov    %cx,0xe(%r14)
+         : 167    obj.header.owner = tc.thread_id;
+   11.46 :   80651d: mov    (%rbx),%ecx
+    0.89 :   80651f: mov    %ecx,0x8(%r14)
+    1.07 :   806523: mov    %r13,%rcx
+    0.00 :   806526: test   %r13,%r13
+    0.00 :   806529: je     806627 <gc.allocation.allocateObject+0x1e7>
+    0.00 :   80652f: mov    %eax,%edx
+    0.00 :   806531: mov    %r13,%rcx
+    0.00 :   806534: and    $0x2,%dl
+    0.00 :   806537: je     806627 <gc.allocation.allocateObject+0x1e7>
+    0.00 :   80653d: movzbl 0xd(%r13),%edx
+    0.00 :   806542: mov    %r13,%rcx
+    0.00 :   806545: test   $0x2,%dl
+    0.00 :   806548: jne    806627 <gc.allocation.allocateObject+0x1e7>
+    0.00 :   80654e: mov    %r13,%rcx
+         : 182    roots.gen2Add(tc, update_root);
+         : 183    }
+         :
+         : 14     pub fn hitBy(tc: Tc, update_root: Col, referenced: Col) void {
+         : 15     if (!view.flags2(update_root).in_gen2_root_list)
+    0.00 :   806551: test   $0x4,%al
+    0.00 :   806553: jne    806620 <gc.allocation.allocateObject+0x1e0>
+         : 18     const col = maybe_col orelse
+    0.00 :   806559: test   %r14,%r14
+    0.00 :   80655c: je     80673f <gc.allocation.allocateObject+0x2ff>
+         : 21     if (tc.num_gen2roots == tc.alloc_gen2roots) {
+    0.00 :   806562: mov    0x78(%rbx),%ebp
+    0.00 :   806565: cmp    0x7c(%rbx),%ebp
+    0.00 :   806568: jne    8065b5 <gc.allocation.allocateObject+0x175>
+         : 25     tc.alloc_gen2roots *%= 2;
+    0.00 :   80656a: add    %ebp,%ebp
+    0.00 :   80656c: mov    %ebp,0x7c(%rbx)
+         : 28     tc.gen2roots = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(tc.gen2roots), @sizeOf(Col) * @as(usize, tc.alloc_gen2roots))));
+    0.00 :   80656f: mov    0x80(%rbx),%r12
+    0.00 :   806576: lea    0x0(,%rbp,8),%r15
+         :
+         : 32     static inline mi_theap_t* _mi_theap_default(void) {
+         : 33     #if defined(MI_TLS_RECURSE_GUARD)
+         : 34     if mi_unlikely(!_mi_process_is_initialized) return _mi_theap_empty_get();
+         : 35     #endif
+         : 36     return __mi_theap_default;
+    0.00 :   80657e: lea    0x2e3a53(%rip),%rdi        # ae9fd8 <_DYNAMIC+0x1f0>
+    0.00 :   806585: call   a02a90 <__tls_get_addr@plt>
+    0.00 :   80658a: mov    0x0(%rax),%rdi
+         : 40     return mi_theap_realloc_zero_ex(theap,p,newsize,zero,NULL,NULL);
+         : 41     }
+         :
+         : 43     mi_decl_nodiscard void* mi_theap_realloc(mi_theap_t* theap, void* p, size_t newsize) mi_attr_noexcept {
+         : 44     // optimize p==NULL
+         : 45     if (p==NULL) {
+    0.00 :   806591: test   %r12,%r12
+    0.00 :   806594: je     8065be <gc.allocation.allocateObject+0x17e>
+         : 48     return mi_theap_malloc(theap,newsize);
+         : 49     }
+         : 50     else {
+         : 51     return _mi_theap_realloc_zero(theap, p, newsize, false);
+    0.00 :   806596: mov    %r12,%rsi
+    0.00 :   806599: mov    %r15,%rdx
+    0.00 :   80659c: xor    %ecx,%ecx
+    0.00 :   80659e: call   a024f0 <_mi_theap_realloc_zero@plt>
+    0.00 :   8065a3: test   %rbp,%rbp
+    0.00 :   8065a6: je     8065ff <gc.allocation.allocateObject+0x1bf>
+    0.00 :   8065a8: test   %rax,%rax
+    0.00 :   8065ab: jne    8065ff <gc.allocation.allocateObject+0x1bf>
+    0.00 :   8065ad: mov    %r15,%rdi
+    0.00 :   8065b0: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+         : 62     tc.gen2roots[tc.num_gen2roots] = col;
+    0.00 :   8065b5: mov    0x80(%rbx),%rax
+         : 64     if (tc.num_gen2roots == tc.alloc_gen2roots) {
+    0.00 :   8065bc: jmp    806609 <gc.allocation.allocateObject+0x1c9>
+         : 66     if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   8065be: cmp    $0x80,%ebp
+    0.00 :   8065c4: ja     8065ee <gc.allocation.allocateObject+0x1ae>
+         :
+         : 70     static inline mi_page_t* _mi_theap_get_free_small_page(mi_theap_t* theap, size_t size) {
+         : 71     mi_assert_internal(size <= (MI_SMALL_SIZE_MAX + MI_PADDING_SIZE));
+         : 72     const size_t idx = _mi_wsize_from_size(size);
+         : 73     mi_assert_internal(idx < MI_PAGES_DIRECT);
+         : 74     return theap->pages_free_direct[idx];
+    0.00 :   8065c6: mov    (%rdi,%rbp,8),%rcx
+         : 76     mi_block_t* const block = page->free;
+    0.00 :   8065ca: mov    0x10(%rcx),%rax
+         : 78     const mi_used_t used = page->used;
+    0.00 :   8065ce: mov    0x18(%rcx),%rdx
+         : 80     if (block == NULL) {
+    0.00 :   8065d2: test   %rax,%rax
+    0.00 :   8065d5: je     8065ee <gc.allocation.allocateObject+0x1ae>
+         : 83     mi_block_t* next = mi_block_next(page,block);
+    0.00 :   8065d7: mov    (%rax),%rsi
+         : 85     block->next = 0;  // don't leak internal data
+    0.00 :   8065da: movq   $0x0,(%rax)
+         : 87     page->free = next;
+    0.00 :   8065e1: mov    %rsi,0x10(%rcx)
+         : 89     page->used = used+1;
+    0.00 :   8065e5: inc    %rdx
+    0.00 :   8065e8: mov    %rdx,0x18(%rcx)
+    0.00 :   8065ec: jmp    8065ff <gc.allocation.allocateObject+0x1bf>
+    0.00 :   8065ee: mov    %r15,%rsi
+    0.00 :   8065f1: xor    %edx,%edx
+    0.00 :   8065f3: xor    %ecx,%ecx
+    0.00 :   8065f5: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   8065fa: test   %rbp,%rbp
+    0.00 :   8065fd: jne    8065a8 <gc.allocation.allocateObject+0x168>
+         : 99     tc.gen2roots = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(tc.gen2roots), @sizeOf(Col) * @as(usize, tc.alloc_gen2roots))));
+    0.00 :   8065ff: mov    %rax,0x80(%rbx)
+         : 101    tc.gen2roots[tc.num_gen2roots] = col;
+    0.00 :   806606: mov    0x78(%rbx),%ebp
+    0.00 :   806609: mov    %ebp,%ecx
+    0.00 :   80660b: mov    %r14,(%rax,%rcx,8)
+         : 105    tc.num_gen2roots +%= 1;
+    0.00 :   80660f: incl   0x78(%rbx)
+         : 107    view.flags2(col).in_gen2_root_list = true;
+    0.00 :   806612: orb    $0x4,0xd(%r14)
+         : 109    roots.gen2Add(tc, update_root);
+         : 110    view.flags2(referenced).ref_from_gen2 = true;
+    0.00 :   806617: movzbl 0xd(%r13),%edx
+         : 112    moar.assignRef(tc, &obj.header, &obj.st, rooted_st);
+         : 113    if (rooted_st.mode_flags & c.MVM_FINALIZE_TYPE != 0)
+    0.00 :   80661c: mov    (%rsp),%rcx
+    0.00 :   806620: or     $0x20,%dl
+    0.00 :   806623: mov    %dl,0xd(%r13)
+         : 117    addr.* = v;
+    0.00 :   806627: mov    %r13,0x10(%r14)
+   11.11 :   80662b: testb  $0x8,0x26(%rcx)
+    5.31 :   80662f: je     806704 <gc.allocation.allocateObject+0x2c4>
+         :
+         : 17     /// full, the capacity becomes 64, or doubles, and the list is reallocated
+         : 18     /// to that many `MVMCollectable **`-sized entries.
+         : 19     inline fn append(list: *Queue, num: *u32, alloc: *u32, obj: Object) void {
+         : 20     if (num.* == alloc.*) {
+    0.00 :   806635: mov    0x88(%rbx),%eax
+         : 22     alloc.* = if (alloc.* != 0) alloc.* *% 2 else 64;
+         : 23     list.* = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(list.*), @sizeOf(**c.MVMCollectable) * @as(usize, alloc.*))));
+         : 24     }
+         : 25     list.*[num.*] = obj;
+    0.00 :   80663b: mov    0x90(%rbx),%r15
+         : 27     if (num.* == alloc.*) {
+    0.00 :   806642: cmp    0x8c(%rbx),%eax
+    0.00 :   806648: jne    8066f8 <gc.allocation.allocateObject+0x2b8>
+    0.00 :   80664e: lea    (%rax,%rax,1),%ecx
+         : 31     alloc.* = if (alloc.* != 0) alloc.* *% 2 else 64;
+    0.00 :   806651: test   %eax,%eax
+    0.00 :   806653: mov    $0x40,%r13d
+    0.00 :   806659: cmovne %ecx,%r13d
+    0.00 :   80665d: mov    %r13d,0x8c(%rbx)
+         : 36     list.* = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(list.*), @sizeOf(**c.MVMCollectable) * @as(usize, alloc.*))));
+    0.00 :   806664: lea    0x0(,%r13,8),%r12
+    0.00 :   80666c: lea    0x2e3965(%rip),%rdi        # ae9fd8 <_DYNAMIC+0x1f0>
+    0.00 :   806673: call   a02a90 <__tls_get_addr@plt>
+    0.00 :   806678: mov    0x0(%rax),%rdi
+         : 41     if (p==NULL) {
+    0.00 :   80667f: test   %r15,%r15
+    0.00 :   806682: je     8066a6 <gc.allocation.allocateObject+0x266>
+         : 44     return _mi_theap_realloc_zero(theap, p, newsize, false);
+    0.00 :   806684: mov    %r15,%rsi
+    0.00 :   806687: mov    %r12,%rdx
+    0.00 :   80668a: xor    %ecx,%ecx
+    0.00 :   80668c: call   a024f0 <_mi_theap_realloc_zero@plt>
+    0.00 :   806691: mov    %rax,%r15
+    0.00 :   806694: test   %r13,%r13
+    0.00 :   806697: je     8066eb <gc.allocation.allocateObject+0x2ab>
+    0.00 :   806699: test   %r15,%r15
+    0.00 :   80669c: jne    8066eb <gc.allocation.allocateObject+0x2ab>
+    0.00 :   80669e: mov    %r12,%rdi
+    0.00 :   8066a1: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+         : 56     if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   8066a6: cmp    $0x80,%r13d
+    0.00 :   8066ad: ja     8066d7 <gc.allocation.allocateObject+0x297>
+    0.00 :   8066af: mov    (%rdi,%r13,8),%rax
+         : 60     mi_block_t* const block = page->free;
+    0.00 :   8066b3: mov    0x10(%rax),%r15
+         : 62     const mi_used_t used = page->used;
+    0.00 :   8066b7: mov    0x18(%rax),%rcx
+         : 64     if (block == NULL) {
+    0.00 :   8066bb: test   %r15,%r15
+    0.00 :   8066be: je     8066d7 <gc.allocation.allocateObject+0x297>
+         : 67     mi_block_t* next = mi_block_next(page,block);
+    0.00 :   8066c0: mov    (%r15),%rdx
+         : 69     block->next = 0;  // don't leak internal data
+    0.00 :   8066c3: movq   $0x0,(%r15)
+         : 71     page->free = next;
+    0.00 :   8066ca: mov    %rdx,0x10(%rax)
+         : 73     page->used = used+1;
+    0.00 :   8066ce: inc    %rcx
+    0.00 :   8066d1: mov    %rcx,0x18(%rax)
+    0.00 :   8066d5: jmp    8066eb <gc.allocation.allocateObject+0x2ab>
+    0.00 :   8066d7: mov    %r12,%rsi
+    0.00 :   8066da: xor    %edx,%edx
+    0.00 :   8066dc: xor    %ecx,%ecx
+    0.00 :   8066de: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   8066e3: mov    %rax,%r15
+    0.00 :   8066e6: test   %r13,%r13
+    0.00 :   8066e9: jne    806699 <gc.allocation.allocateObject+0x259>
+    0.00 :   8066eb: mov    %r15,0x90(%rbx)
+         : 85     list.*[num.*] = obj;
+    0.00 :   8066f2: mov    0x88(%rbx),%eax
+    0.00 :   8066f8: mov    %eax,%eax
+    0.00 :   8066fa: mov    %r14,(%r15,%rax,8)
+         : 89     num.* +%= 1;
+    0.00 :   8066fe: incl   0x88(%rbx)
+         : 91     if (comptime c.MVM_TEMP_ROOT_DEBUG != 0) {
+         : 92     if (tc.num_temproots <= 0)
+         : 93     c.MVM_panic(1, "Illegal attempt to pop empty temporary root stack");
+         : 94     }
+         : 95     // An unsigned decrement, as the C's.
+         : 96     tc.num_temproots -%= 1;
+    1.44 :   806704: decl   0x60(%rbx)
+         : 98     finalize.addToQueue(tc, obj);
+         : 99     return obj;
+    1.36 :   806707: mov    %r14,%rax
+    0.86 :   80670a: add    $0x8,%rsp
+    0.00 :   80670e: pop    %rbx
+    0.18 :   80670f: pop    %r12
+   10.55 :   806711: pop    %r13
+    0.36 :   806713: pop    %r14
+    0.90 :   806715: pop    %r15
+    1.06 :   806717: pop    %rbp
+    0.18 :   806718: ret
+         : 109    c.MVM_panic(c.MVM_exitcode_gcalloc, "Cannot allocate 0 bytes of memory in the nursery");
+    0.00 :   806719: lea    -0x5ca067(%rip),%rsi        # 23c6b9 <__anon_6076>
+    0.00 :   806720: mov    $0xf,%edi
+    0.00 :   806725: xor    %eax,%eax
+    0.00 :   806727: call   9fcf00 <MVM_panic@plt>
+         : 114    c.MVM_panic(c.MVM_exitcode_gcalloc, "Attempt to allocate more than the maximum nursery size");
+    0.00 :   80672c: lea    -0x5ad957(%rip),%rsi        # 258ddc <__anon_6081>
+    0.00 :   806733: mov    $0xf,%edi
+    0.00 :   806738: xor    %eax,%eax
+    0.00 :   80673a: call   9fcf00 <MVM_panic@plt>
+         : 119    c.MVM_panic(c.MVM_exitcode_gcroots, "Illegal attempt to add null collectable address as an inter-generational root");
+    0.00 :   80673f: lea    -0x5c7306(%rip),%rsi        # 23f440 <__anon_4571>
+    0.00 :   806746: mov    $0x10,%edi
+    0.00 :   80674b: xor    %eax,%eax
+    0.00 :   80674d: call   9fcf00 <MVM_panic@plt>

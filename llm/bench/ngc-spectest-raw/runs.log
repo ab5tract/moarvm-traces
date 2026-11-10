@@ -1,0 +1,12 @@
+run 1 base start 19:51:29 load 1.31 1.21 1.18 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-c-base/lib
+run 1 base end 19:56:08 exit 0
+run 2 head start 19:58:08 load 1.98 10.50 6.92 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-n-base/lib
+run 2 head end 20:02:47 exit 0
+run 3 head start 20:05:47 load 1.10 10.78 10.01 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-n-base/lib
+run 3 head end 20:10:26 exit 2
+run 4 base start 20:13:26 load 0.83 10.47 11.68 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-c-base/lib
+run 4 base end 20:18:03 exit 0
+run 5 base start 20:21:03 load 0.85 10.41 12.72 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-c-base/lib
+run 5 base end 20:25:41 exit 0
+run 6 head start 20:27:41 load 1.93 12.57 14.18 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-n-base/lib
+run 6 head end 20:32:19 exit 0

@@ -1,0 +1,10 @@
+ng-c-stress run 1	exit 0	load 0.98		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.41 	Maximum resident set size (kbytes): 251356 	Exit status: 0 
+ng-n-stress run 1	exit 0	load 0.98		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.66 	Maximum resident set size (kbytes): 253080 	Exit status: 0 
+ng-c-stress run 2	exit 0	load 0.98		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.53 	Maximum resident set size (kbytes): 248324 	Exit status: 0 
+ng-n-stress run 2	exit 0	load 0.98		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.61 	Maximum resident set size (kbytes): 249024 	Exit status: 0 
+ng-c-stress run 3	exit 0	load 1.21		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.97 	Maximum resident set size (kbytes): 256700 	Exit status: 0 
+ng-n-stress run 3	exit 0	load 1.17		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.69 	Maximum resident set size (kbytes): 250724 	Exit status: 0 
+ng-c-stress run 4	exit 0	load 1.16		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.55 	Maximum resident set size (kbytes): 248872 	Exit status: 0 
+ng-n-stress run 4	exit 0	load 1.14		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.75 	Maximum resident set size (kbytes): 253064 	Exit status: 0 
+ng-c-stress run 5	exit 0	load 1.12		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.49 	Maximum resident set size (kbytes): 254592 	Exit status: 0 
+ng-n-stress run 5	exit 0	load 1.10		Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.76 	Maximum resident set size (kbytes): 248348 	Exit status: 0 

@@ -1,0 +1,4 @@
+plain start 19:24:00 load 1.21 1.21 1.18 moar-procs 0 rakudo-procs 0
+plain end 19:37:17 exit 0
+bad start 19:37:17 load 1.22 1.25 1.19 moar-procs 0 rakudo-procs 0
+bad end 19:51:29 exit 0

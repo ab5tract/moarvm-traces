@@ -1,0 +1,7 @@
+warmup load 1.49
+stat 1 load 1.49
+stat 2 load 1.41
+stat 3 load 1.38
+stat 4 load 1.62
+stat 5 load 1.57
+profile.sh: wrote /tmp/claude-1000/ngc/acc/profile/bad/c-r2/stat.tsv

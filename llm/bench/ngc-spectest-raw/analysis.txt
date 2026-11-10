@@ -1,0 +1,19 @@
+## per run
+run 1 base: wall 279.06 (4:39.06) RSS 1031228 user 4587.02 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 272 wallclock secs (37.35 usr  7.89 sys + 4545.21 cusr 443.79 csys = 5034.24 CPU)
+run 2 head: wall 278.81 (4:38.81) RSS 1029108 user 4608.73 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 272 wallclock secs (37.12 usr  7.89 sys + 4567.08 cusr 420.53 csys = 5032.62 CPU)
+run 3 head: wall 278.68 (4:38.68) RSS 1026868 user 4599.44 exit 2 Result: FAIL todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138701, 272 wallclock secs (37.16 usr  7.91 sys + 4557.71 cusr 414.46 csys = 5017.24 CPU)
+  FAIL t/spec/S32-io/IO-Socket-Async.t                               (Wstat: 256 (exited 1) Tests: 26 Failed: 0)
+run 4 base: wall 277.46 (4:37.46) RSS 1028908 user 4577.63 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 270 wallclock secs (36.88 usr  7.63 sys + 4536.06 cusr 413.31 csys = 4993.88 CPU)
+run 5 base: wall 277.74 (4:37.74) RSS 1022860 user 4582.07 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 270 wallclock secs (37.00 usr  8.09 sys + 4540.53 cusr 411.51 csys = 4997.13 CPU)
+run 6 head: wall 278.18 (4:38.18) RSS 1030868 user 4606.56 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 271 wallclock secs (36.83 usr  7.91 sys + 4565.16 cusr 415.80 csys = 5025.70 CPU)
+
+base: wall [279.06, 277.46, 277.74] median 277.74 spread 277.46-279.06 (0.0058); RSS [1031228, 1028908, 1022860] median 1028908 spread 1022860-1031228 (0.0081); user median 4582.07
+head: wall [278.81, 278.68, 278.18] median 278.68 spread 278.18-278.81 (0.0023); RSS [1029108, 1026868, 1030868] median 1029108 spread 1026868-1030868 (0.0039); user median 4606.56
+ratio head/base: wall 1.003 RSS 1.000 user 1.005
+z017 reference: Files=1365 Tests=138715, 29 TODO-passed files

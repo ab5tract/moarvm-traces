@@ -1,0 +1,72 @@
+# perf annotate excerpts (plain, round 1, one sampled run per side) and objdump checks, Task 9
+
+## fences: objdump -d | grep -c
+ng-c-base mfence 0 lock-or-rsp 37
+ng-c-syms mfence 0 lock-or-rsp 37
+ng-n-base mfence 0 lock-or-rsp 37
+ng-n-syms mfence 0 lock-or-rsp 37
+
+## sizes (nm -S)
+ng-c-syms 0000000000868030 0000000000000180 T MVM_gc_allocate_object
+ng-c-syms 000000000086c360 0000000000000197 T MVM_gc_collect_free_nursery_uncopied
+ng-c-syms 000000000086b9d0 000000000000054f t process_worklist
+ng-n-syms 0000000000806440 0000000000000312 t gc.allocation.allocateObject
+ng-n-syms 00000000007a39e0 00000000000001af t gc.collect.freeNurseryUncopied
+ng-n-syms 00000000007a4070 00000000000007ff t gc.collect.processWorklist
+ng-n-syms 0000000000806430 0000000000000005 T MVM_gc_allocate_object
+ng-n-syms 0000000000805a40 000000000000000a T MVM_gc_collect_free_nursery_uncopied
+
+## the native export is a tail jump
+  806430:	jmp    806440 <gc.allocation.allocateObject>
+  806435:	int3
+
+## fence sites in gc.collect.processWorklist (ng-n-syms)
+  7a43cb:	lock orl $0x0,-0x40(%rsp)
+  7a43d1:	orb    $0x10,0xd(%r13)
+--
+--
+  7a468a:	lock orl $0x0,-0x40(%rsp)
+  7a4690:	orb    $0x10,0xd(%r13)
+--
+
+## annot-c-alloc: hottest 12 instructions
+   21.98 :   868137: je     868144 <MVM_gc_allocate_object+0x114>
+   12.81 :   8680c1: lea    (%r14,%r15,1),%rax
+   12.39 :   868039: mov    %rdi,%rbx
+   11.50 :   868059: mov    %eax,0x60(%rbx)
+    9.65 :   8680e9: mov    %ecx,0x8(%r14)
+    6.03 :   868030: push   %r15
+    3.22 :   8680d8: mov    0x8(%rsp),%r15
+    3.15 :   868133: testb  $0x8,0x26(%rcx)
+    2.05 :   868032: push   %r14
+    1.46 :   8680e7: mov    (%rbx),%ecx
+    1.44 :   868041: mov    0x60(%rdi),%eax
+    1.27 :   868057: inc    %eax
+
+## annot-n-alloc: hottest 12 instructions
+   13.96 :   806466: incl   0x60(%rbx)
+   11.46 :   80651d: mov    (%rbx),%ecx
+   11.11 :   80662b: testb  $0x8,0x26(%rcx)
+   10.55 :   806711: pop    %r13
+   10.52 :   80644a: push   %rax
+    8.96 :   8064c7: je     806719 <gc.allocation.allocateObject+0x2d9>
+    5.31 :   80662f: je     806704 <gc.allocation.allocateObject+0x2c4>
+    3.76 :   80650f: mov    (%rsp),%r13
+    3.56 :   806445: push   %r13
+    2.51 :   80644b: mov    %rdi,%rbx
+    2.15 :   80646d: mov    0x20(%rax),%r15d
+    1.97 :   806452: mov    0x60(%rdi),%eax
+
+## annot-n-pw: hottest 12 instructions
+   29.02 :   7a4110: test   $0x2,%al
+   11.20 :   7a42cf: movzbl 0xd(%rbp),%ecx
+    8.56 :   7a43d1: orb    $0x10,0xd(%r13)
+    5.87 :   7a4690: orb    $0x10,0xd(%r13)
+    5.79 :   7a40cb: mov    0x0(%r13),%rax
+    5.68 :   7a4705: and    $0x2,%cl
+    2.95 :   7a4450: movq   $0x0,(%rbx)
+    2.94 :   7a46bf: mov    0x80(%r9),%rax
+    2.94 :   7a42f4: mov    0x1d0(%rax),%rax
+    2.93 :   7a43c3: mov    %rbx,(%r12)
+    2.93 :   7a40fc: je     7a47e1 <gc.collect.processWorklist+0x771>
+    2.89 :   7a415c: jne    7a4245 <gc.collect.processWorklist+0x1d5>

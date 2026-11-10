@@ -1,0 +1,13 @@
+warmup base load 0.09
+warmup head load 0.09
+warmup head2 load 0.09
+round 1 base run 1 load 0.24
+round 1 head run 1 load 0.24
+round 1 head2 run 1 load 0.24
+round 2 head run 1 load 0.24
+round 2 head2 run 1 load 0.24
+round 2 base run 1 load 0.24
+round 3 head2 run 1 load 0.24
+round 3 base run 1 load 0.24
+round 3 head run 1 load 0.24
+end load 0.38

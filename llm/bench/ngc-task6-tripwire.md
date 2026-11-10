@@ -38,6 +38,9 @@ tasks so far (Task 5: 1.001) but sits within the faithful port's fixed baseline 
 
 ## Spec 8 h evidence (the work-passing list)
 
+(Note added at Task 9: this section's text predates ruling R10; the section "Re-run after ruling R10" below
+supersedes it.)
+
 Task 6 replaces the C's hand-rolled `ThreadWork` array (`MVM_realloc(target_work, num_target_threads *
 sizeof(ThreadWork))` per new target, `MVM_free` at the end of the run) with `std.ArrayList(ThreadWork)` over
 `moar.mvm_allocator`, grown with `ensureTotalCapacityPrecise(len + 1)`. The requested sizes are the C's (16, 32, 48, ...

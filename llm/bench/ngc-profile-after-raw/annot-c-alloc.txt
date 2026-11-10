@@ -1,0 +1,192 @@
+ Percent |	Source code & Disassembly of libmoar.so for cycles:u (479 samples, percent: local period)
+---------------------------------------------------------------------------------------------------------
+         :
+         :
+         :
+         : 3      Disassembly of section .text:
+         :
+         : 5      0000000000868030 <MVM_gc_allocate_object>:
+    6.03 :   868030: push   %r15
+         : 7      }
+         : 8      return obj;
+         : 9      }
+         :
+         : 11     /* Allocates a new object, and points it at the specified STable. */
+         : 12     MVMObject * MVM_gc_allocate_object(MVMThreadContext *tc, MVMSTable *st) {
+    2.05 :   868032: push   %r14
+    0.00 :   868034: push   %rbx
+    0.63 :   868035: sub    $0x10,%rsp
+   12.39 :   868039: mov    %rdi,%rbx
+    0.21 :   86803c: mov    %rsi,0x8(%rsp)
+         : 18     if (obj_ref == NULL)
+         : 19     MVM_panic(MVM_exitcode_gcroots, "Illegal attempt to add null object address as a temporary root");
+         : 20     #endif
+         :
+         : 22     /* If less than the number of always-allocated roots, just add. */
+         : 23     if (MVM_LIKELY(tc->num_temproots < MVM_TEMP_ROOT_BASE_ALLOC)) {
+    1.44 :   868041: mov    0x60(%rdi),%eax
+    0.21 :   868044: cmp    $0xf,%rax
+    0.84 :   868048: ja     86808b <MVM_gc_allocate_object+0x5b>
+         : 27     tc->temproots[tc->num_temproots] = obj_ref;
+    0.00 :   86804a: mov    0x70(%rbx),%rcx
+    0.00 :   86804e: lea    0x8(%rsp),%rdx
+    0.00 :   868053: mov    %rdx,(%rcx,%rax,8)
+         : 31     tc->num_temproots++;
+    1.27 :   868057: inc    %eax
+   11.50 :   868059: mov    %eax,0x60(%rbx)
+         : 34     MVMObject *obj;
+         : 35     MVMROOT(tc, st) {
+         : 36     obj               = MVM_gc_allocate_zeroed(tc, st->size);
+    0.81 :   86805c: mov    0x20(%rsi),%r15d
+         : 38     MVMObject * MVM_gc_allocate_type_object(MVMThreadContext *tc, MVMSTable *st);
+         : 39     MVMObject * MVM_gc_allocate_object(MVMThreadContext *tc, MVMSTable *st);
+         : 40     MVMFrame * MVM_gc_allocate_frame(MVMThreadContext *tc);
+         :
+         : 42     MVM_STATIC_INLINE void * MVM_gc_allocate(MVMThreadContext *tc, size_t size) {
+         : 43     return tc->allocate_in_gen2
+    0.00 :   868060: cmpl   $0x0,0x58(%rbx)
+    0.00 :   868064: je     8680a7 <MVM_gc_allocate_object+0x77>
+         : 46     ? MVM_gc_gen2_allocate_zeroed(tc->gen2, size)
+    0.00 :   868066: mov    0x48(%rbx),%rdi
+         :
+         : 49     /* Allocates space using the second generation allocator and returns
+         : 50     * a pointer to the allocated space. Promises the memory will be
+         : 51     * zeroed, except that the MVMCollectable gen 2 flag will get set. */
+         : 52     void * MVM_gc_gen2_allocate_zeroed(MVMGen2Allocator *al, MVMuint32 size) {
+         : 53     void *a = MVM_gc_gen2_allocate(al, size);
+    0.00 :   86806a: mov    %r15d,%esi
+    0.00 :   86806d: call   a00f40 <MVM_gc_gen2_allocate@plt>
+    0.00 :   868072: mov    %rax,%r14
+         : 57     memset(a, 0, size);
+    0.00 :   868075: mov    %rax,%rdi
+    0.00 :   868078: xor    %esi,%esi
+    0.00 :   86807a: mov    %r15,%rdx
+    0.00 :   86807d: call   79ddf0 <compiler_rt.fastMemset>
+         : 62     ((MVMCollectable *)a)->flags2 = MVM_CF_SECOND_GEN;
+    0.00 :   868082: movb   $0x2,0xd(%r14)
+    0.00 :   868087: mov    $0x2,%al
+    0.20 :   868089: jmp    8680d8 <MVM_gc_allocate_object+0xa8>
+    0.00 :   86808b: lea    0x8(%rsp),%rsi
+         : 67     }
+         :
+         : 69     /* Otherwise call the slow path. */
+         : 70     else {
+         : 71     MVM_gc_root_temp_push_slow(tc, obj_ref);
+    0.00 :   868090: mov    %rbx,%rdi
+    0.00 :   868093: call   9fce90 <MVM_gc_root_temp_push_slow@plt>
+    0.00 :   868098: mov    0x8(%rsp),%rsi
+    0.00 :   86809d: mov    0x20(%rsi),%r15d
+         : 76     return tc->allocate_in_gen2
+    0.00 :   8680a1: cmpl   $0x0,0x58(%rbx)
+    0.00 :   8680a5: jne    868066 <MVM_gc_allocate_object+0x36>
+         : 79     if (MVM_UNLIKELY(tc->gc_status))
+    0.59 :   8680a7: mov    0x40(%rbx),%rax
+    0.00 :   8680ab: test   %rax,%rax
+    0.00 :   8680ae: jne    868179 <MVM_gc_allocate_object+0x149>
+         : 83     if (MVM_LIKELY(size > 0)) {
+    0.00 :   8680b4: test   %r15,%r15
+    0.84 :   8680b7: je     86818a <MVM_gc_allocate_object+0x15a>
+         : 86     while (MVM_UNLIKELY((char *)tc->nursery_alloc + size >= (char *)tc->nursery_alloc_limit)) {
+    0.00 :   8680bd: mov    0x30(%rbx),%r14
+   12.81 :   8680c1: lea    (%r14,%r15,1),%rax
+    0.63 :   8680c5: cmp    0x38(%rbx),%rax
+    0.60 :   8680c9: jae    868154 <MVM_gc_allocate_object+0x124>
+         : 91     tc->nursery_alloc = (char *)tc->nursery_alloc + size;
+    0.00 :   8680cf: mov    %rax,0x30(%rbx)
+         :
+         : 94     /* Ensures that if a generation 2 object comes to hold a reference to a
+         : 95     * nursery object, then the generation 2 object becomes an inter-generational
+         : 96     * root. */
+         : 97     MVM_STATIC_INLINE void MVM_gc_write_barrier(MVMThreadContext *tc, MVMCollectable *update_root, MVMCollectable *referenced) {
+         : 98     if (((update_root->flags2 & MVM_CF_SECOND_GEN) && referenced && !(referenced->flags2 & MVM_CF_SECOND_GEN)))
+    1.05 :   8680d3: movzbl 0xd(%r14),%eax
+         : 100    obj->header.size  = (MVMuint16)st->size;
+    3.22 :   8680d8: mov    0x8(%rsp),%r15
+    0.00 :   8680dd: movzwl 0x20(%r15),%ecx
+    0.34 :   8680e2: mov    %cx,0xe(%r14)
+         : 104    obj->header.owner = tc->thread_id;
+    1.46 :   8680e7: mov    (%rbx),%ecx
+    9.65 :   8680e9: mov    %ecx,0x8(%r14)
+    0.61 :   8680ed: mov    %r15,%rcx
+    0.00 :   8680f0: test   %r15,%r15
+    0.21 :   8680f3: je     86812f <MVM_gc_allocate_object+0xff>
+    0.00 :   8680f5: mov    %eax,%edx
+    0.85 :   8680f7: mov    %r15,%rcx
+    0.00 :   8680fa: and    $0x2,%dl
+    0.00 :   8680fd: je     86812f <MVM_gc_allocate_object+0xff>
+    0.00 :   8680ff: movzbl 0xd(%r15),%edx
+    0.00 :   868104: mov    %r15,%rcx
+    0.00 :   868107: test   $0x2,%dl
+    0.00 :   86810a: jne    86812f <MVM_gc_allocate_object+0xff>
+    0.00 :   86810c: mov    %r15,%rcx
+         : 119    if (!(update_root->flags2 & MVM_CF_IN_GEN2_ROOT_LIST))
+         : 120    MVM_gc_root_gen2_add(tc, update_root);
+         : 121    }
+         : 122    void MVM_gc_write_barrier_hit_by(MVMThreadContext *tc, MVMCollectable *update_root,
+         : 123    MVMCollectable *referenced) {
+         : 124    if (!(update_root->flags2 & MVM_CF_IN_GEN2_ROOT_LIST))
+    0.00 :   86810f: test   $0x4,%al
+    0.00 :   868111: jne    868128 <MVM_gc_allocate_object+0xf8>
+         : 127    MVM_gc_root_gen2_add(tc, update_root);
+    0.00 :   868113: mov    %rbx,%rdi
+    0.00 :   868116: mov    %r14,%rsi
+    0.00 :   868119: call   a00e90 <MVM_gc_root_gen2_add@plt>
+         : 131    referenced->flags2 |= MVM_CF_REF_FROM_GEN2;
+    0.00 :   86811e: movzbl 0xd(%r15),%edx
+         : 133    MVM_ASSIGN_REF(tc, &(obj->header), obj->st, st);
+         : 134    if (st->mode_flags & MVM_FINALIZE_TYPE)
+    0.00 :   868123: mov    0x8(%rsp),%rcx
+    0.00 :   868128: or     $0x20,%dl
+    0.00 :   86812b: mov    %dl,0xd(%r15)
+         : 138    MVM_ASSIGN_REF(tc, &(obj->header), obj->st, st);
+    0.00 :   86812f: mov    %r15,0x10(%r14)
+         : 140    if (st->mode_flags & MVM_FINALIZE_TYPE)
+    3.15 :   868133: testb  $0x8,0x26(%rcx)
+   21.98 :   868137: je     868144 <MVM_gc_allocate_object+0x114>
+         : 143    MVM_gc_finalize_add_to_queue(tc, obj);
+    0.00 :   868139: mov    %rbx,%rdi
+    0.00 :   86813c: mov    %r14,%rsi
+    0.00 :   86813f: call   a00e40 <MVM_gc_finalize_add_to_queue@plt>
+         : 147    MVM_STATIC_INLINE void MVM_gc_root_temp_pop(MVMThreadContext *tc) {
+         : 148    #if MVM_TEMP_ROOT_DEBUG
+         : 149    if (tc->num_temproots <= 0)
+         : 150    MVM_panic(1, "Illegal attempt to pop empty temporary root stack");
+         : 151    #endif
+         : 152    tc->num_temproots--;
+    0.21 :   868144: decl   0x60(%rbx)
+         : 154    }
+         : 155    return obj;
+    0.84 :   868147: mov    %r14,%rax
+    1.06 :   86814a: add    $0x10,%rsp
+    0.85 :   86814e: pop    %rbx
+    0.21 :   86814f: pop    %r14
+    0.20 :   868151: pop    %r15
+    1.05 :   868153: ret
+    0.00 :   868154: cmp    $0x1000000,%r15d
+         : 163    if (size > MVM_NURSERY_SIZE)
+    0.00 :   86815b: ja     86819d <MVM_gc_allocate_object+0x16d>
+         : 165    MVM_gc_enter_from_allocator(tc);
+    0.00 :   86815d: mov    %rbx,%rdi
+    0.00 :   868160: call   a00310 <MVM_gc_enter_from_allocator@plt>
+         : 168    while (MVM_UNLIKELY((char *)tc->nursery_alloc + size >= (char *)tc->nursery_alloc_limit)) {
+    0.00 :   868165: mov    0x30(%rbx),%r14
+    0.00 :   868169: lea    (%r14,%r15,1),%rax
+    0.00 :   86816d: cmp    0x38(%rbx),%rax
+    0.00 :   868171: jb     8680cf <MVM_gc_allocate_object+0x9f>
+    0.00 :   868177: jmp    86815d <MVM_gc_allocate_object+0x12d>
+         : 174    MVM_gc_enter_from_interrupt(tc);
+    0.00 :   868179: mov    %rbx,%rdi
+    0.00 :   86817c: call   9ff810 <MVM_gc_enter_from_interrupt@plt>
+         : 177    if (MVM_LIKELY(size > 0)) {
+    0.00 :   868181: test   %r15,%r15
+    0.00 :   868184: jne    8680bd <MVM_gc_allocate_object+0x8d>
+         : 180    MVM_panic(MVM_exitcode_gcalloc, "Cannot allocate 0 bytes of memory in the nursery");
+    0.00 :   86818a: lea    -0x62b690(%rip),%rsi        # 23cb01 <__anon_5129+0x167>
+    0.00 :   868191: mov    $0xf,%edi
+    0.00 :   868196: xor    %eax,%eax
+    0.00 :   868198: call   9ff680 <MVM_panic@plt>
+         : 185    MVM_panic(MVM_exitcode_gcalloc, "Attempt to allocate more than the maximum nursery size");
+    0.00 :   86819d: lea    -0x60ef3d(%rip),%rsi        # 259267 <__anon_26942+0x178>
+    0.00 :   8681a4: mov    $0xf,%edi
+    0.00 :   8681a9: xor    %eax,%eax
+    0.00 :   8681ab: call   9ff680 <MVM_panic@plt>

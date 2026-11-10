@@ -163,3 +163,16 @@ My calls (to overrule while reading):
 - The inline C fast paths stay in C; the derived `gc_mark` is the next campaign.
 - The three full-cleanup programs move from the interlude's PR text into `tools/bench/gc/`.
 - Reading notes as a deliverable.
+
+## Errata (as built, recorded at acceptance 2026-11-10)
+
+What the tasks found or changed against the text above; the text is left as approved.
+
+- Section 5: "16 cells per group" -> 8 cells per group (2 volumes x 2 settings x 2 tiers), 24 cells over three groups (48 compared logs, one per side per cell; the acceptance brief's "48 cells" counted logs).
+- Section 3 Threads / plan Atomics constraint: the fence shape (R5), user-approved 2026-11-10.
+- Section 8 d: the status type lives in atomic.zig, re-exported by view.zig; field `suspend_state`; `Suspend` non-exhaustive.
+- Section 8 g: 22 instance-root description sites (18 table entries), not 40; tables joined from segments.
+- Section 8 h: the allocator needed a `remap` over MVM_realloc for the size AND operation sequence to be the C's.
+- Section 11: "118 atomic sites" in orchestrate -> 68.
+- Section 7: the `.text` equality check fails by construction for `-Dstrip=false` builds (std.debug code), so the fallback A/B is always needed.
+- Section 13, "The inline C fast paths stay in C": they stay for the C callers, but the collector's own Zig callers got Zig copies that inline: the temp-root push and pop (`moar.root`/`TempRoot`, Rulings R6/R1, Task 3) and `MVM_gc_write_barrier_no_update_referenced` (`wb.noUpdateReferenced`, Ruling R11, Task 7). Added by Task 9 from the plan deviations.

@@ -1,0 +1,2 @@
+ng-n-syms	exit 0	68s	load 0.35	opts -Dstrip=false	This is MoarVM version 2026.09-291-g1a70642f9 built with JIT support
+ng-n-nlto	exit 0	24s	load 1.13	opts -Dlto=false -Dstrip=false	This is MoarVM version 2026.09-291-g1a70642f9 built with JIT support

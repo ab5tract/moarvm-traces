@@ -1,0 +1,33 @@
+20:53:46 start plain/c-r1
+20:54:31 end plain/c-r1 exit 0
+20:54:31 start plain/n-r1
+20:55:18 end plain/n-r1 exit 0
+20:55:18 start plain/n-r2
+20:55:57 end plain/n-r2 exit 0
+20:55:57 start plain/c-r2
+20:56:35 end plain/c-r2 exit 0
+20:56:35 start plain/c-r3
+20:57:13 end plain/c-r3 exit 0
+20:57:13 start plain/n-r3
+20:57:52 end plain/n-r3 exit 0
+20:57:52 start bad/c-r1
+20:58:41 end bad/c-r1 exit 0
+20:58:41 start bad/n-r1
+20:59:30 end bad/n-r1 exit 0
+20:59:30 start bad/n-r2
+21:00:12 end bad/n-r2 exit 0
+21:00:12 start bad/c-r2
+21:00:52 end bad/c-r2 exit 0
+21:00:52 start bad/c-r3
+21:01:33 end bad/c-r3 exit 0
+21:01:33 start bad/n-r3
+21:02:14 end bad/n-r3 exit 0
+21:02:14 start nlto/c
+21:02:23 end nlto/c exit 0
+21:02:23 start nlto/n
+21:02:31 end nlto/n exit 0
+21:02:31 start textab-c
+21:06:17 end textab-c exit 0
+21:06:17 start textab-n
+21:10:06 end textab-n exit 0
+21:10:06 done

@@ -1,0 +1,843 @@
+ Percent |	Source code & Disassembly of libmoar.so for cycles:u (35 samples, percent: local period)
+--------------------------------------------------------------------------------------------------------
+         :
+         :
+         :
+         : 3      Disassembly of section .text:
+         :
+         : 5      00000000007a4070 <gc.collect.processWorklist>:
+         : 6      const rest: [*]u8 = @ptrCast(tc.nursery_alloc.?);
+         : 7      @memset(rest[0 .. @intFromPtr(tc.nursery_alloc_limit) - @intFromPtr(rest)], 0);
+         : 8      }
+         :
+         : 163    fn processWorklist(tc: Tc, worklist: Worklist, wtp: *WorkToPass, gen: Generations) void {
+    0.00 :   7a4070: push   %rbp
+    0.00 :   7a4071: push   %r15
+    0.00 :   7a4073: push   %r14
+    0.00 :   7a4075: push   %r13
+    0.00 :   7a4077: push   %r12
+    0.00 :   7a4079: push   %rbx
+    0.00 :   7a407a: sub    $0x38,%rsp
+    0.00 :   7a407e: mov    %ecx,0x2c(%rsp)
+         : 172    if (worklist.items == 0) return null;
+    0.00 :   7a4082: mov    0x8(%rsi),%ebx
+    0.00 :   7a4085: test   %ebx,%ebx
+    0.00 :   7a4087: je     7a47e1 <gc.collect.processWorklist+0x771>
+    0.00 :   7a408d: mov    %rsi,%r15
+    0.00 :   7a4090: mov    0x48(%rdi),%rax
+    0.00 :   7a4094: mov    %rax,0x30(%rsp)
+    0.00 :   7a4099: mov    %rdx,0x8(%rsp)
+    0.00 :   7a409e: mov    %rdi,(%rsp)
+    0.00 :   7a40a2: lea    0x345f2f(%rip),%rdi        # ae9fd8 <_DYNAMIC+0x1f0>
+    0.00 :   7a40a9: call   a02a90 <__tls_get_addr@plt>
+    0.00 :   7a40ae: mov    (%rsp),%r9
+    0.00 :   7a40b2: mov    0x8(%rsp),%r8
+    0.00 :   7a40b7: lea    0x0(%rax),%rax
+    0.00 :   7a40be: mov    %rax,0x20(%rsp)
+    0.00 :   7a40c3: jmp    7a40ec <gc.collect.processWorklist+0x7c>
+         : 188    /// on ARM64, `fence rw,rw` on RISC-V; each with a memory clobber so the
+         : 189    /// compiler moves no access across it (and on x86 the flags clobber of the
+         : 190    /// `or`). Elsewhere a seq_cst read-modify-write of a private word, which the
+         : 191    /// hardware orders as a full barrier on the remaining targets.
+         : 192    pub inline fn fence() void {
+         : 193    switch (builtin.target.cpu.arch) {
+    0.00 :   7a40c5: lock orl $0x0,-0x40(%rsp)
+         : 195    gcdebugLog(tc, "Thread %d run %d : already visited handle %p to forwarder %p\n", .{ vp(item_ptr), vp(item.sc_forward_u.forwarder) });
+         : 196    }
+         : 197    }
+         : 207    atomic.fence();
+         : 208    item_ptr.* = item.sc_forward_u.forwarder;
+    5.79 :   7a40cb: mov    0x0(%r13),%rax
+    0.00 :   7a40cf: mov    %rax,(%r12)
+    0.00 :   7a40d3: data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+         : 212    if (worklist.items == 0) return null;
+    0.00 :   7a40e0: mov    0x8(%r15),%ebx
+    0.00 :   7a40e4: test   %ebx,%ebx
+    0.00 :   7a40e6: je     7a47e1 <gc.collect.processWorklist+0x771>
+         : 216    worklist.items -= 1;
+    0.00 :   7a40ec: dec    %ebx
+    0.00 :   7a40ee: mov    %ebx,0x8(%r15)
+         : 219    return @ptrCast(worklist.list[worklist.items]);
+    0.00 :   7a40f2: mov    (%r15),%rax
+    2.89 :   7a40f5: mov    (%rax,%rbx,8),%r12
+         : 222    while (worklistGet(worklist)) |item_ptr| {
+    0.00 :   7a40f9: test   %r12,%r12
+    2.93 :   7a40fc: je     7a47e1 <gc.collect.processWorklist+0x771>
+         : 225    const item: Col = item_ptr.* orelse continue;
+    0.00 :   7a4102: mov    (%r12),%r13
+    2.70 :   7a4106: test   %r13,%r13
+    0.00 :   7a4109: je     7a40e0 <gc.collect.processWorklist+0x70>
+         : 229    const item_gen2 = view.flags2(item).second_gen;
+    0.00 :   7a410b: movzbl 0xd(%r13),%eax
+   29.02 :   7a4110: test   $0x2,%al
+         : 232    if (item_gen2) {
+    0.00 :   7a4112: jne    7a4130 <gc.collect.processWorklist+0xc0>
+         : 234    } else if (view.flags2(item).forwarder_valid) {
+    0.00 :   7a4114: test   $0x10,%al
+    0.00 :   7a4116: jne    7a40c5 <gc.collect.processWorklist+0x55>
+         : 237    continue;
+         : 238    } else {
+         : 239    // If the pointer is already into tospace (the bit we've already
+         : 240    // copied into), we already updated it, so we're done.
+         : 241    if (@intFromPtr(item) >= @intFromPtr(tc.nursery_tospace) and @intFromPtr(item) < @intFromPtr(tc.nursery_alloc)) {
+    0.00 :   7a4118: cmp    0x28(%r9),%r13
+    0.00 :   7a411c: jb     7a413e <gc.collect.processWorklist+0xce>
+    0.00 :   7a411e: cmp    0x30(%r9),%r13
+    0.00 :   7a4122: jb     7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a4124: jmp    7a413e <gc.collect.processWorklist+0xce>
+    0.00 :   7a4126: cs nopw 0x0(%rax,%rax,1)
+    0.00 :   7a4130: cmpb   $0x0,0x2c(%rsp)
+         : 249    if (gen == .nursery)
+    0.00 :   7a4135: je     7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a4137: mov    %eax,%ecx
+    0.00 :   7a4139: and    $0x8,%cl
+    0.00 :   7a413c: jne    7a40e0 <gc.collect.processWorklist+0x70>
+         : 254    }
+         : 255    }
+         :
+         : 257    // If it's owned by a different thread, we need to pass it over to
+         : 258    // the owning thread.
+         : 259    if (item.owner != tc.thread_id) {
+    0.00 :   7a413e: mov    0x8(%r13),%ebp
+    0.00 :   7a4142: cmp    (%r9),%ebp
+    0.00 :   7a4145: jne    7a418f <gc.collect.processWorklist+0x11f>
+         : 263    continue;
+         : 264    }
+         :
+         : 266    // If it's in to-space but *ahead* of our copy offset then it's an
+         : 267    // out-of-date pointer and we have some kind of corruption.
+         : 268    if (@intFromPtr(item) >= @intFromPtr(tc.nursery_alloc) and @intFromPtr(item) < @intFromPtr(tc.nursery_alloc_limit))
+    0.00 :   7a4147: mov    0x30(%r9),%rbx
+    0.00 :   7a414b: cmp    %rbx,%r13
+    0.00 :   7a414e: jb     7a415a <gc.collect.processWorklist+0xea>
+    0.00 :   7a4150: cmp    0x38(%r9),%r13
+    0.00 :   7a4154: jb     7a482b <gc.collect.processWorklist+0x7bb>
+         : 274    const item_gen2 = view.flags2(item).second_gen;
+    0.00 :   7a415a: test   $0x2,%al
+         : 276    c.MVM_panic(1, "Heap corruption detected: pointer %p to past fromspace", vp(item));
+         :
+         : 278    // At this point, we didn't already see the object, which means we
+         : 279    // need to take some action. Go on the generation...
+         : 280    const new_addr: Col, const to_gen2: bool = if (item_gen2) marked: {
+    2.89 :   7a415c: jne    7a4245 <gc.collect.processWorklist+0x1d5>
+         :
+         : 283    // Did we see it in the nursery before, or should we move it to
+         : 284    // gen2 anyway since either:
+         : 285    //   * A persistent ID was requested?
+         : 286    //   * It is referenced by a gen2 aggregate
+         : 287    const promote = view.flags1(item).has_object_id or
+    0.00 :   7a4162: testb  $0x10,0xc(%r13)
+    0.00 :   7a4167: jne    7a4278 <gc.collect.processWorklist+0x208>
+    0.00 :   7a416d: movzwl 0xe(%r13),%esi
+         : 291    view.flags2(item).nursery_seen or view.flags2(item).ref_from_gen2;
+    0.00 :   7a4172: test   $0x21,%al
+    0.00 :   7a4174: je     7a43a8 <gc.collect.processWorklist+0x338>
+    0.00 :   7a417a: mov    0x30(%rsp),%rdi
+    0.00 :   7a417f: mov    %r9,%rbx
+         : 296    // Yes; we should move it to the second generation. Allocate
+         : 297    // space in the second generation.
+         : 298    const to: Col = view.asCol(if (view.flags1(item).has_object_id)
+         : 299    objectid.useAllocation(tc, item).?
+         : 300    else
+         : 301    gen2_mod.allocate(gen2, item.size));
+    0.00 :   7a4182: call   7a99e0 <gc.gen2.allocate>
+    0.00 :   7a4187: mov    %rax,%rbp
+    0.00 :   7a418a: jmp    7a42b3 <gc.collect.processWorklist+0x243>
+         : 305    if (target == 0)
+    0.00 :   7a418f: test   %ebp,%ebp
+    0.00 :   7a4191: je     7a4805 <gc.collect.processWorklist+0x795>
+         : 308    const target_info: *ThreadWork = for (wtp.targets.items) |*tw| {
+    0.00 :   7a4197: mov    (%r8),%r13
+    0.00 :   7a419a: mov    0x8(%r8),%r14
+    0.00 :   7a419e: mov    %r14,%rax
+    0.00 :   7a41a1: mov    %r13,%rbx
+    0.00 :   7a41a4: test   %r14,%r14
+    0.00 :   7a41a7: je     7a41c2 <gc.collect.processWorklist+0x152>
+    0.00 :   7a41a9: nopl   0x0(%rax)
+         : 316    if (tw.target == target) break tw;
+    0.00 :   7a41b0: cmp    %ebp,0x8(%rbx)
+    0.00 :   7a41b3: je     7a4267 <gc.collect.processWorklist+0x1f7>
+         : 319    const target_info: *ThreadWork = for (wtp.targets.items) |*tw| {
+    0.00 :   7a41b9: add    $0x10,%rbx
+    0.00 :   7a41bd: dec    %rax
+    0.00 :   7a41c0: jne    7a41b0 <gc.collect.processWorklist+0x140>
+         : 323    wtp.targets.ensureTotalCapacityPrecise(moar.mvm_allocator, wtp.targets.items.len + 1) catch unreachable;
+    0.00 :   7a41c2: lea    0x1(%r14),%rsi
+         : 325    if (@sizeOf(T) == 0) {
+         : 326    self.capacity = math.maxInt(usize);
+         : 327    return;
+         : 328    }
+         :
+         : 330    if (self.capacity >= new_capacity) return;
+    0.00 :   7a41c6: mov    0x10(%r8),%rax
+    0.00 :   7a41ca: cmp    %r14,%rax
+    0.00 :   7a41cd: ja     7a44d0 <gc.collect.processWorklist+0x460>
+    0.00 :   7a41d3: mov    %rax,0x18(%rsp)
+         :
+         : 336    if (new_len == 0) {
+         : 337    self.free(allocation);
+         : 338    return allocation[0..0];
+         : 339    }
+         : 340    if (allocation.len == 0) {
+    0.00 :   7a41d8: test   %rax,%rax
+    0.00 :   7a41db: sete   %al
+    0.00 :   7a41de: movabs $0xffffffffffffffe,%rcx
+    0.00 :   7a41e8: cmp    %rcx,%r14
+    0.00 :   7a41eb: seta   %cl
+    0.00 :   7a41ee: or     %al,%cl
+    0.00 :   7a41f0: mov    $0x0,%ebx
+    0.00 :   7a41f5: mov    $0x0,%eax
+    0.00 :   7a41fa: jne    7a441c <gc.collect.processWorklist+0x3ac>
+         : 350    }
+         :
+         : 352    /// Returns the product of a and b. Returns an error on overflow.
+         : 353    pub fn mul(comptime T: type, a: T, b: T) (error{Overflow}!T) {
+         : 354    if (T == comptime_int) return a * b;
+         : 355    const ov = @mulWithOverflow(a, b);
+    0.00 :   7a4200: mov    %rsi,%rdx
+    0.00 :   7a4203: shl    $0x4,%rdx
+    0.00 :   7a4207: mov    0x20(%rsp),%rax
+         :
+         : 360    static inline mi_theap_t* _mi_theap_default(void) {
+         : 361    #if defined(MI_TLS_RECURSE_GUARD)
+         : 362    if mi_unlikely(!_mi_process_is_initialized) return _mi_theap_empty_get();
+         : 363    #endif
+         : 364    return __mi_theap_default;
+    0.00 :   7a420c: mov    (%rax),%rdi
+         : 366    return mi_theap_realloc_zero_ex(theap,p,newsize,zero,NULL,NULL);
+         : 367    }
+         :
+         : 369    mi_decl_nodiscard void* mi_theap_realloc(mi_theap_t* theap, void* p, size_t newsize) mi_attr_noexcept {
+         : 370    // optimize p==NULL
+         : 371    if (p==NULL) {
+    0.00 :   7a420f: test   %r13,%r13
+    0.00 :   7a4212: je     7a43e5 <gc.collect.processWorklist+0x375>
+         : 374    return mi_theap_malloc(theap,newsize);
+         : 375    }
+         : 376    else {
+         : 377    return _mi_theap_realloc_zero(theap, p, newsize, false);
+    0.00 :   7a4218: mov    %r13,%rsi
+    0.00 :   7a421b: mov    %rdx,0x10(%rsp)
+    0.00 :   7a4220: xor    %ecx,%ecx
+    0.00 :   7a4222: call   a024f0 <_mi_theap_realloc_zero@plt>
+    0.00 :   7a4227: mov    %rax,%rbx
+    0.00 :   7a422a: test   %rax,%rax
+    0.00 :   7a422d: mov    0x8(%rsp),%r8
+    0.00 :   7a4232: mov    (%rsp),%r9
+    0.00 :   7a4236: lea    0x1(%r14),%rsi
+    0.00 :   7a423a: jne    7a4419 <gc.collect.processWorklist+0x3a9>
+    0.00 :   7a4240: jmp    7a4855 <gc.collect.processWorklist+0x7e5>
+         : 389    view.flags2(item).gen2_live = true;
+    0.00 :   7a4245: or     $0x8,%al
+    0.00 :   7a4247: mov    %al,0xd(%r13)
+         : 392    // Finally, we need to mark the collectable (at its moved address).
+         : 393    // Track how many items we had before we mark it, in case we need
+         : 394    // to write barrier them post-move to uphold the generational
+         : 395    // invariant.
+         : 396    const gen2count = worklist.items;
+         : 397    markCollectable(tc, worklist, new_addr);
+    0.00 :   7a424b: mov    %r9,%rdi
+    0.00 :   7a424e: mov    %r15,%rsi
+    0.00 :   7a4251: mov    %r13,%rdx
+    0.00 :   7a4254: call   7a8070 <gc.collect.markCollectable>
+    0.00 :   7a4259: mov    (%rsp),%r9
+    0.00 :   7a425d: mov    0x8(%rsp),%r8
+         :
+         : 405    // In moving an object to generation 2, we may have left it pointing
+         : 406    // to nursery objects. If so, make sure it's in the gen2 roots.
+         : 407    if (to_gen2) {
+    0.00 :   7a4262: jmp    7a40e0 <gc.collect.processWorklist+0x70>
+         : 409    const work: *PassedWork = target_info.work orelse new: {
+    0.00 :   7a4267: mov    (%rbx),%r13
+    0.00 :   7a426a: test   %r13,%r13
+    0.00 :   7a426d: jne    7a4577 <gc.collect.processWorklist+0x507>
+    0.00 :   7a4273: jmp    7a44ea <gc.collect.processWorklist+0x47a>
+         : 414    /// gen2 address, or null when the hash has no entry for it (the C returns
+         : 40     /// with `MVM_CF_HAS_OBJECT_ID` set, which implies an entry, and unwraps
+         : 41     /// the result with `.?` as the faithful port did.
+         : 42     pub fn useAllocation(tc: Tc, item: Col) ?*anyopaque {
+         : 43     const i: view.Instance = tc.instance;
+    0.00 :   7a4278: mov    0x10(%r9),%rbx
+         : 45     c.uv_mutex_lock(&i.mutex_object_ids);
+    0.00 :   7a427c: lea    0x1f0(%rbx),%r14
+    0.00 :   7a4283: mov    %r14,%rdi
+    0.00 :   7a4286: mov    %r9,%rbp
+    0.00 :   7a4289: call   9fceb0 <uv_mutex_lock@plt>
+         : 50     defer c.uv_mutex_unlock(&i.mutex_object_ids);
+         : 51     const addr = c.MVM_ptr_hash_fetch_and_delete(tc, &i.object_ids, item);
+    0.00 :   7a428e: add    $0x1e8,%rbx
+    0.00 :   7a4295: mov    %rbx,%rsi
+    0.00 :   7a4298: mov    %rbp,%rbx
+    0.00 :   7a429b: mov    %r13,%rdx
+    0.00 :   7a429e: call   7a3b90 <MVM_ptr_hash_fetch_and_delete>
+    0.00 :   7a42a3: mov    %rax,%rbp
+         : 58     // `flags1 ^= MVM_CF_HAS_OBJECT_ID`: a toggle, as the C's.
+         : 59     const f1 = view.flags1(item);
+         : 60     f1.has_object_id = !f1.has_object_id;
+    0.00 :   7a42a6: xorb   $0x10,0xc(%r13)
+         : 62     defer c.uv_mutex_unlock(&i.mutex_object_ids);
+    0.00 :   7a42ab: mov    %r14,%rdi
+    0.00 :   7a42ae: call   9fcec0 <uv_mutex_unlock@plt>
+         : 65     tc.gc_promoted_bytes +%= item.size;
+    0.00 :   7a42b3: movzwl 0xe(%r13),%eax
+    0.00 :   7a42b8: add    %eax,0x5c(%rbx)
+         : 68     @memcpy(bytesOf(to, item.size), bytesOf(item, item.size));
+    0.00 :   7a42bb: movzwl 0xe(%r13),%edx
+    0.00 :   7a42c0: mov    %rbp,%rdi
+    0.00 :   7a42c3: mov    %r13,%rsi
+    0.00 :   7a42c6: call   79e3d0 <compiler_rt.memcpy.memcpyFast>
+         : 73     if (view.flags1(to).frame) {
+    0.00 :   7a42cb: movzbl 0xc(%rbp),%eax
+         : 75     if (view.flags2(to).nursery_seen)
+   11.20 :   7a42cf: movzbl 0xd(%rbp),%ecx
+    0.00 :   7a42d3: and    $0xfc,%cl
+         : 78     view.flags2(to).second_gen = true;
+    2.78 :   7a42d6: or     $0x2,%cl
+    0.00 :   7a42d9: mov    %cl,0xd(%rbp)
+         : 81     if (view.flags1(to).frame) {
+    0.00 :   7a42dc: test   $0x4,%al
+    0.00 :   7a42de: jne    7a4333 <gc.collect.processWorklist+0x2c3>
+         : 84     } else if (!view.flags1(to).type_object and !view.flags1(to).stable) {
+    0.00 :   7a42e0: test   $0x3,%al
+    0.00 :   7a42e2: mov    (%rsp),%rdi
+    0.00 :   7a42e6: jne    7a4677 <gc.collect.processWorklist+0x607>
+         :
+         : 89     // ---- accessor macros from src/6model/6model.h --------------------------
+         :
+         : 91     /// STABLE(o)
+         : 92     pub inline fn stable(o: *Object) *STable {
+         : 93     return o.st;
+    0.00 :   7a42ec: mov    0x10(%rbp),%rsi
+         : 95     }
+         : 96     /// REPR(o)
+         : 97     pub inline fn repr(o: *Object) *const REPROps {
+         : 98     return stable(o).REPR;
+    0.00 :   7a42f0: mov    0x10(%rsi),%rax
+         : 100    if (moar.repr(new_obj_addr).unmanaged_size) |unmanaged_size_fn| {
+    2.94 :   7a42f4: mov    0x1d0(%rax),%rax
+    0.00 :   7a42fb: test   %rax,%rax
+    2.61 :   7a42fe: je     7a4677 <gc.collect.processWorklist+0x607>
+         : 104    }
+         : 105    /// OBJECT_BODY(o)
+         : 106    pub inline fn objectBody(o: *Object) *anyopaque {
+         : 107    const stooge: *c.MVMObjectStooge = @ptrCast(o);
+         : 108    return @ptrCast(&stooge.data);
+    0.00 :   7a4304: lea    0x18(%rbp),%rdx
+         : 110    const unmanaged_size: u64 = unmanaged_size_fn(tc, new_obj_addr.st, moar.objectBody(new_obj_addr));
+    0.00 :   7a4308: call   *%rax
+    0.00 :   7a430a: mov    (%rsp),%rdi
+         : 113    tc.gc_promoted_bytes = @truncate(@as(u64, tc.gc_promoted_bytes) +% unmanaged_size);
+    0.00 :   7a430e: add    %eax,0x5c(%rdi)
+         : 115    if (tc.instance.*.profiling != 0)
+    0.00 :   7a4311: mov    0x10(%rdi),%rcx
+    0.00 :   7a4315: cmpl   $0x0,0xadc(%rcx)
+    0.00 :   7a431c: je     7a4677 <gc.collect.processWorklist+0x607>
+         : 119    c.MVM_profiler_log_unmanaged_data_promoted(tc, unmanaged_size);
+    0.00 :   7a4322: mov    %rax,%rsi
+    0.00 :   7a4325: call   9fd080 <MVM_profiler_log_unmanaged_data_promoted@plt>
+    0.00 :   7a432a: mov    (%rsp),%rdi
+    0.00 :   7a432e: jmp    7a4677 <gc.collect.processWorklist+0x607>
+         : 124    if (view.asFrame(to).work != null)
+    0.00 :   7a4333: cmpq   $0x0,0x18(%rbp)
+    0.00 :   7a4338: mov    (%rsp),%rdi
+    0.00 :   7a433c: je     7a4677 <gc.collect.processWorklist+0x607>
+         :
+         : 129    /// Pushes a collectable that is in generation 2, but now references a nursery
+         : 306    pub fn gen2Add(tc: Tc, maybe_col: ?Col) void {
+         : 307    // Ensure the collectable is not null.
+         : 308    const col = maybe_col orelse
+    0.00 :   7a4342: test   %rbp,%rbp
+    0.00 :   7a4345: je     7a4818 <gc.collect.processWorklist+0x7a8>
+         : 311    c.MVM_panic(c.MVM_exitcode_gcroots, "Illegal attempt to add null collectable address as an inter-generational root");
+         : 312    cAssert(!view.flags2(col).forwarder_valid);
+         :
+         : 314    // Allocate extra gen2 aggregate space if needed.
+         : 315    if (tc.num_gen2roots == tc.alloc_gen2roots) {
+    0.00 :   7a434b: mov    0x78(%rdi),%r14d
+    0.00 :   7a434f: cmp    0x7c(%rdi),%r14d
+    0.00 :   7a4353: jne    7a4464 <gc.collect.processWorklist+0x3f4>
+         : 319    tc.alloc_gen2roots *%= 2;
+    0.00 :   7a4359: add    %r14d,%r14d
+    0.00 :   7a435c: mov    %r14d,0x7c(%rdi)
+    0.00 :   7a4360: mov    %rdi,%r8
+         : 323    tc.gen2roots = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(tc.gen2roots), @sizeOf(Col) * @as(usize, tc.alloc_gen2roots))));
+    0.00 :   7a4363: mov    0x80(%rdi),%rsi
+    0.00 :   7a436a: lea    0x0(,%r14,8),%rbx
+    0.00 :   7a4372: mov    0x20(%rsp),%rax
+    0.00 :   7a4377: mov    (%rax),%rdi
+         : 328    if (p==NULL) {
+    0.00 :   7a437a: test   %rsi,%rsi
+    0.00 :   7a437d: je     7a4611 <gc.collect.processWorklist+0x5a1>
+         : 331    return _mi_theap_realloc_zero(theap, p, newsize, false);
+    0.00 :   7a4383: mov    %rbx,%rdx
+    0.00 :   7a4386: xor    %ecx,%ecx
+    0.00 :   7a4388: call   a024f0 <_mi_theap_realloc_zero@plt>
+    0.00 :   7a438d: test   %r14,%r14
+    0.00 :   7a4390: je     7a465a <gc.collect.processWorklist+0x5ea>
+    0.00 :   7a4396: test   %rax,%rax
+    0.00 :   7a4399: mov    (%rsp),%rdi
+    0.00 :   7a439d: jne    7a465e <gc.collect.processWorklist+0x5ee>
+    0.00 :   7a43a3: jmp    7a485f <gc.collect.processWorklist+0x7ef>
+         : 341    tc.nursery_alloc = alloc + allocation.alignSize(item.size);
+    0.00 :   7a43a8: add    %rbx,%rsi
+    0.00 :   7a43ab: mov    %rsi,0x30(%r9)
+         : 344    @memcpy(bytesOf(to, item.size), bytesOf(item, item.size));
+    0.00 :   7a43af: movzwl 0xe(%r13),%edx
+    0.00 :   7a43b4: mov    %rbx,%rdi
+    0.00 :   7a43b7: mov    %r13,%rsi
+    0.00 :   7a43ba: call   79e3d0 <compiler_rt.memcpy.memcpyFast>
+         : 349    view.flags2(to).nursery_seen = true;
+    0.00 :   7a43bf: orb    $0x1,0xd(%rbx)
+         : 351    item_ptr.* = copy;
+    2.93 :   7a43c3: mov    %rbx,(%r12)
+         : 353    item.sc_forward_u.forwarder = copy;
+    0.00 :   7a43c7: mov    %rbx,0x0(%r13)
+    0.00 :   7a43cb: lock orl $0x0,-0x40(%rsp)
+         : 356    view.flags2(item).forwarder_valid = true;
+    8.56 :   7a43d1: orb    $0x10,0xd(%r13)
+    0.00 :   7a43d6: mov    (%rsp),%rdi
+         : 359    markCollectable(tc, worklist, new_addr);
+    0.00 :   7a43da: mov    %r15,%rsi
+    0.00 :   7a43dd: mov    %rbx,%rdx
+    0.00 :   7a43e0: jmp    7a4254 <gc.collect.processWorklist+0x1e4>
+         : 363    if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   7a43e5: cmp    $0x3f,%r14
+    0.00 :   7a43e9: ja     7a45fb <gc.collect.processWorklist+0x58b>
+         :
+         : 367    static inline mi_page_t* _mi_theap_get_free_small_page(mi_theap_t* theap, size_t size) {
+         : 368    mi_assert_internal(size <= (MI_SMALL_SIZE_MAX + MI_PADDING_SIZE));
+         : 369    const size_t idx = _mi_wsize_from_size(size);
+         : 370    mi_assert_internal(idx < MI_PAGES_DIRECT);
+         : 371    return theap->pages_free_direct[idx];
+    0.00 :   7a43ef: mov    (%rdi,%rdx,1),%rax
+         : 373    mi_block_t* const block = page->free;
+    0.00 :   7a43f3: mov    0x10(%rax),%rbx
+         : 375    const mi_used_t used = page->used;
+    0.00 :   7a43f7: mov    0x18(%rax),%rcx
+         : 377    if (block == NULL) {
+    0.00 :   7a43fb: test   %rbx,%rbx
+    0.00 :   7a43fe: je     7a45fb <gc.collect.processWorklist+0x58b>
+         : 380    mi_block_t* next = mi_block_next(page,block);
+    0.00 :   7a4404: mov    (%rbx),%rdx
+         : 382    block->next = 0;  // don't leak internal data
+    0.00 :   7a4407: movq   $0x0,(%rbx)
+         : 384    page->free = next;
+    0.00 :   7a440e: mov    %rdx,0x10(%rax)
+         : 386    page->used = used+1;
+    0.00 :   7a4412: inc    %rcx
+    0.00 :   7a4415: mov    %rcx,0x18(%rax)
+    0.00 :   7a4419: mov    %rsi,%rax
+         : 390    // attempting a resize in place, and falling back to allocating
+         : 391    // a new buffer and doing our own copy. With a realloc() call,
+         : 392    // the allocator implementation would pointlessly copy our
+         : 393    // extra capacity.
+         : 394    const old_memory = self.allocatedSlice();
+         : 395    if (gpa.remap(old_memory, new_capacity)) |new_memory| {
+    0.00 :   7a441c: test   %rbx,%rbx
+    0.00 :   7a441f: jne    7a44be <gc.collect.processWorklist+0x44e>
+    0.00 :   7a4425: mov    %rsi,0x10(%rsp)
+    0.00 :   7a442a: shl    $0x4,%rsi
+    0.00 :   7a442e: mov    0x20(%rsp),%rax
+    0.00 :   7a4433: mov    (%rax),%rdi
+         : 402    if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   7a4436: cmp    $0x3f,%r14
+    0.00 :   7a443a: ja     7a4470 <gc.collect.processWorklist+0x400>
+    0.00 :   7a443c: mov    (%rdi,%rsi,1),%rax
+         : 406    mi_block_t* const block = page->free;
+    0.00 :   7a4440: mov    0x10(%rax),%rbx
+         : 408    const mi_used_t used = page->used;
+    0.00 :   7a4444: mov    0x18(%rax),%rcx
+         : 410    if (block == NULL) {
+    0.00 :   7a4448: test   %rbx,%rbx
+    0.00 :   7a444b: je     7a4470 <gc.collect.processWorklist+0x400>
+         : 413    mi_block_t* next = mi_block_next(page,block);
+    0.00 :   7a444d: mov    (%rbx),%rdx
+         : 415    block->next = 0;  // don't leak internal data
+    2.95 :   7a4450: movq   $0x0,(%rbx)
+         : 417    page->free = next;
+    0.00 :   7a4457: mov    %rdx,0x10(%rax)
+         : 419    page->used = used+1;
+    0.00 :   7a445b: inc    %rcx
+    0.00 :   7a445e: mov    %rcx,0x18(%rax)
+    0.00 :   7a4462: jmp    7a448d <gc.collect.processWorklist+0x41d>
+         : 423    }
+         :
+         : 425    // Add this one to the list.
+         : 426    tc.gen2roots[tc.num_gen2roots] = col;
+    0.00 :   7a4464: mov    0x80(%rdi),%rax
+         : 428    if (tc.num_gen2roots == tc.alloc_gen2roots) {
+    0.00 :   7a446b: jmp    7a4669 <gc.collect.processWorklist+0x5f9>
+    0.00 :   7a4470: mov    %rsi,%r14
+    0.00 :   7a4473: xor    %edx,%edx
+    0.00 :   7a4475: xor    %ecx,%ecx
+    0.00 :   7a4477: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   7a447c: mov    0x8(%rsp),%r8
+    0.00 :   7a4481: mov    %rax,%rbx
+    0.00 :   7a4484: test   %rax,%rax
+    0.00 :   7a4487: je     7a4867 <gc.collect.processWorklist+0x7f7>
+         : 438    self.items.ptr = new_memory.ptr;
+         : 439    self.capacity = new_memory.len;
+         : 440    } else {
+         : 441    const new_memory = try gpa.alignedAlloc(T, alignment, new_capacity);
+         : 442    @memcpy(new_memory[0..self.items.len], self.items);
+    0.00 :   7a448d: mov    (%r8),%rsi
+    0.00 :   7a4490: mov    0x8(%r8),%rdx
+    0.00 :   7a4494: shl    $0x4,%rdx
+    0.00 :   7a4498: mov    %rbx,%rdi
+    0.00 :   7a449b: call   79e3d0 <compiler_rt.memcpy.memcpyFast>
+    0.00 :   7a44a0: cmpq   $0x0,0x18(%rsp)
+         : 449    const slice_info = @typeInfo(@TypeOf(memory)).pointer;
+         : 450    if (slice_info.size != .slice) {
+         : 451    comptime assert(slice_info.size == .one and @typeInfo(slice_info.child) == .array);
+         : 452    }
+         : 453    const bytes: []u8 = @ptrCast(@constCast(mem.absorbSentinel(memory)));
+         : 454    if (bytes.len == 0) return;
+    0.00 :   7a44a6: je     7a44b0 <gc.collect.processWorklist+0x440>
+    0.00 :   7a44a8: mov    %r13,%rdi
+    0.00 :   7a44ab: call   9fcf50 <mi_free@plt>
+    0.00 :   7a44b0: mov    0x8(%rsp),%r8
+    0.00 :   7a44b5: mov    (%rsp),%r9
+    0.00 :   7a44b9: mov    0x10(%rsp),%rax
+    0.00 :   7a44be: mov    %rbx,(%r8)
+    0.00 :   7a44c1: mov    %rax,0x10(%r8)
+         : 463    /// Increase length by 1, returning pointer to the new item.
+         : 464    /// Never invalidates element pointers.
+         : 465    /// The returned pointer may be invalidated by further operations to this list.
+         : 466    /// Asserts that the list can hold one additional item.
+         : 467    pub fn addOneAssumeCapacity(self: *Self) *T {
+         : 468    assert(self.items.len < self.capacity);
+    0.00 :   7a44c5: mov    0x8(%r8),%r14
+         :
+         : 471    self.items.len += 1;
+    0.00 :   7a44c9: lea    0x1(%r14),%rsi
+    0.00 :   7a44cd: mov    %rbx,%r13
+    0.00 :   7a44d0: mov    %rsi,0x8(%r8)
+         : 475    return &self.items[self.items.len - 1];
+    0.00 :   7a44d4: shl    $0x4,%r14
+    0.00 :   7a44d8: lea    (%r14,%r13,1),%rbx
+         : 478    tw.* = .{ .target = target };
+    0.00 :   7a44dc: mov    %ebp,0x8(%r13,%r14,1)
+    0.00 :   7a44e1: movq   $0x0,0x0(%r13,%r14,1)
+    0.00 :   7a44ea: mov    0x20(%rsp),%rax
+    0.00 :   7a44ef: mov    (%rax),%rdi
+    0.00 :   7a44f2: mov    0x200(%rdi),%rax
+         : 484    mi_block_t* const block = page->free;
+    0.00 :   7a44f9: mov    0x10(%rax),%r13
+         : 486    const mi_used_t used = page->used;
+    0.00 :   7a44fd: mov    0x18(%rax),%rcx
+         : 488    if (block == NULL) {
+    0.00 :   7a4501: test   %r13,%r13
+    0.00 :   7a4504: je     7a454e <gc.collect.processWorklist+0x4de>
+         : 491    mi_block_t* next = mi_block_next(page,block);
+    0.00 :   7a4506: mov    0x0(%r13),%rdx
+         : 493    block->next = 0;  // don't leak internal data
+    0.00 :   7a450a: movq   $0x0,0x0(%r13)
+         : 495    page->free = next;
+    0.00 :   7a4512: mov    %rdx,0x10(%rax)
+         : 497    page->used = used+1;
+    0.00 :   7a4516: inc    %rcx
+    0.00 :   7a4519: mov    %rcx,0x18(%rax)
+         : 500    if (!page->free_is_zero) {
+    0.00 :   7a451d: cmpb   $0x0,0x3f(%rax)
+    0.00 :   7a4521: jne    7a4574 <gc.collect.processWorklist+0x504>
+    0.00 :   7a4523: mov    0x28(%rax),%rcx
+         : 504    memcpy(dst, src, n);
+         : 505    }
+         : 506    }
+         :
+         : 508    static inline void _mi_memset(void* dst, int val, size_t n) {
+         : 509    if mi_likely(n <= _mi_cpu_stosb_max) {  // has fsrs && n <= 127
+    0.00 :   7a4527: cmpb   $0x0,0x37ac92(%rip)        # b1f1c0 <_mi_cpu_stosb_max>
+    0.00 :   7a452e: mov    $0x0,%eax
+    0.00 :   7a4533: mov    $0x7f,%edx
+    0.00 :   7a4538: cmovne %rdx,%rax
+    0.00 :   7a453c: cmp    %rax,%rcx
+    0.00 :   7a453f: ja     7a47c6 <gc.collect.processWorklist+0x756>
+         : 516    __asm volatile("rep stosb" : "+D"(dst), "+c"(n) : "a"(val) : "memory");
+    0.00 :   7a4545: xor    %eax,%eax
+    0.00 :   7a4547: mov    %r13,%rdi
+    0.00 :   7a454a: rep stos %al,(%rdi)
+         : 520    target_info.work = w;
+    0.00 :   7a454c: jmp    7a4574 <gc.collect.processWorklist+0x504>
+         : 522    return _mi_malloc_generic(theap, size, (zero ? 1 : 0), ppage);
+    0.00 :   7a454e: mov    $0x200,%esi
+    0.00 :   7a4553: mov    $0x1,%edx
+    0.00 :   7a4558: xor    %ecx,%ecx
+    0.00 :   7a455a: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   7a455f: mov    (%rsp),%r9
+    0.00 :   7a4563: mov    0x8(%rsp),%r8
+    0.00 :   7a4568: mov    %rax,%r13
+    0.00 :   7a456b: test   %rax,%rax
+    0.00 :   7a456e: je     7a4841 <gc.collect.processWorklist+0x7d1>
+    0.00 :   7a4574: mov    %r13,(%rbx)
+         : 533    work.items[work.num_items] = @ptrCast(item_ptr);
+    0.00 :   7a4577: mov    0x1f8(%r13),%eax
+    0.00 :   7a457e: mov    %r12,0x0(%r13,%rax,8)
+         : 536    work.num_items += 1;
+    0.00 :   7a4583: mov    0x1f8(%r13),%eax
+    0.00 :   7a458a: inc    %eax
+    0.00 :   7a458c: mov    %eax,0x1f8(%r13)
+         : 540    if (work.num_items == c.MVM_GC_PASS_WORK_SIZE) {
+    0.00 :   7a4593: cmp    $0x3e,%eax
+    0.00 :   7a4596: jne    7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a459c: mov    0x10(%r9),%rax
+         : 544    const target_tc: Tc = if (target == 1)
+    0.00 :   7a45a0: cmp    $0x1,%ebp
+    0.00 :   7a45a3: jne    7a45aa <gc.collect.processWorklist+0x53a>
+         : 547    tc.instance.*.main_thread
+    0.00 :   7a45a5: mov    (%rax),%rdx
+    0.00 :   7a45a8: jmp    7a45d0 <gc.collect.processWorklist+0x560>
+         : 550    return @ptrFromInt(@atomicLoad(usize, word(ptr), .seq_cst));
+    0.00 :   7a45aa: mov    0x10(%rax),%rax
+    0.00 :   7a45ae: jmp    7a45bd <gc.collect.processWorklist+0x54d>
+         : 553    t = @as(?Thread, t.body.next) orelse break;
+    0.00 :   7a45b0: mov    0x30(%rax),%rax
+    0.00 :   7a45b4: test   %rax,%rax
+    0.00 :   7a45b7: je     7a47f0 <gc.collect.processWorklist+0x780>
+         : 557    if (@as(?Tc, t.body.tc)) |ttc| {
+    0.00 :   7a45bd: mov    0x28(%rax),%rdx
+    0.00 :   7a45c1: test   %rdx,%rdx
+    0.00 :   7a45c4: je     7a45b0 <gc.collect.processWorklist+0x540>
+         : 561    if (ttc.thread_id == target) break :find ttc;
+    0.00 :   7a45c6: cmp    %ebp,(%rdx)
+    0.00 :   7a45c8: jne    7a45b0 <gc.collect.processWorklist+0x540>
+    0.00 :   7a45ca: nopw   0x0(%rax,%rax,1)
+         : 565    const orig = target_tray.*;
+    0.00 :   7a45d0: mov    0xa8(%rdx),%rcx
+         : 567    work.next = orig;
+    0.00 :   7a45d7: mov    %rcx,0x1f0(%r13)
+         : 569    const found = @cmpxchgStrong(usize, word(ptr), old_word, @intFromPtr(new), .seq_cst, .seq_cst) orelse old_word;
+    0.00 :   7a45de: mov    %rcx,%rax
+    0.00 :   7a45e1: lock cmpxchg %r13,0xa8(%rdx)
+         : 572    if (atomic.cas(target_tray, orig, work) == orig)
+    0.00 :   7a45ea: cmp    %rax,%rcx
+    0.00 :   7a45ed: jne    7a45d0 <gc.collect.processWorklist+0x560>
+         : 575    target_info.work = null;
+    0.00 :   7a45ef: movq   $0x0,(%rbx)
+    0.00 :   7a45f6: jmp    7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a45fb: mov    %rdx,0x10(%rsp)
+    0.00 :   7a4600: mov    %rdx,%rsi
+    0.00 :   7a4603: xor    %edx,%edx
+    0.00 :   7a4605: xor    %ecx,%ecx
+    0.00 :   7a4607: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   7a460c: jmp    7a4227 <gc.collect.processWorklist+0x1b7>
+         : 584    if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   7a4611: cmp    $0x80,%r14d
+    0.00 :   7a4618: ja     7a4645 <gc.collect.processWorklist+0x5d5>
+         : 587    return theap->pages_free_direct[idx];
+    0.00 :   7a461a: mov    (%rdi,%r14,8),%rcx
+         : 589    mi_block_t* const block = page->free;
+    0.00 :   7a461e: mov    0x10(%rcx),%rax
+         : 591    const mi_used_t used = page->used;
+    0.00 :   7a4622: mov    0x18(%rcx),%rdx
+         : 593    if (block == NULL) {
+    0.00 :   7a4626: test   %rax,%rax
+    0.00 :   7a4629: je     7a4645 <gc.collect.processWorklist+0x5d5>
+         : 596    mi_block_t* next = mi_block_next(page,block);
+    0.00 :   7a462b: mov    (%rax),%rsi
+         : 598    block->next = 0;  // don't leak internal data
+    0.00 :   7a462e: movq   $0x0,(%rax)
+         : 600    page->free = next;
+    0.00 :   7a4635: mov    %rsi,0x10(%rcx)
+         : 602    page->used = used+1;
+    0.00 :   7a4639: inc    %rdx
+    0.00 :   7a463c: mov    %rdx,0x18(%rcx)
+    0.00 :   7a4640: mov    %r8,%rdi
+    0.00 :   7a4643: jmp    7a465e <gc.collect.processWorklist+0x5ee>
+    0.00 :   7a4645: mov    %rbx,%rsi
+    0.00 :   7a4648: xor    %edx,%edx
+    0.00 :   7a464a: xor    %ecx,%ecx
+    0.00 :   7a464c: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   7a4651: test   %r14,%r14
+    0.00 :   7a4654: jne    7a4396 <gc.collect.processWorklist+0x326>
+    0.00 :   7a465a: mov    (%rsp),%rdi
+         : 614    tc.gen2roots = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(tc.gen2roots), @sizeOf(Col) * @as(usize, tc.alloc_gen2roots))));
+    0.00 :   7a465e: mov    %rax,0x80(%rdi)
+         : 616    tc.gen2roots[tc.num_gen2roots] = col;
+    0.00 :   7a4665: mov    0x78(%rdi),%r14d
+    0.00 :   7a4669: mov    %r14d,%ecx
+    0.00 :   7a466c: mov    %rbp,(%rax,%rcx,8)
+         : 620    tc.num_gen2roots +%= 1;
+    0.00 :   7a4670: incl   0x78(%rdi)
+         :
+         : 623    // Flag it as added, so we don't add it multiple times.
+         : 624    view.flags2(col).in_gen2_root_list = true;
+    0.00 :   7a4673: orb    $0x4,0xd(%rbp)
+    0.00 :   7a4677: cmpb   $0x1,0x2c(%rsp)
+         : 627    if (gen == .both)
+    0.00 :   7a467c: jne    7a4682 <gc.collect.processWorklist+0x612>
+         : 629    view.flags2(to).gen2_live = true;
+    0.00 :   7a467e: orb    $0x8,0xd(%rbp)
+         : 631    item_ptr.* = copy;
+    0.00 :   7a4682: mov    %rbp,(%r12)
+         : 633    item.sc_forward_u.forwarder = copy;
+    0.00 :   7a4686: mov    %rbp,0x0(%r13)
+         : 635    switch (builtin.target.cpu.arch) {
+    0.00 :   7a468a: lock orl $0x0,-0x40(%rsp)
+         : 637    view.flags2(item).forwarder_valid = true;
+    5.87 :   7a4690: orb    $0x10,0xd(%r13)
+         : 639    const gen2count = worklist.items;
+    0.00 :   7a4695: mov    0x8(%r15),%r14d
+         : 641    markCollectable(tc, worklist, new_addr);
+    0.00 :   7a4699: mov    %r15,%rsi
+    0.00 :   7a469c: mov    %rbp,%rdx
+    0.00 :   7a469f: call   7a8070 <gc.collect.markCollectable>
+    2.60 :   7a46a4: mov    (%rsp),%r9
+         : 646    for (worklist.list[gen2count..worklist.items]) |entry| {
+    0.00 :   7a46a8: mov    0x8(%r15),%r12d
+    0.00 :   7a46ac: cmp    %r14d,%r12d
+    0.00 :   7a46af: mov    0x8(%rsp),%r8
+    0.00 :   7a46b4: je     7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a46ba: mov    (%r15),%r13
+    0.00 :   7a46bd: jmp    7a46ec <gc.collect.processWorklist+0x67c>
+         : 653    tc.gen2roots[tc.num_gen2roots] = col;
+    2.94 :   7a46bf: mov    0x80(%r9),%rax
+    0.00 :   7a46c6: mov    %ebx,%ecx
+    0.00 :   7a46c8: mov    %rbp,(%rax,%rcx,8)
+         : 657    tc.num_gen2roots +%= 1;
+    0.00 :   7a46cc: incl   0x78(%r9)
+         : 659    view.flags2(col).in_gen2_root_list = true;
+    0.00 :   7a46d0: orb    $0x4,0xd(%rbp)
+    0.00 :   7a46d4: data16 data16 cs nopw 0x0(%rax,%rax,1)
+    0.00 :   7a46e0: inc    %r14
+    0.00 :   7a46e3: cmp    %r14,%r12
+    0.00 :   7a46e6: je     7a40e0 <gc.collect.processWorklist+0x70>
+    0.00 :   7a46ec: mov    0x0(%r13,%r14,8),%rax
+         : 666    const j: ColSlot = @ptrCast(entry);
+         : 667    if (j.*) |referenced|
+    0.00 :   7a46f1: mov    (%rax),%rcx
+    2.75 :   7a46f4: test   %rcx,%rcx
+    0.00 :   7a46f7: je     7a46e0 <gc.collect.processWorklist+0x670>
+         : 671    /// collectable comes to hold a reference to a nursery one, it becomes an
+         : 672    /// inter-generational root; unlike `MVM_gc_write_barrier`, the referenced
+         : 673    /// collectable is not flagged. The C's tests, in its order: `update_root`
+         : 674    /// in gen2, `referenced` not NULL, `referenced` not in gen2.
+         : 675    pub inline fn noUpdateReferenced(tc: Tc, update_root: Col, referenced: ?Col) void {
+         : 676    if (view.flags2(update_root).second_gen) {
+    0.00 :   7a46f9: movzbl 0xd(%rbp),%eax
+    0.00 :   7a46fd: test   $0x2,%al
+    0.00 :   7a46ff: je     7a46e0 <gc.collect.processWorklist+0x670>
+         : 680    if (referenced) |r| {
+         : 681    if (!view.flags2(r).second_gen)
+    0.00 :   7a4701: movzbl 0xd(%rcx),%ecx
+    5.68 :   7a4705: and    $0x2,%cl
+    0.00 :   7a4708: and    $0x4,%al
+    0.00 :   7a470a: or     %cl,%al
+    0.00 :   7a470c: jne    7a46e0 <gc.collect.processWorklist+0x670>
+    0.00 :   7a470e: test   %rbp,%rbp
+         : 688    const col = maybe_col orelse
+    0.00 :   7a4711: je     7a4818 <gc.collect.processWorklist+0x7a8>
+         : 690    if (tc.num_gen2roots == tc.alloc_gen2roots) {
+    0.00 :   7a4717: mov    0x78(%r9),%ebx
+    0.00 :   7a471b: cmp    0x7c(%r9),%ebx
+    0.00 :   7a471f: jne    7a46bf <gc.collect.processWorklist+0x64f>
+         : 694    tc.alloc_gen2roots *%= 2;
+    0.00 :   7a4721: add    %ebx,%ebx
+    0.00 :   7a4723: mov    %ebx,0x7c(%r9)
+         : 697    tc.gen2roots = @ptrCast(@alignCast(c.MVM_realloc(@ptrCast(tc.gen2roots), @sizeOf(Col) * @as(usize, tc.alloc_gen2roots))));
+    0.00 :   7a4727: mov    0x80(%r9),%rsi
+    0.00 :   7a472e: lea    0x0(,%rbx,8),%rdx
+    0.00 :   7a4736: mov    0x20(%rsp),%rax
+    0.00 :   7a473b: mov    (%rax),%rdi
+         : 702    if (p==NULL) {
+    0.00 :   7a473e: test   %rsi,%rsi
+    0.00 :   7a4741: je     7a4767 <gc.collect.processWorklist+0x6f7>
+    0.00 :   7a4743: mov    %rdx,0x18(%rsp)
+         : 706    return _mi_theap_realloc_zero(theap, p, newsize, false);
+    0.00 :   7a4748: xor    %ecx,%ecx
+    0.00 :   7a474a: call   a024f0 <_mi_theap_realloc_zero@plt>
+    0.00 :   7a474f: test   %rbx,%rbx
+    0.00 :   7a4752: mov    0x8(%rsp),%r8
+    0.00 :   7a4757: je     7a47b2 <gc.collect.processWorklist+0x742>
+    0.00 :   7a4759: test   %rax,%rax
+    0.00 :   7a475c: mov    (%rsp),%r9
+    0.00 :   7a4760: jne    7a47b6 <gc.collect.processWorklist+0x746>
+    0.00 :   7a4762: jmp    7a484b <gc.collect.processWorklist+0x7db>
+         : 716    if mi_likely(size <= MI_SMALL_SIZE_MAX)
+    0.00 :   7a4767: cmp    $0x80,%ebx
+    0.00 :   7a476d: ja     7a4797 <gc.collect.processWorklist+0x727>
+    0.00 :   7a476f: mov    (%rdi,%rbx,8),%rcx
+         : 720    mi_block_t* const block = page->free;
+    0.00 :   7a4773: mov    0x10(%rcx),%rax
+         : 722    const mi_used_t used = page->used;
+    0.00 :   7a4777: mov    0x18(%rcx),%r10
+         : 724    if (block == NULL) {
+    0.00 :   7a477b: test   %rax,%rax
+    0.00 :   7a477e: je     7a4797 <gc.collect.processWorklist+0x727>
+         : 727    mi_block_t* next = mi_block_next(page,block);
+    0.00 :   7a4780: mov    (%rax),%rsi
+         : 729    block->next = 0;  // don't leak internal data
+    0.00 :   7a4783: movq   $0x0,(%rax)
+         : 731    page->free = next;
+    0.00 :   7a478a: mov    %rsi,0x10(%rcx)
+         : 733    page->used = used+1;
+    0.00 :   7a478e: inc    %r10
+    0.00 :   7a4791: mov    %r10,0x18(%rcx)
+    0.00 :   7a4795: jmp    7a47b6 <gc.collect.processWorklist+0x746>
+    0.00 :   7a4797: mov    %rdx,0x18(%rsp)
+    0.00 :   7a479c: mov    %rdx,%rsi
+    0.00 :   7a479f: xor    %edx,%edx
+    0.00 :   7a47a1: xor    %ecx,%ecx
+    0.00 :   7a47a3: call   a02970 <_mi_malloc_generic@plt>
+    0.00 :   7a47a8: test   %rbx,%rbx
+    0.00 :   7a47ab: mov    0x8(%rsp),%r8
+    0.00 :   7a47b0: jne    7a4759 <gc.collect.processWorklist+0x6e9>
+    0.00 :   7a47b2: mov    (%rsp),%r9
+    0.00 :   7a47b6: mov    %rax,0x80(%r9)
+         : 747    tc.gen2roots[tc.num_gen2roots] = col;
+    0.00 :   7a47bd: mov    0x78(%r9),%ebx
+    0.00 :   7a47c1: jmp    7a46c6 <gc.collect.processWorklist+0x656>
+         : 750    mi_rep_stosb(dst, (uint8_t)val, n);
+         : 751    }
+         : 752    else {
+         : 753    memset(dst, val, n);
+    0.00 :   7a47c6: mov    %r13,%rdi
+    0.00 :   7a47c9: xor    %esi,%esi
+    0.00 :   7a47cb: mov    %rcx,%rdx
+    0.00 :   7a47ce: call   79dea0 <compiler_rt.fastMemset>
+    0.00 :   7a47d3: mov    (%rsp),%r9
+    0.00 :   7a47d7: mov    0x8(%rsp),%r8
+    0.00 :   7a47dc: jmp    7a4574 <gc.collect.processWorklist+0x504>
+         : 761    wb.noUpdateReferenced(tc, new_addr, referenced);
+         : 762    }
+         : 763    }
+         : 764    }
+    0.00 :   7a47e1: add    $0x38,%rsp
+    0.00 :   7a47e5: pop    %rbx
+    0.00 :   7a47e6: pop    %r12
+    0.00 :   7a47e8: pop    %r13
+    0.00 :   7a47ea: pop    %r14
+    0.00 :   7a47ec: pop    %r15
+    0.00 :   7a47ee: pop    %rbp
+    0.00 :   7a47ef: ret
+         : 773    c.MVM_panic(c.MVM_exitcode_gcnursery, "Internal error: invalid thread ID %d in GC work pass", @as(c_uint, target));
+    0.00 :   7a47f0: lea    -0x561397(%rip),%rsi        # 243460 <__anon_3293>
+    0.00 :   7a47f7: mov    $0x11,%edi
+    0.00 :   7a47fc: mov    %ebp,%edx
+    0.00 :   7a47fe: xor    %eax,%eax
+    0.00 :   7a4800: call   9fcf00 <MVM_panic@plt>
+         : 779    c.MVM_panic(c.MVM_exitcode_gcnursery, "Internal error: zeroed target thread ID in work pass");
+    0.00 :   7a4805: lea    -0x5613e1(%rip),%rsi        # 24342b <__anon_4697>
+    0.00 :   7a480c: mov    $0x11,%edi
+    0.00 :   7a4811: xor    %eax,%eax
+    0.00 :   7a4813: call   9fcf00 <MVM_panic@plt>
+    0.00 :   7a4818: lea    -0x5653df(%rip),%rsi        # 23f440 <__anon_4571>
+    0.00 :   7a481f: mov    $0x10,%edi
+    0.00 :   7a4824: xor    %eax,%eax
+    0.00 :   7a4826: call   9fcf00 <MVM_panic@plt>
+         : 788    c.MVM_panic(1, "Heap corruption detected: pointer %p to past fromspace", vp(item));
+    0.00 :   7a482b: lea    -0x546df6(%rip),%rsi        # 25da3c <__anon_4461>
+    0.00 :   7a4832: mov    $0x1,%edi
+    0.00 :   7a4837: mov    %r13,%rdx
+    0.00 :   7a483a: xor    %eax,%eax
+    0.00 :   7a483c: call   9fcf00 <MVM_panic@plt>
+    0.00 :   7a4841: mov    $0x200,%edi
+    0.00 :   7a4846: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+    0.00 :   7a484b: mov    0x18(%rsp),%rdi
+    0.00 :   7a4850: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+    0.00 :   7a4855: mov    0x10(%rsp),%rdi
+    0.00 :   7a485a: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+    0.00 :   7a485f: mov    %rbx,%rdi
+    0.00 :   7a4862: call   9fcfc0 <MVM_panic_allocation_failed@plt>
+    0.00 :   7a4867: mov    %r14,%rdi
+    0.00 :   7a486a: call   9fcfc0 <MVM_panic_allocation_failed@plt>
