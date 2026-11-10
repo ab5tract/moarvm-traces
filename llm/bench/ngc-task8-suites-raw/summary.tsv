@@ -1,0 +1,4 @@
+nqp	n-base	exit 0	18s	load 0.71	Files=150, Tests=13746, 18 wallclock secs ( 0.42 usr  0.14 sys + 14.24 cusr  1.56 csys = 16.36 CPU)	Result: PASS
+nqp	n-stress	exit 0	19s	load 0.85	Files=150, Tests=13746, 19 wallclock secs ( 0.42 usr  0.14 sys + 16.37 cusr  1.25 csys = 18.18 CPU)	Result: PASS
+rakudo	n-base	exit 2	122s	load 1.08	Files=599, Tests=11162, 122 wallclock secs ( 3.60 usr  0.99 sys + 841.31 cusr 75.64 csys = 921.54 CPU)	Result: FAIL
+rakudo	n-stress	exit 2	147s	load 0.85	Files=599, Tests=11162, 146 wallclock secs ( 3.55 usr  0.98 sys + 1029.30 cusr 68.77 csys = 1102.60 CPU)	Result: FAIL
