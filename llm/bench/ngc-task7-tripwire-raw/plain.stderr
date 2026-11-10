@@ -1,0 +1,33 @@
+warmup base load 0.90
+warmup head load 0.90
+round 1 base run 1 load 0.90
+round 1 base run 2 load 0.99
+round 1 base run 3 load 0.99
+round 1 base run 4 load 0.99
+round 1 base run 5 load 1.07
+round 1 head run 1 load 1.06
+round 1 head run 2 load 1.06
+round 1 head run 3 load 1.13
+round 1 head run 4 load 1.20
+round 1 head run 5 load 1.17
+round 2 head run 1 load 1.15
+round 2 head run 2 load 1.20
+round 2 head run 3 load 1.19
+round 2 head run 4 load 1.16
+round 2 head run 5 load 1.23
+round 2 base run 1 load 1.19
+round 2 base run 2 load 1.17
+round 2 base run 3 load 1.23
+round 2 base run 4 load 1.21
+round 2 base run 5 load 1.25
+round 3 base run 1 load 1.23
+round 3 base run 2 load 1.19
+round 3 base run 3 load 1.18
+round 3 base run 4 load 1.22
+round 3 base run 5 load 1.21
+round 3 head run 1 load 1.25
+round 3 head run 2 load 1.31
+round 3 head run 3 load 1.34
+round 3 head run 4 load 1.29
+round 3 head run 5 load 1.27
+ab.sh: wrote /tmp/claude-1000/ngc/t7/tripwire/plain/summary.md
