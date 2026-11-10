@@ -19,7 +19,9 @@ Commands:      sh ngc-crc-ab-driver.sh /tmp/claude-1000/ngc/acc/crc (second stag
                    --head=/tmp/claude-1000/ng-f-base/lib --head2=/tmp/claude-1000/ng-n-base/lib --rounds=7 --runs=5
                    --volume=100000 [--bad-packages] --out=...
                plain, then --bad-packages; one untimed warm-up per side; side order rotated over three per round
-               (base head head2, head head2 base, head2 base head, ...); load < 2.0 before every run
+               (base head head2, head head2 base, head2 base head, ...); load < 2.0 before every run;
+               with three sides over seven rounds the rotation puts base first in rounds 1, 4, 7 and each head
+               first in two rounds; a multiple of three rounds would balance it
 Load:          1-minute load logged before each run (load.log): 1.02-1.55 over both settings
 Raw:           ngc-crc-ab-raw/{plain,bad}/ (<side>-r<round>-<run>.time, .out, load.log, summary.md), {plain,bad}.stderr,
                runs.log (exit column is ab.sh's status: 0 and 0); smoke-* (the Step 1 smokes of ab.sh). All 210 timed

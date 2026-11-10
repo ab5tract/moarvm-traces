@@ -110,6 +110,12 @@ rest on one sampled run per side and setting (round 1), as at Task 2.
 | frame roots and registers | (Task 2: -2.0e7 / +1.9e7) | | | 0.09 (MVM_gc_root_add_frame_roots_to_worklist) | 0.11 (gc.roots.addFrameRootsToWorklist 0.06 + addFrameRegistersToWorklist 0.05) | +7.9e6 |
 | **collector total** | 4.15 | 4.84 | **+3.17e8** | 3.89 | 4.22 | **+1.47e8** |
 
+The listed after rows sum to about +1.75e8; the stated total +1.47e8 also includes the collector symbols not listed,
+whose deltas are net negative (about -2.8e7), the two largest `MVM_gc_collect` (0.04 % to none counted on the native side, about -1.4e7)
+and `MVM_gc_mark_collectable` (0.04 % to 0.02 % as gc.collect.markCollectable, about -7.0e6). The profiled pair's
+wall gap (n-syms/c-syms 1.031) exceeds its cycle gap (cycles:u 1.019), consistent with the -syms builds being
+different binaries from -base.
+
 The analyzer's aligned delta keys a Zig internal by its snake-case name, so in analysis-output.md the native
 `gc.allocation.allocateObject` (`allocate_object`) and the export `MVM_gc_allocate_object` appear as two rows
 (+6.47e8 and -5.23e8), likewise `free_nursery_uncopied` and `MVM_gc_collect_free_nursery_uncopied` (+6.47e8,

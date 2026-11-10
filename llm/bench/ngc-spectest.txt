@@ -21,6 +21,8 @@ run 3 head start 20:05:47 load 1.10 10.78 10.01 roast fb1d87214 moar-procs-befor
 run 4 base start 20:13:26 load 0.83 10.47 11.68 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-c-base/lib
 run 5 base start 20:21:03 load 0.85 10.41 12.72 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-c-base/lib
 run 6 head start 20:27:41 load 1.93 12.57 14.18 roast fb1d87214 moar-procs-before 0 rakudo-procs-before 0 lib /tmp/claude-1000/ng-n-base/lib
+Head runs 2 and 6 started at 1-minute load 1.98/1.93 (15-minute 6.9/14.2, the preceding 24-job run) against 0.83/0.85
+for base runs 4/5; this disfavours the head side, so the 1.003 reading is conservative for the gate.
 
 ## Per run
 run 1 base: wall 279.06 (4:39.06) RSS 1031228 user 4587.02 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
@@ -74,6 +76,8 @@ in every earlier spectest log kept under traces/llm/bench (27 runs, z017-spectes
 checked by grep at Task 9). Recorded, not gated, the way
 z017-spectest.txt recorded the S17-channel intermittent; zero new failures stands. (The probe ran in the suites stage's
 wait between two rakudo make test runs, 20:41:53-20:42:36.)
+The probe ran the file serially, not under TEST_JOBS=24 where it exited; the classification rests on no failed
+subtest, five clean runs of six, 27 clean earlier logs; a parallel-load repro is the open option.
 
 ## Reading (recorded, not gated)
 

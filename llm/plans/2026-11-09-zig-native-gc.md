@@ -4,6 +4,8 @@
 
 **Status:** executed 2026-11-09/10 on branch zig-native-gc; acceptance records traces/llm/bench/ngc-*; awaiting the whole-branch review and the user's merge decision
 
+**Final review:** final review 2026-11-10 (fable): 0 Critical, 1 Important (fixed: NULL slice in finalize.zig/debug.zig on safety-checked builds), 13 Minor (fixed or deferred per the ledger); verdict "with fixes", fixes applied in MoarVM 071571830.
+
 **Goal:** Rewrite the faithful Zig port of `src/gc/` into native Zig shapes while the collector's decisions stay byte-identical to the C collector's, with a build switch for the C-collector control, a profile before and after, and the performance aim (crc-getter native/C at or under 1.00) reported honestly.
 
 **Architecture:** Task 1 adds the `[zig-gc]` section and `-Dzig-gc` so the control "C collector + Zig hash engine" is built from the tree, then freezes three prefix sets (C control, faithful port, native head). Task 2 profiles the C control against the faithful port and says where the gap is. Tasks 3-8 rewrite the ten files behind a new `view.zig` (typed pointers, flag and status views) with Zig-typed internals and thin C-ABI export wrappers, one file per task, each gated by the oracle and a short A/B. Task 9 is acceptance: oracle matrix, three-sided A/B, spectest, after-profile, docs, reading notes.
@@ -258,7 +260,7 @@ MoarVM `"GC native: view module, typed atomics, worklist and allocation"`; trace
 - Records: `ngc-oracle.md` (+ matrix, logs), `ngc-crc-ab.md` (+ raw), `ngc-spectest.txt` (+ raw), `ngc-suites.md`, `ngc-cleanup.md`, `ngc-profile-after.md` (+ raw), `ngc-reading-notes.md`
 
 - [ ] **Step 1: `ab.sh --head2`**; commit `"Bench: three-sided ab.sh"`.
-- [ ] **Step 2: Oracle matrix**: groups (a), (b), (c), 48 cells, exit 0, byte-identical.
+- [ ] **Step 2: Oracle matrix**: groups (a), (b), (c), 24 cells (48 logs), exit 0, byte-identical.
 - [ ] **Step 3: crc-getter**: `ab.sh --base=ng-c-base/lib --head=ng-f-base/lib --head2=ng-n-base/lib --rounds=7 --runs=5 --volume=100000`, plain and `--bad-packages`; the record states f/c and n/c for wall and RSS with spreads, the aim's verdict per spec 6, no claim inside the spread.
 - [ ] **Step 4: Spectest**: C control against native, six runs, Files/Tests counts and TODO-passed list equal to `../bench/z017-spectest-raw/`, zero new failures (re-run an intermittent as Campaign 5 did).
 - [ ] **Step 5: Suites and cleanup**: nqp and rakudo under `ng-c-*` and `ng-n-*` (base and stress); `cleanup.sh --runs=20` on the four; lists identical, 240 of 240.
@@ -272,13 +274,13 @@ MoarVM `"GC native: view module, typed atomics, worklist and allocation"`; trace
 |---|---|---|
 | `-Dzig-gc=false` control equals the Campaign 5 scratch control | equal (Task 1): ng-c-base equals Campaign 5's scratch control; exports 2850 = g7-c-base's | ngc-prefixes.md |
 | profile before: collector share of the gap, finding | f/c cycles +4.19 % plain (resolvable), collector share 0.213; bad +4.80 % not resolvable; finding: the `mfence` in processWorklist (+2.56e8, ~15 % of the gap) and the out-of-line translate-c temp-root push (+1.78e8); stop rule fired, user chose to continue with R5 (2026-11-10) | ngc-profile.md |
-| oracle (a) C vs native, (b) faithful vs native, (c) C vs faithful: 48 cells | 24/24 cells (8 per group; 48 compared logs) exit 0, every raw log pair byte-identical, both tiers, 10 000 and 100 000 | ngc-oracle.md |
+| oracle (a) C vs native, (b) faithful vs native, (c) C vs faithful: 24 cells (48 logs) | 24/24 cells (8 per group; 48 compared logs) exit 0, every raw log pair byte-identical, both tiers, 10 000 and 100 000 | ngc-oracle.md |
 | unit tests, both levels; export set unchanged | from the ledger (Task 8, last Zig change): gc-test 61 + 5 skipped at -Dgc-debug=0, 66/66 at 1; zig build test 105/105; exports of ng-n-base equal ng-c-base's, 2850 names (re-checked at Task 9 with nm -D); 0 mfence | ledger |
 | crc-getter f/c and n/c, wall and RSS, plain and bad | f/c 1.027 / 0.990 plain, 1.033 / 0.983 bad; n/c 1.004 / 1.002 plain, 1.010 / 1.017 bad (C spreads 0.013 / 0.026 plain, 0.010 / 0.027 bad); aim met within spread on three of four measures, not met on bad wall (1.010 on the edge of a 0.0101 spread, above the C range) | ngc-crc-ab.md |
 | spectest n/c wall and RSS, zero new failures | wall 1.003, RSS 1.000 (head medians inside the base ranges): passes; Files=1365 Tests=138715 and the 29 TODO-passed files as Campaign 5; zero new failures (run 3 IO-Socket-Async.t exit 1 with no failed subtest, a flake per R12: 40/40 serial re-runs clean) | ngc-spectest.txt |
 | suites and full-cleanup runs | nqp and rakudo per-file lists identical C vs native at base and stress (rakudo: the pre-existing 02-simple-args.t 17-18 on all four); cleanup 240 of 240; crc-getter under both stress prefixes 10/10 exit 0 | ngc-suites.md, ngc-cleanup.md |
 | profile after: what remains | n/c cycles +1.90 % plain, +2.20 % bad on the -syms pair, unresolvable at volume 100 000 on both (shares 0.216 / 0.055 computed only); mfence stall and temp-root call gone; collector difference +3.17e8 -> +1.47e8, mostly the object allocator; -syms builds are different binaries (c -0.8 %, n +2.3 %) | ngc-profile-after.md |
-| reading notes | collected verbatim from Tasks 3-8, one section per file of src/zig/gc (12) | ngc-reading-notes.md |
+| reading notes | collected verbatim from Tasks 3-8, 13 sections over the 12 files (allocation.zig and atomic.zig share one) | ngc-reading-notes.md |
 
 ## Deviations (running list)
 

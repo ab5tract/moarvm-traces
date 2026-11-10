@@ -168,6 +168,7 @@ From task-6-report.md.
   target with no capacity field at all, so its "capacity" is its length by construction; that is what made
   `ensureTotalCapacityPrecise(len + 1)` the faithful growth, and what made the only remaining difference the call
   kind (realloc against malloc + copy + free), which mimalloc's bins erase up to 9 targets.
+  (pre-R10; the ruling made the Zig growth the C's realloc sequence, see ngc-task6-tripwire.md)
 - **The in-tray take is a single-word steal.** `add_in_tray_to_worklist` takes the whole list with one CAS to NULL and
   then walks it privately; as `const taken = while (true) { ... break head; }` the "retry until stolen or empty" shape
   is one expression, and the walk after it needs no atomics. The push side (`push_work_to_thread_in_tray`) is the
