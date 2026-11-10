@@ -1,0 +1,4 @@
+ng-f-syms instance-walk insns 1876 snapshot-calls 27 addSlow-calls 2 backward-jumps 74
+ng-n-syms instance-walk insns 1873 snapshot-calls 27 addSlow-calls 2 backward-jumps 73
+tc-walk-f insns 1442 snapshot-calls 16
+tc-walk-n insns 1381 snapshot-calls 16
