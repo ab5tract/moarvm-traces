@@ -1,0 +1,17 @@
+a	10000	plain	1	0	37	1.10	55	same
+a	10000	plain	2	0	37	1.18	55	same
+a	10000	bad	1	0	37	1.22	55	same
+a	10000	bad	2	0	37	1.25	55	same
+a	100000	plain	1	0	199	1.26	361	same
+a	100000	plain	2	0	199	1.17	361	same
+a	100000	bad	1	0	200	1.08	361	same
+a	100000	bad	2	0	201	1.03	361	same
+b	10000	plain	1	0	37	1.29	55	same
+b	10000	plain	2	0	38	1.34	55	same
+b	10000	bad	1	0	37	1.31	55	same
+b	10000	bad	2	0	37	1.16	55	same
+b	100000	plain	1	0	200	1.09	361	same
+b	100000	plain	2	0	202	1.07	361	same
+b	100000	bad	1	0	200	1.27	361	same
+b	100000	bad	2	0	202	1.24	361	same
+driver exit 0

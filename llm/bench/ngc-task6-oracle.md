@@ -52,3 +52,31 @@ control (a) or the faithful port (b). The oracle is single-threaded: the work-pa
 full-cleanup measurement recorded there.
 
 Also from this build (ngc-task6-raw/): exported names of ng-n-base equal ng-c-base's (2850, `exports.diff` empty).
+
+## Re-run after ruling R10 (mvm_allocator remap over MVM_realloc, MoarVM c17926d6d)
+
+ng-n-oracle rebuilt at c17926d6d (2026.09-283-gc17926d6d, ngc-task6-fix-raw/builds.tsv), same driver and command
+(`sh ngc-oracle-driver.sh /tmp/claude-1000/ngc/t6/fix/oracle a b`), 2026-11-10 14:48-15:20:18 CET, load before each
+cell 1.03-1.34, driver exit 0; raw ngc-task6-fix-raw/oracle/. The change is on the work-passing path, which this
+single-threaded oracle does not reach; the run is the commit's own oracle.
+
+| group | volume | set | tier | exit | seconds | log lines | raw cmp base-1/head-1 |
+|---|---:|---|---:|---:|---:|---:|---|
+| a | 10000 | plain | 1 | 0 | 37 | 55 | same |
+| a | 10000 | plain | 2 | 0 | 37 | 55 | same |
+| a | 10000 | bad | 1 | 0 | 37 | 55 | same |
+| a | 10000 | bad | 2 | 0 | 37 | 55 | same |
+| a | 100000 | plain | 1 | 0 | 199 | 361 | same |
+| a | 100000 | plain | 2 | 0 | 199 | 361 | same |
+| a | 100000 | bad | 1 | 0 | 200 | 361 | same |
+| a | 100000 | bad | 2 | 0 | 201 | 361 | same |
+| b | 10000 | plain | 1 | 0 | 37 | 55 | same |
+| b | 10000 | plain | 2 | 0 | 38 | 55 | same |
+| b | 10000 | bad | 1 | 0 | 37 | 55 | same |
+| b | 10000 | bad | 2 | 0 | 37 | 55 | same |
+| b | 100000 | plain | 1 | 0 | 200 | 361 | same |
+| b | 100000 | plain | 2 | 0 | 202 | 361 | same |
+| b | 100000 | bad | 1 | 0 | 200 | 361 | same |
+| b | 100000 | bad | 2 | 0 | 202 | 361 | same |
+
+**16/16 cells exit 0, every raw base-1/head-1 pair byte-identical.**

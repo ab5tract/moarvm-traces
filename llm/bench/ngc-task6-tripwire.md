@@ -63,3 +63,32 @@ peak RSS on threaded programs:
    **RSS ratio 0.990**, the C spread of this program 0.0133: within it (below the C's median).
 
 Neither program shows a memory cost from the allocation change.
+
+## Re-run after ruling R10 (mvm_allocator remap over MVM_realloc, MoarVM c17926d6d)
+
+The controller ruled (R10) to keep the `std.ArrayList` and give `moar.mvm_allocator` a real `remap` over
+`MVM_realloc`. `ensureTotalCapacityPrecise` tries `remap` first (std/array_list.zig:1371, quoted in
+ngc-task6-fix-raw/ensure-precise.txt), so each new target is now one `MVM_realloc(old, 16 k)`, the C's operation
+sequence. The first entry still comes from `alloc` (`Allocator.remap` returns null for an empty slice without calling
+the vtable, std/mem/Allocator.zig:389-391), `MVM_malloc(16)`, equal to the C's `MVM_realloc(NULL, 16)`.
+ng-n-base rebuilt at c17926d6d (ngc-task6-fix-raw/builds.tsv, 2026.09-283-gc17926d6d); exported names 2850, diff
+against ng-c-base empty (ngc-task6-fix-raw/exports.diff).
+
+Tripwire, same command, 2026-11-10 14:44:04-14:47:53 CET, load 0.84-1.25, 30/30 runs exit 0
+(ngc-task6-fix-raw/tripwire/):
+
+| side | wall s | peak RSS kB |
+|---|---:|---:|
+| ng-c-base | 7.50 [7.44-7.51] | 342696 [342188-346356] |
+| ng-n-base | 7.62 [7.61-7.63] | 343876 [337004-345876] |
+
+Ratio: **wall 1.016, RSS 1.003**; thresholds 1.0323 and 1.0265 not crossed, so no 7-round re-run, and the suites and
+full-cleanup runs above (on 2f6736cdf) were not repeated for this change. h evidence on the final code: crc-getter RSS
+1.003 against the C spread 0.0358; three-thread full-cleanup program (same protocol as above, 60/60 runs exit 0 with
+`main returning`, load 0.96-1.12, ngc-task6-fix-raw/rss-three/runs.tsv) ng-c-base 300388 [298472-300458] kB,
+ng-n-base 296520 [296392-302704] kB, **RSS 0.987**, C spread 0.0066 (the head's median below the C's; its round
+medians overlap the C's range).
+
+The wall ratio is the third rising value of this task's file (1.001 at Task 5, 1.008 at 2f6736cdf, 1.016 here); this
+run's base was 0.08 s faster than the first run's while the head stayed at 7.62-7.64, so a 3-round tripwire cannot
+separate the trend from the base's run-to-run spread. Under the threshold; for the acceptance measurement to settle.
