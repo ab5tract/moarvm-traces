@@ -1,0 +1,246 @@
+
+/tmp/claude-1000/ng-n-base/lib/libmoar.so:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000007bee70 <MVM_gc_allocate_object@@Base>:
+  7bee70:	e9 0b 00 00 00       	jmp    7bee80 <MVM_gc_allocate_object@@Base+0x10>
+  7bee75:	cc                   	int3
+  7bee76:	cc                   	int3
+  7bee77:	cc                   	int3
+  7bee78:	cc                   	int3
+  7bee79:	cc                   	int3
+  7bee7a:	cc                   	int3
+  7bee7b:	cc                   	int3
+  7bee7c:	cc                   	int3
+  7bee7d:	cc                   	int3
+  7bee7e:	cc                   	int3
+  7bee7f:	cc                   	int3
+  7bee80:	55                   	push   %rbp
+  7bee81:	41 57                	push   %r15
+  7bee83:	41 56                	push   %r14
+  7bee85:	41 55                	push   %r13
+  7bee87:	41 54                	push   %r12
+  7bee89:	53                   	push   %rbx
+  7bee8a:	50                   	push   %rax
+  7bee8b:	48 89 fb             	mov    %rdi,%rbx
+  7bee8e:	48 89 34 24          	mov    %rsi,(%rsp)
+  7bee92:	8b 47 60             	mov    0x60(%rdi),%eax
+  7bee95:	48 83 f8 10          	cmp    $0x10,%rax
+  7bee99:	73 41                	jae    7beedc <MVM_gc_allocate_object@@Base+0x6c>
+  7bee9b:	48 8b 4b 70          	mov    0x70(%rbx),%rcx
+  7bee9f:	48 89 e2             	mov    %rsp,%rdx
+  7beea2:	48 89 14 c1          	mov    %rdx,(%rcx,%rax,8)
+  7beea6:	ff 43 60             	incl   0x60(%rbx)
+  7beea9:	48 8b 04 24          	mov    (%rsp),%rax
+  7beead:	44 8b 78 20          	mov    0x20(%rax),%r15d
+  7beeb1:	83 7b 58 00          	cmpl   $0x0,0x58(%rbx)
+  7beeb5:	74 3e                	je     7beef5 <MVM_gc_allocate_object@@Base+0x85>
+  7beeb7:	48 8b 7b 48          	mov    0x48(%rbx),%rdi
+  7beebb:	44 89 fe             	mov    %r15d,%esi
+  7beebe:	e8 7d 43 fe ff       	call   7a3240 <MVM_gc_gen2_allocate@@Base>
+  7beec3:	49 89 c6             	mov    %rax,%r14
+  7beec6:	48 89 c7             	mov    %rax,%rdi
+  7beec9:	31 f6                	xor    %esi,%esi
+  7beecb:	4c 89 fa             	mov    %r15,%rdx
+  7beece:	e8 dd 8b fd ff       	call   797ab0 <uv_exepath@@Base+0xe0>
+  7beed3:	41 c6 46 0d 02       	movb   $0x2,0xd(%r14)
+  7beed8:	b0 02                	mov    $0x2,%al
+  7beeda:	eb 73                	jmp    7bef4f <MVM_gc_allocate_object@@Base+0xdf>
+  7beedc:	48 89 e6             	mov    %rsp,%rsi
+  7beedf:	48 89 df             	mov    %rbx,%rdi
+  7beee2:	e8 f9 51 fe ff       	call   7a40e0 <MVM_gc_root_temp_push_slow@@Base>
+  7beee7:	48 8b 04 24          	mov    (%rsp),%rax
+  7beeeb:	44 8b 78 20          	mov    0x20(%rax),%r15d
+  7beeef:	83 7b 58 00          	cmpl   $0x0,0x58(%rbx)
+  7beef3:	75 c2                	jne    7beeb7 <MVM_gc_allocate_object@@Base+0x47>
+  7beef5:	48 83 7b 40 00       	cmpq   $0x0,0x40(%rbx)
+  7beefa:	74 08                	je     7bef04 <MVM_gc_allocate_object@@Base+0x94>
+  7beefc:	48 89 df             	mov    %rbx,%rdi
+  7beeff:	e8 3c c2 fd ff       	call   79b140 <MVM_gc_enter_from_interrupt@@Base>
+  7bef04:	4d 85 ff             	test   %r15,%r15
+  7bef07:	0f 84 48 02 00 00    	je     7bf155 <MVM_gc_allocate_object@@Base+0x2e5>
+  7bef0d:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  7bef11:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  7bef15:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  7bef19:	72 2b                	jb     7bef46 <MVM_gc_allocate_object@@Base+0xd6>
+  7bef1b:	41 81 ff 00 00 00 01 	cmp    $0x1000000,%r15d
+  7bef22:	0f 87 40 02 00 00    	ja     7bf168 <MVM_gc_allocate_object@@Base+0x2f8>
+  7bef28:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  7bef2f:	00 
+  7bef30:	48 89 df             	mov    %rbx,%rdi
+  7bef33:	e8 48 bd fd ff       	call   79ac80 <MVM_gc_enter_from_allocator@@Base>
+  7bef38:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  7bef3c:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  7bef40:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  7bef44:	73 ea                	jae    7bef30 <MVM_gc_allocate_object@@Base+0xc0>
+  7bef46:	48 89 43 30          	mov    %rax,0x30(%rbx)
+  7bef4a:	41 0f b6 46 0d       	movzbl 0xd(%r14),%eax
+  7bef4f:	4c 8b 2c 24          	mov    (%rsp),%r13
+  7bef53:	41 0f b7 4d 20       	movzwl 0x20(%r13),%ecx
+  7bef58:	66 41 89 4e 0e       	mov    %cx,0xe(%r14)
+  7bef5d:	8b 0b                	mov    (%rbx),%ecx
+  7bef5f:	41 89 4e 08          	mov    %ecx,0x8(%r14)
+  7bef63:	4c 89 e9             	mov    %r13,%rcx
+  7bef66:	4d 85 ed             	test   %r13,%r13
+  7bef69:	0f 84 f5 00 00 00    	je     7bf064 <MVM_gc_allocate_object@@Base+0x1f4>
+  7bef6f:	89 c2                	mov    %eax,%edx
+  7bef71:	4c 89 e9             	mov    %r13,%rcx
+  7bef74:	80 e2 02             	and    $0x2,%dl
+  7bef77:	0f 84 e7 00 00 00    	je     7bf064 <MVM_gc_allocate_object@@Base+0x1f4>
+  7bef7d:	41 0f b6 55 0d       	movzbl 0xd(%r13),%edx
+  7bef82:	4c 89 e9             	mov    %r13,%rcx
+  7bef85:	f6 c2 02             	test   $0x2,%dl
+  7bef88:	0f 85 d6 00 00 00    	jne    7bf064 <MVM_gc_allocate_object@@Base+0x1f4>
+  7bef8e:	4c 89 e9             	mov    %r13,%rcx
+  7bef91:	a8 04                	test   $0x4,%al
+  7bef93:	0f 85 c4 00 00 00    	jne    7bf05d <MVM_gc_allocate_object@@Base+0x1ed>
+  7bef99:	4d 85 f6             	test   %r14,%r14
+  7bef9c:	0f 84 d9 01 00 00    	je     7bf17b <MVM_gc_allocate_object@@Base+0x30b>
+  7befa2:	8b 6b 78             	mov    0x78(%rbx),%ebp
+  7befa5:	3b 6b 7c             	cmp    0x7c(%rbx),%ebp
+  7befa8:	75 48                	jne    7beff2 <MVM_gc_allocate_object@@Base+0x182>
+  7befaa:	01 ed                	add    %ebp,%ebp
+  7befac:	89 6b 7c             	mov    %ebp,0x7c(%rbx)
+  7befaf:	4c 8b a3 80 00 00 00 	mov    0x80(%rbx),%r12
+  7befb6:	4c 8d 3c ed 00 00 00 	lea    0x0(,%rbp,8),%r15
+  7befbd:	00 
+  7befbe:	48 8d 3d 53 3e 2e 00 	lea    0x2e3e53(%rip),%rdi        # aa2e18 <OP_INFO_TABLE@@Base+0xc318>
+  7befc5:	e8 56 ca 1f 00       	call   9bba20 <__tls_get_addr@plt>
+  7befca:	48 8b b8 00 00 00 00 	mov    0x0(%rax),%rdi
+  7befd1:	4d 85 e4             	test   %r12,%r12
+  7befd4:	74 25                	je     7beffb <MVM_gc_allocate_object@@Base+0x18b>
+  7befd6:	4c 89 e6             	mov    %r12,%rsi
+  7befd9:	4c 89 fa             	mov    %r15,%rdx
+  7befdc:	31 c9                	xor    %ecx,%ecx
+  7befde:	e8 9d c4 1f 00       	call   9bb480 <_mi_theap_realloc_zero@plt>
+  7befe3:	48 85 ed             	test   %rbp,%rbp
+  7befe6:	74 54                	je     7bf03c <MVM_gc_allocate_object@@Base+0x1cc>
+  7befe8:	48 85 c0             	test   %rax,%rax
+  7befeb:	75 4f                	jne    7bf03c <MVM_gc_allocate_object@@Base+0x1cc>
+  7befed:	e9 e2 00 00 00       	jmp    7bf0d4 <MVM_gc_allocate_object@@Base+0x264>
+  7beff2:	48 8b 83 80 00 00 00 	mov    0x80(%rbx),%rax
+  7beff9:	eb 4b                	jmp    7bf046 <MVM_gc_allocate_object@@Base+0x1d6>
+  7beffb:	81 fd 80 00 00 00    	cmp    $0x80,%ebp
+  7bf001:	77 28                	ja     7bf02b <MVM_gc_allocate_object@@Base+0x1bb>
+  7bf003:	48 8b 0c ef          	mov    (%rdi,%rbp,8),%rcx
+  7bf007:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  7bf00b:	48 8b 51 18          	mov    0x18(%rcx),%rdx
+  7bf00f:	48 85 c0             	test   %rax,%rax
+  7bf012:	74 17                	je     7bf02b <MVM_gc_allocate_object@@Base+0x1bb>
+  7bf014:	48 8b 30             	mov    (%rax),%rsi
+  7bf017:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  7bf01e:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  7bf022:	48 ff c2             	inc    %rdx
+  7bf025:	48 89 51 18          	mov    %rdx,0x18(%rcx)
+  7bf029:	eb 11                	jmp    7bf03c <MVM_gc_allocate_object@@Base+0x1cc>
+  7bf02b:	4c 89 fe             	mov    %r15,%rsi
+  7bf02e:	31 d2                	xor    %edx,%edx
+  7bf030:	31 c9                	xor    %ecx,%ecx
+  7bf032:	e8 c9 c8 1f 00       	call   9bb900 <_mi_malloc_generic@plt>
+  7bf037:	48 85 ed             	test   %rbp,%rbp
+  7bf03a:	75 ac                	jne    7befe8 <MVM_gc_allocate_object@@Base+0x178>
+  7bf03c:	48 89 83 80 00 00 00 	mov    %rax,0x80(%rbx)
+  7bf043:	8b 6b 78             	mov    0x78(%rbx),%ebp
+  7bf046:	89 e9                	mov    %ebp,%ecx
+  7bf048:	4c 89 34 c8          	mov    %r14,(%rax,%rcx,8)
+  7bf04c:	ff 43 78             	incl   0x78(%rbx)
+  7bf04f:	41 80 4e 0d 04       	orb    $0x4,0xd(%r14)
+  7bf054:	41 0f b6 55 0d       	movzbl 0xd(%r13),%edx
+  7bf059:	48 8b 0c 24          	mov    (%rsp),%rcx
+  7bf05d:	80 ca 20             	or     $0x20,%dl
+  7bf060:	41 88 55 0d          	mov    %dl,0xd(%r13)
+  7bf064:	4d 89 6e 10          	mov    %r13,0x10(%r14)
+  7bf068:	f6 41 26 08          	testb  $0x8,0x26(%rcx)
+  7bf06c:	0f 84 ce 00 00 00    	je     7bf140 <MVM_gc_allocate_object@@Base+0x2d0>
+  7bf072:	8b 8b 88 00 00 00    	mov    0x88(%rbx),%ecx
+  7bf078:	3b 8b 8c 00 00 00    	cmp    0x8c(%rbx),%ecx
+  7bf07e:	75 5c                	jne    7bf0dc <MVM_gc_allocate_object@@Base+0x26c>
+  7bf080:	8d 04 09             	lea    (%rcx,%rcx,1),%eax
+  7bf083:	85 c9                	test   %ecx,%ecx
+  7bf085:	41 bd 40 00 00 00    	mov    $0x40,%r13d
+  7bf08b:	44 0f 45 e8          	cmovne %eax,%r13d
+  7bf08f:	44 89 ab 8c 00 00 00 	mov    %r13d,0x8c(%rbx)
+  7bf096:	4c 8b a3 90 00 00 00 	mov    0x90(%rbx),%r12
+  7bf09d:	4e 8d 3c ed 00 00 00 	lea    0x0(,%r13,8),%r15
+  7bf0a4:	00 
+  7bf0a5:	48 8d 3d 6c 3d 2e 00 	lea    0x2e3d6c(%rip),%rdi        # aa2e18 <OP_INFO_TABLE@@Base+0xc318>
+  7bf0ac:	e8 6f c9 1f 00       	call   9bba20 <__tls_get_addr@plt>
+  7bf0b1:	48 8b b8 00 00 00 00 	mov    0x0(%rax),%rdi
+  7bf0b8:	4d 85 e4             	test   %r12,%r12
+  7bf0bb:	74 28                	je     7bf0e5 <MVM_gc_allocate_object@@Base+0x275>
+  7bf0bd:	4c 89 e6             	mov    %r12,%rsi
+  7bf0c0:	4c 89 fa             	mov    %r15,%rdx
+  7bf0c3:	31 c9                	xor    %ecx,%ecx
+  7bf0c5:	e8 b6 c3 1f 00       	call   9bb480 <_mi_theap_realloc_zero@plt>
+  7bf0ca:	4d 85 ed             	test   %r13,%r13
+  7bf0cd:	74 58                	je     7bf127 <MVM_gc_allocate_object@@Base+0x2b7>
+  7bf0cf:	48 85 c0             	test   %rax,%rax
+  7bf0d2:	75 53                	jne    7bf127 <MVM_gc_allocate_object@@Base+0x2b7>
+  7bf0d4:	4c 89 ff             	mov    %r15,%rdi
+  7bf0d7:	e8 54 6e 1f 00       	call   9b5f30 <MVM_panic_allocation_failed@plt>
+  7bf0dc:	48 8b 83 90 00 00 00 	mov    0x90(%rbx),%rax
+  7bf0e3:	eb 4f                	jmp    7bf134 <MVM_gc_allocate_object@@Base+0x2c4>
+  7bf0e5:	41 81 fd 80 00 00 00 	cmp    $0x80,%r13d
+  7bf0ec:	77 28                	ja     7bf116 <MVM_gc_allocate_object@@Base+0x2a6>
+  7bf0ee:	4a 8b 0c ef          	mov    (%rdi,%r13,8),%rcx
+  7bf0f2:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  7bf0f6:	48 8b 51 18          	mov    0x18(%rcx),%rdx
+  7bf0fa:	48 85 c0             	test   %rax,%rax
+  7bf0fd:	74 17                	je     7bf116 <MVM_gc_allocate_object@@Base+0x2a6>
+  7bf0ff:	48 8b 30             	mov    (%rax),%rsi
+  7bf102:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  7bf109:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  7bf10d:	48 ff c2             	inc    %rdx
+  7bf110:	48 89 51 18          	mov    %rdx,0x18(%rcx)
+  7bf114:	eb 11                	jmp    7bf127 <MVM_gc_allocate_object@@Base+0x2b7>
+  7bf116:	4c 89 fe             	mov    %r15,%rsi
+  7bf119:	31 d2                	xor    %edx,%edx
+  7bf11b:	31 c9                	xor    %ecx,%ecx
+  7bf11d:	e8 de c7 1f 00       	call   9bb900 <_mi_malloc_generic@plt>
+  7bf122:	4d 85 ed             	test   %r13,%r13
+  7bf125:	75 a8                	jne    7bf0cf <MVM_gc_allocate_object@@Base+0x25f>
+  7bf127:	48 89 83 90 00 00 00 	mov    %rax,0x90(%rbx)
+  7bf12e:	8b 8b 88 00 00 00    	mov    0x88(%rbx),%ecx
+  7bf134:	89 c9                	mov    %ecx,%ecx
+  7bf136:	4c 89 34 c8          	mov    %r14,(%rax,%rcx,8)
+  7bf13a:	ff 83 88 00 00 00    	incl   0x88(%rbx)
+  7bf140:	ff 4b 60             	decl   0x60(%rbx)
+  7bf143:	4c 89 f0             	mov    %r14,%rax
+  7bf146:	48 83 c4 08          	add    $0x8,%rsp
+  7bf14a:	5b                   	pop    %rbx
+  7bf14b:	41 5c                	pop    %r12
+  7bf14d:	41 5d                	pop    %r13
+  7bf14f:	41 5e                	pop    %r14
+  7bf151:	41 5f                	pop    %r15
+  7bf153:	5d                   	pop    %rbp
+  7bf154:	c3                   	ret
+  7bf155:	48 8d 35 9d d1 a7 ff 	lea    -0x582e63(%rip),%rsi        # 23c2f9 <MVM_running_threads_context@@Base+0x1fc2c9>
+  7bf15c:	bf 0f 00 00 00       	mov    $0xf,%edi
+  7bf161:	31 c0                	xor    %eax,%eax
+  7bf163:	e8 28 6d 1f 00       	call   9b5e90 <MVM_panic@plt>
+  7bf168:	48 8d 35 e1 97 a9 ff 	lea    -0x56681f(%rip),%rsi        # 258950 <MVM_running_threads_context@@Base+0x218920>
+  7bf16f:	bf 0f 00 00 00       	mov    $0xf,%edi
+  7bf174:	31 c0                	xor    %eax,%eax
+  7bf176:	e8 15 6d 1f 00       	call   9b5e90 <MVM_panic@plt>
+  7bf17b:	48 8d 35 f0 fe a7 ff 	lea    -0x580110(%rip),%rsi        # 23f072 <MVM_running_threads_context@@Base+0x1ff042>
+  7bf182:	bf 10 00 00 00       	mov    $0x10,%edi
+  7bf187:	31 c0                	xor    %eax,%eax
+  7bf189:	e8 02 6d 1f 00       	call   9b5e90 <MVM_panic@plt>
+  7bf18e:	cc                   	int3
+  7bf18f:	cc                   	int3
+
+00000000007bf190 <MVM_gc_allocate_type_object@@Base>:
+  7bf190:	e9 0b 00 00 00       	jmp    7bf1a0 <MVM_gc_allocate_type_object@@Base+0x10>
+  7bf195:	cc                   	int3
+  7bf196:	cc                   	int3
+  7bf197:	cc                   	int3
+  7bf198:	cc                   	int3
+  7bf199:	cc                   	int3
+  7bf19a:	cc                   	int3
+  7bf19b:	cc                   	int3
+  7bf19c:	cc                   	int3
+  7bf19d:	cc                   	int3
+  7bf19e:	cc                   	int3
+  7bf19f:	cc                   	int3

@@ -1,0 +1,108 @@
+0000000000805c80 <MVM_gc_allocate_object>:
+  805c80:	41 57                	push   %r15
+  805c82:	41 56                	push   %r14
+  805c84:	53                   	push   %rbx
+  805c85:	48 83 ec 10          	sub    $0x10,%rsp
+  805c89:	48 89 fb             	mov    %rdi,%rbx
+  805c8c:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+  805c91:	48 8d 74 24 08       	lea    0x8(%rsp),%rsi
+  805c96:	e8 45 01 00 00       	call   805de0 <moar_c.MVM_gc_root_temp_push>
+  805c9b:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
+  805ca0:	44 8b 78 20          	mov    0x20(%rax),%r15d
+  805ca4:	83 7b 58 00          	cmpl   $0x0,0x58(%rbx)
+  805ca8:	74 25                	je     805ccf <MVM_gc_allocate_object+0x4f>
+  805caa:	48 8b 7b 48          	mov    0x48(%rbx),%rdi
+  805cae:	44 89 fe             	mov    %r15d,%esi
+  805cb1:	e8 ea 36 fa ff       	call   7a93a0 <MVM_gc_gen2_allocate>
+  805cb6:	49 89 c6             	mov    %rax,%r14
+  805cb9:	48 89 c7             	mov    %rax,%rdi
+  805cbc:	31 f6                	xor    %esi,%esi
+  805cbe:	4c 89 fa             	mov    %r15,%rdx
+  805cc1:	e8 1a 7f f9 ff       	call   79dbe0 <compiler_rt.fastMemset>
+  805cc6:	41 c6 46 0d 02       	movb   $0x2,0xd(%r14)
+  805ccb:	b0 02                	mov    $0x2,%al
+  805ccd:	eb 60                	jmp    805d2f <MVM_gc_allocate_object+0xaf>
+  805ccf:	48 83 7b 40 00       	cmpq   $0x0,0x40(%rbx)
+  805cd4:	74 08                	je     805cde <MVM_gc_allocate_object+0x5e>
+  805cd6:	48 89 df             	mov    %rbx,%rdi
+  805cd9:	e8 92 b5 f9 ff       	call   7a1270 <MVM_gc_enter_from_interrupt>
+  805cde:	4d 85 ff             	test   %r15,%r15
+  805ce1:	0f 84 c4 00 00 00    	je     805dab <MVM_gc_allocate_object+0x12b>
+  805ce7:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  805ceb:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  805cef:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  805cf3:	72 31                	jb     805d26 <MVM_gc_allocate_object+0xa6>
+  805cf5:	41 81 ff 00 00 00 01 	cmp    $0x1000000,%r15d
+  805cfc:	0f 87 bc 00 00 00    	ja     805dbe <MVM_gc_allocate_object+0x13e>
+  805d02:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  805d09:	1f 84 00 00 00 00 00 
+  805d10:	48 89 df             	mov    %rbx,%rdi
+  805d13:	e8 98 b0 f9 ff       	call   7a0db0 <MVM_gc_enter_from_allocator>
+  805d18:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  805d1c:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  805d20:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  805d24:	73 ea                	jae    805d10 <MVM_gc_allocate_object+0x90>
+  805d26:	48 89 43 30          	mov    %rax,0x30(%rbx)
+  805d2a:	41 0f b6 46 0d       	movzbl 0xd(%r14),%eax
+  805d2f:	4c 8b 7c 24 08       	mov    0x8(%rsp),%r15
+  805d34:	41 0f b7 4f 20       	movzwl 0x20(%r15),%ecx
+  805d39:	66 41 89 4e 0e       	mov    %cx,0xe(%r14)
+  805d3e:	8b 0b                	mov    (%rbx),%ecx
+  805d40:	41 89 4e 08          	mov    %ecx,0x8(%r14)
+  805d44:	4c 89 f9             	mov    %r15,%rcx
+  805d47:	4d 85 ff             	test   %r15,%r15
+  805d4a:	74 3a                	je     805d86 <MVM_gc_allocate_object+0x106>
+  805d4c:	89 c2                	mov    %eax,%edx
+  805d4e:	4c 89 f9             	mov    %r15,%rcx
+  805d51:	80 e2 02             	and    $0x2,%dl
+  805d54:	74 30                	je     805d86 <MVM_gc_allocate_object+0x106>
+  805d56:	41 0f b6 57 0d       	movzbl 0xd(%r15),%edx
+  805d5b:	4c 89 f9             	mov    %r15,%rcx
+  805d5e:	f6 c2 02             	test   $0x2,%dl
+  805d61:	75 23                	jne    805d86 <MVM_gc_allocate_object+0x106>
+  805d63:	4c 89 f9             	mov    %r15,%rcx
+  805d66:	a8 04                	test   $0x4,%al
+  805d68:	75 15                	jne    805d7f <MVM_gc_allocate_object+0xff>
+  805d6a:	48 89 df             	mov    %rbx,%rdi
+  805d6d:	4c 89 f6             	mov    %r14,%rsi
+  805d70:	e8 db f4 ff ff       	call   805250 <MVM_gc_root_gen2_add>
+  805d75:	41 0f b6 57 0d       	movzbl 0xd(%r15),%edx
+  805d7a:	48 8b 4c 24 08       	mov    0x8(%rsp),%rcx
+  805d7f:	80 ca 20             	or     $0x20,%dl
+  805d82:	41 88 57 0d          	mov    %dl,0xd(%r15)
+  805d86:	4d 89 7e 10          	mov    %r15,0x10(%r14)
+  805d8a:	f6 41 26 08          	testb  $0x8,0x26(%rcx)
+  805d8e:	74 0b                	je     805d9b <MVM_gc_allocate_object+0x11b>
+  805d90:	48 89 df             	mov    %rbx,%rdi
+  805d93:	4c 89 f6             	mov    %r14,%rsi
+  805d96:	e8 b5 46 fa ff       	call   7aa450 <MVM_gc_finalize_add_to_queue>
+  805d9b:	ff 4b 60             	decl   0x60(%rbx)
+  805d9e:	4c 89 f0             	mov    %r14,%rax
+  805da1:	48 83 c4 10          	add    $0x10,%rsp
+  805da5:	5b                   	pop    %rbx
+  805da6:	41 5e                	pop    %r14
+  805da8:	41 5f                	pop    %r15
+  805daa:	c3                   	ret
+  805dab:	48 8d 35 07 69 a3 ff 	lea    -0x5c96f9(%rip),%rsi        # 23c6b9 <__anon_4307>
+  805db2:	bf 0f 00 00 00       	mov    $0xf,%edi
+  805db7:	31 c0                	xor    %eax,%eax
+  805db9:	e8 02 6b 1f 00       	call   9fc8c0 <MVM_panic@plt>
+  805dbe:	48 8d 35 5a 30 a5 ff 	lea    -0x5acfa6(%rip),%rsi        # 258e1f <__anon_4301>
+  805dc5:	bf 0f 00 00 00       	mov    $0xf,%edi
+  805dca:	31 c0                	xor    %eax,%eax
+  805dcc:	e8 ef 6a 1f 00       	call   9fc8c0 <MVM_panic@plt>
+  805dd1:	cc                   	int3
+  805dd2:	cc                   	int3
+  805dd3:	cc                   	int3
+  805dd4:	cc                   	int3
+  805dd5:	cc                   	int3
+  805dd6:	cc                   	int3
+  805dd7:	cc                   	int3
+  805dd8:	cc                   	int3
+  805dd9:	cc                   	int3
+  805dda:	cc                   	int3
+  805ddb:	cc                   	int3
+  805ddc:	cc                   	int3
+  805ddd:	cc                   	int3
+  805dde:	cc                   	int3
+  805ddf:	cc                   	int3

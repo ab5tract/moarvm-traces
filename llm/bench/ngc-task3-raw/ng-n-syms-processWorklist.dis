@@ -1,0 +1,468 @@
+00000000007a3c30 <gc.collect.processWorklist>:
+  7a3c30:	55                   	push   %rbp
+  7a3c31:	41 57                	push   %r15
+  7a3c33:	41 56                	push   %r14
+  7a3c35:	41 55                	push   %r13
+  7a3c37:	41 54                	push   %r12
+  7a3c39:	53                   	push   %rbx
+  7a3c3a:	48 83 ec 28          	sub    $0x28,%rsp
+  7a3c3e:	89 4c 24 0c          	mov    %ecx,0xc(%rsp)
+  7a3c42:	48 89 54 24 18       	mov    %rdx,0x18(%rsp)
+  7a3c47:	8b 5e 08             	mov    0x8(%rsi),%ebx
+  7a3c4a:	85 db                	test   %ebx,%ebx
+  7a3c4c:	0f 84 5b 06 00 00    	je     7a42ad <gc.collect.processWorklist+0x67d>
+  7a3c52:	49 89 f7             	mov    %rsi,%r15
+  7a3c55:	49 89 fc             	mov    %rdi,%r12
+  7a3c58:	48 8b 47 48          	mov    0x48(%rdi),%rax
+  7a3c5c:	48 89 44 24 20       	mov    %rax,0x20(%rsp)
+  7a3c61:	48 8d 3d 70 60 34 00 	lea    0x346070(%rip),%rdi        # ae9cd8 <_DYNAMIC+0x1f0>
+  7a3c68:	e8 43 eb 25 00       	call   a027b0 <__tls_get_addr@plt>
+  7a3c6d:	48 8d 80 00 00 00 00 	lea    0x0(%rax),%rax
+  7a3c74:	48 89 44 24 10       	mov    %rax,0x10(%rsp)
+  7a3c79:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  7a3c80:	ff cb                	dec    %ebx
+  7a3c82:	41 89 5f 08          	mov    %ebx,0x8(%r15)
+  7a3c86:	49 8b 07             	mov    (%r15),%rax
+  7a3c89:	48 8b 1c d8          	mov    (%rax,%rbx,8),%rbx
+  7a3c8d:	48 85 db             	test   %rbx,%rbx
+  7a3c90:	0f 84 17 06 00 00    	je     7a42ad <gc.collect.processWorklist+0x67d>
+  7a3c96:	4c 8b 2b             	mov    (%rbx),%r13
+  7a3c99:	4d 85 ed             	test   %r13,%r13
+  7a3c9c:	0f 84 fe 03 00 00    	je     7a40a0 <gc.collect.processWorklist+0x470>
+  7a3ca2:	41 0f b6 45 0d       	movzbl 0xd(%r13),%eax
+  7a3ca7:	a8 02                	test   $0x2,%al
+  7a3ca9:	75 25                	jne    7a3cd0 <gc.collect.processWorklist+0xa0>
+  7a3cab:	a8 10                	test   $0x10,%al
+  7a3cad:	0f 85 80 00 00 00    	jne    7a3d33 <gc.collect.processWorklist+0x103>
+  7a3cb3:	4d 3b 6c 24 28       	cmp    0x28(%r12),%r13
+  7a3cb8:	72 2c                	jb     7a3ce6 <gc.collect.processWorklist+0xb6>
+  7a3cba:	4d 3b 6c 24 30       	cmp    0x30(%r12),%r13
+  7a3cbf:	73 25                	jae    7a3ce6 <gc.collect.processWorklist+0xb6>
+  7a3cc1:	e9 da 03 00 00       	jmp    7a40a0 <gc.collect.processWorklist+0x470>
+  7a3cc6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  7a3ccd:	00 00 00 
+  7a3cd0:	80 7c 24 0c 00       	cmpb   $0x0,0xc(%rsp)
+  7a3cd5:	0f 84 c5 03 00 00    	je     7a40a0 <gc.collect.processWorklist+0x470>
+  7a3cdb:	89 c1                	mov    %eax,%ecx
+  7a3cdd:	80 e1 08             	and    $0x8,%cl
+  7a3ce0:	0f 85 ba 03 00 00    	jne    7a40a0 <gc.collect.processWorklist+0x470>
+  7a3ce6:	41 8b 6d 08          	mov    0x8(%r13),%ebp
+  7a3cea:	41 3b 2c 24          	cmp    (%r12),%ebp
+  7a3cee:	75 55                	jne    7a3d45 <gc.collect.processWorklist+0x115>
+  7a3cf0:	49 8b 6c 24 30       	mov    0x30(%r12),%rbp
+  7a3cf5:	49 39 ed             	cmp    %rbp,%r13
+  7a3cf8:	72 0b                	jb     7a3d05 <gc.collect.processWorklist+0xd5>
+  7a3cfa:	4d 3b 6c 24 38       	cmp    0x38(%r12),%r13
+  7a3cff:	0f 82 fa 05 00 00    	jb     7a42ff <gc.collect.processWorklist+0x6cf>
+  7a3d05:	a8 02                	test   $0x2,%al
+  7a3d07:	75 77                	jne    7a3d80 <gc.collect.processWorklist+0x150>
+  7a3d09:	41 f6 45 0c 10       	testb  $0x10,0xc(%r13)
+  7a3d0e:	0f 85 19 01 00 00    	jne    7a3e2d <gc.collect.processWorklist+0x1fd>
+  7a3d14:	41 0f b7 75 0e       	movzwl 0xe(%r13),%esi
+  7a3d19:	a8 21                	test   $0x21,%al
+  7a3d1b:	0f 84 90 03 00 00    	je     7a40b1 <gc.collect.processWorklist+0x481>
+  7a3d21:	48 8b 7c 24 20       	mov    0x20(%rsp),%rdi
+  7a3d26:	e8 b5 56 00 00       	call   7a93e0 <MVM_gc_gen2_allocate>
+  7a3d2b:	48 89 c5             	mov    %rax,%rbp
+  7a3d2e:	e9 37 01 00 00       	jmp    7a3e6a <gc.collect.processWorklist+0x23a>
+  7a3d33:	f0 83 4c 24 c0 00    	lock orl $0x0,-0x40(%rsp)
+  7a3d39:	49 8b 45 00          	mov    0x0(%r13),%rax
+  7a3d3d:	48 89 03             	mov    %rax,(%rbx)
+  7a3d40:	e9 5b 03 00 00       	jmp    7a40a0 <gc.collect.processWorklist+0x470>
+  7a3d45:	85 ed                	test   %ebp,%ebp
+  7a3d47:	0f 84 84 05 00 00    	je     7a42d1 <gc.collect.processWorklist+0x6a1>
+  7a3d4d:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
+  7a3d52:	44 8b 28             	mov    (%rax),%r13d
+  7a3d55:	48 8b 70 08          	mov    0x8(%rax),%rsi
+  7a3d59:	4c 89 e8             	mov    %r13,%rax
+  7a3d5c:	49 89 f6             	mov    %rsi,%r14
+  7a3d5f:	4d 85 ed             	test   %r13,%r13
+  7a3d62:	74 50                	je     7a3db4 <gc.collect.processWorklist+0x184>
+  7a3d64:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  7a3d6b:	00 00 00 00 00 
+  7a3d70:	41 39 2e             	cmp    %ebp,(%r14)
+  7a3d73:	74 24                	je     7a3d99 <gc.collect.processWorklist+0x169>
+  7a3d75:	49 83 c6 10          	add    $0x10,%r14
+  7a3d79:	48 ff c8             	dec    %rax
+  7a3d7c:	75 f2                	jne    7a3d70 <gc.collect.processWorklist+0x140>
+  7a3d7e:	eb 34                	jmp    7a3db4 <gc.collect.processWorklist+0x184>
+  7a3d80:	0c 08                	or     $0x8,%al
+  7a3d82:	41 88 45 0d          	mov    %al,0xd(%r13)
+  7a3d86:	4c 89 e7             	mov    %r12,%rdi
+  7a3d89:	4c 89 fe             	mov    %r15,%rsi
+  7a3d8c:	4c 89 ea             	mov    %r13,%rdx
+  7a3d8f:	e8 7c 3e 00 00       	call   7a7c10 <MVM_gc_mark_collectable>
+  7a3d94:	e9 07 03 00 00       	jmp    7a40a0 <gc.collect.processWorklist+0x470>
+  7a3d99:	4d 85 f6             	test   %r14,%r14
+  7a3d9c:	74 16                	je     7a3db4 <gc.collect.processWorklist+0x184>
+  7a3d9e:	4d 8b 6e 08          	mov    0x8(%r14),%r13
+  7a3da2:	49 83 c6 08          	add    $0x8,%r14
+  7a3da6:	4d 85 ed             	test   %r13,%r13
+  7a3da9:	0f 85 65 02 00 00    	jne    7a4014 <gc.collect.processWorklist+0x3e4>
+  7a3daf:	e9 dc 01 00 00       	jmp    7a3f90 <gc.collect.processWorklist+0x360>
+  7a3db4:	41 ff c5             	inc    %r13d
+  7a3db7:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
+  7a3dbc:	44 89 28             	mov    %r13d,(%rax)
+  7a3dbf:	4d 89 ee             	mov    %r13,%r14
+  7a3dc2:	49 c1 e6 04          	shl    $0x4,%r14
+  7a3dc6:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  7a3dcb:	48 8b 38             	mov    (%rax),%rdi
+  7a3dce:	48 85 f6             	test   %rsi,%rsi
+  7a3dd1:	74 21                	je     7a3df4 <gc.collect.processWorklist+0x1c4>
+  7a3dd3:	4c 89 f2             	mov    %r14,%rdx
+  7a3dd6:	31 c9                	xor    %ecx,%ecx
+  7a3dd8:	e8 33 e4 25 00       	call   a02210 <_mi_theap_realloc_zero@plt>
+  7a3ddd:	45 85 ed             	test   %r13d,%r13d
+  7a3de0:	0f 84 85 01 00 00    	je     7a3f6b <gc.collect.processWorklist+0x33b>
+  7a3de6:	48 85 c0             	test   %rax,%rax
+  7a3de9:	0f 85 7c 01 00 00    	jne    7a3f6b <gc.collect.processWorklist+0x33b>
+  7a3def:	e9 03 05 00 00       	jmp    7a42f7 <gc.collect.processWorklist+0x6c7>
+  7a3df4:	41 83 fd 40          	cmp    $0x40,%r13d
+  7a3df8:	0f 87 58 01 00 00    	ja     7a3f56 <gc.collect.processWorklist+0x326>
+  7a3dfe:	4a 8b 0c 37          	mov    (%rdi,%r14,1),%rcx
+  7a3e02:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  7a3e06:	48 8b 51 18          	mov    0x18(%rcx),%rdx
+  7a3e0a:	48 85 c0             	test   %rax,%rax
+  7a3e0d:	0f 84 43 01 00 00    	je     7a3f56 <gc.collect.processWorklist+0x326>
+  7a3e13:	48 8b 30             	mov    (%rax),%rsi
+  7a3e16:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  7a3e1d:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  7a3e21:	48 ff c2             	inc    %rdx
+  7a3e24:	48 89 51 18          	mov    %rdx,0x18(%rcx)
+  7a3e28:	e9 3e 01 00 00       	jmp    7a3f6b <gc.collect.processWorklist+0x33b>
+  7a3e2d:	49 8b 7c 24 10       	mov    0x10(%r12),%rdi
+  7a3e32:	41 be f0 01 00 00    	mov    $0x1f0,%r14d
+  7a3e38:	4c 01 f7             	add    %r14,%rdi
+  7a3e3b:	e8 90 8d 25 00       	call   9fcbd0 <uv_mutex_lock@plt>
+  7a3e40:	49 8b 74 24 10       	mov    0x10(%r12),%rsi
+  7a3e45:	b8 e8 01 00 00       	mov    $0x1e8,%eax
+  7a3e4a:	48 01 c6             	add    %rax,%rsi
+  7a3e4d:	4c 89 ea             	mov    %r13,%rdx
+  7a3e50:	e8 fb f9 ff ff       	call   7a3850 <MVM_ptr_hash_fetch_and_delete>
+  7a3e55:	41 80 75 0c 10       	xorb   $0x10,0xc(%r13)
+  7a3e5a:	48 89 c5             	mov    %rax,%rbp
+  7a3e5d:	49 8b 7c 24 10       	mov    0x10(%r12),%rdi
+  7a3e62:	4c 01 f7             	add    %r14,%rdi
+  7a3e65:	e8 76 8d 25 00       	call   9fcbe0 <uv_mutex_unlock@plt>
+  7a3e6a:	41 0f b7 45 0e       	movzwl 0xe(%r13),%eax
+  7a3e6f:	41 01 44 24 5c       	add    %eax,0x5c(%r12)
+  7a3e74:	41 0f b7 55 0e       	movzwl 0xe(%r13),%edx
+  7a3e79:	48 89 ef             	mov    %rbp,%rdi
+  7a3e7c:	4c 89 ee             	mov    %r13,%rsi
+  7a3e7f:	e8 fc a2 ff ff       	call   79e180 <compiler_rt.memcpy.memcpyFast>
+  7a3e84:	0f b6 45 0d          	movzbl 0xd(%rbp),%eax
+  7a3e88:	24 fc                	and    $0xfc,%al
+  7a3e8a:	0c 02                	or     $0x2,%al
+  7a3e8c:	88 45 0d             	mov    %al,0xd(%rbp)
+  7a3e8f:	0f b6 45 0c          	movzbl 0xc(%rbp),%eax
+  7a3e93:	a8 04                	test   $0x4,%al
+  7a3e95:	75 50                	jne    7a3ee7 <gc.collect.processWorklist+0x2b7>
+  7a3e97:	a8 03                	test   $0x3,%al
+  7a3e99:	0f 85 c1 02 00 00    	jne    7a4160 <gc.collect.processWorklist+0x530>
+  7a3e9f:	48 8b 75 10          	mov    0x10(%rbp),%rsi
+  7a3ea3:	48 8b 46 10          	mov    0x10(%rsi),%rax
+  7a3ea7:	48 8b 80 d0 01 00 00 	mov    0x1d0(%rax),%rax
+  7a3eae:	48 85 c0             	test   %rax,%rax
+  7a3eb1:	0f 84 a9 02 00 00    	je     7a4160 <gc.collect.processWorklist+0x530>
+  7a3eb7:	48 8d 55 18          	lea    0x18(%rbp),%rdx
+  7a3ebb:	4c 89 e7             	mov    %r12,%rdi
+  7a3ebe:	ff d0                	call   *%rax
+  7a3ec0:	41 01 44 24 5c       	add    %eax,0x5c(%r12)
+  7a3ec5:	49 8b 4c 24 10       	mov    0x10(%r12),%rcx
+  7a3eca:	83 b9 dc 0a 00 00 00 	cmpl   $0x0,0xadc(%rcx)
+  7a3ed1:	0f 84 89 02 00 00    	je     7a4160 <gc.collect.processWorklist+0x530>
+  7a3ed7:	4c 89 e7             	mov    %r12,%rdi
+  7a3eda:	48 89 c6             	mov    %rax,%rsi
+  7a3edd:	e8 4e 8e 25 00       	call   9fcd30 <MVM_profiler_log_unmanaged_data_promoted@plt>
+  7a3ee2:	e9 79 02 00 00       	jmp    7a4160 <gc.collect.processWorklist+0x530>
+  7a3ee7:	48 83 7d 18 00       	cmpq   $0x0,0x18(%rbp)
+  7a3eec:	0f 84 6e 02 00 00    	je     7a4160 <gc.collect.processWorklist+0x530>
+  7a3ef2:	48 85 ed             	test   %rbp,%rbp
+  7a3ef5:	0f 84 e9 03 00 00    	je     7a42e4 <gc.collect.processWorklist+0x6b4>
+  7a3efb:	45 8b 74 24 78       	mov    0x78(%r12),%r14d
+  7a3f00:	45 3b 74 24 7c       	cmp    0x7c(%r12),%r14d
+  7a3f05:	0f 85 e4 01 00 00    	jne    7a40ef <gc.collect.processWorklist+0x4bf>
+  7a3f0b:	45 01 f6             	add    %r14d,%r14d
+  7a3f0e:	45 89 74 24 7c       	mov    %r14d,0x7c(%r12)
+  7a3f13:	49 8b b4 24 80 00 00 	mov    0x80(%r12),%rsi
+  7a3f1a:	00 
+  7a3f1b:	4a 8d 14 f5 00 00 00 	lea    0x0(,%r14,8),%rdx
+  7a3f22:	00 
+  7a3f23:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  7a3f28:	48 8b 38             	mov    (%rax),%rdi
+  7a3f2b:	48 85 f6             	test   %rsi,%rsi
+  7a3f2e:	0f 84 c5 01 00 00    	je     7a40f9 <gc.collect.processWorklist+0x4c9>
+  7a3f34:	48 89 14 24          	mov    %rdx,(%rsp)
+  7a3f38:	31 c9                	xor    %ecx,%ecx
+  7a3f3a:	e8 d1 e2 25 00       	call   a02210 <_mi_theap_realloc_zero@plt>
+  7a3f3f:	4d 85 f6             	test   %r14,%r14
+  7a3f42:	0f 84 fb 01 00 00    	je     7a4143 <gc.collect.processWorklist+0x513>
+  7a3f48:	48 85 c0             	test   %rax,%rax
+  7a3f4b:	0f 85 f2 01 00 00    	jne    7a4143 <gc.collect.processWorklist+0x513>
+  7a3f51:	e9 bf 03 00 00       	jmp    7a4315 <gc.collect.processWorklist+0x6e5>
+  7a3f56:	4c 89 f6             	mov    %r14,%rsi
+  7a3f59:	31 d2                	xor    %edx,%edx
+  7a3f5b:	31 c9                	xor    %ecx,%ecx
+  7a3f5d:	e8 2e e7 25 00       	call   a02690 <_mi_malloc_generic@plt>
+  7a3f62:	45 85 ed             	test   %r13d,%r13d
+  7a3f65:	0f 85 7b fe ff ff    	jne    7a3de6 <gc.collect.processWorklist+0x1b6>
+  7a3f6b:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+  7a3f70:	48 89 41 08          	mov    %rax,0x8(%rcx)
+  7a3f74:	8b 09                	mov    (%rcx),%ecx
+  7a3f76:	ff c9                	dec    %ecx
+  7a3f78:	48 c1 e1 04          	shl    $0x4,%rcx
+  7a3f7c:	89 2c 08             	mov    %ebp,(%rax,%rcx,1)
+  7a3f7f:	4c 8d 34 08          	lea    (%rax,%rcx,1),%r14
+  7a3f83:	49 83 c6 08          	add    $0x8,%r14
+  7a3f87:	48 c7 44 08 08 00 00 	movq   $0x0,0x8(%rax,%rcx,1)
+  7a3f8e:	00 00 
+  7a3f90:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  7a3f95:	48 8b 38             	mov    (%rax),%rdi
+  7a3f98:	48 8b 87 00 02 00 00 	mov    0x200(%rdi),%rax
+  7a3f9f:	4c 8b 68 10          	mov    0x10(%rax),%r13
+  7a3fa3:	48 8b 48 18          	mov    0x18(%rax),%rcx
+  7a3fa7:	4d 85 ed             	test   %r13,%r13
+  7a3faa:	74 48                	je     7a3ff4 <gc.collect.processWorklist+0x3c4>
+  7a3fac:	49 8b 55 00          	mov    0x0(%r13),%rdx
+  7a3fb0:	49 c7 45 00 00 00 00 	movq   $0x0,0x0(%r13)
+  7a3fb7:	00 
+  7a3fb8:	48 89 50 10          	mov    %rdx,0x10(%rax)
+  7a3fbc:	48 ff c1             	inc    %rcx
+  7a3fbf:	48 89 48 18          	mov    %rcx,0x18(%rax)
+  7a3fc3:	80 78 3f 00          	cmpb   $0x0,0x3f(%rax)
+  7a3fc7:	75 48                	jne    7a4011 <gc.collect.processWorklist+0x3e1>
+  7a3fc9:	48 8b 48 28          	mov    0x28(%rax),%rcx
+  7a3fcd:	80 3d ec ae 37 00 00 	cmpb   $0x0,0x37aeec(%rip)        # b1eec0 <_mi_cpu_stosb_max>
+  7a3fd4:	b8 00 00 00 00       	mov    $0x0,%eax
+  7a3fd9:	ba 7f 00 00 00       	mov    $0x7f,%edx
+  7a3fde:	48 0f 45 c2          	cmovne %rdx,%rax
+  7a3fe2:	48 39 c1             	cmp    %rax,%rcx
+  7a3fe5:	0f 87 b0 02 00 00    	ja     7a429b <gc.collect.processWorklist+0x66b>
+  7a3feb:	31 c0                	xor    %eax,%eax
+  7a3fed:	4c 89 ef             	mov    %r13,%rdi
+  7a3ff0:	f3 aa                	rep stos %al,(%rdi)
+  7a3ff2:	eb 1d                	jmp    7a4011 <gc.collect.processWorklist+0x3e1>
+  7a3ff4:	be 00 02 00 00       	mov    $0x200,%esi
+  7a3ff9:	ba 01 00 00 00       	mov    $0x1,%edx
+  7a3ffe:	31 c9                	xor    %ecx,%ecx
+  7a4000:	e8 8b e6 25 00       	call   a02690 <_mi_malloc_generic@plt>
+  7a4005:	49 89 c5             	mov    %rax,%r13
+  7a4008:	48 85 c0             	test   %rax,%rax
+  7a400b:	0f 84 0d 03 00 00    	je     7a431e <gc.collect.processWorklist+0x6ee>
+  7a4011:	4d 89 2e             	mov    %r13,(%r14)
+  7a4014:	41 8b 85 f8 01 00 00 	mov    0x1f8(%r13),%eax
+  7a401b:	49 89 5c c5 00       	mov    %rbx,0x0(%r13,%rax,8)
+  7a4020:	49 8b 06             	mov    (%r14),%rax
+  7a4023:	ff 80 f8 01 00 00    	incl   0x1f8(%rax)
+  7a4029:	49 8b 16             	mov    (%r14),%rdx
+  7a402c:	83 ba f8 01 00 00 3e 	cmpl   $0x3e,0x1f8(%rdx)
+  7a4033:	75 6b                	jne    7a40a0 <gc.collect.processWorklist+0x470>
+  7a4035:	49 8b 44 24 10       	mov    0x10(%r12),%rax
+  7a403a:	83 fd 01             	cmp    $0x1,%ebp
+  7a403d:	75 05                	jne    7a4044 <gc.collect.processWorklist+0x414>
+  7a403f:	48 8b 30             	mov    (%rax),%rsi
+  7a4042:	eb 2c                	jmp    7a4070 <gc.collect.processWorklist+0x440>
+  7a4044:	48 8b 40 10          	mov    0x10(%rax),%rax
+  7a4048:	eb 13                	jmp    7a405d <gc.collect.processWorklist+0x42d>
+  7a404a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  7a4050:	48 8b 40 30          	mov    0x30(%rax),%rax
+  7a4054:	48 85 c0             	test   %rax,%rax
+  7a4057:	0f 84 5f 02 00 00    	je     7a42bc <gc.collect.processWorklist+0x68c>
+  7a405d:	48 8b 70 28          	mov    0x28(%rax),%rsi
+  7a4061:	48 85 f6             	test   %rsi,%rsi
+  7a4064:	74 ea                	je     7a4050 <gc.collect.processWorklist+0x420>
+  7a4066:	39 2e                	cmp    %ebp,(%rsi)
+  7a4068:	75 e6                	jne    7a4050 <gc.collect.processWorklist+0x420>
+  7a406a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  7a4070:	48 8b 8e a8 00 00 00 	mov    0xa8(%rsi),%rcx
+  7a4077:	48 89 8a f0 01 00 00 	mov    %rcx,0x1f0(%rdx)
+  7a407e:	48 89 c8             	mov    %rcx,%rax
+  7a4081:	f0 48 0f b1 96 a8 00 	lock cmpxchg %rdx,0xa8(%rsi)
+  7a4088:	00 00 
+  7a408a:	48 39 c1             	cmp    %rax,%rcx
+  7a408d:	75 e1                	jne    7a4070 <gc.collect.processWorklist+0x440>
+  7a408f:	49 c7 06 00 00 00 00 	movq   $0x0,(%r14)
+  7a4096:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  7a409d:	00 00 00 
+  7a40a0:	41 8b 5f 08          	mov    0x8(%r15),%ebx
+  7a40a4:	85 db                	test   %ebx,%ebx
+  7a40a6:	0f 85 d4 fb ff ff    	jne    7a3c80 <gc.collect.processWorklist+0x50>
+  7a40ac:	e9 fc 01 00 00       	jmp    7a42ad <gc.collect.processWorklist+0x67d>
+  7a40b1:	48 01 ee             	add    %rbp,%rsi
+  7a40b4:	49 89 74 24 30       	mov    %rsi,0x30(%r12)
+  7a40b9:	41 0f b7 55 0e       	movzwl 0xe(%r13),%edx
+  7a40be:	48 89 ef             	mov    %rbp,%rdi
+  7a40c1:	4c 89 ee             	mov    %r13,%rsi
+  7a40c4:	e8 b7 a0 ff ff       	call   79e180 <compiler_rt.memcpy.memcpyFast>
+  7a40c9:	80 4d 0d 01          	orb    $0x1,0xd(%rbp)
+  7a40cd:	48 89 2b             	mov    %rbp,(%rbx)
+  7a40d0:	49 89 6d 00          	mov    %rbp,0x0(%r13)
+  7a40d4:	f0 83 4c 24 c0 00    	lock orl $0x0,-0x40(%rsp)
+  7a40da:	41 80 4d 0d 10       	orb    $0x10,0xd(%r13)
+  7a40df:	4c 89 e7             	mov    %r12,%rdi
+  7a40e2:	4c 89 fe             	mov    %r15,%rsi
+  7a40e5:	48 89 ea             	mov    %rbp,%rdx
+  7a40e8:	e8 23 3b 00 00       	call   7a7c10 <MVM_gc_mark_collectable>
+  7a40ed:	eb b1                	jmp    7a40a0 <gc.collect.processWorklist+0x470>
+  7a40ef:	49 8b 84 24 80 00 00 	mov    0x80(%r12),%rax
+  7a40f6:	00 
+  7a40f7:	eb 57                	jmp    7a4150 <gc.collect.processWorklist+0x520>
+  7a40f9:	41 81 fe 80 00 00 00 	cmp    $0x80,%r14d
+  7a4100:	77 28                	ja     7a412a <gc.collect.processWorklist+0x4fa>
+  7a4102:	4a 8b 0c f7          	mov    (%rdi,%r14,8),%rcx
+  7a4106:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  7a410a:	4c 8b 41 18          	mov    0x18(%rcx),%r8
+  7a410e:	48 85 c0             	test   %rax,%rax
+  7a4111:	74 17                	je     7a412a <gc.collect.processWorklist+0x4fa>
+  7a4113:	48 8b 30             	mov    (%rax),%rsi
+  7a4116:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  7a411d:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  7a4121:	49 ff c0             	inc    %r8
+  7a4124:	4c 89 41 18          	mov    %r8,0x18(%rcx)
+  7a4128:	eb 19                	jmp    7a4143 <gc.collect.processWorklist+0x513>
+  7a412a:	48 89 14 24          	mov    %rdx,(%rsp)
+  7a412e:	48 89 d6             	mov    %rdx,%rsi
+  7a4131:	31 d2                	xor    %edx,%edx
+  7a4133:	31 c9                	xor    %ecx,%ecx
+  7a4135:	e8 56 e5 25 00       	call   a02690 <_mi_malloc_generic@plt>
+  7a413a:	4d 85 f6             	test   %r14,%r14
+  7a413d:	0f 85 05 fe ff ff    	jne    7a3f48 <gc.collect.processWorklist+0x318>
+  7a4143:	49 89 84 24 80 00 00 	mov    %rax,0x80(%r12)
+  7a414a:	00 
+  7a414b:	45 8b 74 24 78       	mov    0x78(%r12),%r14d
+  7a4150:	44 89 f1             	mov    %r14d,%ecx
+  7a4153:	48 89 2c c8          	mov    %rbp,(%rax,%rcx,8)
+  7a4157:	41 ff 44 24 78       	incl   0x78(%r12)
+  7a415c:	80 4d 0d 04          	orb    $0x4,0xd(%rbp)
+  7a4160:	80 7c 24 0c 01       	cmpb   $0x1,0xc(%rsp)
+  7a4165:	75 04                	jne    7a416b <gc.collect.processWorklist+0x53b>
+  7a4167:	80 4d 0d 08          	orb    $0x8,0xd(%rbp)
+  7a416b:	48 89 2b             	mov    %rbp,(%rbx)
+  7a416e:	49 89 6d 00          	mov    %rbp,0x0(%r13)
+  7a4172:	f0 83 4c 24 c0 00    	lock orl $0x0,-0x40(%rsp)
+  7a4178:	41 80 4d 0d 10       	orb    $0x10,0xd(%r13)
+  7a417d:	45 8b 77 08          	mov    0x8(%r15),%r14d
+  7a4181:	4c 89 e7             	mov    %r12,%rdi
+  7a4184:	4c 89 fe             	mov    %r15,%rsi
+  7a4187:	48 89 ea             	mov    %rbp,%rdx
+  7a418a:	e8 81 3a 00 00       	call   7a7c10 <MVM_gc_mark_collectable>
+  7a418f:	41 8b 5f 08          	mov    0x8(%r15),%ebx
+  7a4193:	44 39 f3             	cmp    %r14d,%ebx
+  7a4196:	0f 86 08 ff ff ff    	jbe    7a40a4 <gc.collect.processWorklist+0x474>
+  7a419c:	44 29 f3             	sub    %r14d,%ebx
+  7a419f:	eb 2a                	jmp    7a41cb <gc.collect.processWorklist+0x59b>
+  7a41a1:	49 8b 84 24 80 00 00 	mov    0x80(%r12),%rax
+  7a41a8:	00 
+  7a41a9:	44 89 e9             	mov    %r13d,%ecx
+  7a41ac:	48 89 2c c8          	mov    %rbp,(%rax,%rcx,8)
+  7a41b0:	41 ff 44 24 78       	incl   0x78(%r12)
+  7a41b5:	80 4d 0d 04          	orb    $0x4,0xd(%rbp)
+  7a41b9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  7a41c0:	49 ff c6             	inc    %r14
+  7a41c3:	ff cb                	dec    %ebx
+  7a41c5:	0f 84 d5 fe ff ff    	je     7a40a0 <gc.collect.processWorklist+0x470>
+  7a41cb:	49 8b 07             	mov    (%r15),%rax
+  7a41ce:	4a 8b 04 f0          	mov    (%rax,%r14,8),%rax
+  7a41d2:	48 8b 08             	mov    (%rax),%rcx
+  7a41d5:	48 85 c9             	test   %rcx,%rcx
+  7a41d8:	74 e6                	je     7a41c0 <gc.collect.processWorklist+0x590>
+  7a41da:	0f b6 45 0d          	movzbl 0xd(%rbp),%eax
+  7a41de:	a8 02                	test   $0x2,%al
+  7a41e0:	74 de                	je     7a41c0 <gc.collect.processWorklist+0x590>
+  7a41e2:	0f b6 49 0d          	movzbl 0xd(%rcx),%ecx
+  7a41e6:	80 e1 02             	and    $0x2,%cl
+  7a41e9:	24 04                	and    $0x4,%al
+  7a41eb:	08 c8                	or     %cl,%al
+  7a41ed:	75 d1                	jne    7a41c0 <gc.collect.processWorklist+0x590>
+  7a41ef:	48 85 ed             	test   %rbp,%rbp
+  7a41f2:	0f 84 ec 00 00 00    	je     7a42e4 <gc.collect.processWorklist+0x6b4>
+  7a41f8:	45 8b 6c 24 78       	mov    0x78(%r12),%r13d
+  7a41fd:	45 3b 6c 24 7c       	cmp    0x7c(%r12),%r13d
+  7a4202:	75 9d                	jne    7a41a1 <gc.collect.processWorklist+0x571>
+  7a4204:	45 01 ed             	add    %r13d,%r13d
+  7a4207:	45 89 6c 24 7c       	mov    %r13d,0x7c(%r12)
+  7a420c:	49 8b b4 24 80 00 00 	mov    0x80(%r12),%rsi
+  7a4213:	00 
+  7a4214:	4a 8d 14 ed 00 00 00 	lea    0x0(,%r13,8),%rdx
+  7a421b:	00 
+  7a421c:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  7a4221:	48 8b 38             	mov    (%rax),%rdi
+  7a4224:	48 85 f6             	test   %rsi,%rsi
+  7a4227:	74 1a                	je     7a4243 <gc.collect.processWorklist+0x613>
+  7a4229:	48 89 14 24          	mov    %rdx,(%rsp)
+  7a422d:	31 c9                	xor    %ecx,%ecx
+  7a422f:	e8 dc df 25 00       	call   a02210 <_mi_theap_realloc_zero@plt>
+  7a4234:	4d 85 ed             	test   %r13,%r13
+  7a4237:	74 50                	je     7a4289 <gc.collect.processWorklist+0x659>
+  7a4239:	48 85 c0             	test   %rax,%rax
+  7a423c:	75 4b                	jne    7a4289 <gc.collect.processWorklist+0x659>
+  7a423e:	e9 d2 00 00 00       	jmp    7a4315 <gc.collect.processWorklist+0x6e5>
+  7a4243:	41 81 fd 80 00 00 00 	cmp    $0x80,%r13d
+  7a424a:	77 28                	ja     7a4274 <gc.collect.processWorklist+0x644>
+  7a424c:	4a 8b 0c ef          	mov    (%rdi,%r13,8),%rcx
+  7a4250:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  7a4254:	4c 8b 41 18          	mov    0x18(%rcx),%r8
+  7a4258:	48 85 c0             	test   %rax,%rax
+  7a425b:	74 17                	je     7a4274 <gc.collect.processWorklist+0x644>
+  7a425d:	48 8b 30             	mov    (%rax),%rsi
+  7a4260:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  7a4267:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  7a426b:	49 ff c0             	inc    %r8
+  7a426e:	4c 89 41 18          	mov    %r8,0x18(%rcx)
+  7a4272:	eb 15                	jmp    7a4289 <gc.collect.processWorklist+0x659>
+  7a4274:	48 89 14 24          	mov    %rdx,(%rsp)
+  7a4278:	48 89 d6             	mov    %rdx,%rsi
+  7a427b:	31 d2                	xor    %edx,%edx
+  7a427d:	31 c9                	xor    %ecx,%ecx
+  7a427f:	e8 0c e4 25 00       	call   a02690 <_mi_malloc_generic@plt>
+  7a4284:	4d 85 ed             	test   %r13,%r13
+  7a4287:	75 b0                	jne    7a4239 <gc.collect.processWorklist+0x609>
+  7a4289:	49 89 84 24 80 00 00 	mov    %rax,0x80(%r12)
+  7a4290:	00 
+  7a4291:	45 8b 6c 24 78       	mov    0x78(%r12),%r13d
+  7a4296:	e9 0e ff ff ff       	jmp    7a41a9 <gc.collect.processWorklist+0x579>
+  7a429b:	4c 89 ef             	mov    %r13,%rdi
+  7a429e:	31 f6                	xor    %esi,%esi
+  7a42a0:	48 89 ca             	mov    %rcx,%rdx
+  7a42a3:	e8 a8 99 ff ff       	call   79dc50 <compiler_rt.fastMemset>
+  7a42a8:	e9 64 fd ff ff       	jmp    7a4011 <gc.collect.processWorklist+0x3e1>
+  7a42ad:	48 83 c4 28          	add    $0x28,%rsp
+  7a42b1:	5b                   	pop    %rbx
+  7a42b2:	41 5c                	pop    %r12
+  7a42b4:	41 5d                	pop    %r13
+  7a42b6:	41 5e                	pop    %r14
+  7a42b8:	41 5f                	pop    %r15
+  7a42ba:	5d                   	pop    %rbp
+  7a42bb:	c3                   	ret
+  7a42bc:	48 8d 35 9d f1 a9 ff 	lea    -0x560e63(%rip),%rsi        # 243460 <__anon_3471>
+  7a42c3:	bf 11 00 00 00       	mov    $0x11,%edi
+  7a42c8:	89 ea                	mov    %ebp,%edx
+  7a42ca:	31 c0                	xor    %eax,%eax
+  7a42cc:	e8 4f 89 25 00       	call   9fcc20 <MVM_panic@plt>
+  7a42d1:	48 8d 35 53 f1 a9 ff 	lea    -0x560ead(%rip),%rsi        # 24342b <__anon_3525>
+  7a42d8:	bf 11 00 00 00       	mov    $0x11,%edi
+  7a42dd:	31 c0                	xor    %eax,%eax
+  7a42df:	e8 3c 89 25 00       	call   9fcc20 <MVM_panic@plt>
+  7a42e4:	48 8d 35 55 b1 a9 ff 	lea    -0x564eab(%rip),%rsi        # 23f440 <__anon_3841>
+  7a42eb:	bf 10 00 00 00       	mov    $0x10,%edi
+  7a42f0:	31 c0                	xor    %eax,%eax
+  7a42f2:	e8 29 89 25 00       	call   9fcc20 <MVM_panic@plt>
+  7a42f7:	4c 89 f7             	mov    %r14,%rdi
+  7a42fa:	e8 c1 89 25 00       	call   9fccc0 <MVM_panic_allocation_failed@plt>
+  7a42ff:	48 8d 35 79 97 ab ff 	lea    -0x546887(%rip),%rsi        # 25da7f <__anon_3500>
+  7a4306:	bf 01 00 00 00       	mov    $0x1,%edi
+  7a430b:	4c 89 ea             	mov    %r13,%rdx
+  7a430e:	31 c0                	xor    %eax,%eax
+  7a4310:	e8 0b 89 25 00       	call   9fcc20 <MVM_panic@plt>
+  7a4315:	48 8b 3c 24          	mov    (%rsp),%rdi
+  7a4319:	e8 a2 89 25 00       	call   9fccc0 <MVM_panic_allocation_failed@plt>
+  7a431e:	bf 00 02 00 00       	mov    $0x200,%edi
+  7a4323:	e8 98 89 25 00       	call   9fccc0 <MVM_panic_allocation_failed@plt>
+  7a4328:	cc                   	int3
+  7a4329:	cc                   	int3
+  7a432a:	cc                   	int3
+  7a432b:	cc                   	int3
+  7a432c:	cc                   	int3
+  7a432d:	cc                   	int3
+  7a432e:	cc                   	int3
+  7a432f:	cc                   	int3

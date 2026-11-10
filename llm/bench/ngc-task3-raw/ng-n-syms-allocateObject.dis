@@ -1,0 +1,214 @@
+0000000000805c30 <gc.allocation.allocateObject>:
+  805c30:	55                   	push   %rbp
+  805c31:	41 57                	push   %r15
+  805c33:	41 56                	push   %r14
+  805c35:	41 55                	push   %r13
+  805c37:	41 54                	push   %r12
+  805c39:	53                   	push   %rbx
+  805c3a:	50                   	push   %rax
+  805c3b:	48 89 fb             	mov    %rdi,%rbx
+  805c3e:	48 89 34 24          	mov    %rsi,(%rsp)
+  805c42:	8b 47 60             	mov    0x60(%rdi),%eax
+  805c45:	48 83 f8 10          	cmp    $0x10,%rax
+  805c49:	73 41                	jae    805c8c <gc.allocation.allocateObject+0x5c>
+  805c4b:	48 8b 4b 70          	mov    0x70(%rbx),%rcx
+  805c4f:	48 89 e2             	mov    %rsp,%rdx
+  805c52:	48 89 14 c1          	mov    %rdx,(%rcx,%rax,8)
+  805c56:	ff 43 60             	incl   0x60(%rbx)
+  805c59:	48 8b 04 24          	mov    (%rsp),%rax
+  805c5d:	44 8b 78 20          	mov    0x20(%rax),%r15d
+  805c61:	83 7b 58 00          	cmpl   $0x0,0x58(%rbx)
+  805c65:	74 3e                	je     805ca5 <gc.allocation.allocateObject+0x75>
+  805c67:	48 8b 7b 48          	mov    0x48(%rbx),%rdi
+  805c6b:	44 89 fe             	mov    %r15d,%esi
+  805c6e:	e8 6d 37 fa ff       	call   7a93e0 <MVM_gc_gen2_allocate>
+  805c73:	49 89 c6             	mov    %rax,%r14
+  805c76:	48 89 c7             	mov    %rax,%rdi
+  805c79:	31 f6                	xor    %esi,%esi
+  805c7b:	4c 89 fa             	mov    %r15,%rdx
+  805c7e:	e8 cd 7f f9 ff       	call   79dc50 <compiler_rt.fastMemset>
+  805c83:	41 c6 46 0d 02       	movb   $0x2,0xd(%r14)
+  805c88:	b0 02                	mov    $0x2,%al
+  805c8a:	eb 73                	jmp    805cff <gc.allocation.allocateObject+0xcf>
+  805c8c:	48 89 e6             	mov    %rsp,%rsi
+  805c8f:	48 89 df             	mov    %rbx,%rdi
+  805c92:	e8 e9 45 fa ff       	call   7aa280 <MVM_gc_root_temp_push_slow>
+  805c97:	48 8b 04 24          	mov    (%rsp),%rax
+  805c9b:	44 8b 78 20          	mov    0x20(%rax),%r15d
+  805c9f:	83 7b 58 00          	cmpl   $0x0,0x58(%rbx)
+  805ca3:	75 c2                	jne    805c67 <gc.allocation.allocateObject+0x37>
+  805ca5:	48 83 7b 40 00       	cmpq   $0x0,0x40(%rbx)
+  805caa:	74 08                	je     805cb4 <gc.allocation.allocateObject+0x84>
+  805cac:	48 89 df             	mov    %rbx,%rdi
+  805caf:	e8 2c b6 f9 ff       	call   7a12e0 <MVM_gc_enter_from_interrupt>
+  805cb4:	4d 85 ff             	test   %r15,%r15
+  805cb7:	0f 84 48 02 00 00    	je     805f05 <gc.allocation.allocateObject+0x2d5>
+  805cbd:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  805cc1:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  805cc5:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  805cc9:	72 2b                	jb     805cf6 <gc.allocation.allocateObject+0xc6>
+  805ccb:	41 81 ff 00 00 00 01 	cmp    $0x1000000,%r15d
+  805cd2:	0f 87 40 02 00 00    	ja     805f18 <gc.allocation.allocateObject+0x2e8>
+  805cd8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  805cdf:	00 
+  805ce0:	48 89 df             	mov    %rbx,%rdi
+  805ce3:	e8 38 b1 f9 ff       	call   7a0e20 <MVM_gc_enter_from_allocator>
+  805ce8:	4c 8b 73 30          	mov    0x30(%rbx),%r14
+  805cec:	4b 8d 04 37          	lea    (%r15,%r14,1),%rax
+  805cf0:	48 3b 43 38          	cmp    0x38(%rbx),%rax
+  805cf4:	73 ea                	jae    805ce0 <gc.allocation.allocateObject+0xb0>
+  805cf6:	48 89 43 30          	mov    %rax,0x30(%rbx)
+  805cfa:	41 0f b6 46 0d       	movzbl 0xd(%r14),%eax
+  805cff:	4c 8b 2c 24          	mov    (%rsp),%r13
+  805d03:	41 0f b7 4d 20       	movzwl 0x20(%r13),%ecx
+  805d08:	66 41 89 4e 0e       	mov    %cx,0xe(%r14)
+  805d0d:	8b 0b                	mov    (%rbx),%ecx
+  805d0f:	41 89 4e 08          	mov    %ecx,0x8(%r14)
+  805d13:	4c 89 e9             	mov    %r13,%rcx
+  805d16:	4d 85 ed             	test   %r13,%r13
+  805d19:	0f 84 f5 00 00 00    	je     805e14 <gc.allocation.allocateObject+0x1e4>
+  805d1f:	89 c2                	mov    %eax,%edx
+  805d21:	4c 89 e9             	mov    %r13,%rcx
+  805d24:	80 e2 02             	and    $0x2,%dl
+  805d27:	0f 84 e7 00 00 00    	je     805e14 <gc.allocation.allocateObject+0x1e4>
+  805d2d:	41 0f b6 55 0d       	movzbl 0xd(%r13),%edx
+  805d32:	4c 89 e9             	mov    %r13,%rcx
+  805d35:	f6 c2 02             	test   $0x2,%dl
+  805d38:	0f 85 d6 00 00 00    	jne    805e14 <gc.allocation.allocateObject+0x1e4>
+  805d3e:	4c 89 e9             	mov    %r13,%rcx
+  805d41:	a8 04                	test   $0x4,%al
+  805d43:	0f 85 c4 00 00 00    	jne    805e0d <gc.allocation.allocateObject+0x1dd>
+  805d49:	4d 85 f6             	test   %r14,%r14
+  805d4c:	0f 84 d9 01 00 00    	je     805f2b <gc.allocation.allocateObject+0x2fb>
+  805d52:	8b 6b 78             	mov    0x78(%rbx),%ebp
+  805d55:	3b 6b 7c             	cmp    0x7c(%rbx),%ebp
+  805d58:	75 48                	jne    805da2 <gc.allocation.allocateObject+0x172>
+  805d5a:	01 ed                	add    %ebp,%ebp
+  805d5c:	89 6b 7c             	mov    %ebp,0x7c(%rbx)
+  805d5f:	4c 8b a3 80 00 00 00 	mov    0x80(%rbx),%r12
+  805d66:	4c 8d 3c ed 00 00 00 	lea    0x0(,%rbp,8),%r15
+  805d6d:	00 
+  805d6e:	48 8d 3d 63 3f 2e 00 	lea    0x2e3f63(%rip),%rdi        # ae9cd8 <_DYNAMIC+0x1f0>
+  805d75:	e8 36 ca 1f 00       	call   a027b0 <__tls_get_addr@plt>
+  805d7a:	48 8b b8 00 00 00 00 	mov    0x0(%rax),%rdi
+  805d81:	4d 85 e4             	test   %r12,%r12
+  805d84:	74 25                	je     805dab <gc.allocation.allocateObject+0x17b>
+  805d86:	4c 89 e6             	mov    %r12,%rsi
+  805d89:	4c 89 fa             	mov    %r15,%rdx
+  805d8c:	31 c9                	xor    %ecx,%ecx
+  805d8e:	e8 7d c4 1f 00       	call   a02210 <_mi_theap_realloc_zero@plt>
+  805d93:	48 85 ed             	test   %rbp,%rbp
+  805d96:	74 54                	je     805dec <gc.allocation.allocateObject+0x1bc>
+  805d98:	48 85 c0             	test   %rax,%rax
+  805d9b:	75 4f                	jne    805dec <gc.allocation.allocateObject+0x1bc>
+  805d9d:	e9 e2 00 00 00       	jmp    805e84 <gc.allocation.allocateObject+0x254>
+  805da2:	48 8b 83 80 00 00 00 	mov    0x80(%rbx),%rax
+  805da9:	eb 4b                	jmp    805df6 <gc.allocation.allocateObject+0x1c6>
+  805dab:	81 fd 80 00 00 00    	cmp    $0x80,%ebp
+  805db1:	77 28                	ja     805ddb <gc.allocation.allocateObject+0x1ab>
+  805db3:	48 8b 0c ef          	mov    (%rdi,%rbp,8),%rcx
+  805db7:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  805dbb:	48 8b 51 18          	mov    0x18(%rcx),%rdx
+  805dbf:	48 85 c0             	test   %rax,%rax
+  805dc2:	74 17                	je     805ddb <gc.allocation.allocateObject+0x1ab>
+  805dc4:	48 8b 30             	mov    (%rax),%rsi
+  805dc7:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  805dce:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  805dd2:	48 ff c2             	inc    %rdx
+  805dd5:	48 89 51 18          	mov    %rdx,0x18(%rcx)
+  805dd9:	eb 11                	jmp    805dec <gc.allocation.allocateObject+0x1bc>
+  805ddb:	4c 89 fe             	mov    %r15,%rsi
+  805dde:	31 d2                	xor    %edx,%edx
+  805de0:	31 c9                	xor    %ecx,%ecx
+  805de2:	e8 a9 c8 1f 00       	call   a02690 <_mi_malloc_generic@plt>
+  805de7:	48 85 ed             	test   %rbp,%rbp
+  805dea:	75 ac                	jne    805d98 <gc.allocation.allocateObject+0x168>
+  805dec:	48 89 83 80 00 00 00 	mov    %rax,0x80(%rbx)
+  805df3:	8b 6b 78             	mov    0x78(%rbx),%ebp
+  805df6:	89 e9                	mov    %ebp,%ecx
+  805df8:	4c 89 34 c8          	mov    %r14,(%rax,%rcx,8)
+  805dfc:	ff 43 78             	incl   0x78(%rbx)
+  805dff:	41 80 4e 0d 04       	orb    $0x4,0xd(%r14)
+  805e04:	41 0f b6 55 0d       	movzbl 0xd(%r13),%edx
+  805e09:	48 8b 0c 24          	mov    (%rsp),%rcx
+  805e0d:	80 ca 20             	or     $0x20,%dl
+  805e10:	41 88 55 0d          	mov    %dl,0xd(%r13)
+  805e14:	4d 89 6e 10          	mov    %r13,0x10(%r14)
+  805e18:	f6 41 26 08          	testb  $0x8,0x26(%rcx)
+  805e1c:	0f 84 ce 00 00 00    	je     805ef0 <gc.allocation.allocateObject+0x2c0>
+  805e22:	8b 8b 88 00 00 00    	mov    0x88(%rbx),%ecx
+  805e28:	3b 8b 8c 00 00 00    	cmp    0x8c(%rbx),%ecx
+  805e2e:	75 5c                	jne    805e8c <gc.allocation.allocateObject+0x25c>
+  805e30:	8d 04 09             	lea    (%rcx,%rcx,1),%eax
+  805e33:	85 c9                	test   %ecx,%ecx
+  805e35:	41 bd 40 00 00 00    	mov    $0x40,%r13d
+  805e3b:	44 0f 45 e8          	cmovne %eax,%r13d
+  805e3f:	44 89 ab 8c 00 00 00 	mov    %r13d,0x8c(%rbx)
+  805e46:	4c 8b a3 90 00 00 00 	mov    0x90(%rbx),%r12
+  805e4d:	4e 8d 3c ed 00 00 00 	lea    0x0(,%r13,8),%r15
+  805e54:	00 
+  805e55:	48 8d 3d 7c 3e 2e 00 	lea    0x2e3e7c(%rip),%rdi        # ae9cd8 <_DYNAMIC+0x1f0>
+  805e5c:	e8 4f c9 1f 00       	call   a027b0 <__tls_get_addr@plt>
+  805e61:	48 8b b8 00 00 00 00 	mov    0x0(%rax),%rdi
+  805e68:	4d 85 e4             	test   %r12,%r12
+  805e6b:	74 28                	je     805e95 <gc.allocation.allocateObject+0x265>
+  805e6d:	4c 89 e6             	mov    %r12,%rsi
+  805e70:	4c 89 fa             	mov    %r15,%rdx
+  805e73:	31 c9                	xor    %ecx,%ecx
+  805e75:	e8 96 c3 1f 00       	call   a02210 <_mi_theap_realloc_zero@plt>
+  805e7a:	4d 85 ed             	test   %r13,%r13
+  805e7d:	74 58                	je     805ed7 <gc.allocation.allocateObject+0x2a7>
+  805e7f:	48 85 c0             	test   %rax,%rax
+  805e82:	75 53                	jne    805ed7 <gc.allocation.allocateObject+0x2a7>
+  805e84:	4c 89 ff             	mov    %r15,%rdi
+  805e87:	e8 34 6e 1f 00       	call   9fccc0 <MVM_panic_allocation_failed@plt>
+  805e8c:	48 8b 83 90 00 00 00 	mov    0x90(%rbx),%rax
+  805e93:	eb 4f                	jmp    805ee4 <gc.allocation.allocateObject+0x2b4>
+  805e95:	41 81 fd 80 00 00 00 	cmp    $0x80,%r13d
+  805e9c:	77 28                	ja     805ec6 <gc.allocation.allocateObject+0x296>
+  805e9e:	4a 8b 0c ef          	mov    (%rdi,%r13,8),%rcx
+  805ea2:	48 8b 41 10          	mov    0x10(%rcx),%rax
+  805ea6:	48 8b 51 18          	mov    0x18(%rcx),%rdx
+  805eaa:	48 85 c0             	test   %rax,%rax
+  805ead:	74 17                	je     805ec6 <gc.allocation.allocateObject+0x296>
+  805eaf:	48 8b 30             	mov    (%rax),%rsi
+  805eb2:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  805eb9:	48 89 71 10          	mov    %rsi,0x10(%rcx)
+  805ebd:	48 ff c2             	inc    %rdx
+  805ec0:	48 89 51 18          	mov    %rdx,0x18(%rcx)
+  805ec4:	eb 11                	jmp    805ed7 <gc.allocation.allocateObject+0x2a7>
+  805ec6:	4c 89 fe             	mov    %r15,%rsi
+  805ec9:	31 d2                	xor    %edx,%edx
+  805ecb:	31 c9                	xor    %ecx,%ecx
+  805ecd:	e8 be c7 1f 00       	call   a02690 <_mi_malloc_generic@plt>
+  805ed2:	4d 85 ed             	test   %r13,%r13
+  805ed5:	75 a8                	jne    805e7f <gc.allocation.allocateObject+0x24f>
+  805ed7:	48 89 83 90 00 00 00 	mov    %rax,0x90(%rbx)
+  805ede:	8b 8b 88 00 00 00    	mov    0x88(%rbx),%ecx
+  805ee4:	89 c9                	mov    %ecx,%ecx
+  805ee6:	4c 89 34 c8          	mov    %r14,(%rax,%rcx,8)
+  805eea:	ff 83 88 00 00 00    	incl   0x88(%rbx)
+  805ef0:	ff 4b 60             	decl   0x60(%rbx)
+  805ef3:	4c 89 f0             	mov    %r14,%rax
+  805ef6:	48 83 c4 08          	add    $0x8,%rsp
+  805efa:	5b                   	pop    %rbx
+  805efb:	41 5c                	pop    %r12
+  805efd:	41 5d                	pop    %r13
+  805eff:	41 5e                	pop    %r14
+  805f01:	41 5f                	pop    %r15
+  805f03:	5d                   	pop    %rbp
+  805f04:	c3                   	ret
+  805f05:	48 8d 35 ad 67 a3 ff 	lea    -0x5c9853(%rip),%rsi        # 23c6b9 <__anon_4309>
+  805f0c:	bf 0f 00 00 00       	mov    $0xf,%edi
+  805f11:	31 c0                	xor    %eax,%eax
+  805f13:	e8 08 6d 1f 00       	call   9fcc20 <MVM_panic@plt>
+  805f18:	48 8d 35 00 2f a5 ff 	lea    -0x5ad100(%rip),%rsi        # 258e1f <__anon_4314>
+  805f1f:	bf 0f 00 00 00       	mov    $0xf,%edi
+  805f24:	31 c0                	xor    %eax,%eax
+  805f26:	e8 f5 6c 1f 00       	call   9fcc20 <MVM_panic@plt>
+  805f2b:	48 8d 35 0e 95 a3 ff 	lea    -0x5c6af2(%rip),%rsi        # 23f440 <__anon_3841>
+  805f32:	bf 10 00 00 00       	mov    $0x10,%edi
+  805f37:	31 c0                	xor    %eax,%eax
+  805f39:	e8 e2 6c 1f 00       	call   9fcc20 <MVM_panic@plt>
+  805f3e:	cc                   	int3
+  805f3f:	cc                   	int3
