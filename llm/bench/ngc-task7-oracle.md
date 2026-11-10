@@ -50,3 +50,32 @@ inlined post-promotion write barrier (`wb.noUpdateReferenced`), the finalize que
 starts the finalizing run through `collect.collect` as Zig) and the allocator's `finalize.addToQueue`.
 
 Also from this build (ngc-task7-raw/): exported names of ng-n-base equal ng-c-base's (2850, `exports.diff` empty).
+
+## Re-run after review fix round 1 (use_allocation keeps the C NULL contract, MoarVM 6366ac33c)
+
+`objectid.useAllocation` returns `?*anyopaque` again (null for the hash's 0), the export passes it through, and
+collect.zig unwraps it with `.?` as the faithful port did. ng-n-oracle rebuilt at 6366ac33c (2026.09-287-g6366ac33c,
+ngc-task7-fix-raw/builds.tsv), same driver and command (`sh ngc-oracle-driver.sh /tmp/claude-1000/ngc/t7/fix/oracle a
+b`), 2026-11-10 16:35:07-17:07:16 CET, load before each cell 1.00-1.38, driver exit 0; raw ngc-task7-fix-raw/oracle/.
+Exported names of ng-n-base 2850, diff against ng-c-base empty (ngc-task7-fix-raw/exports.diff).
+
+| group | volume | set | tier | exit | seconds | log lines | raw cmp base-1/head-1 |
+|---|---:|---|---:|---:|---:|---:|---|
+| a | 10000 | plain | 1 | 0 | 37 | 55 | same |
+| a | 10000 | plain | 2 | 0 | 37 | 55 | same |
+| a | 10000 | bad | 1 | 0 | 37 | 55 | same |
+| a | 10000 | bad | 2 | 0 | 37 | 55 | same |
+| a | 100000 | plain | 1 | 0 | 204 | 361 | same |
+| a | 100000 | plain | 2 | 0 | 202 | 361 | same |
+| a | 100000 | bad | 1 | 0 | 203 | 361 | same |
+| a | 100000 | bad | 2 | 0 | 204 | 361 | same |
+| b | 10000 | plain | 1 | 0 | 37 | 55 | same |
+| b | 10000 | plain | 2 | 0 | 39 | 55 | same |
+| b | 10000 | bad | 1 | 0 | 37 | 55 | same |
+| b | 10000 | bad | 2 | 0 | 39 | 55 | same |
+| b | 100000 | plain | 1 | 0 | 203 | 361 | same |
+| b | 100000 | plain | 2 | 0 | 204 | 361 | same |
+| b | 100000 | bad | 1 | 0 | 204 | 361 | same |
+| b | 100000 | bad | 2 | 0 | 205 | 361 | same |
+
+**16/16 cells exit 0, every raw base-1/head-1 pair byte-identical.**

@@ -1,4 +1,4 @@
-# ngc Task 7 tripwire: N/C wall 1.019, RSS 1.006 plain; under the stop thresholds (wall 1.0323, RSS 1.0265)
+# ngc Task 7 tripwire: N/C wall 1.019, RSS 1.006 plain (re-run at the fix commit: wall 1.024, RSS 1.006); under the stop thresholds (wall 1.0323, RSS 1.0265)
 
 ```
 ngc crc-getter tripwire record (Task 7, step 5)
@@ -38,3 +38,17 @@ Against ngc-baseline-crc.md: the stop thresholds are wall above 1.0323 and RSS a
 ratio plus the C spread. The base side's round medians (7.47-7.52) sit lower than in Task 6 (7.54-7.64) while the head's
 (7.63) are where Task 6's were, so part of the movement is the control's run-to-run level; the head's spread is zero
 to two decimals. Nothing is claimed from the difference to Task 6: it lies inside the noise floor of spec 11.
+
+## Re-run after review fix round 1 (use_allocation keeps the C NULL contract, MoarVM 6366ac33c)
+
+ng-n-base rebuilt at 6366ac33c (ngc-task7-fix-raw/builds.tsv); same command, 2026-11-10 17:07:16-17:11:05 CET, load
+1.15-1.48, 30/30 runs exit 0 (ngc-task7-fix-raw/tripwire/):
+
+| side | wall s | peak RSS kB |
+|---|---:|---:|
+| ng-c-base | 7.50 [7.47-7.50] | 342564 [342456-344020] |
+| ng-n-base | 7.68 [7.58-7.70] | 344692 [344688-346900] |
+
+Ratio ng-n-base/ng-c-base: **wall 1.024, RSS 1.006**; under the stop thresholds (1.0323, 1.0265), so no 7-round re-run.
+The change is one null test at a call the collector makes only for objects with a requested id; the head's round
+medians (7.58-7.70) overlap the first run's head (7.63) and the move against 1.019 lies inside the noise floor.

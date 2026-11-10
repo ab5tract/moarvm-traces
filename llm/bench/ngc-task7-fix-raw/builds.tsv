@@ -1,0 +1,2 @@
+ng-n-oracle	exit 0	48s	load 1.67	opts -Dgc-debug=1	This is MoarVM version 2026.09-287-g6366ac33c built with JIT support
+ng-n-base	exit 0	46s	load 0.83	opts 	This is MoarVM version 2026.09-287-g6366ac33c built with JIT support
