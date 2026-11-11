@@ -132,3 +132,9 @@ Filled at acceptance (Task 3, 2026-11-11).
    resolution; `cb-crc-ab.md`). The rule's "by more than" makes it a pass; a reading at the bound is recorded as
    such, not as a margin. The controller ruled the one seven-round re-run all the same; it reads cb/C 1.010 against
    ng-n/C 1.011, a pass.
+6. Sections 2 and 13, "the allocator row at or below the C's" (section 13's reading of "clearly better"), against
+   section 7's operative gate, "at or below ... plus 0.10 percentage points": the strict phrasing was met on
+   --bad-packages (1.54 % against the C's 1.61 %) and not on plain (1.63 % against 1.59 %, 0.04 points above, inside
+   the +0.10 bound; `cb-profile.md`). The plain difference is the order of one sampled run's noise: the C's own row
+   moved 1.56 -> 1.59 % on the same binary between Campaign 6's day and this one. On plain the allocator row is at
+   parity with the C's within noise, not below it; the verdict stands under section 7.

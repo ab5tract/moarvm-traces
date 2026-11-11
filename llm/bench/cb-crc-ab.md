@@ -61,8 +61,9 @@ the C spread is 7.99 - 7.92 = 0.07 s, both over the same C median 7.98, so 0.008
 resolution; the ratio is not above the bound, so it is not a crossing. The controller nevertheless ruled the one
 seven-round re-run of the Global Constraints (section "Re-run" below; it reads -0.0013, a pass). It is not a margin either: the head2 round medians (8.02-8.17) and the head's (7.97-8.02) touch only at 8.02,
 and six of the seven head2 rounds are above every head round. On this day the change reads as up to about 0.9 % slower
-than Campaign 6's native build on --bad-packages wall, by an amount equal to the C control's own spread; on plain wall
-it is +0.27 points (inside every spread), and RSS is unchanged on both settings.
+than Campaign 6's native build on --bad-packages wall, by an amount equal to the C control's own spread (first run;
+the re-run below does not reproduce this, see 'Re-run'); on plain wall it is +0.27 points (inside every spread), and
+RSS is unchanged on both settings.
 
 ## The aim (spec 7): "new/C within the C control's spread on wall and RSS, both settings" (4 of 4)
 
@@ -74,10 +75,10 @@ it is +0.27 points (inside every spread), and RSS is unchanged on both settings.
 
 Aim: **3 of 4, --bad-packages wall missed** (1.010 against 0.0088). Campaign 6's binary, measured the same hour, reads
 1.001 there (inside the spread; it read 1.010 at Campaign 6, ngc-crc-ab.md), so the day's noise against the C does
-not explain the miss: it is head2's, against the head's 1.001 on the same base. Per spec 7 and section 13 the aim is
-reported, not gated; the profile gate (cb-profile.md: pass) decides inclusion, and that record finds the remaining
-gap not resolvable in the collector at this volume: the remaining wall gap is outside the collector as far as the
-profile resolves.
+not explain the miss: it is head2's, against the head's 1.001 on the same base (first run; the re-run below does not
+reproduce this, see 'Re-run'). Per spec 7 and section 13 the aim is reported, not gated; the profile gate
+(cb-profile.md: pass) decides inclusion, and that record finds the remaining gap not resolvable in the collector at
+this volume: the remaining wall gap is outside the collector as far as the profile resolves.
 
 ## Re-run, --bad-packages only (controller ruling, 2026-11-11)
 

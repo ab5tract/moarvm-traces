@@ -9,6 +9,11 @@ Builds:     cb-n-syms (-Dstrip=false, cb-prefixes.md) against ng-n-syms (Campaig
 Spec:       traces/llm/specs/2026-11-11-gc-call-boundary-design.md section 5 (the rule and the audit)
 Evidence:   objdump -d --no-show-raw-insn --section=.text of each libmoar.so; every direct `call`/`jmp`/`jcc`
             whose target is a symbol start, per containing symbol; nm -S --defined-only sizes
+Toolchain:  C side compiled by Zig 0.17.1's clang (`zig cc --version`: clang version 22.1.8; the .comment section of
+            each libmoar.so: clang version 22.1.8, Linker: LLD 22.1.8); disassembly and symbols read with GNU
+            Binutils 2.47 (`objdump --version`: GNU objdump (GNU Binutils) 2.47; `nm --version`: GNU nm (GNU
+            Binutils) 2.47). The system `clang --version` prints clang version 23.1.1; it built none of the three
+            libraries.
 ```
 
 ## The method
