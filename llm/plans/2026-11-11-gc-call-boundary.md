@@ -196,8 +196,8 @@ With every gate passed (Global Constraints) and the review clean: in the main ch
 | crc-getter head2/C wall / RSS, plain; C spread | 1.001 / 0.984; 0.0093 / 0.0236 (cb-crc-ab.md) |
 | crc-getter head2/C wall / RSS, bad; C spread | 1.010 / 0.983; 0.0088 / 0.0170 |
 | same-day head/C (Campaign 6 binary), plain / bad | wall 0.999 / 1.001, RSS 0.984 / 0.985 |
-| tripwire | pass on all four (head2/C - head/C: plain +0.0027 / -0.0004, bad +0.0088 / -0.0018); bad wall exactly on the bound (0.07 s against 0.07 s), not above it; no re-run |
-| aim (4 of 4) | 3 of 4: bad wall miss (1.010 against spread 0.0088); plain wall pass (inside the spread), both RSS pass (at most 1.00) |
+| tripwire | pass on all four (head2/C - head/C: plain +0.0027 / -0.0004, bad +0.0088 / -0.0018); bad wall exactly on the bound (0.07 s against 0.07 s), not above it; bad re-run (controller ruling): head2/C 1.010 / 1.003 against head/C 1.011 / 0.996, differences -0.0013 / +0.0078 against C spread 0.0088 / 0.0418, pass; combined pass |
+| aim (4 of 4) | 3 of 4: bad wall miss (1.010 against spread 0.0088; re-run 1.010 against 0.0088, miss again); plain wall pass (inside the spread), both RSS pass (at most 1.00; re-run bad RSS 1.003 inside 0.0418) |
 | profile: allocator row cb vs C (points); collector total cb vs C (points); gate | plain 1.63 vs 1.59 (bound 1.69), 4.08 vs 3.93 (+0.15, bound 0.30); bad 1.54 vs 1.61, 3.90 vs 4.02 (-0.12); **gate pass** (no number within 0.05 of its bound; cb-profile.md) |
 | cycles cb/C, plain / bad | 1.0038 / 1.0024 (-syms pair; unresolvable at volume 100 000 on both) |
 | cleanup (base / stress) | 60 / 60 and 60 / 60 (--stress; cb-cleanup.md) |
@@ -222,4 +222,7 @@ With every gate passed (Global Constraints) and the review clean: in the main ch
   records were due.
 - Cleanup on `cb-n-stress` ran with `--stress` as Task 3 names it; Campaign 6's acceptance had run its -stress
   prefixes with the plain programs (spec Errata 4).
-- The tripwire reading on --bad-packages wall lies exactly on the bound (spec Errata 5); recorded as a pass, no re-run.
+- The tripwire reading on --bad-packages wall lies exactly on the bound (spec Errata 5); recorded as a pass. The controller
+  then ruled the one seven-round --bad-packages re-run (ab.sh directly, the driver running both settings), because a
+  reading on the bound with six of seven rounds ordered was too thin for the inclusion decision; it reads a pass
+  (cb-crc-ab.md, "Re-run").

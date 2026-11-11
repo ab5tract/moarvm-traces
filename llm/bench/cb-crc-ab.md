@@ -1,4 +1,4 @@
-# cb acceptance crc-getter A/B, three-sided: cb/C 1.001 / 0.984 plain, 1.010 / 0.983 bad; same-day ng-n/C 0.999 / 0.984 plain, 1.001 / 0.985 bad; tripwire pass on all four (bad wall on the bound), aim 3 of 4 (bad wall miss)
+# cb acceptance crc-getter A/B, three-sided: cb/C 1.001 / 0.984 plain, 1.010 / 0.983 bad; same-day ng-n/C 0.999 / 0.984 plain, 1.001 / 0.985 bad; tripwire pass on all four (bad wall on the bound; bad re-run cb/C 1.010 against ng-n/C 1.011, pass), aim 3 of 4 (bad wall miss on both runs)
 
 ```
 cb crc-getter acceptance record (Task 3, step 1; spec 7)
@@ -58,8 +58,8 @@ Round medians, wall s: plain C 7.49 7.52 7.47 7.54 7.54 7.53 7.53; head 7.53 7.5
 
 Pass on all four measures. --bad-packages wall sits exactly on the bound: head2 - head is 8.06 - 7.99 = 0.07 s and
 the C spread is 7.99 - 7.92 = 0.07 s, both over the same C median 7.98, so 0.0088 against 0.0088 at timev's 0.01 s
-resolution; the ratio is not above the bound, so it is not a crossing and the re-run of the Global Constraints was not
-taken. It is not a margin either: the head2 round medians (8.02-8.17) and the head's (7.97-8.02) touch only at 8.02,
+resolution; the ratio is not above the bound, so it is not a crossing. The controller nevertheless ruled the one
+seven-round re-run of the Global Constraints (section "Re-run" below; it reads -0.0013, a pass). It is not a margin either: the head2 round medians (8.02-8.17) and the head's (7.97-8.02) touch only at 8.02,
 and six of the seven head2 rounds are above every head round. On this day the change reads as up to about 0.9 % slower
 than Campaign 6's native build on --bad-packages wall, by an amount equal to the C control's own spread; on plain wall
 it is +0.27 points (inside every spread), and RSS is unchanged on both settings.
@@ -78,3 +78,48 @@ not explain the miss: it is head2's, against the head's 1.001 on the same base. 
 reported, not gated; the profile gate (cb-profile.md: pass) decides inclusion, and that record finds the remaining
 gap not resolvable in the collector at this volume: the remaining wall gap is outside the collector as far as the
 profile resolves.
+
+## Re-run, --bad-packages only (controller ruling, 2026-11-11)
+
+The first run's bad-wall reading sat exactly on the tripwire bound with six of seven cb rounds above every ng-n round;
+the controller ruled that too thin to carry the inclusion decision and asked for the one seven-round re-run the
+Global Constraints allow, same sides and parameters, --bad-packages only.
+
+```
+Date:          2026-11-11, 19:50:46-20:04:56 CET
+Command:       (from the MoarVM checkout; the driver runs both settings, so ab.sh directly)
+               systemd-run --user --scope -q -p MemoryMax=8G sh tools/bench/gc/ab.sh --base=/tmp/claude-1000/ng-c-base/lib
+                   --head=/tmp/claude-1000/ng-n-base/lib --head2=/tmp/claude-1000/cb-n-base/lib --rounds=7 --runs=5
+                   --volume=100000 --bad-packages --out=/tmp/claude-1000/cb/crc-rerun/bad
+Load:          start 0.18 (no moar or rakudo process running); per run 0.18-1.42 (load.log)
+Raw:           cb-crc-ab-raw/rerun-bad/ (bad/ as the first run's layout, bad.stderr, runs.log: exit 0). All 105 timed runs
+               exit 0 and print "RUN 5".
+```
+
+| side | wall s | wall spread | peak RSS kB | RSS spread |
+|---|---:|---:|---:|---:|
+| C ng-c-base | 7.95 [7.93-8.00] | 0.0088 | 349092 [336140-350732] | 0.0418 |
+| native ng-n-base (head) | 8.04 [7.92-8.13] | 0.0261 | 347556 [342816-353544] | 0.0309 |
+| cb cb-n-base (head2) | 8.03 [7.99-8.11] | 0.0149 | 350272 [342128-354600] | 0.0356 |
+
+| measure | head/C | head2/C | C spread | head2/C - head/C | tripwire | aim |
+|---|---:|---:|---:|---:|---|---|
+| wall | 1.011 | 1.010 | 0.0088 | -0.0013 | pass | **miss** |
+| RSS | 0.996 | 1.003 | 0.0418 | +0.0078 | pass | pass (inside the spread) |
+
+Round medians, wall s: C 7.94 8.00 7.97 7.98 7.93 7.95 7.94; head 7.97 8.10 7.92 8.13 7.97 8.04 8.07; head2 8.03 7.99
+8.03 8.11 8.01 8.06 7.99. Ordering: **0 of 7** cb round medians lie above every ng-n round median (the ng-n top is
+8.13; the first run had 6 of 7 above 8.02). The two native builds' ranges overlap almost entirely (7.92-8.13 and
+7.99-8.11); on this run cb reads 0.1 % faster than ng-n on bad wall, where the first run read 0.9 % slower. The
+first run's ordering is not reproduced, so it reads as round-to-round noise of the head sides, which is wider than
+the C control's spread (the head's own spread here is 0.0261).
+
+The aim on this run: bad wall 1.010 against a C spread of 0.0088 (8.03 s above the C's top round median 8.00):
+**miss**, the same ratio as the first run; bad RSS 1.003, inside the spread: **pass**.
+
+**Combined verdict.** Tripwire: **pass** (neither run crosses: first run bad wall +0.0088 on its bound of 0.0088,
+re-run -0.0013 against 0.0088; RSS -0.0018 and +0.0078 against 0.0170 and 0.0418; plain from the first run only,
++0.0027 and -0.0004). Aim: bad wall missed on both runs (1.010, 1.010), bad RSS passed on both (0.983, 1.003); over the
+original four measures **3 of 4**, --bad-packages wall missed. The same-day native/C bad wall moved 1.001 to 1.011
+between the two runs while cb/C stayed 1.010: the miss is of the order of the native builds' own spread, and the
+profile (cb-profile.md) finds no resolvable gap in the collector.

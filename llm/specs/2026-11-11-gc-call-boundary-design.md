@@ -129,5 +129,6 @@ Filled at acceptance (Task 3, 2026-11-11).
    plan's Task 3 names it.
 5. Section 7, the tripwire: the --bad-packages wall reading lands exactly on the bound, not above it (cb/C 1.010
    against the same-day ng-n/C 1.001, a difference of 0.07 s against a C spread of 0.07 s at timev's 0.01 s
-   resolution; `cb-crc-ab.md`). The rule's "by more than" makes it a pass, and no re-run was taken; a reading at
-   the bound is recorded as such, not as a margin.
+   resolution; `cb-crc-ab.md`). The rule's "by more than" makes it a pass; a reading at the bound is recorded as
+   such, not as a margin. The controller ruled the one seven-round re-run all the same; it reads cb/C 1.010 against
+   ng-n/C 1.011, a pass.
