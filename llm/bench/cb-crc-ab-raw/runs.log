@@ -1,0 +1,5 @@
+call-boundary 19:04:15 exit 0
+plain start 19:04:15 load 0.21 0.40 0.74 moar-procs 0 rakudo-procs 0
+plain end 19:17:30 exit 0
+bad start 19:17:30 load 1.20 1.17 1.03 moar-procs 0 rakudo-procs 0
+bad end 19:31:40 exit 0

@@ -104,4 +104,30 @@ Mine: "clearly better" is section 7's gate (allocator row at or below the C's, c
 
 ## Errata (as built)
 
-Filled at acceptance.
+Filled at acceptance (Task 3, 2026-11-11).
+
+1. Section 6, "the stress tier at `-Dnursery-size=524288`", and section 7's "Oracle 24 of 24": Campaign 6's two
+   oracle tiers are `oracle.sh --tier=1` and `--tier=2` (tier 2 adds `MVM_GC_DEBUG_RSS`) on the `-oracle` prefixes;
+   the stress prefixes never fed the oracle, and the C control itself does not repeat at that nursery (three runs of
+   `ng-c-stress` give three different logs; `cb-oracle.md`, "Stress pair"). Campaign 6's 24 cells were three groups of
+   8; this campaign has one pair, so the gate is group a's 8 cells (`ng-c-oracle` against `cb-n-oracle`, two volumes x
+   two settings x two tiers), 8 of 8 byte-identical. The stress prefixes' consumer is `cleanup.sh --stress`
+   (`cb-cleanup.md`).
+2. Section 5, "The two spike sites are the expected result": the audit found four more definitions the C build calls
+   out of line and the Zig build had inlined, `worklist.addSlow`, `worklist.create`, `worklist.presizeFor` and
+   `finalize.walkQueues`, and added `noinline` to them under the section's own clause (C disassembly shows the call
+   out of line, the callee allocates or loops); six definitions in all, 18 checked rows in `call-boundary.sh`
+   (`cb-audit.md`). Section 10's "the two `noinline` keywords" (and the plan's "the two sites" for the docs paragraph)
+   read accordingly as six.
+3. Section 7, the `.text` check "repeated for the new `-syms` build": `cb-n-syms` differs from `cb-n-base` as
+   Campaign 6's pairs did (+265168 bytes of std.debug, the same two 4-byte `nm -D -S` differences), so the fallback
+   A/B ran for the cb-n pair (cb-n-syms 1.1 % faster than its base); the ng-c pair's A/B was cited from
+   `ngc-profile-after.md` (0.8 % faster), not re-run, and the attribution pass on `-nlto` builds was dropped (no cb
+   nlto prefix). Both profiled sides are labelled "a different binary" (`cb-profile.md`).
+4. Section 8, cleanup "as Campaign 6's acceptance ran them": Campaign 6 ran its `-stress` prefixes with the plain
+   program set (its Ruling R4); this campaign ran `cb-n-stress` with `cleanup.sh --stress` (the 20x variants), as the
+   plan's Task 3 names it.
+5. Section 7, the tripwire: the --bad-packages wall reading lands exactly on the bound, not above it (cb/C 1.010
+   against the same-day ng-n/C 1.001, a difference of 0.07 s against a C spread of 0.07 s at timev's 0.01 s
+   resolution; `cb-crc-ab.md`). The rule's "by more than" makes it a pass, and no re-run was taken; a reading at
+   the bound is recorded as such, not as a margin.

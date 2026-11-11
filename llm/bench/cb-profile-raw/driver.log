@@ -1,0 +1,27 @@
+19:32:01 start plain/c-r1 load 0.76
+19:32:48 end plain/c-r1 exit 0
+19:32:48 start plain/n-r1 load 1.15
+19:33:33 end plain/n-r1 exit 0
+19:33:33 start plain/n-r2 load 1.55
+19:34:11 end plain/n-r2 exit 0
+19:34:11 start plain/c-r2 load 1.39
+19:34:49 end plain/c-r2 exit 0
+19:34:49 start plain/c-r3 load 1.39
+19:35:27 end plain/c-r3 exit 0
+19:35:27 start plain/n-r3 load 1.34
+19:36:05 end plain/n-r3 exit 0
+19:36:05 start bad/c-r1 load 1.30
+19:36:53 end bad/c-r1 exit 0
+19:36:53 start bad/n-r1 load 1.27
+19:37:42 end bad/n-r1 exit 0
+19:37:42 start bad/n-r2 load 1.35
+19:38:22 end bad/n-r2 exit 0
+19:38:22 start bad/c-r2 load 1.30
+19:39:05 end bad/c-r2 exit 0
+19:39:05 start bad/c-r3 load 1.35
+19:39:46 end bad/c-r3 exit 0
+19:39:46 start bad/n-r3 load 1.18
+19:40:27 end bad/n-r3 exit 0
+19:40:27 start textab-n load 1.09
+19:44:14 end textab-n exit 0
+19:44:14 done

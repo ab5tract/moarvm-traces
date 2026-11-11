@@ -1,0 +1,8 @@
+objcopy -O binary --only-section=.text, cmp, nm -D -S:
+/tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/541a332f-6d99-4924-b26e-b6278f0961a5/scratchpad/cb-n-base.text 2380325
+/tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/541a332f-6d99-4924-b26e-b6278f0961a5/scratchpad/cb-n-syms.text 2645493
+/tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/541a332f-6d99-4924-b26e-b6278f0961a5/scratchpad/cb-n-base.text /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/541a332f-6d99-4924-b26e-b6278f0961a5/scratchpad/cb-n-syms.text differ: byte 4, line 1
+nm -D -S size differences (name base syms):
+MVM_index_hash_build 000000000000026a 0000000000000266
+s_mp_toom_mul 0000000000000f58 0000000000000f54
+exported names: 2850

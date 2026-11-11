@@ -1,0 +1,5 @@
+full-precision allocator share from perf report -F period,dso,sym (report-period.txt in each r1):
+plain c MVM_gc_allocate_object + gc.allocation.allocateObject 1.5906% (period 580892242 of 36519333079)
+plain n MVM_gc_allocate_object + gc.allocation.allocateObject 1.6299% (period 589262390 of 36153419593)
+bad c MVM_gc_allocate_object + gc.allocation.allocateObject 1.6080% (period 610432486 of 37962589084)
+bad n MVM_gc_allocate_object + gc.allocation.allocateObject 1.5418% (period 602401994 of 39071309574)

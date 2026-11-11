@@ -1,0 +1,2 @@
+analyze.pl (ngc-profile-raw/analyze.pl, unchanged) over a view of /tmp/claude-1000/cb/profile in which n-r<k> is linked as f-r<k>: its 'f' columns are cb-n-syms.
+It exits 2 after the bad section because the nlto pass it expects is not part of this campaign (no cb nlto prefix): /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz-rakudo-nqp-MoarVM/541a332f-6d99-4924-b26e-b6278f0961a5/scratchpad/view/nlto/c/report.txt: No such file or directory at /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/traces/llm/bench/ngc-profile-raw/analyze.pl line 46.

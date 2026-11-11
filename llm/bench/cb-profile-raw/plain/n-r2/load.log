@@ -1,0 +1,7 @@
+warmup load 1.55
+stat 1 load 1.55
+stat 2 load 1.54
+stat 3 load 1.49
+stat 4 load 1.50
+stat 5 load 1.42
+end load 1.39

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** written 2026-11-11; not started.
+**Status:** Tasks 1-3 complete 2026-11-11; awaiting final review.
 
 **Goal:** Keep the Zig collector's slow-path calls out of line where the C collector's are, replace the two remaining C cross-calls with Zig imports, prove the decisions unchanged with the oracle, measure the gain with the three-sided A/B and the after-profile, and include the branch in `zig-hash-engine`.
 
@@ -187,21 +187,39 @@ With every gate passed (Global Constraints) and the review clean: in the main ch
 
 | check | result |
 |---|---|
-| sizes (allocateObject / processWorklist, bytes, before -> after, C) | |
-| audit rows (noinline / none / ask) | |
-| `call-boundary.sh` (cb-n-syms / ng-n-syms exit) | |
-| oracle cells identical | |
-| unit tests (test / gc-test) | |
-| exports | |
-| crc-getter head2/C wall / RSS, plain; C spread | |
-| crc-getter head2/C wall / RSS, bad; C spread | |
-| same-day head/C (Campaign 6 binary), plain / bad | |
-| tripwire | |
-| aim (4 of 4) | |
-| profile: allocator row cb vs C (points); collector total cb vs C (points); gate | |
-| cycles cb/C, plain / bad | |
-| cleanup (base / stress) | |
+| sizes (allocateObject / processWorklist, bytes, before -> after, C) | allocateObject 786 -> 369, C 384; processWorklist 2047 -> 1568, C 1359 (`nm -S`, cb-audit.md) |
+| audit rows (noinline / none / ask) | 18 / 32 (1 markCollectable, 14 both out of line, 17 C inlines) / 0; six noinline definitions (cb-audit.md) |
+| `call-boundary.sh` (cb-n-syms / ng-n-syms exit) | 0 (all 18 rows) / 1; repeated at Task 3 by cb-crc-ab-driver.sh: 0 |
+| oracle cells identical | 8 / 8 (group a, both tiers, 16 logs; cb-oracle.md) |
+| unit tests (test / gc-test) | 105 / 105 steps; 66 / 66 |
+| exports | 2850, the same set as ng-c-base / ng-n-syms |
+| crc-getter head2/C wall / RSS, plain; C spread | 1.001 / 0.984; 0.0093 / 0.0236 (cb-crc-ab.md) |
+| crc-getter head2/C wall / RSS, bad; C spread | 1.010 / 0.983; 0.0088 / 0.0170 |
+| same-day head/C (Campaign 6 binary), plain / bad | wall 0.999 / 1.001, RSS 0.984 / 0.985 |
+| tripwire | pass on all four (head2/C - head/C: plain +0.0027 / -0.0004, bad +0.0088 / -0.0018); bad wall exactly on the bound (0.07 s against 0.07 s), not above it; no re-run |
+| aim (4 of 4) | 3 of 4: bad wall miss (1.010 against spread 0.0088); plain wall pass (inside the spread), both RSS pass (at most 1.00) |
+| profile: allocator row cb vs C (points); collector total cb vs C (points); gate | plain 1.63 vs 1.59 (bound 1.69), 4.08 vs 3.93 (+0.15, bound 0.30); bad 1.54 vs 1.61, 3.90 vs 4.02 (-0.12); **gate pass** (no number within 0.05 of its bound; cb-profile.md) |
+| cycles cb/C, plain / bad | 1.0038 / 1.0024 (-syms pair; unresolvable at volume 100 000 on both) |
+| cleanup (base / stress) | 60 / 60 and 60 / 60 (--stress; cb-cleanup.md) |
 
 ## Deviations
 
-Filled at Task 3.
+- Task 1's audit added `noinline` to four more definitions than the plan's two (`worklist.addSlow`,
+  `worklist.create`, `worklist.presizeFor`, `finalize.walkQueues`), under spec 5's own clause; 18 checked rows in
+  `call-boundary.sh` instead of the plan's spike pairs (cb-audit.md; spec Errata 2).
+- Task 2's stress oracle pair (group s, `ng-c-stress` against `cb-n-stress`) was a controller error: the C control
+  does not repeat at the 512 KiB nursery, the driver was stopped by PID and now defaults to group a; the gate is group
+  a's 8 cells (cb-oracle.md, "Stress pair"; spec Errata 1).
+- The crc driver: the Task 3 brief asked for a fix of the runs.log "exit" column recording `date`'s status (ngc-ledger
+  line 41). `ngc-crc-ab-driver.sh` had already been fixed at Campaign 6's Task 9 (`rc=$?` after the scope, its header
+  says so, its runs.log shows ab.sh's 0 and 0); `cb-crc-ab-driver.sh` keeps that fix, and the scope's propagation of
+  the command's status was checked (`systemd-run --user --scope -q sh -c 'exit 3'` returns 3). The driver also runs
+  `call-boundary.sh` on `cb-n-syms` first and refuses to start on a non-zero exit.
+- The profile driver dropped the `-nlto` attribution pass (no cb nlto prefix) and ran the `.text` fallback A/B for
+  the cb-n pair only, citing Campaign 6's ng-c pair; Campaign 6's `analyze.pl` ran unchanged and exits 2 at its
+  nlto section after printing both settings (cb-profile-raw/analysis-note.txt). The plain allocator margin (0.06 at
+  two decimals) was also computed at full precision from `perf report -F period` (0.0607), confirming that no extra
+  records were due.
+- Cleanup on `cb-n-stress` ran with `--stress` as Task 3 names it; Campaign 6's acceptance had run its -stress
+  prefixes with the plain programs (spec Errata 4).
+- The tripwire reading on --bad-packages wall lies exactly on the bound (spec Errata 5); recorded as a pass, no re-run.
