@@ -15,6 +15,8 @@ CPU:           AMD Ryzen 9 5900X (24 threads), 32 GB, no swap
 Environment:   MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 MVM_GC_LOG; tier 2 adds MVM_GC_DEBUG_RSS=104857600;
                the driver and each cell under systemd-run --user --scope -q -p MemoryMax=8G
 Command:       systemd-run --user --scope -q -p MemoryMax=8G sh traces/llm/bench/cb-oracle-driver.sh /tmp/claude-1000/cb/oracle
+               (run with the then-default groups "a s", stopped by PID during the third s cell; the driver now
+               defaults to "a", the same as passing "a")
                per cell: tools/bench/gc/oracle.sh --base=B --head=H --volume=V [--bad-packages] --tier=T --out=...
                (three logged runs of crc-sequential.raku per side; each side repeatable, then base-1 vs head-1)
 Volumes:       10000 and 100000
@@ -42,6 +44,10 @@ repeatability before comparing.
 
 ## Stress pair (group s): not usable as an oracle, the C control does not repeat
 
+Controller ruling (Task 2 review): the brief's stress tier was a controller error. The oracle tiers are oracle.sh
+--tier=1/2 on the -oracle prefixes, as in Campaign 6, and the stress prefixes' consumer is Task 3's
+`cleanup.sh --stress`. The gate is group a's 8 cells.
+
 The driver also carries a group s, ng-c-stress against cb-n-stress (-Dgc-debug=1 -Dnursery-size=524288, both sides),
 run after group a. Neither Campaign 6 nor this brief ran the oracle on the stress prefixes. Its first two cells
 exited 2, "base not repeatable": the C control, run three times, gives three different logs. At the 512 KiB nursery
@@ -58,4 +64,4 @@ The head side is just as unrepeatable (s 10000 plain 2: head-1 vs head-2 and hea
 in s 10000 plain 1 the three base/head pairs differ at lines 13, 13 and 12. So this is a property of the workload at
 that nursery size, not of either build. The driver was stopped by PID during the third cell (s 10000 bad 1,
 oracle-driver.out "driver exit 143"), because the remaining cells could not pass. Raw: cb-oracle-raw/s-v10000-plain-t1-{base,head}.log,
-s-v10000-plain-t{1,2}.stderr, s-v10000-bad-t1-killed.stderr. To re-run only the meaningful group: `sh cb-oracle-driver.sh OUT a`.
+s-v10000-plain-t{1,2}.stderr, s-v10000-bad-t1-killed.stderr. The driver now defaults to group a and runs s only when it is named.

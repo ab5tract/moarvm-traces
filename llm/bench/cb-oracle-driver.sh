@@ -3,8 +3,10 @@
 # matrix (copied from ngc-oracle-driver.sh, re-pointed at the cb-n-* prefixes;
 # groups b and c dropped).
 # Groups: a = ng-c-oracle vs cb-n-oracle (the C control vs the native collector at the cb tip),
-#         s = ng-c-stress vs cb-n-stress (the same at the 512 KiB nursery, -Dgc-debug=1).
-# Default groups "a s". VOLUMES (environment, default "10000 100000") narrows the volumes.
+#         s = ng-c-stress vs cb-n-stress (the same at the 512 KiB nursery, -Dgc-debug=1);
+#             known not to repeat (the C control itself), so it cannot pass: see
+#             cb-oracle.md, "Stress pair". Run it only by naming it.
+# Default group "a". VOLUMES (environment, default "10000 100000") narrows the volumes.
 # Each: volumes x {plain, --bad-packages} x tier {1,2} (8 cells per group at both volumes).
 # One line per cell to OUTROOT/matrix.tsv:
 #   group volume set tier exit seconds load_before lines raw_cmp
@@ -12,7 +14,7 @@
 # Exit 0 when every cell exits 0 with identical raw logs, 1 otherwise.
 case $1 in --help|-h) sed -n '2,/^# Exit/p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;; esac
 out=$1; [ $# -gt 0 ] && shift
-groups=${*:-a s}
+groups=${*:-a}
 [ -n "$out" ] || { echo "usage: cb-oracle-driver.sh OUTROOT [groups]" >&2; exit 64; }
 [ -e "$out" ] && { echo "$out exists" >&2; exit 64; }
 mkdir -p "$out"
