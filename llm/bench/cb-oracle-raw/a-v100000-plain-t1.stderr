@@ -1,0 +1,7 @@
+oracle.sh: base run 1 (volume 100000, tier 1, load 1.28)
+oracle.sh: base run 2 (volume 100000, tier 1, load 1.21)
+oracle.sh: base run 3 (volume 100000, tier 1, load 1.26)
+oracle.sh: head run 1 (volume 100000, tier 1, load 1.25)
+oracle.sh: head run 2 (volume 100000, tier 1, load 1.14)
+oracle.sh: head run 3 (volume 100000, tier 1, load 1.08)
+oracle.sh: identical (tier 1, 361 lines)

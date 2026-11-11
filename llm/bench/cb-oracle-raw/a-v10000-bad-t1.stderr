@@ -1,0 +1,7 @@
+oracle.sh: base run 1 (volume 10000 --bad-packages, tier 1, load 1.26)
+oracle.sh: base run 2 (volume 10000 --bad-packages, tier 1, load 1.32)
+oracle.sh: base run 3 (volume 10000 --bad-packages, tier 1, load 1.45)
+oracle.sh: head run 1 (volume 10000 --bad-packages, tier 1, load 1.42)
+oracle.sh: head run 2 (volume 10000 --bad-packages, tier 1, load 1.38)
+oracle.sh: head run 3 (volume 10000 --bad-packages, tier 1, load 1.32)
+oracle.sh: identical (tier 1, 55 lines)

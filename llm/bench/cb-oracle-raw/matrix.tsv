@@ -1,0 +1,10 @@
+a	10000	plain	1	0	37	1.04	55	same
+a	10000	plain	2	0	37	1.15	55	same
+a	10000	bad	1	0	37	1.26	55	same
+a	10000	bad	2	0	37	1.38	55	same
+a	100000	plain	1	0	198	1.28	361	same
+a	100000	plain	2	0	202	1.21	361	same
+a	100000	bad	1	0	205	1.26	361	same
+a	100000	bad	2	0	201	1.24	361	same
+s	10000	plain	1	2	36	1.05	1806	differ
+s	10000	plain	2	2	35	1.13	1806	differ
