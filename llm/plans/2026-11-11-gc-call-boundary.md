@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Status:** Tasks 1-3 complete 2026-11-11; awaiting final review.
+**Status:** complete 2026-11-11: Tasks 1-4 done, final review clean after one fix wave, gc-call-boundary fast-forwarded into zig-hash-engine (Task 5); records traces/llm/bench/cb-*, ledger cb-ledger.md, review cb-final-review.md.
 
 **Goal:** Keep the Zig collector's slow-path calls out of line where the C collector's are, replace the two remaining C cross-calls with Zig imports, prove the decisions unchanged with the oracle, measure the gain with the three-sided A/B and the after-profile, and include the branch in `zig-hash-engine`.
 
