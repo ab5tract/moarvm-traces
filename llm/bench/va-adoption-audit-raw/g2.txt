@@ -1,0 +1,4 @@
+src/6model/reprs/MultiDimArray.c:286:        MVM_free(arr->body.slots.any);
+src/6model/reprs/VMArray.c:114:    MVM_free(arr->body.slots.any);
+src/io/io.c:133:        MVM_free(result_body->slots.any);
+src/strings/normalize.c:84:        MVM_free(out_body->slots.any);
