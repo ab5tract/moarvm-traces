@@ -1,0 +1,283 @@
+case	kind	result is
+prepend	obj	memmove and forward copy (no overlap that matters)
+prepend	str	memmove and forward copy (no overlap that matters)
+prepend	i64	memmove and forward copy (no overlap that matters)
+prepend	i32	memmove and forward copy (no overlap that matters)
+prepend	i16	memmove and forward copy (no overlap that matters)
+prepend	i8	memmove and forward copy (no overlap that matters)
+prepend	u64	memmove and forward copy (no overlap that matters)
+prepend	u32	memmove and forward copy (no overlap that matters)
+prepend	u16	memmove and forward copy (no overlap that matters)
+prepend	u8	memmove and forward copy (no overlap that matters)
+prepend	n64	memmove and forward copy (no overlap that matters)
+prepend	n32	memmove and forward copy (no overlap that matters)
+append	obj	memmove and forward copy (no overlap that matters)
+append	str	memmove and forward copy (no overlap that matters)
+append	i64	memmove and forward copy (no overlap that matters)
+append	i32	memmove and forward copy (no overlap that matters)
+append	i16	memmove and forward copy (no overlap that matters)
+append	i8	memmove and forward copy (no overlap that matters)
+append	u64	memmove and forward copy (no overlap that matters)
+append	u32	memmove and forward copy (no overlap that matters)
+append	u16	memmove and forward copy (no overlap that matters)
+append	u8	memmove and forward copy (no overlap that matters)
+append	n64	memmove and forward copy (no overlap that matters)
+append	n32	memmove and forward copy (no overlap that matters)
+middle	obj	forward copy
+middle	str	forward copy
+middle	i64	forward copy
+middle	i32	forward copy
+middle	i16	forward copy
+middle	i8	forward copy
+middle	u64	forward copy
+middle	u32	forward copy
+middle	u16	forward copy
+middle	u8	forward copy
+middle	n64	forward copy
+middle	n32	forward copy
+middle1	obj	NEITHER
+middle1	str	forward copy
+middle1	i64	NEITHER
+middle1	i32	NEITHER
+middle1	i16	NEITHER
+middle1	i8	NEITHER
+middle1	u64	NEITHER
+middle1	u32	NEITHER
+middle1	u16	NEITHER
+middle1	u8	NEITHER
+middle1	n64	NEITHER
+middle1	n32	NEITHER
+middle9	obj	forward copy
+middle9	str	forward copy
+middle9	i64	forward copy
+middle9	i32	forward copy
+middle9	i16	forward copy
+middle9	i8	forward copy
+middle9	u64	forward copy
+middle9	u32	forward copy
+middle9	u16	forward copy
+middle9	u8	forward copy
+middle9	n64	forward copy
+middle9	n32	forward copy
+replace.2.3	obj	NEITHER
+replace.2.3	str	forward copy
+replace.2.3	i64	NEITHER
+replace.2.3	i32	NEITHER
+replace.2.3	i16	NEITHER
+replace.2.3	i8	NEITHER
+replace.2.3	u64	NEITHER
+replace.2.3	u32	NEITHER
+replace.2.3	u16	NEITHER
+replace.2.3	u8	NEITHER
+replace.2.3	n64	NEITHER
+replace.2.3	n32	NEITHER
+replace.0.3	obj	memmove and forward copy (no overlap that matters)
+replace.0.3	str	memmove and forward copy (no overlap that matters)
+replace.0.3	i64	memmove and forward copy (no overlap that matters)
+replace.0.3	i32	memmove and forward copy (no overlap that matters)
+replace.0.3	i16	memmove and forward copy (no overlap that matters)
+replace.0.3	i8	memmove and forward copy (no overlap that matters)
+replace.0.3	u64	memmove and forward copy (no overlap that matters)
+replace.0.3	u32	memmove and forward copy (no overlap that matters)
+replace.0.3	u16	memmove and forward copy (no overlap that matters)
+replace.0.3	u8	memmove and forward copy (no overlap that matters)
+replace.0.3	n64	memmove and forward copy (no overlap that matters)
+replace.0.3	n32	memmove and forward copy (no overlap that matters)
+replace.all	obj	memmove and forward copy (no overlap that matters)
+replace.all	str	memmove and forward copy (no overlap that matters)
+replace.all	i64	memmove and forward copy (no overlap that matters)
+replace.all	i32	memmove and forward copy (no overlap that matters)
+replace.all	i16	memmove and forward copy (no overlap that matters)
+replace.all	i8	memmove and forward copy (no overlap that matters)
+replace.all	u64	memmove and forward copy (no overlap that matters)
+replace.all	u32	memmove and forward copy (no overlap that matters)
+replace.all	u16	memmove and forward copy (no overlap that matters)
+replace.all	u8	memmove and forward copy (no overlap that matters)
+replace.all	n64	memmove and forward copy (no overlap that matters)
+replace.all	n32	memmove and forward copy (no overlap that matters)
+replace.over	obj	memmove and forward copy (no overlap that matters)
+replace.over	str	memmove and forward copy (no overlap that matters)
+replace.over	i64	memmove and forward copy (no overlap that matters)
+replace.over	i32	memmove and forward copy (no overlap that matters)
+replace.over	i16	memmove and forward copy (no overlap that matters)
+replace.over	i8	memmove and forward copy (no overlap that matters)
+replace.over	u64	memmove and forward copy (no overlap that matters)
+replace.over	u32	memmove and forward copy (no overlap that matters)
+replace.over	u16	memmove and forward copy (no overlap that matters)
+replace.over	u8	memmove and forward copy (no overlap that matters)
+replace.over	n64	memmove and forward copy (no overlap that matters)
+replace.over	n32	memmove and forward copy (no overlap that matters)
+replace.tail	obj	forward copy
+replace.tail	str	forward copy
+replace.tail	i64	forward copy
+replace.tail	i32	forward copy
+replace.tail	i16	forward copy
+replace.tail	i8	forward copy
+replace.tail	u64	forward copy
+replace.tail	u32	forward copy
+replace.tail	u16	forward copy
+replace.tail	u8	forward copy
+replace.tail	n64	forward copy
+replace.tail	n32	forward copy
+replace.5.5	obj	forward copy
+replace.5.5	str	forward copy
+replace.5.5	i64	forward copy
+replace.5.5	i32	forward copy
+replace.5.5	i16	forward copy
+replace.5.5	i8	forward copy
+replace.5.5	u64	forward copy
+replace.5.5	u32	forward copy
+replace.5.5	u16	forward copy
+replace.5.5	u8	forward copy
+replace.5.5	n64	forward copy
+replace.5.5	n32	forward copy
+replace.1.9	obj	NEITHER
+replace.1.9	str	forward copy
+replace.1.9	i64	NEITHER
+replace.1.9	i32	NEITHER
+replace.1.9	i16	NEITHER
+replace.1.9	i8	NEITHER
+replace.1.9	u64	NEITHER
+replace.1.9	u32	NEITHER
+replace.1.9	u16	NEITHER
+replace.1.9	u8	NEITHER
+replace.1.9	n64	NEITHER
+replace.1.9	n32	NEITHER
+replace.1.20	obj	NEITHER
+replace.1.20	str	forward copy
+replace.1.20	i64	NEITHER
+replace.1.20	i32	NEITHER
+replace.1.20	i16	NEITHER
+replace.1.20	i8	NEITHER
+replace.1.20	u64	NEITHER
+replace.1.20	u32	NEITHER
+replace.1.20	u16	NEITHER
+replace.1.20	u8	NEITHER
+replace.1.20	n64	NEITHER
+replace.1.20	n32	NEITHER
+neg	obj	forward copy
+neg	str	forward copy
+neg	i64	forward copy
+neg	i32	forward copy
+neg	i16	forward copy
+neg	i8	forward copy
+neg	u64	forward copy
+neg	u32	forward copy
+neg	u16	forward copy
+neg	u8	forward copy
+neg	n64	forward copy
+neg	n32	forward copy
+past	obj	memmove and forward copy (no overlap that matters)
+past	str	memmove and forward copy (no overlap that matters)
+past	i64	memmove and forward copy (no overlap that matters)
+past	i32	memmove and forward copy (no overlap that matters)
+past	i16	memmove and forward copy (no overlap that matters)
+past	i8	memmove and forward copy (no overlap that matters)
+past	u64	memmove and forward copy (no overlap that matters)
+past	u32	memmove and forward copy (no overlap that matters)
+past	u16	memmove and forward copy (no overlap that matters)
+past	u8	memmove and forward copy (no overlap that matters)
+past	n64	memmove and forward copy (no overlap that matters)
+past	n32	memmove and forward copy (no overlap that matters)
+shifted.prepend	i64	memmove and forward copy (no overlap that matters)
+shifted.prepend	i32	memmove and forward copy (no overlap that matters)
+shifted.prepend	i16	memmove and forward copy (no overlap that matters)
+shifted.prepend	i8	memmove and forward copy (no overlap that matters)
+shifted.prepend	u64	memmove and forward copy (no overlap that matters)
+shifted.prepend	u32	memmove and forward copy (no overlap that matters)
+shifted.prepend	u16	memmove and forward copy (no overlap that matters)
+shifted.prepend	u8	memmove and forward copy (no overlap that matters)
+shifted.prepend	n64	memmove and forward copy (no overlap that matters)
+shifted.prepend	n32	memmove and forward copy (no overlap that matters)
+shifted.prepend20	i64	memmove and forward copy (no overlap that matters)
+shifted.prepend20	i32	memmove and forward copy (no overlap that matters)
+shifted.prepend20	i16	memmove and forward copy (no overlap that matters)
+shifted.prepend20	i8	memmove and forward copy (no overlap that matters)
+shifted.prepend20	u64	memmove and forward copy (no overlap that matters)
+shifted.prepend20	u32	memmove and forward copy (no overlap that matters)
+shifted.prepend20	u16	memmove and forward copy (no overlap that matters)
+shifted.prepend20	u8	memmove and forward copy (no overlap that matters)
+shifted.prepend20	n64	memmove and forward copy (no overlap that matters)
+shifted.prepend20	n32	memmove and forward copy (no overlap that matters)
+shifted.middle	obj	forward copy
+shifted.middle	str	forward copy
+shifted.middle	i64	forward copy
+shifted.middle	i32	forward copy
+shifted.middle	i16	forward copy
+shifted.middle	i8	forward copy
+shifted.middle	u64	forward copy
+shifted.middle	u32	forward copy
+shifted.middle	u16	forward copy
+shifted.middle	u8	forward copy
+shifted.middle	n64	forward copy
+shifted.middle	n32	forward copy
+shifted.replace	i64	memmove and forward copy (no overlap that matters)
+shifted.replace	i32	memmove and forward copy (no overlap that matters)
+shifted.replace	i16	memmove and forward copy (no overlap that matters)
+shifted.replace	i8	memmove and forward copy (no overlap that matters)
+shifted.replace	u64	memmove and forward copy (no overlap that matters)
+shifted.replace	u32	memmove and forward copy (no overlap that matters)
+shifted.replace	u16	memmove and forward copy (no overlap that matters)
+shifted.replace	u8	memmove and forward copy (no overlap that matters)
+shifted.replace	n64	memmove and forward copy (no overlap that matters)
+shifted.replace	n32	memmove and forward copy (no overlap that matters)
+shifted.replace.2.3	obj	NEITHER
+shifted.replace.2.3	str	forward copy
+shifted.replace.2.3	i64	NEITHER
+shifted.replace.2.3	i32	NEITHER
+shifted.replace.2.3	i16	NEITHER
+shifted.replace.2.3	i8	NEITHER
+shifted.replace.2.3	u64	NEITHER
+shifted.replace.2.3	u32	NEITHER
+shifted.replace.2.3	u16	NEITHER
+shifted.replace.2.3	u8	NEITHER
+shifted.replace.2.3	n64	NEITHER
+shifted.replace.2.3	n32	NEITHER
+shifted.append	obj	memmove and forward copy (no overlap that matters)
+shifted.append	str	memmove and forward copy (no overlap that matters)
+shifted.append	i64	memmove and forward copy (no overlap that matters)
+shifted.append	i32	memmove and forward copy (no overlap that matters)
+shifted.append	i16	memmove and forward copy (no overlap that matters)
+shifted.append	i8	memmove and forward copy (no overlap that matters)
+shifted.append	u64	memmove and forward copy (no overlap that matters)
+shifted.append	u32	memmove and forward copy (no overlap that matters)
+shifted.append	u16	memmove and forward copy (no overlap that matters)
+shifted.append	u8	memmove and forward copy (no overlap that matters)
+shifted.append	n64	memmove and forward copy (no overlap that matters)
+shifted.append	n32	memmove and forward copy (no overlap that matters)
+one	obj	memmove and forward copy (no overlap that matters)
+one	str	memmove and forward copy (no overlap that matters)
+one	i64	memmove and forward copy (no overlap that matters)
+one	i32	memmove and forward copy (no overlap that matters)
+one	i16	memmove and forward copy (no overlap that matters)
+one	i8	memmove and forward copy (no overlap that matters)
+one	u64	memmove and forward copy (no overlap that matters)
+one	u32	memmove and forward copy (no overlap that matters)
+one	u16	memmove and forward copy (no overlap that matters)
+one	u8	memmove and forward copy (no overlap that matters)
+one	n64	memmove and forward copy (no overlap that matters)
+one	n32	memmove and forward copy (no overlap that matters)
+one.replace	obj	memmove and forward copy (no overlap that matters)
+one.replace	str	memmove and forward copy (no overlap that matters)
+one.replace	i64	memmove and forward copy (no overlap that matters)
+one.replace	i32	memmove and forward copy (no overlap that matters)
+one.replace	i16	memmove and forward copy (no overlap that matters)
+one.replace	i8	memmove and forward copy (no overlap that matters)
+one.replace	u64	memmove and forward copy (no overlap that matters)
+one.replace	u32	memmove and forward copy (no overlap that matters)
+one.replace	u16	memmove and forward copy (no overlap that matters)
+one.replace	u8	memmove and forward copy (no overlap that matters)
+one.replace	n64	memmove and forward copy (no overlap that matters)
+one.replace	n32	memmove and forward copy (no overlap that matters)
+empty	obj	memmove and forward copy (no overlap that matters)
+empty	str	memmove and forward copy (no overlap that matters)
+empty	i64	memmove and forward copy (no overlap that matters)
+empty	i32	memmove and forward copy (no overlap that matters)
+empty	i16	memmove and forward copy (no overlap that matters)
+empty	i8	memmove and forward copy (no overlap that matters)
+empty	u64	memmove and forward copy (no overlap that matters)
+empty	u32	memmove and forward copy (no overlap that matters)
+empty	u16	memmove and forward copy (no overlap that matters)
+empty	u8	memmove and forward copy (no overlap that matters)
+empty	n64	memmove and forward copy (no overlap that matters)
+empty	n32	memmove and forward copy (no overlap that matters)

@@ -1,0 +1,10 @@
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1

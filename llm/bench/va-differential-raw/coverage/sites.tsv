@@ -1,0 +1,165 @@
+# throw sites
+line	function	message	hit by
+11	enter_single_user	Array may not be used concurrently	no code
+154	MVM_VMArray_at_pos_s	MVMArray: Index out of bounds	diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+159	MVM_VMArray_at_pos_s	MVMArray: atpos expected a string register, but %u is not MVM_ARRAY_STR	diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+173	MVM_VMArray_at_pos_i	MVMArray: Index out of bounds	diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+190	MVM_VMArray_at_pos_u	MVMArray: Index out of bounds	diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+207	MVM_VMArray_at_pos_n	MVMArray: Index out of bounds	diff-raku-nospesh diff-raku-spesh
+225	MVM_VMArray_at_pos_o	MVMArray: Index out of bounds	diff-nqp-spesh
+230	MVM_VMArray_at_pos_o	MVMArray: atpos with an object register, but array type %u is not MVM_ARRAY_OBJ	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+249	MVM_VMArray_at_pos	MVMArray: Index out of bounds	devirt-nospesh diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+258	MVM_VMArray_at_pos	MVMArray: atpos expected object register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+269	MVM_VMArray_at_pos	MVMArray: atpos expected string register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh serial-nospesh serial-read-nospesh serial-read-spesh serial-spesh
+277	MVM_VMArray_at_pos	MVMArray: atpos I64 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+285	MVM_VMArray_at_pos	MVMArray: atpos I32 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+293	MVM_VMArray_at_pos	MVMArray: atpos I16 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+301	MVM_VMArray_at_pos	MVMArray: atpos I8 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+309	MVM_VMArray_at_pos	MVMArray: atpos expected num register	no code
+317	MVM_VMArray_at_pos	MVMArray: atpos expected num register	no code
+325	MVM_VMArray_at_pos	MVMArray: atpos U64 expected int register, got %d instead	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+333	MVM_VMArray_at_pos	MVMArray: atpos U32 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+341	MVM_VMArray_at_pos	MVMArray: atpos U16 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+349	MVM_VMArray_at_pos	MVMArray: atpos U8 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+356	MVM_VMArray_at_pos	MVMArray: Unhandled slot type, got '%s'	diff-nqp-nospesh diff-nqp-spesh
+400	zero_slots	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+459	set_size_internal	Unable to allocate an array of % ...  elements	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+488	MVM_VMArray_bind_pos	MVMArray: Index out of bounds	devirt-nospesh diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+499	MVM_VMArray_bind_pos	MVMArray: bindpos expected object register	diff-nqp-nospesh diff-nqp-spesh
+504	MVM_VMArray_bind_pos	MVMArray: bindpos expected string register	diff-nqp-nospesh diff-nqp-spesh
+509	MVM_VMArray_bind_pos	MVMArray: bindpos I64 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+514	MVM_VMArray_bind_pos	MVMArray: bindpos I32 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+519	MVM_VMArray_bind_pos	MVMArray: bindpos I16 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+524	MVM_VMArray_bind_pos	MVMArray: bindpos I8 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+529	MVM_VMArray_bind_pos	MVMArray: bindpos expected num register	no code
+534	MVM_VMArray_bind_pos	MVMArray: bindpos expected num register	no code
+539	MVM_VMArray_bind_pos	MVMArray: bindpos U64 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+544	MVM_VMArray_bind_pos	MVMArray: bindpos U32 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+549	MVM_VMArray_bind_pos	MVMArray: bindpos U16 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+554	MVM_VMArray_bind_pos	MVMArray: bindpos U8 expected int register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+558	MVM_VMArray_bind_pos	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+584	MVM_VMArray_push	MVMArray: push expected object register	no code
+589	MVM_VMArray_push	MVMArray: push expected string register	no code
+594	MVM_VMArray_push	MVMArray: push expected int register	no code
+599	MVM_VMArray_push	MVMArray: push expected int register	no code
+604	MVM_VMArray_push	MVMArray: push expected int register	no code
+609	MVM_VMArray_push	MVMArray: push expected int register	no code
+614	MVM_VMArray_push	MVMArray: push expected num register	no code
+619	MVM_VMArray_push	MVMArray: push expected num register	no code
+624	MVM_VMArray_push	MVMArray: push expected int register	no code
+629	MVM_VMArray_push	MVMArray: push expected int register	no code
+634	MVM_VMArray_push	MVMArray: push expected int register	no code
+639	MVM_VMArray_push	MVMArray: push expected int register	no code
+643	MVM_VMArray_push	MVMArray: Unhandled slot type	no code
+654	pop	MVMArray: Can't pop from an empty array	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+662	pop	MVMArray: pop expected object register	diff-nqp-nospesh diff-nqp-spesh
+667	pop	MVMArray: pop expected string register	diff-nqp-nospesh diff-nqp-spesh
+672	pop	MVMArray: pop expected int register	no code
+677	pop	MVMArray: pop expected int register	no code
+682	pop	MVMArray: pop expected int register	no code
+687	pop	MVMArray: pop expected int register	no code
+692	pop	MVMArray: pop expected num register	no code
+697	pop	MVMArray: pop expected num register	no code
+702	pop	MVMArray: pop expected int register	no code
+707	pop	MVMArray: pop expected int register	no code
+712	pop	MVMArray: pop expected int register	no code
+717	pop	MVMArray: pop expected int register	no code
+721	pop	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+761	unshift	MVMArray: unshift expected object register	diff-nqp-nospesh diff-nqp-spesh
+766	unshift	MVMArray: unshift expected string register	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+771	unshift	MVMArray: unshift expected int register	no code
+776	unshift	MVMArray: unshift expected int register	no code
+781	unshift	MVMArray: unshift expected int register	no code
+786	unshift	MVMArray: unshift expected int register	no code
+791	unshift	MVMArray: unshift expected num register	no code
+796	unshift	MVMArray: unshift expected num register	no code
+801	unshift	MVMArray: unshift expected int register	no code
+806	unshift	MVMArray: unshift expected int register	no code
+811	unshift	MVMArray: unshift expected int register	no code
+816	unshift	MVMArray: unshift expected int register	no code
+820	unshift	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+831	shift	MVMArray: Can't shift from an empty array	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+838	shift	MVMArray: shift expected object register	diff-nqp-nospesh diff-nqp-spesh
+843	shift	MVMArray: shift expected string register	diff-nqp-nospesh diff-nqp-spesh
+848	shift	MVMArray: shift expected int register	no code
+853	shift	MVMArray: shift expected int register	no code
+858	shift	MVMArray: shift expected int register	no code
+863	shift	MVMArray: shift expected int register	no code
+868	shift	MVMArray: shift expected num register	no code
+873	shift	MVMArray: shift expected num register	no code
+878	shift	MVMArray: shift expected int register	no code
+883	shift	MVMArray: shift expected int register	no code
+888	shift	MVMArray: shift expected int register	no code
+893	shift	MVMArray: shift expected int register	no code
+897	shift	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+980	aslice	MVMArray: Slice index out of bounds	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+996	write_buf	MVMArray: write_buf requires an integer type	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1000	write_buf	MVMArray: Index out of bounds	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1023	read_buf	MVMArray: read_buf requires an integer type	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1027	read_buf	MVMArray: read_buf out of bounds offset % ...  start % ...  elems % ...  count %	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1054	asplice	MVMArray: Illegal splice offset	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1125	at_pos_multidim	A dynamic array can only be indexed with a single dimension	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1131	bind_pos_multidim	A dynamic array can only be indexed with a single dimension	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1143	set_dimensions	A dynamic array can only have a single dimension	diff-nqp-nospesh diff-nqp-spesh diff-raku-nospesh diff-raku-spesh
+1203	pos_as_atomic	Index out of bounds in atomic operation on array	diff-raku-nospesh diff-raku-spesh
+1211	pos_as_atomic	Can only do integer atomic operation on native integer array element of atomic size	diff-raku-nospesh diff-raku-spesh
+1218	pos_as_atomic_multidim	A dynamic array can only be indexed with a single dimension	diff-raku-nospesh diff-raku-spesh
+1259	spec_to_repr_data	MVMArray: Unsupported uint size	NOT HIT
+1294	spec_to_repr_data	MVMArray: Unsupported int size	NOT HIT
+1310	spec_to_repr_data	MVMArray: Unsupported num size	NOT HIT
+1424	deserialize	MVMArray: Unhandled slot type	serial-nospesh serial-read-nospesh serial-read-spesh serial-spesh
+1473	serialize	MVMArray: Unhandled slot type	diff-nqp-nospesh diff-nqp-spesh
+1568	vmarray_bind_pos_int64	MVMArray: Index out of bounds	devirt-spesh
+1592	vmarray_at_pos_int64	MVMArray: Index out of bounds	devirt-spesh
+# 111 sites, 60 hit
+# functions
+function	lines with code	lines hit by any run	never hit
+type_object_for	9	9	
+copy_to	13	13	
+VMArray_gc_mark	20	20	
+gc_free	1	1	
+gc_mark_repr_data	4	4	
+gc_free_repr_data	1	1	
+get_storage_spec	1	1	
+MVM_VMArray_at_pos_s	10	8	146 164
+MVM_VMArray_at_pos_i	6	5	181
+MVM_VMArray_at_pos_u	6	5	198
+MVM_VMArray_at_pos_n	6	5	215
+MVM_VMArray_at_pos_o	11	9	217 238
+MVM_VMArray_at_pos	49	49	
+zero_slots	4	4	
+set_size_internal	22	22	
+MVM_VMArray_bind_pos	36	36	
+elems	1	1	
+set_elems	3	3	
+MVM_VMArray_push	13	13	
+pop	30	30	
+unshift	25	25	
+shift	29	29	
+slot_type_to_kind	2	1	929
+copy_elements	11	11	
+aslice	11	11	
+write_buf	10	10	
+read_buf	10	10	
+asplice	28	28	
+at_pos_multidim	5	5	
+bind_pos_multidim	5	5	
+dimensions	3	3	
+set_dimensions	2	2	
+get_elem_storage_spec	3	3	
+pos_as_atomic	8	8	
+pos_as_atomic_multidim	4	4	
+spec_to_repr_data	11	8	1259 1294 1310
+compose	9	9	
+deserialize_stable_size	2	2	
+serialize_repr_data	2	2	
+deserialize_repr_data	10	10	
+deserialize	33	33	
+serialize	10	10	
+spesh	21	21	
+unmanaged_size	2	2	
+describe_refs	12	0	1521 1522 1524 1525 1528 1532 1533 1535 1542 1543 1545 1550
+MVMArray_initialize	1	0	1554
+vmarray_bind_pos_int64	9	9	
+vmarray_at_pos_int64	6	6	
+MVM_VMArray_find_fast_impl_for_jit	11	11	

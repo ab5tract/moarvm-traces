@@ -1,0 +1,101 @@
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib MVM_SPESH_BLOCKING=1 gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib MVM_SPESH_BLOCKING=1 gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib MVM_SPESH_BLOCKING=1 gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib none gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib none gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib none gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1592 index=-1
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+HIT VMArray.c:1568 index=-1
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+== LD_LIBRARY_PATH=/tmp/claude-1000/va-c-syms/lib MVM_SPESH_DISABLE=1 gdb -q -batch -x bt.py --args nqp-m tools/bench/repr/vmarray-devirt.nqp
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1

@@ -1,0 +1,62 @@
+sites	output lines	message format	example case
+3	264	A dynamic array can only be indexed with a single dimension	obj.nd.at.2
+1	50	A dynamic array can only have a single dimension	obj.nd.setdimensions.2
+1	0	Array may not be used concurrently	-
+1	140	Can only do integer atomic operation on native integer array element of atomic size	int8.atomic.load
+1	98	Index out of bounds in atomic operation on array	int8.atomic.load.past
+1	204	MVMArray: Can't pop from an empty array	obj.empty.pop
+1	188	MVMArray: Can't shift from an empty array	obj.empty.shift
+1	116	MVMArray: Illegal splice offset	i8.limit.splice
+10	1344	MVMArray: Index out of bounds	i64.devirt.at_i.-11
+1	196	MVMArray: Slice index out of bounds	obj.slice.neg7
+8	400	MVMArray: Unhandled slot type	i4.odd.bindpos_i
+1	168	MVMArray: Unhandled slot type, got '%s'	i4.odd.atpos_i
+1	0	MVMArray: Unsupported int size	-
+1	0	MVMArray: Unsupported num size	-
+1	0	MVMArray: Unsupported uint size	-
+1	80	MVMArray: atpos I16 expected int register	i16.kind.atpos_o
+1	80	MVMArray: atpos I32 expected int register	i32.kind.atpos_o
+1	80	MVMArray: atpos I64 expected int register	i64.kind.atpos_o
+1	80	MVMArray: atpos I8 expected int register	i8.kind.atpos_o
+1	74	MVMArray: atpos U16 expected int register	u16.kind.atpos_o
+1	74	MVMArray: atpos U32 expected int register	u32.kind.atpos_o
+1	74	MVMArray: atpos U64 expected int register, got %d instead	u64.kind.atpos_o
+1	74	MVMArray: atpos U8 expected int register	u8.kind.atpos_o
+1	49	MVMArray: atpos expected a string register, but %u is not MVM_ARRAY_STR	obj.mega.atpos_s.1
+2	148	MVMArray: atpos expected num register	n64.kind.atpos_o
+1	86	MVMArray: atpos expected object register	obj.kind.atpos_i
+1	78	MVMArray: atpos expected string register	str.kind.atpos_o
+1	167	MVMArray: atpos with an object register, but array type %u is not MVM_ARRAY_OBJ	str.kind.existspos
+1	52	MVMArray: bindpos I16 expected int register	i16.kind.bindpos_o
+1	52	MVMArray: bindpos I32 expected int register	i32.kind.bindpos_o
+1	54	MVMArray: bindpos I64 expected int register	i64.kind.bindpos_o
+1	54	MVMArray: bindpos I8 expected int register	i8.kind.bindpos_o
+1	38	MVMArray: bindpos U16 expected int register	u16.kind.bindpos_o
+1	38	MVMArray: bindpos U32 expected int register	u32.kind.bindpos_o
+1	38	MVMArray: bindpos U64 expected int register	u64.kind.bindpos_o
+1	38	MVMArray: bindpos U8 expected int register	u8.kind.bindpos_o
+2	104	MVMArray: bindpos expected num register	n64.kind.bindpos_o
+1	48	MVMArray: bindpos expected object register	obj.kind.bindpos_i
+1	48	MVMArray: bindpos expected string register	str.kind.bindpos_o
+8	96	MVMArray: pop expected int register	i64.kind.pop_o
+2	24	MVMArray: pop expected num register	n64.kind.pop_o
+1	12	MVMArray: pop expected object register	obj.kind.pop_i
+1	12	MVMArray: pop expected string register	str.kind.pop_o
+8	160	MVMArray: push expected int register	i64.kind.push_o
+2	36	MVMArray: push expected num register	n64.kind.push_o
+1	20	MVMArray: push expected object register	obj.kind.push_i
+1	20	MVMArray: push expected string register	str.kind.push_o
+1	1220	MVMArray: read_buf out of bounds offset %N start %N elems %N count %N	i64.buf.readint.past.f0
+1	246	MVMArray: read_buf requires an integer type	obj.buf.readint.f0
+8	96	MVMArray: shift expected int register	i64.kind.shift_o
+2	24	MVMArray: shift expected num register	n64.kind.shift_o
+1	12	MVMArray: shift expected object register	obj.kind.shift_i
+1	12	MVMArray: shift expected string register	str.kind.shift_o
+8	144	MVMArray: unshift expected int register	i64.kind.unshift_o
+2	36	MVMArray: unshift expected num register	n64.kind.unshift_o
+1	18	MVMArray: unshift expected object register	obj.kind.unshift_i
+1	18	MVMArray: unshift expected string register	str.kind.unshift_o
+1	446	MVMArray: write_buf requires an integer type	obj.buf.writeint.f0
+1	288	Unable to allocate an array of %N elements	obj.limit.fresh
+# 111 sites, 59 distinct message formats, 55 formats seen in the outputs
+# 254 distinct DIED messages in the outputs (every message of every case, VMArray's and others')
