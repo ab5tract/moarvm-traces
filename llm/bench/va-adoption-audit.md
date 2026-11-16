@@ -78,9 +78,14 @@ What the sites have in common, for Task 5:
   array's own `copy_to` (`VMArray.c:53`) and `deserialize` (`VMArray.c:1370`),
   set it to an arbitrary value; it can be smaller than the allocation (sites
   5, 8) and, at site 6, larger.
-- `slots.any != NULL` with `ssize == 0` happens (sites 1, 2, 5, 7, 8, and the
+- `slots.any != NULL` with `ssize == 0` happens (sites 5, 7, 8, and the
   array's own growth of a no-storage kind, see `va-kind-differences.md`
-  section 3). The campaign rule "an array without storage has
+  section 3). Sites 1 and 2 give the other edge case for a 0-byte read:
+  `elems == 0` with `ssize = buf->len >= 4` (`asyncsocket.c:20-22`, `50`;
+  `asyncsocketudp.c:23-25`, `113`). Inside `VMArray.c`, a clone or
+  deserialize of a non-empty array of a no-storage kind (after a recompose)
+  holds `MVM_malloc(0)` with `ssize = elems > 0` (`VMArray.c:53-60`,
+  `1370-1372`). The campaign rule "an array without storage has
   `slots.any == NULL`" holds for arrays the Zig code creates, but the Zig code
   must accept and free a non-NULL zero-capacity buffer it receives.
 - The fields are written in the order slots, start, ssize, elems (sites 6 and
@@ -119,6 +124,7 @@ layout is the C one and the elements of an array are contiguous from
 | `src/jit/x64/emit.dasc:2728-2732` | the JIT computes `slots + start * elem_size` inline for a VMArray native-call argument |
 | `src/core/nativecall.c:507-510` | `MVM_nativecall_unmarshal_vmarray` hands native code `slots + start * elem_size`; native code may write elements through it |
 | `src/6model/reprs/VMArray.c:1194-1213` (for completeness) | `pos_as_atomic` returns a pointer into the slots to the atomic ops |
+| `src/io/asyncsocket.c:295-297`, `src/io/asyncsocketudp.c:310-312`, `src/io/procops.c:354-356` | read `slots.i8 + start` and `elems` to write a buffer to a socket or process |
 | `src/core/loadbytecode.c:56-61`, `88-93`; `Decoder.c:220-231`; `io.c:154-170`; `normalize.c:50-51`, `146-147`; `ops.c:1957-1959` | read `slots + start` and `elems` (bytecode loading, decoder input, `write_fhb`, normalization input, decode from buf) |
 | `src/profiler/configuration.c:544` | reads `slots.u8` **without adding `start`**: a confprog bytecode array that has been shifted is read from the wrong place (reported; minor) |
 | `src/gc/orchestrate.c:514-532`, `src/zig/gc/orchestrate.zig:739`, `src/spesh/worker.c:138-144` (and the later `overview_data[...]` writes up to line 319) | `MVM_repr_pos_set_elems` on a fresh event array, then write elements through `slots.u64`/`slots.i64` directly, relying on `start == 0` for a fresh array |
