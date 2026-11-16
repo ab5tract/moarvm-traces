@@ -1,6 +1,6 @@
 # The first REPR in Zig: VMArray by a comptime mechanism, with allocator-backed slots: design
 
-Campaign 8 of the MoarVM C-to-Zig migration. Follows the collector's three campaigns (`2026-11-04-zig-gc-port-design.md`, `2026-11-09-zig-native-gc-design.md`, `2026-11-11-gc-call-boundary-design.md`; all of `src/gc` is Zig on `zig-hash-engine` at 4e7e981dd). Author: the controller session, from a brainstorm with the user on 2026-11-16. Status: draft for the user's approval; builder check done 2026-11-16 (its four points settled in 5.2, 5.4 and 7.1).
+Campaign 8 of the MoarVM C-to-Zig migration. Follows the collector's three campaigns (`2026-11-04-zig-gc-port-design.md`, `2026-11-09-zig-native-gc-design.md`, `2026-11-11-gc-call-boundary-design.md`; all of `src/gc` is Zig on `zig-hash-engine` at 4e7e981dd). Author: the controller session, from a brainstorm with the user on 2026-11-16. Status: approved by the user 2026-11-16 ("looks great") after the builder check (its four points settled in 5.2, 5.4 and 7.1).
 
 ## 1. Intent
 
