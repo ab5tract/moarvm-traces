@@ -153,7 +153,7 @@ There is no line-by-line correspondence to review, by decision. Identity rests o
 6. Evidence and gate (sections 7 and 8), the paper check (5.5), docs.
 7. Final whole-branch review including the comprehension check; fix wave; hand back to the user for the merge decision.
 
-Process as in the earlier campaigns: subagent-driven development, one implementer and one reviewer per task, a ledger, a final whole-branch review. Models (my call, carried over from Campaigns 6 and 7): Opus implementers, Sonnet task reviewers, the session's own model for the final review.
+Process as in the earlier campaigns: subagent-driven development, one implementer and one reviewer per task, a ledger, a final whole-branch review. Models (the user's instruction, 2026-11-16): Fable implementers, Opus reviewers (task reviews, re-reviews, the final whole-branch review and its comprehension check).
 
 ## 10. Risks the builder should plan around
 
@@ -179,6 +179,7 @@ The user's (2026-11-16):
 - "VMArray first with the malloc-backed allocator"; the nursery-lifetime allocator is a later spike.
 - "straight to comptime shapes": no line-by-line translation first.
 - Comptime: "well documented comptime activity. it can be clever as long as it is not opaque".
+- Models: "Let's go with Fable implementors and Opus reviewers for this campaign".
 
 Mine (the user saw these in summary and said nothing was missing; each can be overruled):
 
@@ -189,4 +190,4 @@ Mine (the user saw these in summary and said nothing was missing; each can be ov
 - The evidence list of section 7 and the gate of section 8, including "break-even is enough".
 - Bytes at one fixed alignment for all kinds; the adoption sites left as they are and audited.
 - The comprehension check in the final review.
-- File locations, the branch name `zig-vmarray`, the record prefix `va-`, the models, and handing the branch back for the merge decision instead of merging it.
+- File locations, the branch name `zig-vmarray`, the record prefix `va-`, and handing the branch back for the merge decision instead of merging it.
