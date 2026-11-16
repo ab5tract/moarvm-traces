@@ -11,7 +11,8 @@ prints for the programs of `tools/bench/repr/`, and the coverage measurement.
 | `serial-read.out` | `vmarray-serial.nqp --read=` of that output, by the control (identical in both settings) |
 | `devirt.out` | `vmarray-devirt.nqp` (identical in both settings) |
 | `diff-self.log`, `load.log` | stderr of the `diff.sh` run of section 1, and the 1-minute load before each of its 52 runs |
-| `selfsplice.py`, `selfsplice.tsv` | section 5: each small `selfsplice` case against a memmove model and a forward-copy model of `asplice` (`python3 selfsplice.py diff-nqp-spesh.out`) |
+| `selfsplice.py`, `selfsplice.tsv` | section 5: each `selfsplice` case against a memmove model and a forward-copy model of `asplice` (`python3 selfsplice.py diff-nqp-spesh.out`); with `--list` it prints the entries of `tools/bench/repr/undefined-lines.txt` it derives |
+| `diff-self-fix1.log`, `libmoar-fix1.log`, `diff-fix1-tests.txt`, `diff-fix1-env.txt` | after the review: the control against itself with the reworked `diff.sh`, the library each side mapped, the exit-code checks on tampered copies, and a run with `MVM_SPESH_INLINE_DISABLE`, `MVM_SPESH_LOG`, `MVM_JIT_DISABLE` and `RAKULIB` set in the caller's environment |
 | `coverage/cov.py`, `cov.sh` | the gdb script (a breakpoint on every line of `VMArray.c` with code, disabled at its first hit) and its runner, as run from the session's scratch directory against `/tmp/claude-1000/va-c-syms` (`cov.sh <name> <program> ENV=VAL...`; `s1.out` beside it was the control's serial output) |
 | `coverage/cov-<program>-<setting>.txt` | per run: `HIT <line>` / `MISS <line>` for the 541 lines with code |
 | `coverage/sites.py`, `sites.tsv` | per throw site: function, message, the runs that hit it (`no code`: merged by the compiler with another arm); per function: lines with code, lines hit |

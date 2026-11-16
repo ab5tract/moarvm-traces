@@ -31,8 +31,19 @@ serialization as it wrote it (66 lines a setting).
 The runner's own checks were exercised on a copy of that directory with
 `--compare-only`: one run of a side altered gives exit 2 ("not repeatable",
 the line named), all three runs of head altered gives exit 1, a cross-read
-altered gives exit 1; unknown argument and missing prefix 64; prefixes of
-unequal length 4. `sh -n tools/bench/repr/diff.sh` is clean.
+altered gives exit 1; unknown argument and missing prefix 64. `sh -n
+tools/bench/repr/diff.sh` is clean.
+
+After the review of this task the runner gained exit 3 (section 5), a probe of
+the libmoar each side maps, the removal of the caller's `MVM_*` and related
+variables from the runs, and exit 64 for prefixes of unequal length. The
+control was run against itself again with that script, 2026-11-16 12:08 CET, load 0.78 to 1.70: exit 0 after 192 s, both sides mapping `/tmp/claude-1000/va-c-base/lib/libmoar.so` through both runners
+(`diff-self-fix1.log`, `libmoar-fix1.log`); the outputs are the bytes recorded
+here. Its checks on tampered copies and a fake prefix are in
+`diff-fix1-tests.txt`: only listed lines altered in all head runs gives 3; a
+listed and an unlisted line, a dropped line or a changed case name gives 1; one
+head run altered gives 2; unequal prefix lengths 64; a prefix whose libmoar.so
+is a link into another prefix 4.
 
 | program | setting | lines | spesh output = nospesh output |
 |---|---|---|---|
@@ -295,21 +306,37 @@ forward element by element:
 | `prepend`, `append`, `past`, `replace.0.3`, `replace.all`, `replace.over`, `one`, `one.replace`, `empty`, `shifted.append`, and (numeric kinds only) `shifted.prepend`, `shifted.prepend20`, `shifted.replace` (150 lines) | no overlap that matters: both models agree with the output | the same |
 | `middle`, `middle9`, `neg`, `replace.5.5`, `replace.tail`, `shifted.middle` (72 lines) | forward copy | forward copy (not a memmove) |
 | `middle1`, `replace.2.3`, `replace.1.9`, `replace.1.20`, `shifted.replace.2.3` (60 lines) | forward copy (5 lines) | neither (55 lines): a pattern of the `memcpy`'s block order, different for 8-, 4-, 2- and 1-byte elements |
+| `big.middle`, `big.replace` (9,000 elements; the dump is a SHA-1, which the models reproduce) | forward copy | forward copy |
+| `big.1`, `big.shifted` | forward copy | neither (22 lines) |
 
-The same holds for `<kind>.selfsplice.big.*`, `.twice`, `<kind>.gc.selfsplice.
-promoted` (a promoted OBJ array goes element by element: forward copy), and in
-the Raku output `*.nqp.splice.self`, `*.splice.self*`, `array.reified.splice`.
-Rakudo's own `.splice` with the array as the replacement (`int8.splice.self`,
-`array.splice.self`) copies first and is not affected.
+So the lines whose value depends on how overlapping ranges are copied are not
+only the 77 "neither" lines: the forward-copy lines of the memcpy kinds are
+not what a memmove gives either. Counting every line where the two models
+differ, for the eleven memcpy kinds: 15 cases x 11 kinds = 165 `selfsplice`
+lines, plus `<kind>.selfsplice.twice` (two such splices; 11), plus, in the
+Raku output, `<int type>.nqp.splice.self` (8), `num32/num64.splice.self` (2),
+`Buf[...]`/`Blob[...]`.splice.self (8) and `array.reified.splice` (1): 195
+lines. Not among them, because the C defines the result: every STR case;
+`<kind>.gc.selfsplice.promoted` and `gc.splice.promoted` (a promoted OBJ array
+is copied element by element, checked with a breakpoint on the loop of
+`copy_elements`); self-splices at offset 0 or at the end; Rakudo's own
+`.splice` with the array as the replacement (`int8.splice.self`,
+`array.splice.self`), which copies the replacement first.
 
-These lines are in the record because the brief asks for them, and they repeat
-(same binary, same heap layout; the unstripped second build prints the same).
-They are also the lines most likely to differ on a Zig array for a reason that
-is not a porting error: a different `memcpy`, or the same one on storage with
-a different alignment. `diff.sh` refuses prefixes of unequal length for that
-reason. A difference confined to the 55 "neither" lines and their relatives
-is for the user to decide (keep the C's call to the same `memcpy`, or define
-the result), not for the builder to chase.
+The ruling on these lines (the campaign's controller, after the review of this
+task): the cases stay in the programs, and the Zig array copies overlapping
+ranges with memmove semantics. It will therefore differ from the control in
+these lines, and `diff.sh` is told so: `tools/bench/repr/undefined-lines.txt`
+names the 195 lines (the `selfsplice` entries printed by `selfsplice.py
+--list`, the rest by the same rule by hand), and when base and head differ
+only in listed lines, with the same line count and the same case name on each
+differing line, the script exits 3, "differs only in undefined self-splice
+lines", and prints each differing line with both values. A head that reaches
+exit 3 is not a pass: the result and the printed lines are recorded and put to
+the user. Any difference outside the list is exit 1 as before, and each side
+must still repeat the listed lines run to run (exit 2). `diff.sh` also refuses
+prefixes of unequal length (exit 64), because the "neither" patterns can follow
+the alignment of the storage.
 
 ## 6. Left out, with the reason
 

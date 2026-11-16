@@ -281,3 +281,51 @@ empty	u16	memmove and forward copy (no overlap that matters)
 empty	u8	memmove and forward copy (no overlap that matters)
 empty	n64	memmove and forward copy (no overlap that matters)
 empty	n32	memmove and forward copy (no overlap that matters)
+big.middle	obj	forward copy
+big.middle	str	forward copy
+big.middle	i64	forward copy
+big.middle	i32	forward copy
+big.middle	i16	forward copy
+big.middle	i8	forward copy
+big.middle	u64	forward copy
+big.middle	u32	forward copy
+big.middle	u16	forward copy
+big.middle	u8	forward copy
+big.middle	n64	forward copy
+big.middle	n32	forward copy
+big.1	obj	NEITHER
+big.1	str	forward copy
+big.1	i64	NEITHER
+big.1	i32	NEITHER
+big.1	i16	NEITHER
+big.1	i8	NEITHER
+big.1	u64	NEITHER
+big.1	u32	NEITHER
+big.1	u16	NEITHER
+big.1	u8	NEITHER
+big.1	n64	NEITHER
+big.1	n32	NEITHER
+big.replace	obj	forward copy
+big.replace	str	forward copy
+big.replace	i64	forward copy
+big.replace	i32	forward copy
+big.replace	i16	forward copy
+big.replace	i8	forward copy
+big.replace	u64	forward copy
+big.replace	u32	forward copy
+big.replace	u16	forward copy
+big.replace	u8	forward copy
+big.replace	n64	forward copy
+big.replace	n32	forward copy
+big.shifted	obj	NEITHER
+big.shifted	str	forward copy
+big.shifted	i64	NEITHER
+big.shifted	i32	NEITHER
+big.shifted	i16	NEITHER
+big.shifted	i8	NEITHER
+big.shifted	u64	NEITHER
+big.shifted	u32	NEITHER
+big.shifted	u16	NEITHER
+big.shifted	u8	NEITHER
+big.shifted	n64	NEITHER
+big.shifted	n32	NEITHER

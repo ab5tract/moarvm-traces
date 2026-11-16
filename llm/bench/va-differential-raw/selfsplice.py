@@ -3,7 +3,7 @@
 # output by what the final copy of asplice did: for every case the result is
 # compared with a model of asplice whose last step is (a) a memmove and (b) a
 # forward element-by-element copy.
-import re, sys
+import hashlib, re, sys
 def ival(j, bits, signed):
     v = j * 3 + 1
     if bits == 0: return v
@@ -24,7 +24,8 @@ CASES = {  # name: (len, extra, offset, count)
  'replace.tail': (10,0,7,3), 'replace.5.5': (10,0,5,5), 'replace.1.9': (10,0,1,9), 'replace.1.20': (10,0,1,20),
  'neg': (10,0,-3,1), 'past': (10,0,12,0), 'shifted.prepend': (10,4,0,0), 'shifted.prepend20': (10,20,0,0),
  'shifted.middle': (10,4,5,0), 'shifted.replace': (10,4,0,4), 'shifted.replace.2.3': (10,4,2,3),
- 'shifted.append': (10,4,10,0), 'one': (1,0,0,0), 'one.replace': (1,0,0,1), 'empty': (0,0,0,0)}
+ 'shifted.append': (10,4,10,0), 'one': (1,0,0,0), 'one.replace': (1,0,0,1), 'empty': (0,0,0,0),
+ 'big.middle': (9000,0,4500,0), 'big.1': (9000,0,1,0), 'big.replace': (9000,0,100,5000), 'big.shifted': (9000,50,3,7)}
 def model(kind, n, extra, offset, count, forward):
     zero = {'obj': '<null>', 'str': '<null>'}.get(kind, '0')
     slots = [val(kind, 90 + j) for j in range(extra)] + [val(kind, j) for j in range(n)]
@@ -54,16 +55,29 @@ def model(kind, n, extra, offset, count, forward):
         src = slots[start:start + elems1]
         slots[start + offset:start + offset + elems1] = src
     return slots[start:start + new]
+def shown(v):
+    # What the program's dump prints: the elements, or above 40 of them their SHA-1.
+    return v if len(v) <= 40 else ['sha1=' + hashlib.sha1(' '.join(v).encode()).hexdigest().upper()]
+args = [a for a in sys.argv[1:] if a != '--list']
 out = {}
-for line in open(sys.argv[1]):
-    m = re.match(r'(\w+)\.selfsplice\.([\w.]+): elems=(\d+) \[(.*)\]$', line.rstrip('\n'))
-    if m and m.group(2) in CASES: out[(m.group(1), m.group(2))] = m.group(4).split(' ') if m.group(4) else []
-print("case\tkind\tresult is")
+for line in open(args[0]):
+    m = re.match(r'(\w+)\.selfsplice\.([\w.]+): elems=(\d+) (?:\[(.*)\]|(sha1=\w+) head)', line.rstrip('\n'))
+    if m and m.group(2) in CASES:
+        out[(m.group(1), m.group(2))] = [m.group(5)] if m.group(5) else (m.group(4).split(' ') if m.group(4) else [])
+rows = []
 for name in CASES:
     for kind in KINDS:
         if (kind, name) not in out: continue
         got = out[(kind, name)]
-        mm = model(kind, *CASES[name], forward=False)
-        fw = model(kind, *CASES[name], forward=True)
+        mm = shown(model(kind, *CASES[name], forward=False))
+        fw = shown(model(kind, *CASES[name], forward=True))
         what = 'memmove and forward copy (no overlap that matters)' if got == mm == fw else 'memmove' if got == mm else 'forward copy' if got == fw else 'NEITHER'
-        print("%s\t%s\t%s" % (name, kind, what))
+        rows.append((name, kind, what, mm != fw))
+if '--list' in sys.argv:
+    # The lines whose value depends on how overlapping ranges are copied, for
+    # the kinds the C copies with memcpy (every kind but STR).
+    for name, kind, what, overlap in rows:
+        if overlap and kind != 'str': print("diff-nqp %s.selfsplice.%s" % (kind, name))
+else:
+    print("case\tkind\tresult is")
+    for name, kind, what, overlap in rows: print("%s\t%s\t%s" % (name, kind, what))

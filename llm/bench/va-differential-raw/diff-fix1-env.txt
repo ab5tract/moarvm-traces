@@ -1,0 +1,15 @@
+$ MVM_SPESH_INLINE_DISABLE=1 MVM_SPESH_LOG=<scratch>/leak-spesh.log MVM_JIT_DISABLE=1 RAKULIB=/nonexistent tools/bench/repr/diff.sh --base=/tmp/claude-1000/va-c-base --head=/tmp/claude-1000/va-c-base --runs=1 --out=<W>/diff-envtest
+diff.sh: base through nqp loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: base through rakudo loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: head through nqp loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: head through rakudo loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: identical (1 runs a side; lines: diff-nqp/spesh 9987 diff-nqp/nospesh 9987 diff-raku/spesh 2475 diff-raku/nospesh 2475 serial/spesh 196 serial/nospesh 196 devirt/spesh 10 devirt/nospesh 10; cross-read identical)
+exit 0
+$ cat <W>/diff-envtest/libmoar.log
+base nqp libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+base rakudo libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 NQP_HOME=/tmp/claude-1000/tune-zig-prefix/share/nqp RAKUDO_HOME=/home/longwalker/code/raku/x.core/zmoarz/rakudo/gen/build_rakudo_home RAKUDO_NO_PRECOMPILATION=1 
+head nqp libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+head rakudo libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 NQP_HOME=/tmp/claude-1000/tune-zig-prefix/share/nqp RAKUDO_HOME=/home/longwalker/code/raku/x.core/zmoarz/rakudo/gen/build_rakudo_home RAKUDO_NO_PRECOMPILATION=1 
+$ ls <scratch>/leak-spesh.log
+ls: cannot access: No such file or directory (no spesh log was written)
+The outputs of this run equal the recorded ones byte for byte (cmp of diff-nqp spesh, diff-raku, serial, devirt).

@@ -1,0 +1,54 @@
+### a) only listed lines altered, in all head runs (diff-nqp both settings, diff-raku spesh)
+diff.sh: differs only in undefined self-splice lines (5 differing lines over the programs and settings, all listed in tools/bench/repr/undefined-lines.txt; everything else and the cross-read identical). Record this and put it to the user:
+diff-nqp, spesh:
+  obj.selfsplice.big.1
+    base: elems=18000 sha1=AA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=ZA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+  i8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28] ALTERED
+diff-nqp, nospesh:
+  obj.selfsplice.big.1
+    base: elems=18000 sha1=AA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=ZA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+  i8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28] ALTERED
+diff-raku, spesh:
+  Buf[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6 9]
+exit 3
+### b) a listed and an unlisted line altered in all head runs
+diff.sh: base and head differ (diff-nqp, spesh), first difference at
+line 2218:
+  base-diff-nqp-spesh-1.out: i8.selfsplice.prepend: elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+  head-diff-nqp-spesh-1.out: i8.selfsplice.prepend: elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28] ALTERED
+exit 1
+### b2) a listed line altered and the last line dropped in all head runs
+diff.sh: base and head differ (diff-nqp, spesh), first difference at
+line 2221:
+  base-diff-nqp-spesh-1.out: i8.selfsplice.middle1: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+  head-diff-nqp-spesh-1.out: i8.selfsplice.middle1: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28] ALTERED
+exit 1
+### b3) a listed line altered together with its case name
+diff.sh: base and head differ (diff-nqp, spesh), first difference at
+line 2221:
+  base-diff-nqp-spesh-1.out: i8.selfsplice.middle1: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+  head-diff-nqp-spesh-1.out: i8.selfsplice.middle1x: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+exit 1
+### c) a listed line altered in one head run only
+diff.sh: head not repeatable (diff-nqp, spesh): run 1 against run 2, first difference at
+line 2221:
+  head-diff-nqp-spesh-1.out: i8.selfsplice.middle1: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+  head-diff-nqp-spesh-2.out: i8.selfsplice.middle1: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28] ALTERED
+exit 2
+### d) prefixes of unequal length
+diff.sh: --base and --head differ in length (base /tmp/claude-1000/va-c-base is 26 characters, head /tmp/claude-1000/tune-zig-prefix is 32); use prefixes of equal length (see --help)
+exit 64
+### e) a prefix whose libmoar.so is a link into another prefix
+diff.sh: base through nqp loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: base through rakudo loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: head through nqp loads /tmp/claude-1000/va-c-base/lib/libmoar.so
+diff.sh: head (nqp) loaded /tmp/claude-1000/va-c-base/lib/libmoar.so, which is not under its prefix /tmp/claude-1000/va-x-fake
+exit 4
