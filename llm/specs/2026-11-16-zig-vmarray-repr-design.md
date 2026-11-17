@@ -271,3 +271,7 @@ plan's Outcome.
 14. **Models (9).** Tasks 1-2 had Fable implementers; from Task 3 on,
     implementers were Opus (the user's change of 2026-11-16); reviewers
     Opus throughout.
+15. **Cleanup and stress (7, item 6).** "All runs clean" was met on the base prefixes (120 of 120) but not with
+    `cleanup.sh --stress` on the stress prefixes: `blocked.nqp` segfaults in global destruction in about 2 % of
+    runs, equally on the C control (2/120) and the Zig array (3/120), at the same site. Ruled not the array's and
+    put to the user as a finding outside it (`va-cleanup.md`, plan Outcome).

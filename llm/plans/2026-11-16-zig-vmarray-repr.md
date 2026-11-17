@@ -261,7 +261,7 @@ last commit that changes libmoar; evidence taken at bea13d101 (a test-only commi
 | spectest wall / RSS, head/control | wall 1.003 (head 288.08 s in the control's 280.93-290.00), RSS 0.994 (in range); zero failures in six runs (`va-spectest.txt`) | pass |
 | crc-getter plain wall / RSS | wall 0.993 (spread 0.029, in range), RSS 1.000 (spread 0.025, in range) (`va-crc-ab.md`) | pass |
 | crc-getter bad-packages wall / RSS | first: wall 0.999 in range, **RSS 1.016 outside the range** (348,584 kB vs the control's 338,636-346,640); the one re-run: wall 0.995, RSS 1.011, both in range | pass after the allowed re-run (both reported) |
-| cleanup, plain and stress | base 120 of 120; **stress `--stress` 116 of 120**: `blocked.nqp` segfaults after `main returning` in global destruction, 2 of 20 on the C control and 2 of 20 on the Zig array, at the same code offsets (`va-cleanup.md`) | **miss, on both sides alike**; reported (BLOCKED by ruling 9) |
+| cleanup, plain and stress | base 120 of 120; `--stress`, pooled with the controller's 300 more per side: C 358 of 360, Zig 357 of 360, every failure `blocked.nqp` segfaulting in global destruction after `main returning` (C 2/120, Zig 3/120), at the same code offsets on both builds (`va-cleanup.md`) | **same as control; not all clean**: spec 7 item 6 is met on base and missed on `--stress`, on both sides equally (controller's ruling: not the array's) |
 
 Also measured: the JIT's two direct functions reach their "Index out of bounds" throws under `vmarray-devirt.nqp`
 with spesh, as the C's do (breakpoints on an unstripped Zig build, `va-suites.md` section 5). The paper check
@@ -298,7 +298,16 @@ the wall readings (spectest 1.003, crc-getter 0.993-0.999) show nothing to attri
    sites changed first (`va-adoption-audit.md` section 5).
 6. **Housekeeping:** about ten `repr-test` core dumps from Task 6's early fork-test runs are in systemd-coredump, and
    four `moar` cores from this task's stress cleanup runs (`va-cleanup.md`); none was deleted.
-7. **The stress cleanup miss** (gate table): `cleanup.sh --stress` on the stress prefixes fails 2 of 60 on both the C
-   control and the Zig array, the same program and crash site, in global destruction with a background thread still
-   running. Not caused by the array; whether it is new since campaign 7 (which passed 60 of 60 on its stress prefix)
-   is not established. The controller rules on it.
+7. **An intermittent crash at full cleanup, outside the array.** `cleanup.sh --stress` on the stress prefixes
+   (512 KiB nursery, `-Dgc-debug=1`): `blocked.nqp` (a background thread looping on `nqp::sleep` and allocating)
+   segfaults after `main returning`, during `--full-cleanup`'s global destruction, about 2 % of runs: pooled, C
+   control 2/120, Zig array 3/120, the crashing thread at the same `MVM_interp_run` offsets on both builds. The
+   controller ruled it is not the array's (the same-commit C control fails alike) and that it is not diagnosed in
+   this campaign. Open: when it began. Campaign 7 passed 20/20 runs of that program (60/60 overall) on cb-n-stress
+   at 11a2e2e84, an ancestor of this branch, with no control, and at about 2 % such a sample passes two times in
+   three, so "new since campaign 7" is not shown. Possible next steps: more runs per side; the same runs on a
+   campaign-7 build; a diagnosis on unstripped (`-syms`) builds.
+8. **roast left modified by the spectest.** After the six spectest runs, `t/spec/packages/RT128156/lib/RT128156/Needed.rakumod`
+   ends with a `#` (mtime during run 6): `S10-packages/precompilation.t` rewrites that file on every run, by design,
+   and its end state is fixed, so earlier spectests most likely left it the same way. t/spec's status was not
+   checked before the runs, and the file was left as it is; rakudo's and nqp's own `git status` are empty.

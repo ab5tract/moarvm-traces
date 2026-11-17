@@ -1,4 +1,4 @@
-# va full-cleanup runs: base 120 of 120; stress --stress 116 of 120, 2 of 60 on each side (C and Zig alike)
+# va full-cleanup runs: base 120 of 120; stress --stress, pooled, C 358 of 360, Zig 357 of 360 (blocked.nqp 2/120 and 3/120): same as control, not all clean
 
 ```
 va full-cleanup record (Task 8, Step 7; spec 7 item 6)
@@ -51,3 +51,30 @@ no code was changed and nothing was built for diagnosis.** Whether it is
 new since campaign 7 (a change on `zig-hash-engine` or this branch outside
 the array) or an intermittent campaign 7's single 60-run sample missed is
 not established here.
+
+## More runs (the controller's, after the report), and the ruling
+
+The controller ran more of the same, with no code change:
+`tools/bench/gc/cleanup.sh --prefix=/tmp/claude-1000/va-{c,n}-stress --runs=20 --stress`,
+five blocks per side alternating c, n, under `ulimit -c 0` (no cores), 2026-11-17 about 15:58-16:05 CET;
+1-minute load before each block 0.44, 0.56, 0.54, 0.87, 0.98, 0.99, 1.29, 1.23, 1.32, 1.25. Raw:
+`va-cleanup-raw/more/` (`{c,n}-{1..5}.out`, and `cleanup.i7XRhX/blocked-2.out`, the failing run's output).
+
+- C (va-c-stress): 300 of 300.
+- Zig (va-n-stress): 299 of 300. Block 4, `blocked.nqp` run 2: exit 139, its output ends `main returning` then
+  "timeout: the monitored command dumped core", the same shape as the four failures above.
+
+Pooled with the runs above:
+
+| prefix | running.nqp | blocked.nqp | three.nqp | total |
+|---|---:|---:|---:|---:|
+| va-c-stress --stress | 120/120 | 118/120 | 120/120 | 358/360 |
+| va-n-stress --stress | 120/120 | 117/120 | 120/120 | 357/360 |
+
+**Ruling (controller, 2026-11-17):** the miss is not the array's. The same-commit C control fails the same program
+at the same site at a rate that cannot be told apart from the Zig array's (2/120 against 3/120). At about 2 % per
+run, campaign 7's single 20-run sample of `blocked.nqp --stress` passes about two times in three, so "new since
+campaign 7" is not shown either. The gate reads **"same as control; not all clean"**: spec 7 item 6 ("all runs
+clean") is met on the base prefixes and **missed on --stress, on both sides equally**. The intermittent goes to the
+user as a finding outside the array and is not diagnosed in this campaign. No code was changed and nothing was
+built for it.
