@@ -39,10 +39,17 @@ stripped), **at the same offsets on the C-array and the Zig-array build**:
 the background thread is still running interpreted code when global
 destruction frees what it runs.
 
+*Superseded by the ruling in the next section (more runs, pooled; the gate
+reads "same as control; not all clean"). Kept as first written, with one
+correction of the fix wave, 2026-11-17: it said "nothing in it involves the
+array", which the evidence does not show; what it shows is the sentence as
+it now stands.*
+
 **Verdict: the base runs pass (120 of 120); the stress runs do not (116 of
 120).** The failure is the control's as much as the head's (2 of 60 on each
 side, the same program, the same crash site), so it is not caused by the
-Zig array, and nothing in it involves the array; but it is a miss of spec 7
+Zig array (the same-commit C-array control fails alike, at the same
+offsets); but it is a miss of spec 7
 item 6 ("all runs clean") as written, which campaign 7's stress run of the
 same script met (`cb-cleanup.md`: cb-n-stress --stress 60 of 60, at
 gc-call-boundary 11a2e2e84, an ancestor of this branch; no control was run with --stress

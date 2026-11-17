@@ -1,0 +1,2 @@
+2026-11-17 16:44:44 CET	va-c-base	exit 0	47s	load 1.37	opts -Dzig-reprs=false	This is MoarVM version 2026.09-332-g584d21d02 built with JIT support
+2026-11-17 16:46:23 CET	va-n-base	exit 0	39s	load 1.56	opts 	This is MoarVM version 2026.09-332-g584d21d02 built with JIT support

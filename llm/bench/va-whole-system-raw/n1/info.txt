@@ -1,0 +1,10 @@
+name n1
+prefix copied from /tmp/claude-1000/va-n-base
+source libmoar 97fbb7afa3159db975db1c623b86d7311d21a3a64b1fe71081ecd366c7981817  /tmp/claude-1000/va-n-base/lib/libmoar.so
+copied libmoar 97fbb7afa3159db975db1c623b86d7311d21a3a64b1fe71081ecd366c7981817  /tmp/claude-1000/va-ws/moar/lib/libmoar.so
+moar --version: This is MoarVM version 2026.09-332-g584d21d02 built with JIT support
+nqp checkout 41e7210ba29ce648d72aafd86ce6577447963662, status lines 0
+make start 2026-11-17 16:53:56 CET load 1.22 1.45 1.26
+make exit 0, 17 s, end 2026-11-17 16:54:13 CET load 1.58 1.52 1.29
+145:CONFIGURE   = $(PERL5) '/tmp/claude-1000/va-ws/nqp/Configure.pl' --with-moar='/tmp/claude-1000/va-ws/moar/bin/moar' --backends=moar --prefix='/tmp/claude-1000/va-ws/moar' --silent-build
+moarvm files 45

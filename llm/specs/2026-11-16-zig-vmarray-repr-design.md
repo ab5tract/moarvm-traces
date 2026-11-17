@@ -275,3 +275,7 @@ plan's Outcome.
     `cleanup.sh --stress` on the stress prefixes: `blocked.nqp` segfaults in global destruction in about 2 % of
     runs, equally on the C control (2/120) and the Zig array (3/120), at the same site. Ruled not the array's and
     put to the user as a finding outside it (`va-cleanup.md`, plan Outcome).
+16. **The whole-system check (7, item 3)** was run at the final review's fix wave, not at Task 7 where the
+    ladder placed it (it was not attempted at Task 7 or Task 8). nqp was built three times from copies, twice
+    with the C-array moar and once with the Zig-array moar (both libmoar at 584d21d02); the control repeated
+    byte for byte and the Zig array's build gave the same 45 `.moarvm` files (`va-whole-system.md`).

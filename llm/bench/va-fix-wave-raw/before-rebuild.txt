@@ -1,0 +1,10 @@
+3770c04188017653e6cf5579e292f06130fa21c8c13c2eb7a7d4719be30b0cf2  va-c-base/lib/libmoar.so
+va-c-base .text 2380325
+va-c-base/lib/libmoar.so 11335760
+This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2850
+6266ffa6b1f8cbb4b566210fe0a548a6be3c11008dc09011273c1c593112ded5  va-n-base/lib/libmoar.so
+va-n-base .text 2372325
+va-n-base/lib/libmoar.so 11328016
+This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2850

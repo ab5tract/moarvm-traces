@@ -1,0 +1,39 @@
+unit-test
++- run test shim-test
+   +- compile test shim-test fast native-native
+      +- compile lib moar fast native-native
+         +- compile obj moar_zig fast native-native 1 errors
+src/zig/6model/reprs/vmarray/kinds.zig:441:21: error: dispatch: the Otherwise.throw message "MVMArray: Unhandled slot type 100%" contains '%', but it is passed as a printf format with no arguments; write a function for `otherwise` that passes the text as an argument
+                    @compileError("dispatch: the Otherwise.throw message \"" ++ message ++
+                    ^~~~~~~~~~~~~
+src/zig/6model/reprs/vmarray/storage.zig:279:19: note: called inline here
+    kinds.dispatch(slot_type, zeroArm, .{ tc, body, from, to }, kinds.Otherwise{ .throw = "MVMArray: Unhandled slot type 100%" });
+    ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    setSize: src/zig/6model/reprs/vmarray/storage.zig:124:26
+    push: src/zig/6model/reprs/vmarray/elements.zig:498:22
+    6 reference(s) hidden; use '-freference-trace=8' to see all references
+error: 1 compilation errors
+failed command: /usr/bin/zig build-obj -fstrip -fomit-frame-pointer -fPIC -Ofast -target x86_64-native -mcpu x86_64_v3 --dep moar --dep zig_options -Mroot=src/zig/root.zig -Ofast -target x86_64-native -mcpu x86_64_v3 --dep c -Mmoar=src/zig/moar.zig -Mzig_options=.zig-cache/o/6073ab25a239b5ea45cb654d167a57da/options.zig -Ofast -target x86_64-native -mcpu x86_64_v3 -I .zig-cache/o/d8148588db07872493a49699610cd66b -I src -I 3rdparty/libuv/include -I 3rdparty/libuv/src -I 3rdparty/libtommath -I 3rdparty/dyncall/dynload -I 3rdparty/dyncall/dyncall -I 3rdparty/dyncall/dyncallback -I 3rdparty/mimalloc/include -I 3rdparty/mimalloc/src -I 3rdparty/sha1 -isystem 3rdparty/mimalloc -isystem 3rdparty/zmij -isystem 3rdparty/dynasm -isystem 3rdparty/cmp -isystem 3rdparty -D_REENTRANT=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE=1 -DMVM_TRACING=0 -DMVM_CGOTO=1 -DMVM_HEAPSNAPSHOT_FORMAT=3 -DMVM_GC_DEBUG=0 -DMVM_NURSERY_SIZE=16777216 -DMVM_BUILD_SHARED=1 -DNDEBUG=1 --dep c_builtins --dep helpers -Mc=.zig-cache/o/52f49700bd2d2f987180b37dbc1c9c5a/moar_c.zig -Mc_builtins=zig-pkg/translate_c-2.0.2-Q_BUWvBNBwDnyehSiuAJmdFcMYHYGA-Jc3KiYdrV2Dqx/lib/c_builtins.zig -Mhelpers=zig-pkg/translate_c-2.0.2-Q_BUWvBNBwDnyehSiuAJmdFcMYHYGA-Jc3KiYdrV2Dqx/lib/helpers.zig -lc --cache-dir .zig-cache --global-cache-dir /home/longwalker/.cache/zig --build-root . --name moar_zig --zig-lib-dir /usr/lib/zig/ -flto=full --listen=-
+
+Build Summary: 82/93 steps succeeded (1 failed)
+unit-test transitive failure
++- run test shim-test transitive failure
+|  +- compile test shim-test fast native-native transitive failure
+|     +- compile lib moar fast native-native transitive failure
+|     |  +- compile obj moar_zig fast native-native 1 errors
+|     |  +- compile obj moar_zig fast native-native (+3 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
++- run test hash-str-test transitive failure
+|  +- compile test hash-str-test fast native-native transitive failure
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
++- run test gc-test transitive failure
+|  +- compile test gc-test fast native-native transitive failure
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
++- run test repr-test transitive failure
+   +- compile test repr-test fast native-native transitive failure
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+

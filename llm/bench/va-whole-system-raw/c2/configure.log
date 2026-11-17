@@ -1,0 +1,6 @@
+Found /tmp/claude-1000/va-ws/moar/bin/moar version 2026.09-332-g584d21d02, which is new enough.
+Cleaning up ...
+You can now use 'make' to build NQP.
+After that, 'make test' will run some tests and
+'make install' will install NQP.
++++ Cleaning MOAR backend

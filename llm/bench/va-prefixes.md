@@ -89,3 +89,23 @@ polled every 60 s, under MemoryMax=8G). Raw: `va-prefixes-raw/t8/`
 Scratch, not campaign prefixes: `va-c-syms` (Task 2's coverage build at
 ea8c48954, untouched), `va-n-syms` (Task 8's unstripped Zig build for the
 breakpoint check, `va-suites.md` section 5; built 2026-11-17 15:31:07 CET at bea13d101, `-Dstrip=false`).
+
+## Fix wave: the two base prefixes at 584d21d02
+
+After the final review's fix wave changed library source (584d21d02, "VMArray:
+the final review's fix wave; wrap where the C's size_t wraps"), va-c-base and
+va-n-base were removed and rebuilt at that commit with the same script and
+options: `sh traces/llm/bench/va-prefixes-raw/build.sh "va-c-base -Dzig-reprs=false" "va-n-base"`.
+Raw and details: `va-fix-wave.md` (C2) and `va-fix-wave-raw/c2/`.
+
+| prefix | built (completion) | time | load before | options | exports | `.text` bytes | file bytes |
+|---|---|---|---|---|---|---:|---:|
+| va-c-base | 2026-11-17 16:44:44 CET | 47 s | 1.37 | `-Dzig-reprs=false` | 2,850 | 2,380,325 | 11,335,760 |
+| va-n-base | 2026-11-17 16:46:23 CET | 39 s | 1.56 (after waits at 2.73, 2.01) | (defaults) | 2,850 | 2,372,325 | 11,328,016 |
+
+- `moar --version` on both: "This is MoarVM version 2026.09-332-g584d21d02 built with JIT support".
+- Export lists: c = n, each equal to its 472cf7e92 list and to `exports-base.txt`.
+- **The other four prefixes (va-{c,n}-{oracle,stress}) were not rebuilt and stay at 472cf7e92**, and so does
+  the evidence taken on them and on the base prefixes before the rebuild (oracle, suites, spectest, crc-getter,
+  cleanup, heap snapshot). The differential (`va-fix-wave.md`, C3) and the whole-system check
+  (`va-whole-system.md`) were run on the rebuilt base prefixes.

@@ -248,11 +248,15 @@ In `sources.zig`: a list text with a `[zig-reprs]` line `src/zig/6model/reprs/X.
 
 (filled at Task 8, 2026-11-17. Prefixes: all six `va-{c,n}-{base,oracle,stress}` built at MoarVM 472cf7e92, the
 last commit that changes libmoar; evidence taken at bea13d101 (a test-only commit after it). Records in
-`traces/llm/bench/va-*`.)
+`traces/llm/bench/va-*`. After the final review's fix wave changed library source (584d21d02), va-c-base and
+va-n-base were rebuilt at 584d21d02 and the unit tests (all passing, three more of them), the export lists (equal)
+and the differential (every output equal to the 472cf7e92 run's) were re-run there (`va-fix-wave.md`); the oracle, stress, spectest, crc-getter, cleanup and suite evidence
+below was not re-taken and stands at 472cf7e92.)
 
 | gate | result | pass |
 |---|---|---|
 | differential program, head vs control | `diff.sh` exit 3: 390 differing lines over the programs and settings, all on the 195 listed undefined self-splice lines, all 390 equal to the memmove model (none accepted unchecked); everything else byte-identical, every output equal to Task 7's (`va-differential-final.md`) | recorded outcome, to the user (below); not a pass or a failure by the Task 2 ruling |
+| whole-system check (spec 7 item 3), run at the fix wave | nqp built three times from copies at the same paths, twice under the C array and once under the Zig array (libmoar of 584d21d02): all 45 `.moarvm` files byte-identical in every pair, so the control repeats and the Zig array's build equals it (`va-whole-system.md`) | pass (one control repeat, one build per side) |
 | serialization bytes, both directions | identical bytes for the 65 cases in both settings; each side reads the other's output as the writer does (same run) | pass |
 | collector oracle, 8 cells | 8 of 8 exit 0, raw logs byte-identical (`va-oracle.md`) | pass |
 | exports equal | 2,850 (base) and 2,852 (gc-debug) names, c = n in each of the three pairs (`va-prefixes.md`) | pass |
@@ -260,7 +264,7 @@ last commit that changes libmoar; evidence taken at bea13d101 (a test-only commi
 | suites: same names and verdicts | nqp make test PASS both; rakudo make test base and stress: identical per-file lists, the one pre-existing failure (02-simple-args.t 17-18) on all four; stress crc-getter 6 of 6 exit 0; heap snapshot both sides (`va-suites.md`) | pass |
 | spectest wall / RSS, head/control | wall 1.003 (head 288.08 s in the control's 280.93-290.00), RSS 0.994 (head 1,024,884 kB below the control's range 1,027,660-1,035,352: outside it on the low side, not above 1 %); zero failures in six runs (`va-spectest.txt`) | pass |
 | crc-getter plain wall / RSS | wall 0.993 (spread 0.029, in range), RSS 1.000 (spread 0.025, in range) (`va-crc-ab.md`) | pass |
-| crc-getter bad-packages wall / RSS | first: wall 0.999 in range, **RSS 1.016 outside the range** (348,584 kB vs the control's 338,636-346,640); the one re-run: wall 0.995, RSS 1.011, both in range | pass after the allowed re-run (both reported) |
+| crc-getter bad-packages wall / RSS | first: wall 0.999 in range, **RSS 1.016 outside the range** (348,584 kB vs the control's 338,636-346,640); the one re-run: wall 0.995, RSS 1.011, both in range. In both readings the Zig side's RSS median was 1.1-1.6 % above the control's, and the Zig round medians lay above the control's median of round medians in 6 of 7 rounds each time (round by round, above the same round's control median in 7 of 7 and 5 of 7) (`va-crc-ab.md`) | pass after the allowed re-run (both reported) |
 | cleanup, plain and stress | base 120 of 120; `--stress`, pooled with the controller's 300 more per side: C 358 of 360, Zig 357 of 360, every failure `blocked.nqp` segfaulting in global destruction after `main returning` (C 2/120, Zig 3/120), at the same code offsets on both builds (`va-cleanup.md`) | **same as control; not all clean**: spec 7 item 6 is met on base and missed on `--stress`, on both sides equally (controller's ruling: not the array's) |
 
 Also measured: the JIT's two direct functions reach their "Index out of bounds" throws under `vmarray-devirt.nqp`
@@ -287,7 +291,23 @@ the wall readings (spectest 1.003, crc-getter 0.993-0.999) show nothing to attri
    not elements (about 4x); `procops.c` does not check `buf_type` (a wider element type overstates `ssize`/`elems`);
    `normalize.c:200` leaks the old slots; `ops.c:1910`'s append ignores `start` and the element size (and truncates
    `elems` to 32 bits); a rejected `unshift` after a `shift` resurrects a pointer; a recompose ignores an object
-   element type.
+   element type. Found by reading at the final review (verified against the C at the fix wave, not driven by any
+   case): (a) `VMArray_gc_mark` passes `elems` (`MVMuint64`) as `MVM_gc_worklist_presize_for`'s `MVMint32` count
+   (VMArray.c:83, 97; worklist.c:24-27): the conversion keeps the low 32 bits and the presize adds them to
+   `worklist->items` in unsigned 32-bit arithmetic, so once `items + elems` reaches 2**32 (an OBJ or STR array of
+   about 2**32 elements or more, less what the worklist already holds) the list is presized short, and the
+   unchecked adds that follow (`..._nocheck`) write past it (and `items`, an `MVMuint32`, wraps); reproduced at
+   `mark.zig:60`. For elems between 2**31 and that point the negative `MVMint32` is harmless: the unsigned sum
+   is right. (b) `write_buf` and `read_buf` compute `offset * elem_size` in `size_t` (VMArray.c:1006/1011,
+   1026/1034), which wraps for `offset` >= 2**62 on a 4-byte kind and >= 2**61 on an 8-byte kind (never for 1-
+   and 2-byte kinds: `offset` is a non-negative `MVMint64`); the wrapped end passes the bounds check, no growth
+   happens, and the copy goes to `slots + start * elem_size` plus the wrapped value: for `write_buf` inside the
+   live window (the check bounds the wrapped end by `elems * elem_size`), for `read_buf` within
+   `(start + elems) * elem_size` of the window's start, so past the storage when `start > 0` allows it (as row 25);
+   reproduced at `elements.zig` `writeBuf`/`readBuf` (the `*%` products). (c) Noted, not verified, outside the
+   array: `serialization.c:1806-1817` `read_array_var` does not root `result` across
+   `MVM_serialization_read_ref` (which can allocate); whether a collection can move it there was not followed
+   (much of deserialization runs with gen2 allocation as the default, which may make it moot).
 3. **One deliberate pointer-value difference:** for the six kinds without storage the C sometimes holds
    `MVM_malloc(0)` where the Zig holds NULL (`va-kind-differences.md` section 3); only the pointer value differs.
 4. **Pre-existing, outside this campaign:** under `-Doptimize=ReleaseSafe` every VM-booting unit test aborts with
@@ -311,3 +331,10 @@ the wall readings (spectest 1.003, crc-getter 0.993-0.999) show nothing to attri
    ends with a `#` (mtime during run 6): `S10-packages/precompilation.t` rewrites that file on every run, by design,
    and its end state is fixed, so earlier spectests most likely left it the same way. t/spec's status was not
    checked before the runs, and the file was left as it is; rakudo's and nqp's own `git status` are empty.
+9. **The Perl build path was never exercised.** The `[zig-reprs]` section is read by `Configure.pl` too (the change
+   of 6b45869d9: it is read as part of the Zig groups, with no `-Dzig-reprs=false` control), but no Perl
+   (`Configure.pl` + make) build was made in this campaign; every prefix is a `zig build`.
+10. **The Zig array has never run with runtime safety on a booted VM**, because of the pre-existing ReleaseSafe boot
+    abort of item 4: the unit tests at ReleaseFast and the differential, oracle and suites on ReleaseFast prefixes
+    are all the evidence. Fixing that cast and running `diff.sh` against a ReleaseSafe head is the cheapest strong
+    check left: the first follow-up.

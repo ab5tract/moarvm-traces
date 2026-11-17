@@ -1,0 +1,48 @@
++++ Preparing MOAR build directories
+++++++ Building MOAR backend
++++ Generating	gen/moar/stage1/nqpmo.nqp
++++ Compiling	gen/moar/stage1/nqpmo.moarvm
++++ Compiling	gen/moar/stage1/ModuleLoader.moarvm
++++ Generating	gen/moar/stage1/NQPCORE.setting
++++ Compiling	gen/moar/stage1/NQPCORE.setting.moarvm
++++ Generating	gen/moar/stage1/QASTNode.nqp
++++ Compiling	gen/moar/stage1/QASTNode.moarvm
++++ Generating	gen/moar/stage1/QRegex.nqp
++++ Compiling	gen/moar/stage1/QRegex.moarvm
++++ Generating 	stage 1 nqp-config.nqp
++++ Generating	gen/moar/stage1/NQPHLL.nqp
++++ Generating	gen/moar/stage1/MASTNodes.nqp
++++ Compiling	gen/moar/stage1/MASTOps.moarvm
++++ Compiling	gen/moar/stage1/MASTNodes.moarvm
++++ Compiling	gen/moar/stage1/NQPHLL.moarvm
++++ Generating	gen/moar/stage1/QAST.nqp
++++ Compiling	gen/moar/stage1/QAST.moarvm
++++ Generating	gen/moar/stage1/NQPP6QRegex.nqp
++++ Compiling	gen/moar/stage1/NQPP6QRegex.moarvm
++++ Creating	stage 1 NQP
++++ Generating	gen/moar/stage2/nqpmo.nqp
++++ Compiling	gen/moar/stage2/nqpmo.moarvm
++++ Compiling	gen/moar/stage2/ModuleLoader.moarvm
++++ Generating	gen/moar/stage2/NQPCORE.setting
++++ Compiling	gen/moar/stage2/NQPCORE.setting.moarvm
++++ Generating	gen/moar/stage2/QASTNode.nqp
++++ Compiling	gen/moar/stage2/QASTNode.moarvm
++++ Generating	gen/moar/stage2/QRegex.nqp
++++ Compiling	gen/moar/stage2/QRegex.moarvm
++++ Generating 	stage 2 nqp-config.nqp
++++ Generating	gen/moar/stage2/NQPHLL.nqp
++++ Generating	gen/moar/stage2/MASTNodes.nqp
++++ Compiling	gen/moar/stage2/MASTOps.moarvm
++++ Compiling	gen/moar/stage2/MASTNodes.moarvm
++++ Compiling	gen/moar/stage2/NQPHLL.moarvm
++++ Generating	gen/moar/stage2/QAST.nqp
++++ Compiling	gen/moar/stage2/QAST.moarvm
++++ Generating	gen/moar/stage2/NQPP6QRegex.nqp
++++ Compiling	gen/moar/stage2/NQPP6QRegex.moarvm
++++ Creating	stage 2 NQP
++++ Installing MOAR stage 2 files locally
++++ Setting up	nqp-m
++++ Compiling	NQPP5QRegex.moarvm
++++ Compiling	inst-nqp-m
++++ Compiling	inst-nqp
++++ Compiling MOAR default runner

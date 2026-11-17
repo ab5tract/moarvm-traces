@@ -17,54 +17,76 @@ spec names.
 
 ## 1. What each REPR would declare
 
-The declarations, as `repr.Ops` reads them. Each slot names a function of
-exactly the field's type; the signatures are the translate-c types of
-`MVMREPROps` (src/6model/6model.h). The bodies are the REPRs' code and are
-not part of the question; the test gives each an empty body.
+The declarations, as `repr.Ops` reads them, and as the test compiles them:
+the code below is copied from `src/zig/6model/test/repr_ops_test.zig`
+(corrected at the final review's fix wave, 2026-11-17: this section first
+printed declarations with self-named functions, `pub const serialize =
+serialize;`, which refer to themselves and would not compile, and said the
+test declares them "exactly so"; the test has always used the `t`-prefixed
+stubs below). Each slot names a function of exactly the field's type; the
+signatures are the translate-c types of `MVMREPROps` (src/6model/6model.h).
+The bodies are the REPRs' code and are not part of the question; the stubs
+are empty. One stub serves every slot of its type
+(`deserialize_repr_data` and `deserialize_stable_size` share `tStReader`).
+In a real port `type_object_for` would refer to the REPR's own table, as
+VMArray's does (`Ser.typeObjectFor(&table)`); the stub needs no table.
 
 ### P6int
 
 ```zig
-// Function types (bodies elided):
-fn typeObjectFor(tc: [*c]c.MVMThreadContext, how: [*c]c.MVMObject) callconv(.c) [*c]c.MVMObject;
-fn copyTo(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, src: ?*anyopaque, dest_root: [*c]c.MVMObject, dest: ?*anyopaque) callconv(.c) void;
-fn setInt(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, root: [*c]c.MVMObject, data: ?*anyopaque, value: c.MVMint64) callconv(.c) void;
-fn getInt(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, root: [*c]c.MVMObject, data: ?*anyopaque) callconv(.c) c.MVMint64;
-fn setUint(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, root: [*c]c.MVMObject, data: ?*anyopaque, value: c.MVMuint64) callconv(.c) void;
-fn getUint(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, root: [*c]c.MVMObject, data: ?*anyopaque) callconv(.c) c.MVMuint64;
-fn getStorageSpec(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable) callconv(.c) [*c]const c.MVMStorageSpec;
-fn serialize(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, data: ?*anyopaque, writer: [*c]c.MVMSerializationWriter) callconv(.c) void;
-fn deserialize(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, root: [*c]c.MVMObject, data: ?*anyopaque, reader: [*c]c.MVMSerializationReader) callconv(.c) void;
-fn serializeReprData(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, writer: [*c]c.MVMSerializationWriter) callconv(.c) void;
-fn deserializeReprData(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, reader: [*c]c.MVMSerializationReader) callconv(.c) void;
-fn deserializeStableSize(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, reader: [*c]c.MVMSerializationReader) callconv(.c) void;
-fn gcFreeReprData(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable) callconv(.c) void;
-fn compose(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, info: [*c]c.MVMObject) callconv(.c) void;
-fn spesh(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, g: [*c]c.MVMSpeshGraph, bb: [*c]c.MVMSpeshBB, ins: [*c]c.MVMSpeshIns) callconv(.c) void;
+// src/zig/6model/test/repr_ops_test.zig: the stubs both REPRs share, then P6int
+const Tc = [*c]c.MVMThreadContext;
+const St = [*c]c.MVMSTable;
+const Obj = [*c]c.MVMObject;
 
+fn tObjectFor(_: Tc, _: Obj) callconv(.c) Obj {
+    return null;
+}
+fn tCopyTo(_: Tc, _: St, _: ?*anyopaque, _: Obj, _: ?*anyopaque) callconv(.c) void {}
+fn tSetInt(_: Tc, _: St, _: Obj, _: ?*anyopaque, _: c.MVMint64) callconv(.c) void {}
+fn tGetInt(_: Tc, _: St, _: Obj, _: ?*anyopaque) callconv(.c) c.MVMint64 {
+    return 0;
+}
+fn tSetUint(_: Tc, _: St, _: Obj, _: ?*anyopaque, _: c.MVMuint64) callconv(.c) void {}
+fn tGetUint(_: Tc, _: St, _: Obj, _: ?*anyopaque) callconv(.c) c.MVMuint64 {
+    return 0;
+}
+fn tStorageSpec(_: Tc, _: St) callconv(.c) [*c]const c.MVMStorageSpec {
+    return null;
+}
+fn tSerialize(_: Tc, _: St, _: ?*anyopaque, _: [*c]c.MVMSerializationWriter) callconv(.c) void {}
+fn tDeserialize(_: Tc, _: St, _: Obj, _: ?*anyopaque, _: [*c]c.MVMSerializationReader) callconv(.c) void {}
+fn tSerializeReprData(_: Tc, _: St, _: [*c]c.MVMSerializationWriter) callconv(.c) void {}
+fn tStReader(_: Tc, _: St, _: [*c]c.MVMSerializationReader) callconv(.c) void {}
+fn tFreeReprData(_: Tc, _: St) callconv(.c) void {}
+fn tCompose(_: Tc, _: St, _: Obj) callconv(.c) void {}
+fn tSpesh(_: Tc, _: St, _: [*c]c.MVMSpeshGraph, _: [*c]c.MVMSpeshBB, _: [*c]c.MVMSpeshIns) callconv(.c) void {}
+fn tGcMark(_: Tc, _: St, _: ?*anyopaque, _: [*c]c.MVMGCWorklist) callconv(.c) void {}
+fn tGcFree(_: Tc, _: Obj) callconv(.c) void {}
+
+/// P6int as `repr.Ops` would read it (P6int.c:317-355).
 const P6int = struct {
     pub const name = "P6int";
     pub const ID = c.MVM_REPR_ID_P6int;
-    pub const type_object_for = typeObjectFor; // refers to &table, as VMArray's does
-    pub const allocate = &c.MVM_gc_allocate_object; // serialization.c compares against it
-    pub const copy_to = copyTo;
+    pub const type_object_for = tObjectFor;
+    pub const allocate = &c.MVM_gc_allocate_object;
+    pub const copy_to = tCopyTo;
     pub const box_funcs = struct {
-        pub const set_int = setInt; // also exported as MVMP6int_set_int (serialization.c:1926)
-        pub const get_int = getInt; // also exported as MVMP6int_get_int
-        pub const set_uint = setUint;
-        pub const get_uint = getUint;
+        pub const set_int = tSetInt;
+        pub const get_int = tGetInt;
+        pub const set_uint = tSetUint;
+        pub const get_uint = tGetUint;
     };
-    pub const get_storage_spec = getStorageSpec;
-    pub const serialize = serialize;
-    pub const deserialize = deserialize;
-    pub const serialize_repr_data = serializeReprData;
-    pub const deserialize_repr_data = deserializeReprData;
-    pub const deserialize_stable_size = deserializeStableSize;
-    pub const gc_free_repr_data = gcFreeReprData;
-    pub const compose = compose;
-    pub const spesh = spesh;
+    pub const get_storage_spec = tStorageSpec;
+    pub const serialize = tSerialize;
+    pub const deserialize = tDeserialize;
+    pub const serialize_repr_data = tSerializeReprData;
+    pub const deserialize_repr_data = tStReader;
+    pub const deserialize_stable_size = tStReader;
+    pub const gc_free_repr_data = tFreeReprData;
+    pub const compose = tCompose;
+    pub const spesh = tSpesh;
 };
-const table: c.MVMREPROps = repr.Ops(P6int);
 ```
 
 Against P6int.c's table, field by field: `initialize`, `change_type`,
@@ -85,26 +107,19 @@ against the header's signatures); nothing in `repr.zig` is involved.
 ### MVMCode
 
 ```zig
-// Function types (bodies elided; the shared ones as for P6int):
-fn typeObjectFor(tc: [*c]c.MVMThreadContext, how: [*c]c.MVMObject) callconv(.c) [*c]c.MVMObject;
-fn copyTo(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, src: ?*anyopaque, dest_root: [*c]c.MVMObject, dest: ?*anyopaque) callconv(.c) void;
-fn getStorageSpec(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable) callconv(.c) [*c]const c.MVMStorageSpec;
-fn gcMark(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, data: ?*anyopaque, worklist: [*c]c.MVMGCWorklist) callconv(.c) void;
-fn gcFree(tc: [*c]c.MVMThreadContext, obj: [*c]c.MVMObject) callconv(.c) void;
-fn compose(tc: [*c]c.MVMThreadContext, st: [*c]c.MVMSTable, info: [*c]c.MVMObject) callconv(.c) void;
-
+// src/zig/6model/test/repr_ops_test.zig, with the stubs above
+/// MVMCode as `repr.Ops` would read it (MVMCode.c:86-114).
 const MVMCode = struct {
     pub const name = "MVMCode";
     pub const ID = c.MVM_REPR_ID_MVMCode;
-    pub const type_object_for = typeObjectFor;
+    pub const type_object_for = tObjectFor;
     pub const allocate = &c.MVM_gc_allocate_object;
-    pub const copy_to = copyTo;
-    pub const get_storage_spec = getStorageSpec;
-    pub const gc_mark = gcMark; // the four body references and the state vars, written by hand
-    pub const gc_free = gcFree; // frees state_vars
-    pub const compose = compose;
+    pub const copy_to = tCopyTo;
+    pub const get_storage_spec = tStorageSpec;
+    pub const gc_mark = tGcMark;
+    pub const gc_free = tGcFree;
+    pub const compose = tCompose;
 };
-const table: c.MVMREPROps = repr.Ops(MVMCode);
 ```
 
 Against MVMCode.c's table: the four default groups and `elems` are the
@@ -115,14 +130,14 @@ declaration.
 
 ## 2. The check, run
 
-The test declares both structs exactly so (with empty bodies), builds
+The test declares both structs as printed in section 1, builds
 `repr.Ops` of each and compares `repr.dumpOps` of the result with the dump of
 the library's own C table (`MVMP6int_initialize`, `MVMCode_initialize`): the
 two dumps are equal line for line for both REPRs (each of the 60 leaves the
 same class `own`/`default`/`null`, and the same name and ID), and P6int's
 `allocate` is the very `MVM_gc_allocate_object` of the C table. It passed on
-first compile; no declaration had to be adjusted, and no signature in the
-list above is a guess (each was checked by `fits` against the field type).
+first compile; no declaration had to be adjusted, and no signature above is
+a guess (each was checked by `fits` against the field type).
 
 ## 3. What `repr.zig` lacked, from all 47 tables
 

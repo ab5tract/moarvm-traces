@@ -1,0 +1,12 @@
+va-c-base 2850 names
+va-c-base equal to its 472cf7e92 list
+f48899c12b93fff55adbe94b596c08bbde95cf94112696cc54e7f8a769aea7e7  va-c-base/lib/libmoar.so
+va-c-base .text 2380325
+va-c-base/lib/libmoar.so 11335760
+va-n-base 2850 names
+va-n-base equal to its 472cf7e92 list
+97fbb7afa3159db975db1c623b86d7311d21a3a64b1fe71081ecd366c7981817  va-n-base/lib/libmoar.so
+va-n-base .text 2372325
+va-n-base/lib/libmoar.so 11328016
+c = n
+= va-prefixes-raw/exports-base.txt
