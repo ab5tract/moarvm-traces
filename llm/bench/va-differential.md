@@ -142,7 +142,7 @@ Lines never hit by any run, all 24 of them:
 | lines | what | why |
 |---|---|---|
 | 146, 164, 181, 198, 215, 217, 238 | the opening and closing lines of `MVM_VMArray_at_pos_s/_i/_u/_n/_o` | line-table artefacts: the body lines of all five are hit |
-| 929 | `abort()` in `slot_type_to_kind` | reached only by a splice that copies elements into an array of a kind without storage; it would abort the process, so no case goes there |
+| 929 | `abort()` in `slot_type_to_kind` | reached only by a splice that copies elements into an array of a kind without storage; it would abort the process, so no case goes there (incomplete; see §6 correction) |
 | 1259, 1294, 1310 | the three "Unsupported uint/int/num size" throws of `spec_to_repr_data` | unreachable from the language: every REPR whose storage spec says boxed int or uint has 1, 2, 4, 8, 16, 32 or 64 bits (P6int refuses anything else with its own "MVMP6int: Unsupported int size", P6bigint says 64), P6num has 32 or 64 (it refuses others itself); cases `compose.num16`, `compose.int3`, `compose.uint128` print those refusals |
 | 1521-1550 | `describe_refs` (12 lines) | called by the heap snapshot profiler only (`src/profiler/heapsnapshot.c`), which writes a file and prints nothing; no case. For a unit test |
 | 1554 | `MVMArray_initialize` | runs at VM start, before the breakpoints are set |

@@ -191,3 +191,83 @@ Mine (the user saw these in summary and said nothing was missing; each can be ov
 - Bytes at one fixed alignment for all kinds; the adoption sites left as they are and audited.
 - The comprehension check in the final review.
 - File locations, the branch name `zig-vmarray`, the record prefix `va-`, and handing the branch back for the merge decision instead of merging it.
+
+## 13. Errata (what was built differently, recorded at Task 8, 2026-11-17)
+
+Each item: what this document says, what was built, and why. None changes
+the goals of section 2; the behavioural ones are put to the user in the
+plan's Outcome.
+
+1. **Files (5.1).** `VMArray.zig` is a thin file (declaration, allocator,
+   table, exports); the array's code is in `src/zig/6model/reprs/vmarray/`
+   (`kinds`, `storage`, `elements`, `mark`, `serial`, `spesh`), export-free
+   so that `repr-test` can link it beside libmoar without interposing its
+   symbols (the plan's architecture).
+2. **Kind constants (4, 5.3).** The header has eighteen `MVM_ARRAY_*`
+   constants: twelve with storage (the `Kind` table) and six without
+   (`U4`, `U2`, `U1`, `I4`, `I2`, `I1`, element size 0), listed once in
+   `kinds.unstored` and handled per call site, not as table entries.
+3. **The kind table (5.3)** has two more columns than listed: the
+   serialization reader and writer of each kind (`reader`, `writer`), and
+   two register-kind sets (`reg_kinds` for `at_pos`/`bind_pos`,
+   `stack_reg_kinds` for push/pop/shift/unshift), because the C accepts
+   different register kinds there.
+4. **`dispatch` has a fourth argument, `otherwise`** (`.throw = "..."`,
+   `.abort`, `.nothing`, or a function), stating at each call site what the
+   C's `default:` arm does for the six kinds without storage; and
+   **`zeroSlots` takes `tc`**, because the C's `zero_slots` throws for those
+   kinds (Task 5 ruling).
+5. **The allocator's raw functions (5.4).** The storage calls
+   `rawAlloc`/`rawRemap`/`rawFree` of the declared allocator, not
+   `Allocator.alloc/realloc/free`: the lengths given back cannot be trusted
+   (adoption sites misstate `ssize`, and a non-NULL buffer with `ssize == 0`
+   exists), and `Allocator.free` skips a zero-length slice, which would
+   leak such a buffer. `gc_free` passes length 0. So the declared allocator
+   must ignore lengths on free and remap, as `mvm_allocator` does; the
+   adoption-shape unit tests use a length-agnostic tracking allocator
+   instead of `std.testing.allocator` (Task 5 ruling). "Bytes of length
+   `ssize * elem_size`" (5.4) is what is requested, not what is trusted.
+6. **NULL faults (no behaviour change).** Where the C dereferences a NULL
+   REPR data or NULL slots deterministically, the Zig calls
+   `moar.nullDeref` (a read in the null page: SIGSEGV as in the C) rather
+   than unwrapping an optional, and never earlier than the C's first
+   dereference of that pointer in the same function (Task 6 rulings).
+   `kinds.slots` and `reprDataOf` keep one defensive NULL test on every
+   element access; the gates of section 8 measured it (plan Outcome).
+7. **The no-check worklist adds** (`MVM_gc_worklist_add_include_gen2_nocheck`
+   and friends, macros) live in `src/zig/moar.zig` beside `worklistAdd`,
+   not in the array's files: the test root cannot import files outside
+   `src/zig/6model`.
+8. **Spesh (4, 5.3)** ports both rewrites of the C hook: `elems` on a known
+   array into a direct field read, and `create` of a type without
+   `MVM_FINALIZE_TYPE` into `sp_fastcreate` (section 4 named only `elems`).
+9. **Self-splice copies (5.3, "no behaviour change").** Where the C copies
+   overlapping ranges with `memcpy` (a splice of an array from itself, the
+   eleven memcpy kinds), the result is undefined; the Zig uses memmove
+   semantics there (Task 2 ruling). The C's defined element-by-element
+   copy (STR, OBJ into a second-generation target) is kept. This is the one
+   place the outputs differ.
+10. **No storage is NULL (5.4).** For the six kinds without storage the C
+    keeps `MVM_malloc(0)` in some paths (growth before the throw, `copy_to`);
+    the Zig keeps NULL (zero length never requested). Only the pointer
+    value differs (Task 5 ruling; `va-kind-differences.md` section 3).
+11. **The differential (7.2)** has four programs, not two: `vmarray-diff.nqp`,
+    `vmarray-diff.raku`, `vmarray-serial.nqp` and `vmarray-devirt.nqp` (only
+    its shape reaches the JIT's two direct functions). `diff.sh` has an exit
+    3, "differs only in the listed undefined self-splice lines, and equals
+    memmove there" (`undefined-lines.txt`, 195 entries, every one checked
+    against `memmove-model.py`), which is neither a pass nor a failure and
+    goes to the user.
+12. **The vtable builder (5.2)** also accepts a slot declared `null` (two C
+    tables need it, MVMContinuation and P6opaque; found by the paper check,
+    `va-mechanism-check.md`), and reports a required slot declared null.
+    The comparison of 5.2 is against a recorded dump
+    (`src/zig/6model/test/vmarray_vtable_c.tsv`), as anticipated.
+13. **Test-only C.** `src/zig/test/layout_probe.c` (a test-only C file)
+    gained probes: the C compiler's sizes and offsets of `MVMArrayBody`,
+    `MVMArray` and `MVMArrayREPRData` (Task 5), checked against
+    translate-c's, and two `MVMOpInfo` probes, a struct translate-c leaves
+    opaque (bit-fields) (Task 7 ruling). No C file of the library changed.
+14. **Models (9).** Tasks 1-2 had Fable implementers; from Task 3 on,
+    implementers were Opus (the user's change of 2026-11-16); reviewers
+    Opus throughout.

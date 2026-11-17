@@ -246,17 +246,59 @@ In `sources.zig`: a list text with a `[zig-reprs]` line `src/zig/6model/reprs/X.
 
 ## Outcome
 
-(filled at Task 8)
+(filled at Task 8, 2026-11-17. Prefixes: all six `va-{c,n}-{base,oracle,stress}` built at MoarVM 472cf7e92, the
+last commit that changes libmoar; evidence taken at bea13d101 (a test-only commit after it). Records in
+`traces/llm/bench/va-*`.)
 
 | gate | result | pass |
 |---|---|---|
-| differential program, head vs control | | |
-| serialization bytes, both directions | | |
-| collector oracle, 8 cells | | |
-| exports equal | | |
-| unit tests, both switch settings | | |
-| suites: same names and verdicts | | |
-| spectest wall / RSS, head/control | | |
-| crc-getter plain wall / RSS | | |
-| crc-getter bad-packages wall / RSS | | |
-| cleanup, plain and stress | | |
+| differential program, head vs control | `diff.sh` exit 3: 390 differing lines over the programs and settings, all on the 195 listed undefined self-splice lines, all 390 equal to the memmove model (none accepted unchecked); everything else byte-identical, every output equal to Task 7's (`va-differential-final.md`) | recorded outcome, to the user (below); not a pass or a failure by the Task 2 ruling |
+| serialization bytes, both directions | identical bytes for the 65 cases in both settings; each side reads the other's output as the writer does (same run) | pass |
+| collector oracle, 8 cells | 8 of 8 exit 0, raw logs byte-identical (`va-oracle.md`) | pass |
+| exports equal | 2,850 (base) and 2,852 (gc-debug) names, c = n in each of the three pairs (`va-prefixes.md`) | pass |
+| unit tests, both switch settings | `unit-test` 93/93 steps, 227/239 passed, 12 skipped, both settings; `test` 107/107 both (`va-suites.md` 1) | pass |
+| suites: same names and verdicts | nqp make test PASS both; rakudo make test base and stress: identical per-file lists, the one pre-existing failure (02-simple-args.t 17-18) on all four; stress crc-getter 6 of 6 exit 0; heap snapshot both sides (`va-suites.md`) | pass |
+| spectest wall / RSS, head/control | wall 1.003 (head 288.08 s in the control's 280.93-290.00), RSS 0.994 (in range); zero failures in six runs (`va-spectest.txt`) | pass |
+| crc-getter plain wall / RSS | wall 0.993 (spread 0.029, in range), RSS 1.000 (spread 0.025, in range) (`va-crc-ab.md`) | pass |
+| crc-getter bad-packages wall / RSS | first: wall 0.999 in range, **RSS 1.016 outside the range** (348,584 kB vs the control's 338,636-346,640); the one re-run: wall 0.995, RSS 1.011, both in range | pass after the allowed re-run (both reported) |
+| cleanup, plain and stress | base 120 of 120; **stress `--stress` 116 of 120**: `blocked.nqp` segfaults after `main returning` in global destruction, 2 of 20 on the C control and 2 of 20 on the Zig array, at the same code offsets (`va-cleanup.md`) | **miss, on both sides alike**; reported (BLOCKED by ruling 9) |
+
+Also measured: the JIT's two direct functions reach their "Index out of bounds" throws under `vmarray-devirt.nqp`
+with spesh, as the C's do (breakpoints on an unstripped Zig build, `va-suites.md` section 5). The paper check
+(`va-mechanism-check.md`): P6int and MVMCode need nothing new from `repr.zig`; the one gap the 47 C tables showed
+(an explicit NULL in a defaulted slot) is closed with a test. Ruling 4's defensive NULL test in `kinds.slots` stays:
+the wall readings (spectest 1.003, crc-getter 0.993-0.999) show nothing to attribute to it.
+
+### For the user (decisions and reports; nothing here was acted on)
+
+1. **The differential's exit 3 needs a decision.** The Zig array copies overlapping ranges of a splice of an array
+   from itself with memmove semantics, where the C uses `memcpy` (undefined for overlapping ranges) for the eleven
+   memcpy kinds; it differs from the C exactly on the 195 listed lines (176 diff-nqp, 19 diff-raku, per setting) and
+   equals the memmove model on every one. Accept memmove there, or replicate the C's `memcpy` behaviour (which is
+   undefined, so "replicate" means a specific copy order chosen to match this build's libc).
+2. **C bugs found and kept** (candidates for upstream reports). From Task 2 (`va-differential.md` section 6): growth
+   to 2**64 - 4096 or more on an array with 8,192+ slots wraps to a 0-byte realloc and a crash; a size at or just
+   under the limit panics in malloc (the check is `>`); a splice from a non-empty non-VMArray dereferences NULL REPR
+   data; a splice copying into or out of a kind without storage reaches `abort()`; cross-kind splices between
+   reference and numeric kinds reinterpret bits; growing an OBJ/STR array back over a slot a rejected `pop` left, or a
+   self-splice at offset 0 with `start > 0`, resurrects pointers the collector stopped tracking; a `read_buf` the
+   bounds check passes can read past the storage; `writeint` on a recomposed array without storage writes into the
+   old storage. From Task 3 (`va-adoption-audit.md` section 3 and its report): `normalize.c:90` sets `ssize` in bytes,
+   not elements (about 4x); `procops.c` does not check `buf_type` (a wider element type overstates `ssize`/`elems`);
+   `normalize.c:200` leaks the old slots; `ops.c:1910`'s append ignores `start` and the element size (and truncates
+   `elems` to 32 bits); a rejected `unshift` after a `shift` resurrects a pointer; a recompose ignores an object
+   element type.
+3. **One deliberate pointer-value difference:** for the six kinds without storage the C sometimes holds
+   `MVM_malloc(0)` where the Zig holds NULL (`va-kind-differences.md` section 3); only the pointer value differs.
+4. **Pre-existing, outside this campaign:** under `-Doptimize=ReleaseSafe` every VM-booting unit test aborts with
+   "cast causes pointer to be null" (shim-test, hash-str-test, gc-test, repr-test's VM tests): some Zig code on the VM
+   boot path casts a null C pointer to a non-optional pointer, hidden at ReleaseFast. A follow-up candidate.
+5. **The allocator constraint for the planned nursery-lifetime allocator spike:** the lengths given back to the
+   array's allocator cannot be trusted at the outside adoption sites, so a length-sensitive allocator needs those
+   sites changed first (`va-adoption-audit.md` section 5).
+6. **Housekeeping:** about ten `repr-test` core dumps from Task 6's early fork-test runs are in systemd-coredump, and
+   four `moar` cores from this task's stress cleanup runs (`va-cleanup.md`); none was deleted.
+7. **The stress cleanup miss** (gate table): `cleanup.sh --stress` on the stress prefixes fails 2 of 60 on both the C
+   control and the Zig array, the same program and crash site, in global destruction with a background thread still
+   running. Not caused by the array; whether it is new since campaign 7 (which passed 60 of 60 on its stress prefix)
+   is not established. The controller rules on it.

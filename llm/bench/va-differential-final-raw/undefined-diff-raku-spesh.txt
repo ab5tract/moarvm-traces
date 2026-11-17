@@ -1,0 +1,57 @@
+  int8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  num32.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  num64.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  Buf[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  array.reified.splice
+    base: elems=10 [1 7 1 7 1 7 1 8 4 5]
+    head: elems=10 [1 7 1 7 8 4 5 8 4 5]

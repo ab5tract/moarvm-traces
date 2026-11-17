@@ -1,0 +1,4 @@
+2026-11-17 14:13:12	va-c-base		exit 0	load 1.57	passed 60 of 60 (/tmp/claude-1000/va-c-base)
+2026-11-17 14:13:30	va-n-base		exit 0	load 1.82	passed 60 of 60 (/tmp/claude-1000/va-n-base)
+2026-11-17 14:13:50	va-c-stress	--stress	exit 1	load 1.96	cleanup.sh: failing runs' output kept in /tmp/cleanup.Aovy9s
+2026-11-17 14:14:10	va-n-stress	--stress	exit 1	load 1.97	cleanup.sh: failing runs' output kept in /tmp/cleanup.ZyD4dT

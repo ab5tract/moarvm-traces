@@ -1,0 +1,4 @@
+2026-11-17 14:15:11	va-c-base	1	exit 0	load 1.39	maps /tmp/claude-1000/va-c-base/lib/libmoar.so	stdout 2000	stderr 190 bytes	snapshot 2161785 bytes
+2026-11-17 14:15:11	va-n-base	1	exit 0	load 1.44	maps /tmp/claude-1000/va-n-base/lib/libmoar.so	stdout 2000	stderr 190 bytes	snapshot 2162703 bytes
+2026-11-17 14:15:12	va-c-base	2	exit 0	load 1.44	maps /tmp/claude-1000/va-c-base/lib/libmoar.so	stdout 2000	stderr 190 bytes	snapshot 2158669 bytes
+2026-11-17 14:15:13	va-n-base	2	exit 0	load 1.44	maps /tmp/claude-1000/va-n-base/lib/libmoar.so	stdout 2000	stderr 190 bytes	snapshot 2159618 bytes

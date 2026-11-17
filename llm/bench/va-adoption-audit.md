@@ -81,11 +81,13 @@ What the sites have in common, for Task 5:
 - `slots.any != NULL` with `ssize == 0` happens (sites 5, 7, 8, and the
   array's own growth of a no-storage kind, see `va-kind-differences.md`
   section 3). Sites 1 and 2 give the other edge case for a 0-byte read:
-  `elems == 0` with `ssize = buf->len >= 4` (`asyncsocket.c:20-22`, `50`;
-  `asyncsocketudp.c:23-25`, `113`). Inside `VMArray.c`, a clone or
-  deserialize of a non-empty array of a no-storage kind (after a recompose)
-  holds `MVM_malloc(0)` with `ssize = elems > 0` (`VMArray.c:53-60`,
-  `1370-1372`). The campaign rule "an array without storage has
+  `elems == 0` with `ssize = buf->len > 0` (libuv's suggested size, else 4)
+  (`asyncsocket.c:20-22`, `50`; `asyncsocketudp.c:23-25`, `113`). Inside
+  `VMArray.c`, a clone of a non-empty array of a no-storage kind (such an
+  array exists only after a recompose) and a deserialize of one with
+  `elems > 0` hold `MVM_malloc(0)` with `ssize = elems > 0`
+  (`VMArray.c:53-60`, `1370-1372`). (Corrected at Task 8: this said
+  `>= 4`, and put "after a recompose" on the deserialize too.) The campaign rule "an array without storage has
   `slots.any == NULL`" holds for arrays the Zig code creates, but the Zig code
   must accept and free a non-NULL zero-capacity buffer it receives.
 - The fields are written in the order slots, start, ssize, elems (sites 6 and

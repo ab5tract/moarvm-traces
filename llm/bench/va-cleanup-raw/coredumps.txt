@@ -1,0 +1,32 @@
+           PID: 386985 (moar)
+        Signal: 11 (SEGV)
+    Executable: /tmp/claude-1000/va-c-stress/bin/moar
+                Stack trace of thread 386987:
+                #0  0x00007f2b39e54093 n/a (n/a + 0x0)
+                #1  0x00007f2b3c12e510 n/a (/tmp/claude-1000/va-c-stress/lib/libmoar.so + 0x7ee510)
+                #2  0x00007f2b3c117b72 n/a (/tmp/claude-1000/va-c-stress/lib/libmoar.so + 0x7d7b72)
+                ELF object binary architecture: AMD x86-64
+           PID: 387088 (moar)
+        Signal: 11 (SEGV)
+    Executable: /tmp/claude-1000/va-c-stress/bin/moar
+                Stack trace of thread 387090:
+                #0  0x00007f8634783093 n/a (n/a + 0x0)
+                #1  0x00007f8636a5d510 n/a (/tmp/claude-1000/va-c-stress/lib/libmoar.so + 0x7ee510)
+                #2  0x00007f8636a46b72 n/a (/tmp/claude-1000/va-c-stress/lib/libmoar.so + 0x7d7b72)
+                ELF object binary architecture: AMD x86-64
+           PID: 387645 (moar)
+        Signal: 11 (SEGV)
+    Executable: /tmp/claude-1000/va-n-stress/bin/moar
+                Stack trace of thread 387647:
+                #0  0x00007f4b820fb093 n/a (n/a + 0x0)
+                #1  0x00007f4b843d9090 n/a (/tmp/claude-1000/va-n-stress/lib/libmoar.so + 0x7f2090)
+                #2  0x00007f4b843c26f2 n/a (/tmp/claude-1000/va-n-stress/lib/libmoar.so + 0x7db6f2)
+                ELF object binary architecture: AMD x86-64
+           PID: 387750 (moar)
+        Signal: 11 (SEGV)
+    Executable: /tmp/claude-1000/va-n-stress/bin/moar
+                Stack trace of thread 387752:
+                #0  0x00007f66e41cd093 n/a (n/a + 0x0)
+                #1  0x00007f66e64ab090 n/a (/tmp/claude-1000/va-n-stress/lib/libmoar.so + 0x7f2090)
+                #2  0x00007f66e64946f2 n/a (/tmp/claude-1000/va-n-stress/lib/libmoar.so + 0x7db6f2)
+                ELF object binary architecture: AMD x86-64

@@ -1,0 +1,6 @@
+2026-11-17 14:12:15	va-c-stress	1	exit 0	load 0.93	maps /tmp/claude-1000/va-c-stress/lib/libmoar.so	RUN 5: 1.497639953s
+2026-11-17 14:12:23	va-n-stress	1	exit 0	load 1.10	maps /tmp/claude-1000/va-n-stress/lib/libmoar.so	RUN 5: 1.377557922s
+2026-11-17 14:12:30	va-c-stress	2	exit 0	load 1.17	maps /tmp/claude-1000/va-c-stress/lib/libmoar.so	RUN 5: 1.367753798s
+2026-11-17 14:12:38	va-n-stress	2	exit 0	load 1.30	maps /tmp/claude-1000/va-n-stress/lib/libmoar.so	RUN 5: 1.365985677s
+2026-11-17 14:12:46	va-c-stress	3	exit 0	load 1.36	maps /tmp/claude-1000/va-c-stress/lib/libmoar.so	RUN 5: 1.395958726s
+2026-11-17 14:12:54	va-n-stress	3	exit 0	load 1.54	maps /tmp/claude-1000/va-n-stress/lib/libmoar.so	RUN 5: 1.386468271s

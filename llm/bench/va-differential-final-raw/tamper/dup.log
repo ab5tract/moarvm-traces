@@ -1,0 +1,2 @@
+memmove-model.py: /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/tamper/dup/head-diff-raku-spesh-1.out prints the case int8.nqp.splice.self twice
+diff.sh: base and head differ (diff-raku, spesh) only in listed lines, but the head does not print what memmove gives on all of them:

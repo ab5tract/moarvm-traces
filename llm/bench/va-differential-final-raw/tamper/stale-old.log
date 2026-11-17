@@ -1,0 +1,1569 @@
+diff.sh: differs only in undefined self-splice lines, and equals memmove there (390 differing lines over the programs and settings, all listed in tools/bench/repr/undefined-lines.txt; 389 of them equal to memmove-model.py's memmove result, 1 accepted without a model check, named below; everything else and the cross-read identical). Record this and put it to the user:
+diff-nqp, spesh:
+  obj.selfsplice.middle
+    base: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.middle1
+    base: elems=20 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.middle9
+    base: elems=20 [o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o9]
+  obj.selfsplice.replace.2.3
+    base: elems=17 [o0 o1 o0 o1 o2 o3 o2 o3 o2 o3 o6 o7 o5 o6 o7 o8 o9]
+    head: elems=17 [o0 o1 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.tail
+    base: elems=17 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o0 o1 o2]
+    head: elems=17 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.5.5
+    base: elems=15 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4]
+    head: elems=15 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.1.9
+    base: elems=11 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9]
+    head: elems=11 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.1.20
+    base: elems=11 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9]
+    head: elems=11 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.neg
+    base: elems=19 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o8 o9]
+    head: elems=19 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o8 o9]
+  obj.selfsplice.shifted.middle
+    base: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.shifted.replace.2.3
+    base: elems=17 [o0 o1 o0 o1 o2 o3 o2 o3 o2 o3 o6 o7 o5 o6 o7 o8 o9]
+    head: elems=17 [o0 o1 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.big.middle
+    base: elems=18000 sha1=02E02259C3505DC98EB1A741F79A246D8B1895A4 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=0B1E1AA0A5A6878DA8B1BB20EAD351A1CBBF7A05 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.1
+    base: elems=18000 sha1=AA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=3A538277767122B3B6090468E7DF94FDA0CF100A head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.replace
+    base: elems=13000 sha1=784512C95E520772F4C055BCEB670D6C7CD4A7CB head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=13000 sha1=9BED4111C3004787F366E2BC66112E7D3CAAC636 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.shifted
+    base: elems=17993 sha1=F5DC4C83D7C3B331FFB446F47F3C8C61634BB926 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=17993 sha1=DB0DE512344289116ADB6B73F6A534C12DF9D58E head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.twice
+    base: elems=14 [o0 o1 o0 o0 o1 o0 o0 o1 o0 o0 o1 o0 o1 o3]
+    head: elems=14 [o0 o1 o0 o0 o1 o0 o1 o2 o3 o3 o1 o2 o3 o3]
+  i64.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.middle1
+    base: elems=20 [1 1 4 7 10 10 16 16 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i64.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i64.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.big.1
+    base: elems=18000 sha1=690E40FBC431FFBE50BE0D9B49615A1D4B2EAFE0 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i64.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.big.shifted
+    base: elems=17993 sha1=06A0F50EF18D667C587D11075875BA38905941DA head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i32.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i32.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i32.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.big.1
+    base: elems=18000 sha1=E20E2C9837834DE24FFED4C29272017F083C5802 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i32.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.big.shifted
+    base: elems=17993 sha1=D7C439825AAAD06C5B73EA118EC7763E7A268879 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i16.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.middle1
+    base: elems=20 [1 1 1 1 1 4 7 10 13 16 19 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i16.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.1.9
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.1.20
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i16.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.big.1
+    base: elems=18000 sha1=6F0F5995C40F0273F92D2CD239799B9B1256E6DB head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i16.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.big.shifted
+    base: elems=17993 sha1=99FA1A1CB53C3D54173C82DBF4E8B0ECAB4D2C99 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i8.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i8.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i8.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.big.middle
+    base: elems=18000 sha1=DEDEA0ABCD387B7580CF7760E9D433C6CD621D5A head=[1 4 7] tail=[112 115 118]
+    head: elems=18000 sha1=230BD918BF200894BB64BD11EE224B47635358E1 head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.big.1
+    base: elems=18000 sha1=B2730FF7059ECF2F0B4DD91E2FC3049F5704B696 head=[1 1 4] tail=[112 115 118]
+    head: elems=18000 sha1=BC040BDD505EF13830A5715662DAE10141749D30 head=[1 1 4] tail=[112 115 118]
+  i8.selfsplice.big.replace
+    base: elems=13000 sha1=3919A5690732EB4FC55ECB1D632CFF3296BCB8D2 head=[1 4 7] tail=[112 115 118]
+    head: elems=13000 sha1=B2855C18C1DFE4B5D9B13B41ABEE4C228C18B6CE head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.big.shifted
+    base: elems=17993 sha1=C14ACA458C2F1ADCC83BB3D4118492D87390D790 head=[1 4 7] tail=[112 115 118]
+    head: elems=17993 sha1=CA0B76A16CFDCD549CCC3FFA0D10EDC493BC2566 head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u64.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.middle1
+    base: elems=20 [1 1 4 7 10 10 16 16 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u64.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u64.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.big.1
+    base: elems=18000 sha1=690E40FBC431FFBE50BE0D9B49615A1D4B2EAFE0 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u64.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.big.shifted
+    base: elems=17993 sha1=06A0F50EF18D667C587D11075875BA38905941DA head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u32.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u32.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u32.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.big.1
+    base: elems=18000 sha1=E20E2C9837834DE24FFED4C29272017F083C5802 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u32.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.big.shifted
+    base: elems=17993 sha1=D7C439825AAAD06C5B73EA118EC7763E7A268879 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u16.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.middle1
+    base: elems=20 [1 1 1 1 1 4 7 10 13 16 19 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u16.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.1.9
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.1.20
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u16.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.big.1
+    base: elems=18000 sha1=6F0F5995C40F0273F92D2CD239799B9B1256E6DB head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u16.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.big.shifted
+    base: elems=17993 sha1=99FA1A1CB53C3D54173C82DBF4E8B0ECAB4D2C99 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u8.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u8.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u8.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.big.middle
+    base: elems=18000 sha1=C86266BA273CE4F6DC6F90BE22E8629DB1A07075 head=[1 4 7] tail=[112 115 118]
+    head: elems=18000 sha1=B9A4DC960B0A004BC871E73990E171A9F7C5B8A6 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.big.1
+    base: elems=18000 sha1=90231FDE8A89E7E4726E79987B7BB6A47079975B head=[1 1 4] tail=[112 115 118]
+    head: elems=18000 sha1=53A805B2A703771347E0C12BF958FE94B64A0C31 head=[1 1 4] tail=[112 115 118]
+  u8.selfsplice.big.replace
+    base: elems=13000 sha1=355666B69114AE300CE6C0BE100B2430341AD517 head=[1 4 7] tail=[112 115 118]
+    head: elems=13000 sha1=C1F84493FC9791201D4090691162FC36C24754C8 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.big.shifted
+    base: elems=17993 sha1=207360858FE3E6285E23A77D477E08E5156C4C9A head=[1 4 7] tail=[112 115 118]
+    head: elems=17993 sha1=F977DAB97971D76CD9C3464F8A38EDAEDD400367 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  n64.selfsplice.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.middle1
+    base: elems=20 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.middle9
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 9.25]
+  n64.selfsplice.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.tail
+    base: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25]
+    head: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.5.5
+    base: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25]
+    head: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.1.9
+    base: elems=11 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.1.20
+    base: elems=11 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.neg
+    base: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 8.25 9.25]
+    head: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 8.25 9.25]
+  n64.selfsplice.shifted.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.shifted.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.big.middle
+    base: elems=18000 sha1=D45AF8F1B3398767E2FCE2EA1B96618599119558 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=B6410CBBEEADBD53737077831C4B49A796654E0E head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.1
+    base: elems=18000 sha1=2A868A60D84210FD57D463D375FB026256FA8B3B head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=DD361ABB573A83E29D9228A98A83CEC9219E843E head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.replace
+    base: elems=13000 sha1=57F7C8C788E8DE008E72F142D53A3560FF0B3181 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=13000 sha1=A364311EF789BA025C63FA58CFD38394EFB6C80D head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.shifted
+    base: elems=17993 sha1=0DC1BF703B5CA54795978D80D8FC72FBD3DE767C head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=17993 sha1=2D4059271916F713D53B2B01AE877E9A7AE9D12B head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.twice
+    base: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 1.25 3.25]
+    head: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 1.25 2.25 3.25 3.25 1.25 2.25 3.25 3.25]
+  n32.selfsplice.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.middle1
+    base: elems=20 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.middle9
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 9.25]
+  n32.selfsplice.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.tail
+    base: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25]
+    head: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.5.5
+    base: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25]
+    head: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.1.9
+    base: elems=11 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.1.20
+    base: elems=11 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.neg
+    base: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 8.25 9.25]
+    head: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 8.25 9.25]
+  n32.selfsplice.shifted.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.shifted.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.big.middle
+    base: elems=18000 sha1=D45AF8F1B3398767E2FCE2EA1B96618599119558 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=B6410CBBEEADBD53737077831C4B49A796654E0E head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.1
+    base: elems=18000 sha1=CEBCFB310CA06B51C10A48323EC8DF5ABF639328 head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=DD361ABB573A83E29D9228A98A83CEC9219E843E head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.replace
+    base: elems=13000 sha1=57F7C8C788E8DE008E72F142D53A3560FF0B3181 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=13000 sha1=A364311EF789BA025C63FA58CFD38394EFB6C80D head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.shifted
+    base: elems=17993 sha1=CBAA58971F80DB095CE0C7955ADE697681F554D2 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=17993 sha1=2D4059271916F713D53B2B01AE877E9A7AE9D12B head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.twice
+    base: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 1.25 3.25]
+    head: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 1.25 2.25 3.25 3.25 1.25 2.25 3.25 3.25]
+diff-nqp, spesh, the head against the memmove model:
+  memmove: diff-nqp obj.selfsplice.middle
+  memmove: diff-nqp obj.selfsplice.middle1
+  memmove: diff-nqp obj.selfsplice.middle9
+  memmove: diff-nqp obj.selfsplice.replace.2.3
+  memmove: diff-nqp obj.selfsplice.replace.tail
+  memmove: diff-nqp obj.selfsplice.replace.5.5
+  memmove: diff-nqp obj.selfsplice.replace.1.9
+  memmove: diff-nqp obj.selfsplice.replace.1.20
+  memmove: diff-nqp obj.selfsplice.neg
+  memmove: diff-nqp obj.selfsplice.shifted.middle
+  memmove: diff-nqp obj.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp obj.selfsplice.big.middle
+  memmove: diff-nqp obj.selfsplice.big.1
+  memmove: diff-nqp obj.selfsplice.big.replace
+  memmove: diff-nqp obj.selfsplice.big.shifted
+  memmove: diff-nqp obj.selfsplice.twice
+  memmove: diff-nqp i64.selfsplice.middle
+  memmove: diff-nqp i64.selfsplice.middle1
+  memmove: diff-nqp i64.selfsplice.middle9
+  memmove: diff-nqp i64.selfsplice.replace.2.3
+  memmove: diff-nqp i64.selfsplice.replace.tail
+  memmove: diff-nqp i64.selfsplice.replace.5.5
+  memmove: diff-nqp i64.selfsplice.replace.1.9
+  memmove: diff-nqp i64.selfsplice.replace.1.20
+  memmove: diff-nqp i64.selfsplice.neg
+  memmove: diff-nqp i64.selfsplice.shifted.middle
+  memmove: diff-nqp i64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i64.selfsplice.big.middle
+  memmove: diff-nqp i64.selfsplice.big.1
+  memmove: diff-nqp i64.selfsplice.big.replace
+  memmove: diff-nqp i64.selfsplice.big.shifted
+  memmove: diff-nqp i64.selfsplice.twice
+  memmove: diff-nqp i32.selfsplice.middle
+  memmove: diff-nqp i32.selfsplice.middle1
+  memmove: diff-nqp i32.selfsplice.middle9
+  memmove: diff-nqp i32.selfsplice.replace.2.3
+  memmove: diff-nqp i32.selfsplice.replace.tail
+  memmove: diff-nqp i32.selfsplice.replace.5.5
+  memmove: diff-nqp i32.selfsplice.replace.1.9
+  memmove: diff-nqp i32.selfsplice.replace.1.20
+  memmove: diff-nqp i32.selfsplice.neg
+  memmove: diff-nqp i32.selfsplice.shifted.middle
+  memmove: diff-nqp i32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i32.selfsplice.big.middle
+  memmove: diff-nqp i32.selfsplice.big.1
+  memmove: diff-nqp i32.selfsplice.big.replace
+  memmove: diff-nqp i32.selfsplice.big.shifted
+  memmove: diff-nqp i32.selfsplice.twice
+  memmove: diff-nqp i16.selfsplice.middle
+  memmove: diff-nqp i16.selfsplice.middle1
+  memmove: diff-nqp i16.selfsplice.middle9
+  memmove: diff-nqp i16.selfsplice.replace.2.3
+  memmove: diff-nqp i16.selfsplice.replace.tail
+  memmove: diff-nqp i16.selfsplice.replace.5.5
+  memmove: diff-nqp i16.selfsplice.replace.1.9
+  memmove: diff-nqp i16.selfsplice.replace.1.20
+  memmove: diff-nqp i16.selfsplice.neg
+  memmove: diff-nqp i16.selfsplice.shifted.middle
+  memmove: diff-nqp i16.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i16.selfsplice.big.middle
+  memmove: diff-nqp i16.selfsplice.big.1
+  memmove: diff-nqp i16.selfsplice.big.replace
+  memmove: diff-nqp i16.selfsplice.big.shifted
+  memmove: diff-nqp i16.selfsplice.twice
+  memmove: diff-nqp i8.selfsplice.middle
+  memmove: diff-nqp i8.selfsplice.middle1
+  memmove: diff-nqp i8.selfsplice.middle9
+  memmove: diff-nqp i8.selfsplice.replace.2.3
+  memmove: diff-nqp i8.selfsplice.replace.tail
+  memmove: diff-nqp i8.selfsplice.replace.5.5
+  memmove: diff-nqp i8.selfsplice.replace.1.9
+  memmove: diff-nqp i8.selfsplice.replace.1.20
+  memmove: diff-nqp i8.selfsplice.neg
+  memmove: diff-nqp i8.selfsplice.shifted.middle
+  memmove: diff-nqp i8.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i8.selfsplice.big.middle
+  memmove: diff-nqp i8.selfsplice.big.1
+  memmove: diff-nqp i8.selfsplice.big.replace
+  memmove: diff-nqp i8.selfsplice.big.shifted
+  memmove: diff-nqp i8.selfsplice.twice
+  memmove: diff-nqp u64.selfsplice.middle
+  memmove: diff-nqp u64.selfsplice.middle1
+  memmove: diff-nqp u64.selfsplice.middle9
+  memmove: diff-nqp u64.selfsplice.replace.2.3
+  memmove: diff-nqp u64.selfsplice.replace.tail
+  memmove: diff-nqp u64.selfsplice.replace.5.5
+  memmove: diff-nqp u64.selfsplice.replace.1.9
+  memmove: diff-nqp u64.selfsplice.replace.1.20
+  memmove: diff-nqp u64.selfsplice.neg
+  memmove: diff-nqp u64.selfsplice.shifted.middle
+  memmove: diff-nqp u64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u64.selfsplice.big.middle
+  memmove: diff-nqp u64.selfsplice.big.1
+  memmove: diff-nqp u64.selfsplice.big.replace
+  memmove: diff-nqp u64.selfsplice.big.shifted
+  memmove: diff-nqp u64.selfsplice.twice
+  memmove: diff-nqp u32.selfsplice.middle
+  memmove: diff-nqp u32.selfsplice.middle1
+  memmove: diff-nqp u32.selfsplice.middle9
+  memmove: diff-nqp u32.selfsplice.replace.2.3
+  memmove: diff-nqp u32.selfsplice.replace.tail
+  memmove: diff-nqp u32.selfsplice.replace.5.5
+  memmove: diff-nqp u32.selfsplice.replace.1.9
+  memmove: diff-nqp u32.selfsplice.replace.1.20
+  memmove: diff-nqp u32.selfsplice.neg
+  memmove: diff-nqp u32.selfsplice.shifted.middle
+  memmove: diff-nqp u32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u32.selfsplice.big.middle
+  memmove: diff-nqp u32.selfsplice.big.1
+  memmove: diff-nqp u32.selfsplice.big.replace
+  memmove: diff-nqp u32.selfsplice.big.shifted
+  memmove: diff-nqp u32.selfsplice.twice
+  memmove: diff-nqp u16.selfsplice.middle
+  memmove: diff-nqp u16.selfsplice.middle1
+  memmove: diff-nqp u16.selfsplice.middle9
+  memmove: diff-nqp u16.selfsplice.replace.2.3
+  memmove: diff-nqp u16.selfsplice.replace.tail
+  memmove: diff-nqp u16.selfsplice.replace.5.5
+  memmove: diff-nqp u16.selfsplice.replace.1.9
+  memmove: diff-nqp u16.selfsplice.replace.1.20
+  memmove: diff-nqp u16.selfsplice.neg
+  memmove: diff-nqp u16.selfsplice.shifted.middle
+  memmove: diff-nqp u16.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u16.selfsplice.big.middle
+  memmove: diff-nqp u16.selfsplice.big.1
+  memmove: diff-nqp u16.selfsplice.big.replace
+  memmove: diff-nqp u16.selfsplice.big.shifted
+  memmove: diff-nqp u16.selfsplice.twice
+  memmove: diff-nqp u8.selfsplice.middle
+  memmove: diff-nqp u8.selfsplice.middle1
+  memmove: diff-nqp u8.selfsplice.middle9
+  memmove: diff-nqp u8.selfsplice.replace.2.3
+  memmove: diff-nqp u8.selfsplice.replace.tail
+  memmove: diff-nqp u8.selfsplice.replace.5.5
+  memmove: diff-nqp u8.selfsplice.replace.1.9
+  memmove: diff-nqp u8.selfsplice.replace.1.20
+  memmove: diff-nqp u8.selfsplice.neg
+  memmove: diff-nqp u8.selfsplice.shifted.middle
+  memmove: diff-nqp u8.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u8.selfsplice.big.middle
+  memmove: diff-nqp u8.selfsplice.big.1
+  memmove: diff-nqp u8.selfsplice.big.replace
+  memmove: diff-nqp u8.selfsplice.big.shifted
+  memmove: diff-nqp u8.selfsplice.twice
+  memmove: diff-nqp n64.selfsplice.middle
+  memmove: diff-nqp n64.selfsplice.middle1
+  memmove: diff-nqp n64.selfsplice.middle9
+  memmove: diff-nqp n64.selfsplice.replace.2.3
+  memmove: diff-nqp n64.selfsplice.replace.tail
+  memmove: diff-nqp n64.selfsplice.replace.5.5
+  memmove: diff-nqp n64.selfsplice.replace.1.9
+  memmove: diff-nqp n64.selfsplice.replace.1.20
+  memmove: diff-nqp n64.selfsplice.neg
+  memmove: diff-nqp n64.selfsplice.shifted.middle
+  memmove: diff-nqp n64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp n64.selfsplice.big.middle
+  memmove: diff-nqp n64.selfsplice.big.1
+  memmove: diff-nqp n64.selfsplice.big.replace
+  memmove: diff-nqp n64.selfsplice.big.shifted
+  memmove: diff-nqp n64.selfsplice.twice
+  memmove: diff-nqp n32.selfsplice.middle
+  memmove: diff-nqp n32.selfsplice.middle1
+  memmove: diff-nqp n32.selfsplice.middle9
+  memmove: diff-nqp n32.selfsplice.replace.2.3
+  memmove: diff-nqp n32.selfsplice.replace.tail
+  memmove: diff-nqp n32.selfsplice.replace.5.5
+  memmove: diff-nqp n32.selfsplice.replace.1.9
+  memmove: diff-nqp n32.selfsplice.replace.1.20
+  memmove: diff-nqp n32.selfsplice.neg
+  memmove: diff-nqp n32.selfsplice.shifted.middle
+  memmove: diff-nqp n32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp n32.selfsplice.big.middle
+  memmove: diff-nqp n32.selfsplice.big.1
+  memmove: diff-nqp n32.selfsplice.big.replace
+  memmove: diff-nqp n32.selfsplice.big.shifted
+  memmove: diff-nqp n32.selfsplice.twice
+diff-nqp, nospesh:
+  obj.selfsplice.middle
+    base: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.middle1
+    base: elems=20 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.middle9
+    base: elems=20 [o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o5 o6 o7 o8 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o9]
+  obj.selfsplice.replace.2.3
+    base: elems=17 [o0 o1 o0 o1 o2 o3 o2 o3 o2 o3 o6 o7 o5 o6 o7 o8 o9]
+    head: elems=17 [o0 o1 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.tail
+    base: elems=17 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o0 o1 o2]
+    head: elems=17 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.5.5
+    base: elems=15 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4]
+    head: elems=15 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.1.9
+    base: elems=11 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9]
+    head: elems=11 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.replace.1.20
+    base: elems=11 [o0 o0 o1 o2 o3 o3 o5 o5 o6 o7 o9]
+    head: elems=11 [o0 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+  obj.selfsplice.neg
+    base: elems=19 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o8 o9]
+    head: elems=19 [o0 o1 o2 o3 o4 o5 o6 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o8 o9]
+  obj.selfsplice.shifted.middle
+    base: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9]
+    head: elems=20 [o0 o1 o2 o3 o4 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.shifted.replace.2.3
+    base: elems=17 [o0 o1 o0 o1 o2 o3 o2 o3 o2 o3 o6 o7 o5 o6 o7 o8 o9]
+    head: elems=17 [o0 o1 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o5 o6 o7 o8 o9]
+  obj.selfsplice.big.middle
+    base: elems=18000 sha1=02E02259C3505DC98EB1A741F79A246D8B1895A4 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=0B1E1AA0A5A6878DA8B1BB20EAD351A1CBBF7A05 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.1
+    base: elems=18000 sha1=AA8B6A6ADF89C486C4A15B47185F15A8A77D8DBB head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+    head: elems=18000 sha1=3A538277767122B3B6090468E7DF94FDA0CF100A head=[o0 o0 o1] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.replace
+    base: elems=13000 sha1=784512C95E520772F4C055BCEB670D6C7CD4A7CB head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=13000 sha1=9BED4111C3004787F366E2BC66112E7D3CAAC636 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.big.shifted
+    base: elems=17993 sha1=F5DC4C83D7C3B331FFB446F47F3C8C61634BB926 head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+    head: elems=17993 sha1=DB0DE512344289116ADB6B73F6A534C12DF9D58E head=[o0 o1 o2] tail=[o8997 o8998 o8999]
+  obj.selfsplice.twice
+    base: elems=14 [o0 o1 o0 o0 o1 o0 o0 o1 o0 o0 o1 o0 o1 o3]
+    head: elems=14 [o0 o1 o0 o0 o1 o0 o1 o2 o3 o3 o1 o2 o3 o3]
+  i64.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.middle1
+    base: elems=20 [1 1 4 7 10 10 16 16 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i64.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i64.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i64.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i64.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.big.1
+    base: elems=18000 sha1=690E40FBC431FFBE50BE0D9B49615A1D4B2EAFE0 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i64.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.big.shifted
+    base: elems=17993 sha1=06A0F50EF18D667C587D11075875BA38905941DA head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i64.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i32.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i32.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i32.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i32.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i32.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.big.1
+    base: elems=18000 sha1=E20E2C9837834DE24FFED4C29272017F083C5802 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i32.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.big.shifted
+    base: elems=17993 sha1=D7C439825AAAD06C5B73EA118EC7763E7A268879 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i32.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i16.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.middle1
+    base: elems=20 [1 1 1 1 1 4 7 10 13 16 19 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i16.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.1.9
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.replace.1.20
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i16.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i16.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i16.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.big.1
+    base: elems=18000 sha1=6F0F5995C40F0273F92D2CD239799B9B1256E6DB head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  i16.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.big.shifted
+    base: elems=17993 sha1=99FA1A1CB53C3D54173C82DBF4E8B0ECAB4D2C99 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  i16.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  i8.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  i8.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  i8.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  i8.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  i8.selfsplice.big.middle
+    base: elems=18000 sha1=DEDEA0ABCD387B7580CF7760E9D433C6CD621D5A head=[1 4 7] tail=[112 115 118]
+    head: elems=18000 sha1=230BD918BF200894BB64BD11EE224B47635358E1 head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.big.1
+    base: elems=18000 sha1=B2730FF7059ECF2F0B4DD91E2FC3049F5704B696 head=[1 1 4] tail=[112 115 118]
+    head: elems=18000 sha1=BC040BDD505EF13830A5715662DAE10141749D30 head=[1 1 4] tail=[112 115 118]
+  i8.selfsplice.big.replace
+    base: elems=13000 sha1=3919A5690732EB4FC55ECB1D632CFF3296BCB8D2 head=[1 4 7] tail=[112 115 118]
+    head: elems=13000 sha1=B2855C18C1DFE4B5D9B13B41ABEE4C228C18B6CE head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.big.shifted
+    base: elems=17993 sha1=C14ACA458C2F1ADCC83BB3D4118492D87390D790 head=[1 4 7] tail=[112 115 118]
+    head: elems=17993 sha1=CA0B76A16CFDCD549CCC3FFA0D10EDC493BC2566 head=[1 4 7] tail=[112 115 118]
+  i8.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u64.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.middle1
+    base: elems=20 [1 1 4 7 10 10 16 16 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u64.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 7 10 10 16 16 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u64.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u64.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 7 10 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u64.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.big.1
+    base: elems=18000 sha1=690E40FBC431FFBE50BE0D9B49615A1D4B2EAFE0 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u64.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.big.shifted
+    base: elems=17993 sha1=06A0F50EF18D667C587D11075875BA38905941DA head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u64.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u32.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u32.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u32.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u32.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u32.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.big.1
+    base: elems=18000 sha1=E20E2C9837834DE24FFED4C29272017F083C5802 head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u32.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.big.shifted
+    base: elems=17993 sha1=D7C439825AAAD06C5B73EA118EC7763E7A268879 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u32.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u16.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.middle1
+    base: elems=20 [1 1 1 1 1 4 7 10 13 16 19 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u16.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.1.9
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.replace.1.20
+    base: elems=11 [1 1 1 1 1 4 7 10 13 16 19]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u16.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u16.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 1 4 1 4 7 10 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u16.selfsplice.big.middle
+    base: elems=18000 sha1=3161F51AE1C9085EC888587D7581B38DB391C870 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=18000 sha1=8D3168707F0158060DDC7A18D0FD9EC05A0A4C13 head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.big.1
+    base: elems=18000 sha1=6F0F5995C40F0273F92D2CD239799B9B1256E6DB head=[1 1 4] tail=[26992 26995 26998]
+    head: elems=18000 sha1=4B9C2D1F5F93ACF2F65687791C1F7E747B63564A head=[1 1 4] tail=[26992 26995 26998]
+  u16.selfsplice.big.replace
+    base: elems=13000 sha1=86C55A139DAC15E7BF30D0F8C434E159A5DF38C0 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=13000 sha1=F3983EECAA8AA796FB1A10AE9C19C5D8C9B569DD head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.big.shifted
+    base: elems=17993 sha1=99FA1A1CB53C3D54173C82DBF4E8B0ECAB4D2C99 head=[1 4 7] tail=[26992 26995 26998]
+    head: elems=17993 sha1=7FC0671FE3414F2814598FB50CF1B33A5B4547FC head=[1 4 7] tail=[26992 26995 26998]
+  u16.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  u8.selfsplice.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.middle1
+    base: elems=20 [1 1 4 4 7 10 10 10 19 22 28 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.middle9
+    base: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 1 28]
+    head: elems=20 [1 4 7 10 13 16 19 22 25 1 4 7 10 13 16 19 22 25 28 28]
+  u8.selfsplice.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.replace.tail
+    base: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7]
+    head: elems=17 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.5.5
+    base: elems=15 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13]
+    head: elems=15 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.1.9
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.replace.1.20
+    base: elems=11 [1 1 4 4 7 10 10 10 19 22 28]
+    head: elems=11 [1 1 4 7 10 13 16 19 22 25 28]
+  u8.selfsplice.neg
+    base: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 1 4 7 25 28]
+    head: elems=19 [1 4 7 10 13 16 19 1 4 7 10 13 16 19 22 25 28 25 28]
+  u8.selfsplice.shifted.middle
+    base: elems=20 [1 4 7 10 13 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28]
+    head: elems=20 [1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.shifted.replace.2.3
+    base: elems=17 [1 4 1 4 1 4 7 10 7 10 19 22 16 19 22 25 28]
+    head: elems=17 [1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28]
+  u8.selfsplice.big.middle
+    base: elems=18000 sha1=C86266BA273CE4F6DC6F90BE22E8629DB1A07075 head=[1 4 7] tail=[112 115 118]
+    head: elems=18000 sha1=B9A4DC960B0A004BC871E73990E171A9F7C5B8A6 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.big.1
+    base: elems=18000 sha1=90231FDE8A89E7E4726E79987B7BB6A47079975B head=[1 1 4] tail=[112 115 118]
+    head: elems=18000 sha1=53A805B2A703771347E0C12BF958FE94B64A0C31 head=[1 1 4] tail=[112 115 118]
+  u8.selfsplice.big.replace
+    base: elems=13000 sha1=355666B69114AE300CE6C0BE100B2430341AD517 head=[1 4 7] tail=[112 115 118]
+    head: elems=13000 sha1=C1F84493FC9791201D4090691162FC36C24754C8 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.big.shifted
+    base: elems=17993 sha1=207360858FE3E6285E23A77D477E08E5156C4C9A head=[1 4 7] tail=[112 115 118]
+    head: elems=17993 sha1=F977DAB97971D76CD9C3464F8A38EDAEDD400367 head=[1 4 7] tail=[112 115 118]
+  u8.selfsplice.twice
+    base: elems=14 [1 4 1 1 4 1 1 4 1 1 4 1 4 10]
+    head: elems=14 [1 4 1 1 4 1 4 7 10 10 4 7 10 10]
+  n64.selfsplice.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.middle1
+    base: elems=20 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.middle9
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 9.25]
+  n64.selfsplice.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.tail
+    base: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25]
+    head: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.5.5
+    base: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25]
+    head: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.1.9
+    base: elems=11 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.replace.1.20
+    base: elems=11 [0.25 0.25 1.25 2.25 3.25 3.25 5.25 5.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.neg
+    base: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 8.25 9.25]
+    head: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 8.25 9.25]
+  n64.selfsplice.shifted.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.shifted.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n64.selfsplice.big.middle
+    base: elems=18000 sha1=D45AF8F1B3398767E2FCE2EA1B96618599119558 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=B6410CBBEEADBD53737077831C4B49A796654E0E head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.1
+    base: elems=18000 sha1=2A868A60D84210FD57D463D375FB026256FA8B3B head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=DD361ABB573A83E29D9228A98A83CEC9219E843E head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.replace
+    base: elems=13000 sha1=57F7C8C788E8DE008E72F142D53A3560FF0B3181 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=13000 sha1=A364311EF789BA025C63FA58CFD38394EFB6C80D head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.big.shifted
+    base: elems=17993 sha1=0DC1BF703B5CA54795978D80D8FC72FBD3DE767C head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=17993 sha1=2D4059271916F713D53B2B01AE877E9A7AE9D12B head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n64.selfsplice.twice
+    base: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 1.25 3.25]
+    head: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 1.25 2.25 3.25 3.25 1.25 2.25 3.25 3.25]
+  n32.selfsplice.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.middle1
+    base: elems=20 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.middle9
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 9.25]
+  n32.selfsplice.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.tail
+    base: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25]
+    head: elems=17 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.5.5
+    base: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25]
+    head: elems=15 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.1.9
+    base: elems=11 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.replace.1.20
+    base: elems=11 [0.25 0.25 1.25 1.25 2.25 3.25 3.25 3.25 6.25 7.25 9.25]
+    head: elems=11 [0.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.neg
+    base: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 8.25 9.25]
+    head: elems=19 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 8.25 9.25]
+  n32.selfsplice.shifted.middle
+    base: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=20 [0.25 1.25 2.25 3.25 4.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.shifted.replace.2.3
+    base: elems=17 [0.25 1.25 0.25 1.25 0.25 1.25 2.25 3.25 2.25 3.25 6.25 7.25 5.25 6.25 7.25 8.25 9.25]
+    head: elems=17 [0.25 1.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 5.25 6.25 7.25 8.25 9.25]
+  n32.selfsplice.big.middle
+    base: elems=18000 sha1=D45AF8F1B3398767E2FCE2EA1B96618599119558 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=B6410CBBEEADBD53737077831C4B49A796654E0E head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.1
+    base: elems=18000 sha1=CEBCFB310CA06B51C10A48323EC8DF5ABF639328 head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=18000 sha1=DD361ABB573A83E29D9228A98A83CEC9219E843E head=[0.25 0.25 1.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.replace
+    base: elems=13000 sha1=57F7C8C788E8DE008E72F142D53A3560FF0B3181 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=13000 sha1=A364311EF789BA025C63FA58CFD38394EFB6C80D head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.big.shifted
+    base: elems=17993 sha1=CBAA58971F80DB095CE0C7955ADE697681F554D2 head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+    head: elems=17993 sha1=2D4059271916F713D53B2B01AE877E9A7AE9D12B head=[0.25 1.25 2.25] tail=[8997.25 8998.25 8999.25]
+  n32.selfsplice.twice
+    base: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 0.25 1.25 0.25 1.25 3.25]
+    head: elems=14 [0.25 1.25 0.25 0.25 1.25 0.25 1.25 2.25 3.25 3.25 1.25 2.25 3.25 3.25]
+diff-nqp, nospesh, the head against the memmove model:
+  memmove: diff-nqp obj.selfsplice.middle
+  memmove: diff-nqp obj.selfsplice.middle1
+  memmove: diff-nqp obj.selfsplice.middle9
+  memmove: diff-nqp obj.selfsplice.replace.2.3
+  memmove: diff-nqp obj.selfsplice.replace.tail
+  memmove: diff-nqp obj.selfsplice.replace.5.5
+  memmove: diff-nqp obj.selfsplice.replace.1.9
+  memmove: diff-nqp obj.selfsplice.replace.1.20
+  memmove: diff-nqp obj.selfsplice.neg
+  memmove: diff-nqp obj.selfsplice.shifted.middle
+  memmove: diff-nqp obj.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp obj.selfsplice.big.middle
+  memmove: diff-nqp obj.selfsplice.big.1
+  memmove: diff-nqp obj.selfsplice.big.replace
+  memmove: diff-nqp obj.selfsplice.big.shifted
+  memmove: diff-nqp obj.selfsplice.twice
+  memmove: diff-nqp i64.selfsplice.middle
+  memmove: diff-nqp i64.selfsplice.middle1
+  memmove: diff-nqp i64.selfsplice.middle9
+  memmove: diff-nqp i64.selfsplice.replace.2.3
+  memmove: diff-nqp i64.selfsplice.replace.tail
+  memmove: diff-nqp i64.selfsplice.replace.5.5
+  memmove: diff-nqp i64.selfsplice.replace.1.9
+  memmove: diff-nqp i64.selfsplice.replace.1.20
+  memmove: diff-nqp i64.selfsplice.neg
+  memmove: diff-nqp i64.selfsplice.shifted.middle
+  memmove: diff-nqp i64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i64.selfsplice.big.middle
+  memmove: diff-nqp i64.selfsplice.big.1
+  memmove: diff-nqp i64.selfsplice.big.replace
+  memmove: diff-nqp i64.selfsplice.big.shifted
+  memmove: diff-nqp i64.selfsplice.twice
+  memmove: diff-nqp i32.selfsplice.middle
+  memmove: diff-nqp i32.selfsplice.middle1
+  memmove: diff-nqp i32.selfsplice.middle9
+  memmove: diff-nqp i32.selfsplice.replace.2.3
+  memmove: diff-nqp i32.selfsplice.replace.tail
+  memmove: diff-nqp i32.selfsplice.replace.5.5
+  memmove: diff-nqp i32.selfsplice.replace.1.9
+  memmove: diff-nqp i32.selfsplice.replace.1.20
+  memmove: diff-nqp i32.selfsplice.neg
+  memmove: diff-nqp i32.selfsplice.shifted.middle
+  memmove: diff-nqp i32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i32.selfsplice.big.middle
+  memmove: diff-nqp i32.selfsplice.big.1
+  memmove: diff-nqp i32.selfsplice.big.replace
+  memmove: diff-nqp i32.selfsplice.big.shifted
+  memmove: diff-nqp i32.selfsplice.twice
+  memmove: diff-nqp i16.selfsplice.middle
+  memmove: diff-nqp i16.selfsplice.middle1
+  memmove: diff-nqp i16.selfsplice.middle9
+  memmove: diff-nqp i16.selfsplice.replace.2.3
+  memmove: diff-nqp i16.selfsplice.replace.tail
+  memmove: diff-nqp i16.selfsplice.replace.5.5
+  memmove: diff-nqp i16.selfsplice.replace.1.9
+  memmove: diff-nqp i16.selfsplice.replace.1.20
+  memmove: diff-nqp i16.selfsplice.neg
+  memmove: diff-nqp i16.selfsplice.shifted.middle
+  memmove: diff-nqp i16.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i16.selfsplice.big.middle
+  memmove: diff-nqp i16.selfsplice.big.1
+  memmove: diff-nqp i16.selfsplice.big.replace
+  memmove: diff-nqp i16.selfsplice.big.shifted
+  memmove: diff-nqp i16.selfsplice.twice
+  memmove: diff-nqp i8.selfsplice.middle
+  memmove: diff-nqp i8.selfsplice.middle1
+  memmove: diff-nqp i8.selfsplice.middle9
+  memmove: diff-nqp i8.selfsplice.replace.2.3
+  memmove: diff-nqp i8.selfsplice.replace.tail
+  memmove: diff-nqp i8.selfsplice.replace.5.5
+  memmove: diff-nqp i8.selfsplice.replace.1.9
+  memmove: diff-nqp i8.selfsplice.replace.1.20
+  memmove: diff-nqp i8.selfsplice.neg
+  memmove: diff-nqp i8.selfsplice.shifted.middle
+  memmove: diff-nqp i8.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp i8.selfsplice.big.middle
+  memmove: diff-nqp i8.selfsplice.big.1
+  memmove: diff-nqp i8.selfsplice.big.replace
+  memmove: diff-nqp i8.selfsplice.big.shifted
+  memmove: diff-nqp i8.selfsplice.twice
+  memmove: diff-nqp u64.selfsplice.middle
+  memmove: diff-nqp u64.selfsplice.middle1
+  memmove: diff-nqp u64.selfsplice.middle9
+  memmove: diff-nqp u64.selfsplice.replace.2.3
+  memmove: diff-nqp u64.selfsplice.replace.tail
+  memmove: diff-nqp u64.selfsplice.replace.5.5
+  memmove: diff-nqp u64.selfsplice.replace.1.9
+  memmove: diff-nqp u64.selfsplice.replace.1.20
+  memmove: diff-nqp u64.selfsplice.neg
+  memmove: diff-nqp u64.selfsplice.shifted.middle
+  memmove: diff-nqp u64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u64.selfsplice.big.middle
+  memmove: diff-nqp u64.selfsplice.big.1
+  memmove: diff-nqp u64.selfsplice.big.replace
+  memmove: diff-nqp u64.selfsplice.big.shifted
+  memmove: diff-nqp u64.selfsplice.twice
+  memmove: diff-nqp u32.selfsplice.middle
+  memmove: diff-nqp u32.selfsplice.middle1
+  memmove: diff-nqp u32.selfsplice.middle9
+  memmove: diff-nqp u32.selfsplice.replace.2.3
+  memmove: diff-nqp u32.selfsplice.replace.tail
+  memmove: diff-nqp u32.selfsplice.replace.5.5
+  memmove: diff-nqp u32.selfsplice.replace.1.9
+  memmove: diff-nqp u32.selfsplice.replace.1.20
+  memmove: diff-nqp u32.selfsplice.neg
+  memmove: diff-nqp u32.selfsplice.shifted.middle
+  memmove: diff-nqp u32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u32.selfsplice.big.middle
+  memmove: diff-nqp u32.selfsplice.big.1
+  memmove: diff-nqp u32.selfsplice.big.replace
+  memmove: diff-nqp u32.selfsplice.big.shifted
+  memmove: diff-nqp u32.selfsplice.twice
+  memmove: diff-nqp u16.selfsplice.middle
+  memmove: diff-nqp u16.selfsplice.middle1
+  memmove: diff-nqp u16.selfsplice.middle9
+  memmove: diff-nqp u16.selfsplice.replace.2.3
+  memmove: diff-nqp u16.selfsplice.replace.tail
+  memmove: diff-nqp u16.selfsplice.replace.5.5
+  memmove: diff-nqp u16.selfsplice.replace.1.9
+  memmove: diff-nqp u16.selfsplice.replace.1.20
+  memmove: diff-nqp u16.selfsplice.neg
+  memmove: diff-nqp u16.selfsplice.shifted.middle
+  memmove: diff-nqp u16.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u16.selfsplice.big.middle
+  memmove: diff-nqp u16.selfsplice.big.1
+  memmove: diff-nqp u16.selfsplice.big.replace
+  memmove: diff-nqp u16.selfsplice.big.shifted
+  memmove: diff-nqp u16.selfsplice.twice
+  memmove: diff-nqp u8.selfsplice.middle
+  memmove: diff-nqp u8.selfsplice.middle1
+  memmove: diff-nqp u8.selfsplice.middle9
+  memmove: diff-nqp u8.selfsplice.replace.2.3
+  memmove: diff-nqp u8.selfsplice.replace.tail
+  memmove: diff-nqp u8.selfsplice.replace.5.5
+  memmove: diff-nqp u8.selfsplice.replace.1.9
+  memmove: diff-nqp u8.selfsplice.replace.1.20
+  memmove: diff-nqp u8.selfsplice.neg
+  memmove: diff-nqp u8.selfsplice.shifted.middle
+  memmove: diff-nqp u8.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp u8.selfsplice.big.middle
+  memmove: diff-nqp u8.selfsplice.big.1
+  memmove: diff-nqp u8.selfsplice.big.replace
+  memmove: diff-nqp u8.selfsplice.big.shifted
+  memmove: diff-nqp u8.selfsplice.twice
+  memmove: diff-nqp n64.selfsplice.middle
+  memmove: diff-nqp n64.selfsplice.middle1
+  memmove: diff-nqp n64.selfsplice.middle9
+  memmove: diff-nqp n64.selfsplice.replace.2.3
+  memmove: diff-nqp n64.selfsplice.replace.tail
+  memmove: diff-nqp n64.selfsplice.replace.5.5
+  memmove: diff-nqp n64.selfsplice.replace.1.9
+  memmove: diff-nqp n64.selfsplice.replace.1.20
+  memmove: diff-nqp n64.selfsplice.neg
+  memmove: diff-nqp n64.selfsplice.shifted.middle
+  memmove: diff-nqp n64.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp n64.selfsplice.big.middle
+  memmove: diff-nqp n64.selfsplice.big.1
+  memmove: diff-nqp n64.selfsplice.big.replace
+  memmove: diff-nqp n64.selfsplice.big.shifted
+  memmove: diff-nqp n64.selfsplice.twice
+  memmove: diff-nqp n32.selfsplice.middle
+  memmove: diff-nqp n32.selfsplice.middle1
+  memmove: diff-nqp n32.selfsplice.middle9
+  memmove: diff-nqp n32.selfsplice.replace.2.3
+  memmove: diff-nqp n32.selfsplice.replace.tail
+  memmove: diff-nqp n32.selfsplice.replace.5.5
+  memmove: diff-nqp n32.selfsplice.replace.1.9
+  memmove: diff-nqp n32.selfsplice.replace.1.20
+  memmove: diff-nqp n32.selfsplice.neg
+  memmove: diff-nqp n32.selfsplice.shifted.middle
+  memmove: diff-nqp n32.selfsplice.shifted.replace.2.3
+  memmove: diff-nqp n32.selfsplice.big.middle
+  memmove: diff-nqp n32.selfsplice.big.1
+  memmove: diff-nqp n32.selfsplice.big.replace
+  memmove: diff-nqp n32.selfsplice.big.shifted
+  memmove: diff-nqp n32.selfsplice.twice
+diff-raku, spesh:
+  int8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  num32.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  num64.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  Buf[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  array.reified.splice
+    base: elems=10 [1 7 1 7 1 7 1 8 4 5]
+    head: elems=10 [1 7 1 7 8 4 5 8 4 5]
+diff-raku, spesh, the head against the memmove model:
+  memmove: diff-raku int8.nqp.splice.self
+  memmove: diff-raku int16.nqp.splice.self
+  memmove: diff-raku int32.nqp.splice.self
+  memmove: diff-raku int64.nqp.splice.self
+  memmove: diff-raku uint8.nqp.splice.self
+  memmove: diff-raku uint16.nqp.splice.self
+  memmove: diff-raku uint32.nqp.splice.self
+  memmove: diff-raku uint64.nqp.splice.self
+  memmove: diff-raku num32.splice.self
+  memmove: diff-raku num64.splice.self
+  memmove: diff-raku Buf[uint8].splice.self
+  memmove: diff-raku Buf[uint16].splice.self
+  memmove: diff-raku Buf[uint32].splice.self
+  memmove: diff-raku Buf[uint64].splice.self
+  memmove: diff-raku Blob[uint8].splice.self
+  memmove: diff-raku Blob[uint16].splice.self
+  memmove: diff-raku Blob[uint32].splice.self
+  memmove: diff-raku Blob[uint64].splice.self
+  memmove: diff-raku array.reified.splice
+diff-raku, nospesh:
+  int8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  int64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint8.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint16.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint32.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  uint64.nqp.splice.self
+    base: elems=12 [0 1 2 0 1 2 0 1 2 3 4 5]
+    head: elems=12 [0 1 2 0 1 2 3 4 5 3 4 5]
+  num32.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  num64.splice.self
+    base: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5]
+    head: elems=12 [0.5 1.5 2.5 0.5 1.5 2.5 3.5 4.5 5.5 3.5 4.5 5.5]
+  Buf[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Buf[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint8].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint16].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint32].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  Blob[uint64].splice.self
+    base: elems=12 [1 2 3 1 2 3 1 2 3 4 5 6]
+    head: elems=12 [1 2 3 1 2 3 4 5 6 4 5 6]
+  array.reified.splice
+    base: elems=10 [1 7 1 7 1 7 1 8 4 5]
+    head: elems=10 [1 7 1 7 8 4 5 8 4 5]
+diff-raku, nospesh, the head against the memmove model:
+  memmove: diff-raku int8.nqp.splice.self
+  memmove: diff-raku int16.nqp.splice.self
+  memmove: diff-raku int32.nqp.splice.self
+  memmove: diff-raku int64.nqp.splice.self
+  memmove: diff-raku uint8.nqp.splice.self
+  memmove: diff-raku uint16.nqp.splice.self
+  memmove: diff-raku uint32.nqp.splice.self
+  memmove: diff-raku uint64.nqp.splice.self
+  memmove: diff-raku num32.splice.self
+  memmove: diff-raku num64.splice.self
+  memmove: diff-raku Buf[uint8].splice.self
+  memmove: diff-raku Buf[uint16].splice.self
+  memmove: diff-raku Buf[uint32].splice.self
+  memmove: diff-raku Buf[uint64].splice.self
+  memmove: diff-raku Blob[uint8].splice.self
+  memmove: diff-raku Blob[uint16].splice.self
+  memmove: diff-raku Blob[uint32].splice.self
+  memmove: diff-raku Blob[uint64].splice.self
+  memmove: diff-raku array.reified.splice

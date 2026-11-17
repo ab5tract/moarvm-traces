@@ -1,0 +1,12 @@
+run 1 base start 2026-11-17 14:15:13 load 1.44 2.58 2.81 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-c-base/lib maps /tmp/claude-1000/va-c-base/lib/libmoar.so
+run 1 base end 2026-11-17 14:19:54 exit 0
+run 2 head start 2026-11-17 14:22:55 load 0.81 9.39 7.75 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-n-base/lib maps /tmp/claude-1000/va-n-base/lib/libmoar.so
+run 2 head end 2026-11-17 14:27:42 exit 0
+run 3 head start 2026-11-17 14:30:43 load 1.30 10.93 10.83 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-n-base/lib maps /tmp/claude-1000/va-n-base/lib/libmoar.so
+run 3 head end 2026-11-17 14:35:31 exit 0
+run 4 base start 2026-11-17 14:38:31 load 1.13 11.46 12.90 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-c-base/lib maps /tmp/claude-1000/va-c-base/lib/libmoar.so
+run 4 base end 2026-11-17 14:43:18 exit 0
+run 5 base start 2026-11-17 14:46:18 load 1.26 11.32 13.97 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-c-base/lib maps /tmp/claude-1000/va-c-base/lib/libmoar.so
+run 5 base end 2026-11-17 14:51:08 exit 0
+run 6 head start 2026-11-17 14:54:09 load 0.87 11.43 14.73 roast fb1d87214 moar-procs-before 0 raku-procs-before 0 lib /tmp/claude-1000/va-n-base/lib maps /tmp/claude-1000/va-n-base/lib/libmoar.so
+run 6 head end 2026-11-17 14:58:57 exit 0

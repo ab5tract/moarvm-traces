@@ -70,8 +70,10 @@ va-c-oracle and va-c-stress were not touched.
     tools/bench/repr/diff.sh --base=/tmp/claude-1000/va-c-base \
         --head=/tmp/claude-1000/va-n-base --out=<workspace>/diff-1
 
-2026-11-17 12:41:56 CET, load 1.15-2.14 over the 52 runs (each run waited
-for < 2.0; `diff-1/load.log`), **exit 3 after 498 s**:
+2026-11-17 12:41:56 CET, 1-minute load 0.92-1.99 before the 52 runs, as
+`diff-1/load.log` records it (each run waited for < 2.0; corrected at Task 8:
+this line first gave 1.15-2.14, which mixed in the loads of the driver's own
+stderr progress lines), **exit 3 after 498 s**:
 
 > differs only in undefined self-splice lines, and equals memmove there (390
 > differing lines over the programs and settings, all listed in

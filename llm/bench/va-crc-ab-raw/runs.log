@@ -1,0 +1,4 @@
+plain start 2026-11-17 14:58:57 load 13.03 19.74 18.01 moar-procs 0 raku-procs 0
+plain end 2026-11-17 15:10:03 exit 0
+bad start 2026-11-17 15:10:03 load 1.13 3.12 9.33 moar-procs 0 raku-procs 0
+bad end 2026-11-17 15:19:21 exit 0

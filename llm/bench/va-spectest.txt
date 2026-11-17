@@ -1,0 +1,63 @@
+# va spectest A/B (Task 8, Step 4): Zig array / C array wall 1.003, RSS 0.994; zero failures in six runs
+
+Sides, six runs in the order base head head base base head, one at a time:
+  base va-c-base (C array, -Dzig-reprs=false), head va-n-base (Zig array, defaults); both built at 472cf7e92
+  (va-prefixes.md, Task 8), version 2026.09-327-g472cf7e92, MoarVM at bea13d101 during the runs (test-only change).
+(both LTO, ReleaseFast, x86-64-v3, -Dgc-debug=0.) rakudo make -o spectest_update spectest, TEST_JOBS=24, roast
+fb1d87214 (verified before each run), .precomp under t/spec removed before each run, libmoar chosen by
+LD_LIBRARY_PATH=<prefix>/lib against the moar, nqp and rakudo of /tmp/claude-1000/tune-zig-prefix; before each run a
+probe through ./rakudo-m showed it mapped the side's libmoar.so ("maps" in runs.log), and the caller's MVM_*,
+RAKUDO_*, NQP_*, RAKU_*, PERL6* variables and RAKULIB were removed. Timed by tools/bench/timev.py; each run under
+systemd-run --user --scope -q -p MemoryMax=24G (24 test jobs together need more than 8G; as ngc-spectest-driver.sh).
+Driver: va-spectest-driver.sh (ngc-spectest-driver.sh re-pointed), sixth stage of va-evidence-master.sh; raw:
+va-spectest-raw/ (runs.log, run<N>-<side>.time, run<N>-<side>.log, analysis.txt from analyze.py, a copy of
+ngc-spectest-raw/analyze.py run as `analyze.py va-spectest-raw ngc-spectest-raw`). 2026-11-17 14:15-14:59 CET,
+AMD Ryzen 9 5900X, 32 GB, no swap. Zig 0.17.1.
+
+## Load before each run (1-, 5-, 15-minute; the driver waited for a 1-minute load under 2.0; no moar or raku process before any run)
+run 1 base start 2026-11-17 14:15:13 load 1.44 2.58 2.81 roast fb1d87214
+run 2 head start 2026-11-17 14:22:55 load 0.81 9.39 7.75 roast fb1d87214
+run 3 head start 2026-11-17 14:30:43 load 1.30 10.93 10.83 roast fb1d87214
+run 4 base start 2026-11-17 14:38:31 load 1.13 11.46 12.90 roast fb1d87214
+run 5 base start 2026-11-17 14:46:18 load 1.26 11.32 13.97 roast fb1d87214
+run 6 head start 2026-11-17 14:54:09 load 0.87 11.43 14.73 roast fb1d87214
+The 5- and 15-minute loads are the preceding 24-job run's, the same for both sides after run 1.
+
+## Per run
+run 1 base: wall 280.93 (4:40.93) RSS 1027660 user 4503.82 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 273 wallclock secs (36.53 usr  7.86 sys + 4462.57 cusr 414.11 csys = 4921.07 CPU)
+run 2 head: wall 287.54 (4:47.54) RSS 1029332 user 4578.18 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 280 wallclock secs (37.14 usr  7.73 sys + 4536.59 cusr 402.00 csys = 4983.46 CPU)
+run 3 head: wall 288.08 (4:48.08) RSS 1024732 user 4583.53 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 281 wallclock secs (36.73 usr  7.88 sys + 4542.15 cusr 401.66 csys = 4988.42 CPU)
+run 4 base: wall 287.22 (4:47.22) RSS 1030832 user 4638.28 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 280 wallclock secs (37.62 usr  8.24 sys + 4595.98 cusr 406.26 csys = 5048.10 CPU)
+run 5 base: wall 290.00 (4:50.00) RSS 1035352 user 4636.56 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 282 wallclock secs (37.36 usr  7.88 sys + 4594.61 cusr 404.65 csys = 5044.50 CPU)
+run 6 head: wall 288.27 (4:48.27) RSS 1024884 user 4582.60 exit 0 Result: PASS todo 29 todo-list-equal-to-z017 True
+  Files=1365, Tests=138715, 281 wallclock secs (37.17 usr  7.90 sys + 4540.74 cusr 398.20 csys = 4984.01 CPU)
+
+## Medians of three per side (spread = (max - min) / median)
+base: wall [280.93, 287.22, 290.0] median 287.22 spread 280.93-290.00 (0.0316); RSS [1027660, 1030832, 1035352] median 1030832 spread 1027660-1035352 (0.0075); user median 4636.56
+head: wall [287.54, 288.08, 288.27] median 288.08 spread 287.54-288.27 (0.0025); RSS [1029332, 1024732, 1024884] median 1024884 spread 1024732-1029332 (0.0045); user median 4582.60
+ratio head/base: wall 1.003 RSS 0.994 user 0.988
+
+| | base va-c-base | head va-n-base | head/base |
+|---|---|---|---:|
+| wall s, median [range] (spread) | 287.22 [280.93-290.00] (0.0316) | 288.08 [287.54-288.27] (0.0025) | 1.003 |
+| peak RSS kB, median [range] (spread) | 1030832 [1027660-1035352] (0.0075) | 1024884 [1024732-1029332] (0.0045) | 0.994 |
+| user CPU s, median | 4636.56 | 4582.60 | 0.988 |
+
+Gate (spec 8 and the global constraints: "a spectest wall or RSS ratio outside the control's spread and above 1
+percent" stops the campaign): wall 1.003, the head median (288.08 s) inside the base range (280.93-290.00 s) and below
+1 percent: **passes**; RSS 0.994, the head median inside the base range: **passes**. Nothing is claimed inside the
+spreads: the Zig array's spectest time and memory are not distinguishable from the C array's here. (Base run 1, the
+first of the six and at the lowest 15-minute load, is the fastest; the base spread is wide mostly by it.)
+
+## Failures and the TODO-passed list
+
+All six runs: exit 0, Result: PASS, Files=1365, Tests=138715 (Campaign 5's counts). The Test Summary Report of every
+run lists the same 29 TODO-passed files, identical to the reference given to analyze.py,
+ngc-spectest-raw/run1-base.log, whose list equals z017's (the script's column is named "todo-list-equal-to-z017";
+True on every run). No file failed on either side, so no solo re-runs were needed.
+**Zero new failures.**

@@ -1,0 +1,53 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.archlinux.org>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+Catchpoint 1 (load)
+warning: File "/tmp/claude-1000/va-n-syms/lib/libmoar.so-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /tmp/claude-1000/va-n-syms/lib/libmoar.so-gdb.py
+line to your configuration file "/home/longwalker/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/longwalker/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+
+Catchpoint 1
+  Inferior loaded /tmp/claude-1000/va-n-syms/lib/libmoar.so
+    /usr/lib/libc.so.6
+    /usr/lib/libzstd.so.1
+    /usr/lib/libm.so.6
+0x00007ffff7fe2b16 in ?? () from /lib64/ld-linux-x86-64.so.2
+Breakpoint 2 at 0x7ffff7bf6a51: file /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/src/zig/6model/reprs/vmarray/elements.zig, line 863.
+Breakpoint 3 at 0x7ffff7bf69d8: file /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/src/zig/6model/reprs/vmarray/elements.zig, line 892.
+Breakpoint 4 at 0x7ffff7c682da: file ./src/core/exceptions.c, line 909.
+[New Thread 0x7ffff6d5f6c0 (LWP 528280) (id 2)]
+ENTER at_pos_int64 index=-11 (call 435351)
+THROW 'MVMArray: Index out of bounds' from 6model.reprs.vmarray.elements.fromEnd <- E.atPosKind(.i64).read <- E.atPosKind(.i64).jit <- None
+i64.devirt.at_i.-11: DIED MVMArray: Index out of bounds
+ENTER bind_pos_int64 index=-11 (call 434029)
+THROW 'MVMArray: Index out of bounds' from 6model.reprs.vmarray.elements.fromEnd <- 6model.reprs.vmarray.elements.bindIndex <- E.bindPosKind(.i64).jit <- None
+i64.devirt.bind_i.-11: DIED MVMArray: Index out of bounds
+ENTER at_pos_int64 index=-11 (call 437351)
+THROW 'MVMArray: Index out of bounds' from 6model.reprs.vmarray.elements.fromEnd <- E.atPosKind(.i64).read <- E.atPosKind(.i64).jit <- None
+i64.devirt.at_i.-11.again: DIED MVMArray: Index out of bounds
+ENTER bind_pos_int64 index=-11 (call 436029)
+THROW 'MVMArray: Index out of bounds' from 6model.reprs.vmarray.elements.fromEnd <- 6model.reprs.vmarray.elements.bindIndex <- E.bindPosKind(.i64).jit <- None
+i64.devirt.bind_i.-11.again: DIED MVMArray: Index out of bounds
+i64.devirt.at_i.-10: 0
+i64.devirt.bind_i.-10: 10
+i64.devirt.at_i.10: 0
+i64.devirt.bind_i.10: 11
+i64.devirt.bind_i.30000: 30001
+done: 1
+[Thread 0x7ffff6fe0780 (LWP 528271) (id 1) exited]
+[Thread 0x7ffff6d5f6c0 (LWP 528280) (id 2) exited]
+[New process 528271 (id 3)]
+[Inferior 1 (process 528271) exited normally]
+CALLS at_pos_int64=441351 bind_pos_int64=442029

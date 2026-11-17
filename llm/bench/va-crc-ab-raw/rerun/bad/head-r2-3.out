@@ -1,0 +1,7 @@
+>>> INIT: 0.138812385s (100000 objects)
+RUN 1: 1.569543277s
+RUN 2: 1.569169454s
+RUN 3: 1.575709101s
+RUN 4: 1.578209871s
+RUN 5: 1.588265947s
+<<< 50000 packages with bad addresses found. Alert the Elves!

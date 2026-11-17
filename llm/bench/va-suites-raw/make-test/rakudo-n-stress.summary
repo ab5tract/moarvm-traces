@@ -1,0 +1,9 @@
+Test Summary Report
+-------------------
+t/04-nativecall/02-simple-args.t                              (Wstat: 512 (exited 2) Tests: 24 Failed: 2)
+  Failed tests:  17-18
+  Non-zero exit status: 2
+t/09-moar/Line_Break__LineBreak.t                             (Wstat: 0 Tests: 2 Failed: 0)
+  TODO passed:   1-2
+t/12-rakuast/xx-fixed-in-rakuast.rakutest                     (Wstat: 0 Tests: 171 Failed: 0)
+  TODO passed:   76

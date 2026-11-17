@@ -1,0 +1,6 @@
+2026-11-17 13:15:02 CET	va-c-oracle	exit 0	49s	load 1.62	opts -Dzig-reprs=false -Dgc-debug=1	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2026-11-17 13:16:43 CET	va-n-oracle	exit 0	41s	load 1.50	opts -Dgc-debug=1	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2026-11-17 13:17:30 CET	va-c-base	exit 0	47s	load 1.72	opts -Dzig-reprs=false	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2026-11-17 13:19:10 CET	va-n-base	exit 0	40s	load 1.87	opts 	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2026-11-17 13:20:59 CET	va-c-stress	exit 0	49s	load 1.40	opts -Dzig-reprs=false -Dgc-debug=1 -Dnursery-size=524288	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support
+2026-11-17 13:21:40 CET	va-n-stress	exit 0	41s	load 1.88	opts -Dgc-debug=1 -Dnursery-size=524288	This is MoarVM version 2026.09-327-g472cf7e92 built with JIT support

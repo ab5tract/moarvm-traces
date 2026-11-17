@@ -1,0 +1,2 @@
+--profile-filename is deprecated and will be removed in a future Rakudo release. Please use --profile=<filename> instead.
+Heap snapshot written to /tmp/claude-1000/va/t8/ev/heap/n-2.mvmheap
