@@ -181,12 +181,26 @@ passed to the allocator; an array without storage has `slots.any == NULL`)
 takes precedence over reproducing the pointer value. The value reaches
 outside code: `MVM_nativecall_unmarshal_vmarray` passes `slots + start * 0`
 through, so native code given such an array receives NULL where the C gave
-a non-NULL zero-byte pointer. One consequence inside the array: a
-`write_buf` with `count > 0` into a recomposed clone whose
-`offset + count == elems` (no growth, no throw) copies into a zero-byte
-block in the C (a heap overrun) and through NULL in the Zig (a crash);
-neither is defined, and no differential case drives it (Task 2 §6
+a non-NULL zero-byte pointer. One consequence inside the array: an
+operation that goes on to read or write the slots of such an array (only
+after a further recompose, or a `write_buf` with `count > 0` into a
+recomposed clone whose `offset + count == elems`, which neither grows nor
+throws) accesses a zero-byte block in the C, a heap overrun with undefined
+result. The Zig array checks the slots pointer there (`kinds.slots` and the
+byte copies of `elements.zig`) and faults deterministically through
+`moar.nullDeref`: a volatile read in the null page, SIGSEGV (SIGABRT only
+if page 0 were mapped). No differential case drives this (Task 2 §6
 "`writeint` on a recomposed array without storage").
+
+The same helper is used wherever the C itself reads through NULL on a path
+it reaches, so the Zig faults with the C's signal instead of unwrapping a
+NULL pointer (illegal behaviour in Zig): a splice or slice copying from a
+non-VMArray with elements (`s_repr_data->slot_type`, `VMArray.c:958`, Task 2
+§6), a splice whose `from` is a NULL object (`REPR(from)`), another REPR's
+`elems` or `at_pos` slot left NULL (MVMContinuation's `elems`: the C jumps
+to address 0), and NULL REPR data. Task 2's programs drive none of these
+(they crash the process); `vmarray_elements_test.zig` checks the first two
+in forked children (both SIGSEGV).
 
 ## 4. Against Task 2's sections 4-6
 
