@@ -1,0 +1,3 @@
+c358db93317f419ee3bc3a127c0810bc  .superpowers/sdd/2026-11-16-zig-vmarray-repr/t7-old-c-base/libmoar.so
+54f1616625ee11be049330016c3b2716  /tmp/claude-1000/va-c-base/lib/libmoar.so
+df703780ff591abe72b6a3111764ca26  /tmp/claude-1000/va-n-base/lib/libmoar.so

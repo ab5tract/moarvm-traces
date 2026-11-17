@@ -1,0 +1,4 @@
+base nqp libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+base rakudo libmoar=/tmp/claude-1000/va-c-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 NQP_HOME=/tmp/claude-1000/tune-zig-prefix/share/nqp RAKUDO_HOME=/home/longwalker/code/raku/x.core/zmoarz/rakudo/gen/build_rakudo_home RAKUDO_NO_PRECOMPILATION=1 
+head nqp libmoar=/tmp/claude-1000/va-n-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+head rakudo libmoar=/tmp/claude-1000/va-n-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 NQP_HOME=/tmp/claude-1000/tune-zig-prefix/share/nqp RAKUDO_HOME=/home/longwalker/code/raku/x.core/zmoarz/rakudo/gen/build_rakudo_home RAKUDO_NO_PRECOMPILATION=1 

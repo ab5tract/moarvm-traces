@@ -1,0 +1,1 @@
+base: heap snapshot exit 0, 1 s, load 0.86 1.41 1.55 at 2026-11-17 12:51:57, stdout '2000', stderr 272 bytes, snapshot 2161848 bytes

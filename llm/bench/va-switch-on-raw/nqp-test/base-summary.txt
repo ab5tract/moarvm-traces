@@ -1,0 +1,1 @@
+base: make test exit 0, 18 s, load 0.87 1.50 1.59 at 2026-11-17 12:50:56, libmoar /tmp/claude-1000/va-c-base/lib/libmoar.so

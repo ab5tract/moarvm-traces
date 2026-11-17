@@ -1,0 +1,1 @@
+diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 9987 diff-nqp/nospesh 9987 diff-raku/spesh 2475 diff-raku/nospesh 2475 serial/spesh 196 serial/nospesh 196 devirt/spesh 10 devirt/nospesh 10; cross-read identical)

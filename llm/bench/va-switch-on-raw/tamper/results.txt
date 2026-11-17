@@ -1,0 +1,6 @@
+plain: exit 0 (expected 0)
+nonl: exit 1 (expected 1)
+nonl2: exit 2 (expected 2)
+mm: exit 3 (expected 3)
+mmbad: exit 1 (expected 1)
+mmraku: exit 3 (expected 3)

@@ -1,0 +1,6 @@
+load 1.76 1.88 1.46 at 2026-11-17 12:36:13
+Build Summary: 93/93 steps succeeded; 224/236 tests passed (12 skipped)
++- run test shim-test 12 pass (12 total) 52ms MaxRSS:57M
++- run test hash-str-test 103 pass, 7 skip (110 total) 863ms MaxRSS:58M
++- run test gc-test 61 pass, 5 skip (66 total) 524ms MaxRSS:73M
++- run test repr-test 48 pass (48 total) 226ms MaxRSS:58M

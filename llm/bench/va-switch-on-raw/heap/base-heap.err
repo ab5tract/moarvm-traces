@@ -1,0 +1,2 @@
+--profile-filename is deprecated and will be removed in a future Rakudo release. Please use --profile=<filename> instead.
+Heap snapshot written to /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/.superpowers/sdd/2026-11-16-zig-vmarray-repr/t7-heap/base.mvmheap

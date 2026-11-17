@@ -1,0 +1,4 @@
+diff.sh: head not repeatable (diff-nqp, spesh): run 1 against run 2, first difference at
+  /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/.superpowers/sdd/2026-11-16-zig-vmarray-repr/t7-tamper/nonl2/head-diff-nqp-spesh-1.out does not end with a newline
+  /home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/.superpowers/sdd/2026-11-16-zig-vmarray-repr/t7-tamper/nonl2/head-diff-nqp-spesh-2.out ends with a newline
+  (no line differs; the files differ only in their final newline)

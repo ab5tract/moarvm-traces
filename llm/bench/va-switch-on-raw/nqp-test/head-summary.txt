@@ -1,0 +1,1 @@
+head: make test exit 0, 18 s, load 1.18 1.54 1.60 at 2026-11-17 12:51:14, libmoar /tmp/claude-1000/va-n-base/lib/libmoar.so

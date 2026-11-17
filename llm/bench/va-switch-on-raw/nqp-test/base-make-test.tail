@@ -1,0 +1,4 @@
+t/concurrency/04-osr-crash.t ............ ok
+All tests successful.
+Files=150, Tests=13746, 18 wallclock secs ( 0.45 usr  0.15 sys + 14.85 cusr  1.63 csys = 17.08 CPU)
+Result: PASS
