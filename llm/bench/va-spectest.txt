@@ -1,4 +1,4 @@
-# va spectest A/B (Task 8, Step 4): Zig array / C array wall 1.003, RSS 0.994; zero failures in six runs
+# va spectest A/B (Task 8, Step 4): Zig array / C array wall 1.003 (in the control's range), RSS 0.994 (below it, not above 1 %); zero failures in six runs
 
 Sides, six runs in the order base head head base base head, one at a time:
   base va-c-base (C array, -Dzig-reprs=false), head va-n-base (Zig array, defaults); both built at 472cf7e92
@@ -50,9 +50,13 @@ ratio head/base: wall 1.003 RSS 0.994 user 0.988
 
 Gate (spec 8 and the global constraints: "a spectest wall or RSS ratio outside the control's spread and above 1
 percent" stops the campaign): wall 1.003, the head median (288.08 s) inside the base range (280.93-290.00 s) and below
-1 percent: **passes**; RSS 0.994, the head median inside the base range: **passes**. Nothing is claimed inside the
-spreads: the Zig array's spectest time and memory are not distinguishable from the C array's here. (Base run 1, the
-first of the six and at the lowest 15-minute load, is the fastest; the base spread is wide mostly by it.)
+1 percent: **passes**; RSS 0.994: the head median (1,024,884 kB) lies **below** the base range (1,027,660-1,035,352 kB),
+2,776 kB under its lowest run, so it is outside the control's spread on the low side, and it is not above 1 percent
+(0.994 < 1.01): **passes**, because the rule stops only a reading outside the spread *and* above 1 percent. (Corrected
+at Task 8's review: this line first said the head median was inside the base range, which it is not.) Wall is not
+distinguishable from the C array's here. The lower RSS is recorded, not claimed as a gain: three runs a side, 0.6 %,
+and the crc-getter shows no RSS reduction (va-crc-ab.md). (Base run 1, the first of the six and at the lowest
+15-minute load, is the fastest; the base wall spread is wide mostly by it.)
 
 ## Failures and the TODO-passed list
 
