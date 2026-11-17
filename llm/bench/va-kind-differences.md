@@ -168,6 +168,26 @@ copies to the start of the old storage, and a splice or slice into it from a dif
 array reproduces these by keeping the same order of effects, not by special
 cases.
 
+**The one deliberate difference of the Zig array (2026-11-17, Task 6).**
+Where the C hands the allocator a zero length for one of the six kinds (the
+growth before `zero_slots` throws: `MVM_malloc(8 * 0)` or
+`MVM_realloc(slots, 0)`; `copy_to` and `deserialize` of a recomposed array
+with `elems > 0`: `MVM_malloc(elems * 0)`), the Zig array does not call the
+allocator: `slots` keeps its value (NULL for a fresh array) or stays NULL,
+where the C holds a zero-byte block (or, under glibc's `realloc(p, 0)`,
+NULL). Every other field (`ssize`, `elems`, `start`) and every message and
+throw is the C's. The allocator rule (spec 5.4: a zero length is never
+passed to the allocator; an array without storage has `slots.any == NULL`)
+takes precedence over reproducing the pointer value. The value reaches
+outside code: `MVM_nativecall_unmarshal_vmarray` passes `slots + start * 0`
+through, so native code given such an array receives NULL where the C gave
+a non-NULL zero-byte pointer. One consequence inside the array: a
+`write_buf` with `count > 0` into a recomposed clone whose
+`offset + count == elems` (no growth, no throw) copies into a zero-byte
+block in the C (a heap overrun) and through NULL in the Zig (a crash);
+neither is defined, and no differential case drives it (Task 2 §6
+"`writeint` on a recomposed array without storage").
+
 ## 4. Against Task 2's sections 4-6
 
 - Section 4: every bullet agrees with the source. Precision added here: the
