@@ -22,8 +22,8 @@ nqp/rakudo: Task 1's builds (nqp 305ff2f77, rakudo c6d6fc3c6b), only the libmoar
 Raw:       cfix-P-raw/repro/ (run-all on the fix-round-1 builds), cfix-P-raw/cmp.txt,
            cfix-P-raw/pr-repro/ (the PR text's nqp programs on cfix-base, cfix-asan, cfix-P,
            cfix-P-asan), cfix-P-raw/round1/ (shaped-array and site probes, type-object source, P2
-           growth check, N2 reruns), cfix-P-raw/hand/, cfix-P-raw/suites/ (run on the first build,
-           section 4), cfix-P-raw/build/
+           growth check, N2 reruns), cfix-P-raw/hand/, cfix-P-raw/suites/ (first build) and
+           cfix-P-raw/suites-r1/ (fix-round-1 build), section 4, cfix-P-raw/build/
 ```
 
 ## 1. The fix
@@ -255,14 +255,18 @@ map `/tmp/claude-1000/cfix-P/lib/libmoar.so`:
 | nqp 305ff2f77 | 0 | 150 / 13746 | PASS (18 s, load 0.63) | identical (`diff` empty) |
 | rakudo c6d6fc3c6b | 0 | 599 / 11162 | PASS (128 s, load 0.92) | identical (`diff` empty) |
 
-**Not re-run after fix round 1, on purpose.** The only source difference between the suite build
-(e9c533194) and the new tip (c7513438e) is P3's message: its format string, its two arguments, and the
-new static helper `kind_to_elements_name`, which is called only from that throw.
-`git diff e9c533194 c7513438e` shows exactly that, two hunks:
-- +11 lines: the helper, after slot_type_to_kind;
-- 2 lines changed: the format string and the arguments of the P3 throw.
+**Re-run on the fix-round-1 build** (tip c7513438e, cfix-P rebuilt from it; its libmoar holds the new
+P3 string), `cfix-maketest-driver.sh cfix-P-raw/suites-r1 cfix-P`, probes map
+`/tmp/claude-1000/cfix-P/lib/libmoar.so`:
 
-The P1 and P2 commits have the same trees as before (only their messages changed).
+| project | exit | Files / Tests | Result | per-file list vs cfix-base |
+|---|---:|---|---|---|
+| nqp 305ff2f77 | 0 | 150 / 13746 | PASS (18 s, load 0.23) | identical (`diff` empty) |
+| rakudo c6d6fc3c6b | 0 | 599 / 11162 | PASS (124 s, load 0.58) | identical (`diff` empty) |
+
+The delta between the two builds is the P3 throw's format string and arguments plus the new static
+helper `kind_to_elements_name` (`git diff e9c533194 c7513438e`). The table above is the result for the
+build offered.
 
 ## 5. Call sites of nqp::splice in nqp and Rakudo (redone at fix round 1)
 
@@ -623,8 +627,9 @@ The review found the C correct. Its findings, and what was done for each:
      `cfix-P-raw/build/`, the first build's logs in `/tmp/claude-1000/cfix-logs/round1-old/`).
    - All reproducers and the PR programs were re-run on both builds, and every quoted output was
      updated.
-   - The suites were not re-run (section 4). `git diff e9c533194 c7513438e` is confined to the helper
-     and the throw's format string and arguments.
+   - The suites were re-run on the rebuilt cfix-P (c7513438e): nqp and rakudo PASS, per-file lists
+     identical to cfix-base (section 4). `git diff e9c533194 c7513438e` is the helper and the throw's
+     format string and arguments.
 3. **The P2 "before" was too broad.**
    - Verified: a fresh uint4 array as the target dies with "Unhandled slot type" from zero_slots on
      cfix-base and cfix-asan (`cfix-P-raw/round1/p2-grow/`).
