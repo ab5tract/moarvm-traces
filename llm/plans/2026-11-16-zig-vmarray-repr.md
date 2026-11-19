@@ -275,7 +275,8 @@ the wall readings (spectest 1.003, crc-getter 0.993-0.999) show nothing to attri
 
 ### For the user (decisions and reports; nothing here was acted on)
 
-1. **The differential's exit 3 needs a decision.** The Zig array copies overlapping ranges of a splice of an array
+1. **The differential's exit 3: decided by the user 2026-11-19 — memmove semantics are accepted and exit 3 stays the
+   recorded outcome.** (As put to the user:) The Zig array copies overlapping ranges of a splice of an array
    from itself with memmove semantics, where the C uses `memcpy` (undefined for overlapping ranges) for the eleven
    memcpy kinds; it differs from the C exactly on the 195 listed lines (176 diff-nqp, 19 diff-raku, per setting) and
    equals the memmove model on every one. Accept memmove there, or replicate the C's `memcpy` behaviour (which is
