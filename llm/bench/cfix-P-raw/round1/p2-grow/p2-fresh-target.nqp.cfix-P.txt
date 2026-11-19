@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-P/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P/lib nqp-m p2-fresh-target.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+splice into a fresh uint4 array: DIED MVMArray: Unhandled slot type
+----
+exit: 0

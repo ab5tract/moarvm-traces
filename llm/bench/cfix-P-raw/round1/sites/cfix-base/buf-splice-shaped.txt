@@ -1,0 +1,4 @@
+This representation (MultiDimArray) cannot unbox to a native int (for type array[int])
+  in block <unit> at -e line 1
+
+exit: 1

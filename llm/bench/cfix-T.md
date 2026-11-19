@@ -1,5 +1,8 @@
 # cfix area T: a rejected pop or unshift changes the array (T1, T2) (Task 3)
 
+(Revised at Task 3's fix round 1, section 6: the PR text's first paragraph no longer says "before
+anything is touched", and it claims consistency only with shift. Branch and commits unchanged.)
+
 ```
 Branch:    vmarray-stale-slots, from origin/main f112c3998, in P (local only, not pushed)
 Commits:   27ebea0b8f7f421b4bc53b630fbc614c67959126 "Check the register kind before dropping the element in VMArray pop" (T1)
@@ -60,6 +63,9 @@ shows the elements and elems unchanged), and it is what every successful unshift
 
 Defined behaviour: a rejected pop or unshift leaves the array unchanged, as a rejected shift already
 does (shift's switch reads before it moves start and decrements elems after it, 826-902). No new message.
+That is the only consistency claimed: a rejected push or bind_pos still grows the array first (by a
+zeroed slot, not a stale pointer; `va-differential.md` section 4, cfix-baseline.md section 5), which is
+not in this area's scope and not changed.
 
 Hunks: pop 655-661 and 719-727, unshift 755-827. Area S's hunks are in copy_elements and asplice, B's in
 write_buf/read_buf, G's in set_size_internal: no overlap. `git merge-tree` of this branch with
@@ -100,7 +106,7 @@ outputs; run-all now also runs the four programs added in this task). `cfix-T-ra
 compares each with the unmodified builds' output of the same program, after the normalisation of
 cfix-G-raw/cmp-repro.sh (upstream outputs: cfix-baseline-raw/repro/, cfix-S-raw/round1/ for the two
 programs Task 2 added, and the cfix-base/cfix-asan runs of this task's new programs in
-cfix-P-raw/repro/ and cfix-T-raw/repro/). Result (`cfix-T-raw/cmp.txt`): 81 same, 7 differ:
+cfix-P-raw/repro/ and cfix-T-raw/repro/). Result: 81 same, 7 differ (at fix round 1, with the shaped-array program added, `cfix-T-raw/cmp.txt` has 94 outputs: 87 same, the same 7 differ):
 - the expected flips: `T1-rejected-pop.nqp` and `T2-rejected-unshift.nqp` (plain and ASAN), and
   `T-rejected-leaves-array.nqp` (plain and ASAN);
 - `B1-read-buf-past-storage.raku` plain: `past1: 1`, `past4: 16844807` against the baseline's 40 /
@@ -125,8 +131,9 @@ Body:
 
 > A pop or an unshift with a register of the wrong kind (for example `nqp::pop_i` on an object array)
 > throws "pop expected object register" or "unshift expected object register", but by then the array
-> had already been changed. This change makes both leave the array as it was, as shift already does:
-> the register kind is checked before anything is touched. No message changes.
+> had already been changed. This change makes both leave the array as it was, as a rejected shift
+> already does: the register kind is now checked before the array's elements or size change. No
+> message changes.
 >
 > In pop, `elems` was decremented before the switch that checks the kind, and the throw came before
 > the slot was cleared. The array lost its last element, while the slot still held the object pointer.
@@ -185,3 +192,20 @@ Body:
 > Found while porting the VMArray REPR to Zig.
 >
 > 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+## 6. Fix round 1
+
+- The PR text's first paragraph said "the register kind is checked before anything is touched". That
+  contradicted the later paragraph saying unshift still makes front room first. It now reads
+  "checked before the array's elements or size change".
+- The only consistency claimed, in the PR text and in section 1, is "as a rejected shift already
+  does". Section 1 now also says that a rejected push or bind_pos still grows the array by a zeroed
+  slot. That is out of scope and unchanged.
+- I checked both commit bodies for the same over-statement. T1's says a rejected pop "leaves the
+  array as it was", and pop makes no room, so that is exact. T2's says a rejected unshift "leaves the
+  elements and elems as they were", and it describes the front room explicitly. Neither needed a
+  change, so branch `vmarray-stale-slots` is unchanged: 27ebea0b8f7f421b4bc53b630fbc614c67959126 and
+  fd53df2e04387d79830c4dfad405ded65c557a9b, with the same trees.
+- run-all now also runs `P1-splice-shaped-raku.raku`. It was run on cfix-T and cfix-T-asan, and is the
+  same as upstream (SIGSEGV), which raises section 3's counts to 94 outputs: 87 same, and the same 7
+  differing.

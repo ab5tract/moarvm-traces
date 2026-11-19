@@ -6,22 +6,22 @@ unshift_i: DIED MVMArray: unshift expected object register
 elems 2, element 1 is "b"
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==2289250==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f2336f5af82 bp 0x7ffda9912be0 sp 0x7ffda9910b10 T0)
-==2289250==The signal is caused by a READ memory access.
-==2289250==Hint: address points to the zero page.
-    #0 0x7f2336f5af82 in MVM_interp_run (/tmp/claude-1000/cfix-P-asan/lib/libmoar.so+0x83bf82) (BuildId: 301a5c643f10ee12aa8b2dabc9bb66cd509a81fc)
-    #1 0x56331b0734d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
-    #2 0x7f2336427780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #3 0x7f23364278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #4 0x56331b073614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+==2388713==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f7ff615af82 bp 0x7ffe2d43b4e0 sp 0x7ffe2d439410 T0)
+==2388713==The signal is caused by a READ memory access.
+==2388713==Hint: address points to the zero page.
+    #0 0x7f7ff615af82 in MVM_interp_run (/tmp/claude-1000/cfix-P-asan/lib/libmoar.so+0x83bf82) (BuildId: e96ee3dfcffb193880c422eeb435dcd2790353ce)
+    #1 0x56016716d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7f7ff5627780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7f7ff56278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x56016716d614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
 
-==2289250==Register values:
-rax = 0x0000000000000007  rbx = 0x00007d333504c53c  rcx = 0x00007b2334006780  rdx = 0x00000fa6e6a018a4  
-rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffda9912be0  rsp = 0x00007ffda9910b10  
- r8 = 0x00007d333504c526   r9 = 0x00000fa666a098a4  r10 = 0x00000fa666a098a4  r11 = 0x00000fa6e6a018a5  
-r12 = 0x00007b2332529bb8  r13 = 0x00007f2335a8c5f8  r14 = 0x0000000000000000  r15 = 0x00007ca334fe0080  
+==2388713==Register values:
+rax = 0x0000000000000007  rbx = 0x00007d8ff423d53c  rcx = 0x00007b7ff3206780  rdx = 0x00000fb27e83faa4  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffe2d43b4e0  rsp = 0x00007ffe2d439410  
+ r8 = 0x00007d8ff423d526   r9 = 0x00000fb1fe847aa4  r10 = 0x00000fb1fe847aa4  r11 = 0x00000fb27e83faa5  
+r12 = 0x00007b7ff1729ab8  r13 = 0x00007f7ff4c3c5f8  r14 = 0x0000000000000000  r15 = 0x00007cfff41e0080  
 AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-P-asan/lib/libmoar.so+0x83bf82) (BuildId: 301a5c643f10ee12aa8b2dabc9bb66cd509a81fc) in MVM_interp_run
-==2289250==ABORTING
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-P-asan/lib/libmoar.so+0x83bf82) (BuildId: e96ee3dfcffb193880c422eeb435dcd2790353ce) in MVM_interp_run
+==2388713==ABORTING
 ----
 exit: 1

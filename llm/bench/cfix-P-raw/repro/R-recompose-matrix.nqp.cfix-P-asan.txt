@@ -1,0 +1,78 @@
+probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m R-recompose-matrix.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+none -> obj: allowed; live elems 0; fresh elems 1: VMArray(7)
+none -> obj2: allowed; live elems 0; fresh elems 1: VMArray(7)
+none -> int8: allowed; live elems 0; fresh elems 1: 7
+none -> uint8: allowed; live elems 0; fresh elems 1: 7
+none -> int64: allowed; live elems 0; fresh elems 1: 7
+none -> uint64: allowed; live elems 0; fresh elems 1: 7
+none -> num64: allowed; live elems 0; fresh elems 1: 7.5
+none -> str: allowed; live elems 0; fresh elems 1: z
+obj -> obj: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> obj2: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> int8: allowed; live elems 0; fresh elems 1: 7
+obj -> uint8: allowed; live elems 0; fresh elems 1: 7
+obj -> int64: allowed; live elems 0; fresh elems 1: 7
+obj -> uint64: allowed; live elems 0; fresh elems 1: 7
+obj -> num64: allowed; live elems 0; fresh elems 1: 7.5
+obj -> str: allowed; live elems 0; fresh elems 1: z
+obj2 -> obj: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> obj2: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> int8: allowed; live elems 0; fresh elems 1: 7
+obj2 -> uint8: allowed; live elems 0; fresh elems 1: 7
+obj2 -> int64: allowed; live elems 0; fresh elems 1: 7
+obj2 -> uint64: allowed; live elems 0; fresh elems 1: 7
+obj2 -> num64: allowed; live elems 0; fresh elems 1: 7.5
+obj2 -> str: allowed; live elems 0; fresh elems 1: z
+int8 -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+int8 -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+int8 -> int8: allowed; live elems 2: 5 6; fresh elems 1: 7
+int8 -> uint8: allowed; live elems 2: 5 6; fresh elems 1: 7
+int8 -> int64: allowed; live elems 0; fresh elems 1: 7
+int8 -> uint64: allowed; live elems 0; fresh elems 1: 7
+int8 -> num64: allowed; live elems 0; fresh elems 1: 7.5
+int8 -> str: allowed; live elems 0; fresh elems 1: z
+uint8 -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+uint8 -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+uint8 -> int8: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> uint8: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> int64: allowed; live elems 0; fresh elems 1: 7
+uint8 -> uint64: allowed; live elems 0; fresh elems 1: 7
+uint8 -> num64: allowed; live elems 0; fresh elems 1: 7.5
+uint8 -> str: allowed; live elems 0; fresh elems 1: z
+int64 -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+int64 -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+int64 -> int8: allowed; live elems 0; fresh elems 1: 7
+int64 -> uint8: allowed; live elems 0; fresh elems 1: 7
+int64 -> int64: allowed; live elems 2: 5 6; fresh elems 1: 7
+int64 -> uint64: allowed; live elems 2: 5 6; fresh elems 1: 7
+int64 -> num64: allowed; live elems 0; fresh elems 1: 7.5
+int64 -> str: allowed; live elems 0; fresh elems 1: z
+uint64 -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+uint64 -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected int register
+uint64 -> int8: allowed; live elems 0; fresh elems 1: 7
+uint64 -> uint8: allowed; live elems 0; fresh elems 1: 7
+uint64 -> int64: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> uint64: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> num64: allowed; live elems 0; fresh elems 1: 7.5
+uint64 -> str: allowed; live elems 0; fresh elems 1: z
+num64 -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected num register
+num64 -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected num register
+num64 -> int8: allowed; live elems 0; fresh elems 1: 7
+num64 -> uint8: allowed; live elems 0; fresh elems 1: 7
+num64 -> int64: allowed; live elems 0; fresh elems 1: 7
+num64 -> uint64: allowed; live elems 0; fresh elems 1: 7
+num64 -> num64: allowed; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> str: allowed; live elems 0; fresh elems 1: z
+str -> obj: allowed; live elems 0; fresh DIED MVMArray: push expected string register
+str -> obj2: allowed; live elems 0; fresh DIED MVMArray: push expected string register
+str -> int8: allowed; live elems 0; fresh elems 1: 7
+str -> uint8: allowed; live elems 0; fresh elems 1: 7
+str -> int64: allowed; live elems 0; fresh elems 1: 7
+str -> uint64: allowed; live elems 0; fresh elems 1: 7
+str -> num64: allowed; live elems 0; fresh elems 1: 7.5
+str -> str: allowed; live elems 2: x y; fresh elems 1: z
+done
+----
+exit: 0

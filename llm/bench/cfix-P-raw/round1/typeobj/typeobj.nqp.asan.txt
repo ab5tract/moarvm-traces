@@ -1,0 +1,17 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m typeobj.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+source is concrete: 0
+=================================================================
+==2379706==ERROR: AddressSanitizer: requested allocation size 0x16800000038 (0x16800001038 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
+    #0 0x7f468d52b161  (/usr/lib/libasan.so.8+0x12b161) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f468c0a2a45 in set_size_internal (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x983a45) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f468c0a732c in asplice (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x98832c) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x7f468bf64d1c in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x845d1c) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #4 0x55ff31b944d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2379706==HINT: if you don't care about these errors you may set allocator_may_return_null=1
+SUMMARY: AddressSanitizer: allocation-size-too-big (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x983a45) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in set_size_internal
+==2379706==ABORTING
+----
+exit: 1

@@ -1,0 +1,4 @@
+Type check failed in push to Buf; expected uint8 but got array[int] (array[int].new(:shap...)
+  in block <unit> at -e line 1
+
+exit: 1

@@ -18,8 +18,8 @@
 #   prints "elems 1" for every pair, before and after the fix.
 #
 # A correct VM (the P3 fix) prints, in part 1, "DIED MVMArray: Cannot splice
-# <source register kind> elements into an array of <target register kind>
-# elements" (elems 0) for: obj or str to or from any int/uint/num kind; obj
+# from an array of <source kind> into an array of <target kind>" (objects,
+# strings, integers, unsigned integers, numbers; elems 0) for: obj or str to or from any int/uint/num kind; obj
 # into str; any int/uint kind to or from any num kind; and "returned" with
 # the value for the others. Upstream returns for every pair.
 

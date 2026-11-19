@@ -1,0 +1,4 @@
+MVMArray: Can only splice from a VMArray, got a MultiDimArray
+  in block <unit> at -e line 1
+
+exit: 1

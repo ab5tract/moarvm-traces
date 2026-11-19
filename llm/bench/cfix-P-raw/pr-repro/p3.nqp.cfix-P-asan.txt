@@ -1,16 +1,16 @@
 probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
 run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m p3.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
 ----
-obj into int: DIED MVMArray: Cannot splice obj elements into an array of int64 elements, elems 0
-int into num: DIED MVMArray: Cannot splice int64 elements into an array of num64 elements, elems 0
-obj into str: DIED MVMArray: Cannot splice obj elements into an array of str elements, elems 0
+obj into int: DIED MVMArray: Cannot splice from an array of objects into an array of integers, elems 0
+int into num: DIED MVMArray: Cannot splice from an array of integers into an array of numbers, elems 0
+obj into str: DIED MVMArray: Cannot splice from an array of objects into an array of strings, elems 0
 str into obj: returned, elems 1
   element 0: MVMString
 int into uint8: returned, elems 2
   elements: 65 44
 delete from str through an empty obj list: a c
 delete from uint8 through an empty num list: elems 1
-int into obj: DIED MVMArray: Cannot splice int64 elements into an array of obj elements, elems 0
+int into obj: DIED MVMArray: Cannot splice from an array of integers into an array of objects, elems 0
 survived a collection
 ----
 exit: 0

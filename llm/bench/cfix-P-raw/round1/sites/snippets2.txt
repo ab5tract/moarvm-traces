@@ -1,0 +1,2 @@
+buf-allocate-shaped	my int @a[2] = 1,2; say Buf.allocate(4, @a)
+buf-subbufrw-shaped	my int @a[2] = 1,2; my $b = Buf.new(1,2,3); $b.subbuf-rw(0,1) = Buf.new(9); say $b

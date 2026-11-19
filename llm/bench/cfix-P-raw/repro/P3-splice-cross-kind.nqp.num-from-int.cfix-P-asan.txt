@@ -1,6 +1,6 @@
 probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
 run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P3-splice-cross-kind.nqp num-from-int (timeout 60 s, MemoryMax=4G, ulimit -c 0)
 ----
-num-from-int: DIED MVMArray: Cannot splice int64 elements into an array of num64 elements
+num-from-int: DIED MVMArray: Cannot splice from an array of integers into an array of numbers
 ----
 exit: 0

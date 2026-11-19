@@ -1,0 +1,22 @@
+buf-new-shaped	my int @a[2] = 1,2; say Buf.new(@a)
+blob-new-shaped	my int @a[2] = 1,2; say Blob.new(@a)
+buf-store-shaped	my int @a[2] = 1,2; my $b = Buf.new; $b.STORE(@a); say $b
+buf-append-shaped	my int @a[2] = 1,2; my $b = Buf.new(5); $b.append(@a); say $b
+buf-prepend-shaped	my int @a[2] = 1,2; my $b = Buf.new(5); $b.prepend(@a); say $b
+buf-splice-shaped	my int @a[2] = 1,2; my $b = Buf.new(5,6); $b.splice(1,0,@a); say $b
+buf-push-shaped	my int @a[2] = 1,2; my $b = Buf.new(5); $b.push(@a); say $b
+int-store-shaped	my int @a[2] = 1,2; my int @i; @i.STORE(@a); say @i
+int-assign-shaped	my int @a[2] = 1,2; my int @i = @a; say @i
+int-append-shaped	my int @a[2] = 1,2; my int @i = 1; @i.append(@a); say @i
+int-splice-shaped	my int @a[2] = 1,2; my int @i = 5,6; @i.splice(1,0,@a); say @i
+uint-append-shaped	my uint @a[2] = 1,2; my uint @i = 1; @i.append(@a); say @i
+num-append-shaped	my num @a[2] = 1e0,2e0; my num @i = 1e0; @i.append(@a); say @i
+num-store-shaped	my num @a[2] = 1e0,2e0; my num @i; @i.STORE(@a); say @i
+str-append-shaped	my str @s[2] = <a b>; my str @t = <x>; @t.append(@s); say @t
+str-store-shaped	my str @s[2] = <a b>; my str @t; @t.STORE(@s); say @t
+str-splice-shaped	my str @s[2] = <a b>; my str @t = <x y>; @t.splice(1,0,@s); say @t
+buf-new-typeobj	say Buf.new(array[int])
+int-append-typeobj	my int @i = 1; @i.append(array[int]); say @i
+buf-new-carray	use NativeCall; my $c = CArray[int64].new(1,2); say Buf.new($c)
+buf-append-carray	use NativeCall; my $c = CArray[int64].new(1,2); my $b = Buf.new(5); $b.append($c); say $b
+int-append-carray	use NativeCall; my $c = CArray[int64].new(1,2); my int @i = 1; @i.append($c); say @i

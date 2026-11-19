@@ -1,0 +1,2 @@
+MoarVM panic: Memory allocation failed; could not allocate 264965122424860 bytes
+exit: 1

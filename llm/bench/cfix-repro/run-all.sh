@@ -23,6 +23,7 @@ $R $X -t 60 T3-self-splice-shifted.nqp; $R $X -t 60 T3-self-splice-shifted.nqp c
 $R $X -t 60 T3-self-splice-overcount.nqp; $R $X -t 60 T3-self-splice-overcount.nqp control
 $R $X -t 600 S1-self-splice-vs-clone.nqp
 $R $X -t 60 P1-splice-empty-non-vmarray.nqp
+for c in buf strapp intapp; do $R $X -t 60 P1-splice-shaped-raku.raku $c; done
 for c in same-fit same-grow empty-src empty-into; do $R $X -t 60 P2-splice-no-storage-same-kind.nqp $c; done
 $R $X -t 120 P3-splice-kind-matrix.nqp
 $R $X -t 60 T-rejected-leaves-array.nqp
