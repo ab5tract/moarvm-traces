@@ -1,11 +1,17 @@
 # cfix area S: splicing a VMArray into itself (S1, T3) (Task 2)
 
+(Revised at Task 2's fix round 1: the defined result is the clone result, T3's count > elems
+direction added, commits recreated with corrected messages and one comment changed; section 7.)
+
 ```
 Branch:    vmarray-self-splice-memmove, from origin/main f112c3998, in P (local only, not pushed)
-Commits:   0593a9574af8a169418eb3159bc4cd44096ffc42 "Use memmove for a VMArray splice of an array into itself"
-           f1cd6bad9a82e2883676d22c888814170359b667 "Copy backwards in a VMArray self-splice that goes element by element"
-           90a506f14e9ff6b330f2a9a6cdedd8070ee467a2 "Don't move start in a VMArray splice of an array into itself at offset 0"
-Diff:      src/6model/reprs/VMArray.c only, +15 -6, three hunks: copy_elements' fast path (memcpy → memmove
+Commits:   b2cbdc57c49d4586a17ae05169cdb344a315b4f6 "Use memmove for a VMArray splice of an array into itself"
+           6ee35f98a84ee5e8cd18c879b7cba79bf8617efd "Copy backwards in a VMArray self-splice that goes element by element"
+           5febdef325774ecd6861631b4e8a0a938185a85b "Don't move start in a VMArray splice of an array into itself at offset 0"
+           (fix round 1; before: 0593a9574, f1cd6bad9, 90a506f14 — same trees for the first two, the third
+           differs from 90a506f14 only in the asplice comment; the prefixes were built from the old
+           tips, see section 7)
+Diff:      src/6model/reprs/VMArray.c only, +14 -6, three hunks: copy_elements' fast path (memcpy → memmove
            and its comment), copy_elements' element loop (backwards when src == dest and d_offset > s_offset),
            asplice's offset-0 adjustment (`&& from != root` and its comment)
 Prefixes:  /tmp/claude-1000/cfix-S (defaults), /tmp/claude-1000/cfix-S-asan (--asan --no-mimalloc), and for the
@@ -29,14 +35,30 @@ Raw:       cfix-S-raw/repro/, cfix-S-raw/base-rerun/ (noise check on cfix-base),
 3. **T3** (VMArray.c:1065): the offset-0 start adjustment is skipped when `from == root`.
 
 They are three commits because they are three defects: undefined behaviour in a library call, a defined
-but kind- and generation-dependent wrong result in a loop, and a re-exposure of dead slots in asplice. Each
+but kind- and generation-dependent wrong result in a loop, and the offset-0 adjustment moving the source
+(re-exposing dead slots, or dropping elements when count > elems) in asplice. Each
 can be reviewed and reverted alone. (1) and (2) together give one definition, stated in both bodies.
 
-What the fix defines, worded as ruled: a self-splice gives **what memmove gives**. That is a copy of the
-array as it stands after asplice's tail move, not "the source as it stood before the splice". The two
-differ when the tail move overwrote part of the copied range. Example: `2,3` on 1 4 7 .. 28 gives
-`1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28`. The copy is the 10 elements as they stand after the
-tail (16 .. 28) was moved left over positions 2-6.
+What the fix defines (ruling of fix round 1): a self-splice gives **the same result as splicing from
+`nqp::clone($a)`**, whatever the kind and GC generation. (The first version of this record said the
+result was "a copy of the array after the tail move", different from the before-the-splice result; that
+was wrong, and so was its example.) Why, from the C, with all three changes in place (E = elems0 =
+elems1 for a self-splice):
+- No offset-0 adjustment runs (T3's change), so start, elems0 and count are as given.
+- The shrinking memmove (`tail > 0 && count > elems1`) cannot run: count > E makes
+  `tail = E - offset - count` negative, clamped to 0.
+- set_size_internal grows to `offset + E + tail >= E`, so its downsizing clear does not run. Its
+  compaction (start > 0, too little room at the end) moves the elements down unchanged. It zeroes only
+  slots at E and above.
+- The growing tail move writes only at `offset + E` and above.
+- So `[0, E)` still holds the array as it was before the splice when the copy starts. The copy reads
+  each element before it is overwritten: memmove on the fast path, the backwards loop on the element
+  path. That is what the clone gives.
+
+Example: `2,3` on 1 4 7 .. 28 grows the array (count 3 < 10). The tail 16 .. 28 moves right to
+positions 12-16, and the copy of the untouched 1 .. 28 lands at 2-11:
+`1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28`, the clone result. Checked over 2704 shapes by
+`cfix-repro/S1-self-splice-vs-clone.nqp` (section 7).
 
 Checked against the C before writing:
 - **(2)** For a self-splice `s_offset` is always 0 and `d_offset = offset >= 0`, so the backwards
@@ -49,12 +71,14 @@ Checked against the C before writing:
   caller produces it.
 - **(2)** aslice (the other caller) copies into a different object.
 - **(3)** The adjustment is wrong for a self-splice in both directions it moves start, not only T3's.
-  For `n > 0` (T3) it re-exposes shifted-off slots. For `n < 0` (count > elems1, e.g. elems 4, count 6,
-  start 2 after two shifts) it moves start forward and the copy then reads past the old elements.
-  Skipping it whenever `from == root` covers both, and the ordinary path is correct for any count.
-  Checked by hand, a STR array a..f with two shifted off, `nqp::splice($a, $a, 0, 6)`: cfix-base
-  prints `4: e f null null`, cfix-S prints `4: c d e f`. Not in the reproducer files; the command is
-  in task-2-report.md.
+  For `n > 0` (slots in front of start, from earlier shifts) it re-exposes shifted-off slots. For
+  `n < 0` (count > elems1; no shift needed) it moves start forward and drops source elements before
+  they are copied. Skipping it whenever `from == root` covers both, and the ordinary path is correct
+  for any count. The `n < 0` direction has its own reproducer, `cfix-repro/T3-self-splice-overcount.nqp`
+  (section 7): an 8-element OBJ array 1 4 .. 22, `nqp::splice($a, $a, 0, 9)`, gives
+  `4 7 10 13 16 19 22 null` on cfix-base and `1 4 7 10 13 16 19 22` on cfix-S. (Also checked by hand
+  on a shifted STR array a..f with two shifted off, `nqp::splice($a, $a, 0, 6)`: cfix-base
+  `4: e f null null`, cfix-S `4: c d e f`.)
 - **(3)** In T3's case (start 2, elems 2, ssize 8), nothing moves in set_size_internal (`n + start =
   6 <= ssize`). The tail memmove copies `c d` to positions 2-3, and the self-copy at offset 0 is the
   identity: `c d c d`.
@@ -164,13 +188,12 @@ Body:
 > `nqp::splice($a, $a, $offset, $count)`, a splice of an array into itself, is handled wrongly in
 > three ways. Each commit fixes one of them.
 >
-> **What the result is now.** After this PR a self-splice gives what memmove gives: the incoming
-> elements are a copy of the array as it stands after asplice has moved the tail to make room,
-> whatever the element kind and whatever GC generation the array is in. That is a definition chosen
-> here, not one the code promised before. It is the result the fast path already happened to give on
-> common platforms, and the element-by-element path is brought in line with it. If you would rather
-> define it as "the array as it was before the splice" (that differs when the tail move overwrites
-> part of the copied range), that would mean copying the source first.
+> **What the result is now.** After this PR a self-splice gives the same result as splicing from a
+> clone of the array, `nqp::splice($a, nqp::clone($a), $offset, $count)`, whatever the element kind
+> and whatever GC generation the array is in. Nothing asplice does before the copy touches the
+> elements being copied, and the copy now reads every element before overwriting it. The code did
+> not promise this before. It is the result the fast path already happened to give on common
+> platforms, and the other two paths are brought in line with it.
 >
 > 1. **Overlapping memcpy.** copy_elements copies with `memcpy` for the numeric kinds, and for OBJ
 >    while the array is not in the second generation. For a self-splice at `0 < $offset < elems`
@@ -187,8 +210,10 @@ Body:
 >    the array itself, that moves the source too. The copy then reads the shifted-off slots and makes
 >    them elements again. In a numeric array they are old values: `90 91 92 0 1 2 3 4 5` with three
 >    shifted off, spliced into itself at 0 replacing 2, gave `90 91 92 0 1 2 2 3 4 5`. In an object or
->    string array they are pointers the collector no longer marks. The adjustment is now skipped for
->    a self-splice.
+>    string array they are pointers the collector no longer marks. When `$count` is larger than the
+>    array, the same adjustment moves start forward instead and drops elements of the source before
+>    they are copied: `nqp::splice($a, $a, 0, 9)` on an 8-element array `1 4 … 22` gave `4 7 … 22`
+>    and a null. The adjustment is now skipped for a self-splice.
 >
 > Reproducer for 1 and 2:
 >
@@ -234,12 +259,66 @@ Body:
 > Before, the first two elements are the dead "a" and "b", and the program crashes using them
 > (SIGSEGV). After, it prints `c d c d`, the same as splicing from `nqp::clone($a)`.
 >
+> A program that compares `nqp::splice($a, $a, $offset, $count)` with the same splice from
+> `nqp::clone($a)`, for object arrays (young and promoted), string and int arrays, with 0 to 3
+> elements shifted off, offsets 0 to 12 and counts 0 to 12 on 8 elements (2704 cases), finds 0
+> differences after this PR, with and without AddressSanitizer. Before, it finds 135 and then
+> crashes on a re-exposed dead object.
+>
 > `make test` of nqp and Rakudo gives the same per-file results as before. A differential run of a
 > larger program, which exercises every array operation over every slot kind, prints the same output
-> as before except on self-splice lines. Those are the STR and promoted-OBJ self-splices, now the
-> memmove result, and the offset-0 self-splices of shifted numeric arrays, which used to return the
-> shifted-off values and now give the spliced elements.
+> as before except on self-splice lines. Those are the STR and promoted-OBJ self-splices, and the
+> offset-0 self-splices of shifted numeric arrays, which used to return the shifted-off values. Each
+> now gives the clone result.
 >
 > Found while porting the VMArray REPR to Zig.
 >
 > 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+## 7. Fix round 1
+
+The review found the C correct and minimal. It found the definition of the result wrong in this
+record, in the PR draft and in the commit bodies, and it found T3's description incomplete.
+
+**Clone equivalence.** I checked the reviewer's argument against the C (section 1, rewritten) and
+found it holds. The reviewer's program is adopted as `cfix-repro/S1-self-splice-vs-clone.nqp`, with a
+header and the program unchanged. It compares a self-splice with the splice from a clone over 2704
+shapes: obj in the nursery, obj in gen2, str and int; 0-3 shifted; offset 0-12; count 0-12.
+Outputs are in `cfix-S-raw/round1/`:
+
+| build | result |
+|---|---|
+| cfix-base | 135 DIFF lines (40 obj nursery, 95 obj gen2), then SIGSEGV (exit 139) before the str and int cases |
+| cfix-asan | 4 DIFF lines (obj nursery, offset 0, counts 9-12: the count > elems direction of T3), then `memcpy-param-overlap` at offset 1 |
+| cfix-S | `cases 2704, differing 0`, exit 0 |
+| cfix-S-asan | `cases 2704, differing 0`, exit 0, no report |
+
+**T3's other direction.** New reproducer `cfix-repro/T3-self-splice-overcount.nqp`, with a `control`
+mode that splices from a clone. It runs counts 9-12 on an 8-element OBJ array 1 4 .. 22:
+
+| build | case | control |
+|---|---|---|
+| cfix-base, cfix-asan | `count 9: elems 8: 4 7 10 13 16 19 22 null` … `count 12: elems 8: 13 16 19 22 null null null null` (no ASAN report: the lost slots read as null) | `1 4 7 10 13 16 19 22` for every count |
+| cfix-S, cfix-S-asan | `1 4 7 10 13 16 19 22` for every count | the same |
+
+Both programs were added to `run-all.sh`.
+
+**Commits recreated.** I built them with `git commit-tree` and `git checkout -B`; no interactive tools
+were used.
+- 0593a9574 → b2cbdc57c and f1cd6bad9 → 6ee35f98a: messages only, same trees. The memmove and
+  element-path bodies now say the result is the clone result.
+- 90a506f14 → 5febdef32: new message, with the count > elems direction and the clone result.
+- The asplice comment is now "Not when splicing SELF into itself: moving start would move the
+  source too." The old text only fit the backward direction.
+- `git diff 90a506f14 5febdef32` is that comment only (2 lines out, 1 in).
+
+**Builds.** The prefixes cfix-S, cfix-S-asan and cfix-S-df were built from the old tips. The only
+source difference is the comment, so they were not rebuilt. All the evidence above and in sections
+2-5 comes from those builds.
+
+Section 5's differential is unaffected. Its "memmove model" wording means the same values: on every
+checked line the head equals the clone result.
+
+**`S1-self-splice-overlap.nqp` header.** One comment line now reads "(memmove semantics; the same as
+splicing from nqp::clone($a), since the tail move does not touch the elements being copied)". It used to
+say "the array as it stands after the tail has been moved". The program and its outputs are unchanged.

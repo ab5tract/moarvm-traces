@@ -18,6 +18,8 @@ for c in int-into-obj obj-into-int num-from-int str-into-obj empty-other; do $R 
 $R $X -t 60 T1-rejected-pop.nqp; $R $X -t 60 T1-rejected-pop.nqp control
 $R $X -t 60 T2-rejected-unshift.nqp; $R $X -t 60 T2-rejected-unshift.nqp control
 $R $X -t 60 T3-self-splice-shifted.nqp; $R $X -t 60 T3-self-splice-shifted.nqp control
+$R $X -t 60 T3-self-splice-overcount.nqp; $R $X -t 60 T3-self-splice-overcount.nqp control
+$R $X -t 600 S1-self-splice-vs-clone.nqp
 $R $X -t 60 B1-read-buf-past-storage.nqp; $R $X -t 60 B1-read-buf-past-storage.raku
 $R $X -t 60 B2-buf-offset-wrap.nqp; $R $X -t 60 B2-buf-offset-wrap.raku
 $R $X -t 60 B3-writeint-no-storage-kind.nqp

@@ -8,8 +8,8 @@
 #
 # Each case fills a 10-element array with 1 4 7 ... 28 and splices it into
 # itself: ($offset, $count) = (1, 0), (2, 3), (5, 0). What a correct VM prints
-# (memmove semantics: the copy reads the array as it stands after the tail
-# has been moved, and every element arrives as it was):
+# (memmove semantics; the same as splicing from nqp::clone($a), since the
+# tail move does not touch the elements being copied):
 #     1,0  -> 1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28
 #     2,3  -> 1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28
 #     5,0  -> 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28

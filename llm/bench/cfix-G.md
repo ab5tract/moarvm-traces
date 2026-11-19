@@ -1,10 +1,14 @@
 # cfix area G: VMArray growth that wraps the slot count (G1) (Task 2)
 
+(Revised at Task 2's fix round 1: comment and commit body also true where unsigned long is 32 bits,
+the plain-build wording names the build; commit recreated, section 6.)
+
 ```
 Branch:    vmarray-size-overflow, from origin/main f112c3998, in P (local only, not pushed)
-Commit:    35f1559a1432fb75d0929855f385e6ae28d9d649
+Commit:    52aa2501956f6270be5e0ae72b2d6aa409772de1 (fix round 1; before: 35f1559a1, which differs only in
+           the code comment and the message; the prefixes were built from 35f1559a1, section 6)
            "Throw instead of wrapping when growing a VMArray to near 2**64 elements"
-Diff:      src/6model/reprs/VMArray.c, 1 hunk, +6 lines (set_size_internal, `ssize >= 8192` branch)
+Diff:      src/6model/reprs/VMArray.c, 1 hunk, +7 lines (set_size_internal, `ssize >= 8192` branch)
 Prefixes:  /tmp/claude-1000/cfix-G (defaults: gcc -O3, mimalloc), /tmp/claude-1000/cfix-G-asan
            (--asan --no-mimalloc), built from `git archive vmarray-size-overflow` copies
            /tmp/claude-1000/cfix-src-G{,-asan} (cfix-G-raw/build/export-build.sh)
@@ -24,8 +28,9 @@ slots are realloc'ed to 0 bytes and zero_slots memsets `(0 - elems)` slots. The 
 rounding:
 
 ```c
-        /* n within 4096 of the top of the range wraps the rounding to 0;
-         * that is over the limit below too */
+        /* a rounded size below n cannot hold the array (e.g. the addition
+         * wrapped, for n within 4096 of 2**64): refuse it, as a size over
+         * the limit below is */
         if (ssize < n)
             MVM_exception_throw_adhoc(tc,
                 "Unable to allocate an array of %"PRIu64" elements",
@@ -33,7 +38,7 @@ rounding:
 ```
 
 Checked against the C before writing it:
-- `ssize < n` is exactly the wrap: without a wrap, the rounding gives a value of at least n. With a wrap
+- Where unsigned long is 64 bits (LP64, as here), `ssize < n` is exactly the wrap (for LLP64 see section 6): without a wrap, the rounding gives a value of at least n. With a wrap
   (n >= 2**64 - 4096) it gives a value below 4096, and n is far above that.
 - The `ssize < 8192` branch cannot wrap. `ssize * 2 < 16384`, and a huge n sets `ssize = n`, which
   the existing limit check catches.
@@ -123,8 +128,8 @@ Body:
 > say("element 1000000000: " ~ nqp::atpos_i($a, 1000000000));
 > ```
 >
-> Before, on a plain build, setelems returns with elems -4096 over a buffer of no size, and the read
-> of a high index crashes:
+> Before, on a plain build here (with mimalloc, the default allocator), setelems returns with elems
+> -4096 over a minimal buffer, and the read of a high index crashes:
 >
 > ```
 > setelems(2**64 - 4096): returned, elems -4096
@@ -135,7 +140,7 @@ Body:
 > With AddressSanitizer it stops in the memset: `negative-size-param: (size=-65536)` in set_elems →
 > set_size_internal → zero_slots.
 >
-> This change treats a rounded size that wrapped as over the limit. It throws the existing "Unable to
+> This change treats a rounded size below `n`, which is what the wrap produces, as over the limit. It throws the existing "Unable to
 > allocate an array of N elements" exception before anything is reallocated, so the array is left
 > as it was. That is the same exception every other too-large size gets; if another behaviour is
 > preferred for this corner, it is a one-line change. The message gives the requested size `n`,
@@ -147,9 +152,34 @@ Body:
 > element 1000000000: 0
 > ```
 >
-> The same output with AddressSanitizer, without a report. `make test` of nqp and Rakudo gives the
+> The same output with AddressSanitizer, without a report.
+>
+> A related observation, not addressed here: the mask is `~0xfffUL`. Where `unsigned long` is 32 bits
+> (64-bit Windows), it clears the upper half of the 64-bit sum, so the rounding truncates the size for
+> any `n >= 2**32 - 4096`. That was found by reading the types, not tried on Windows. The new check is
+> on the result of the rounding, so it also turns that case into the exception instead of a too-small
+> buffer, but the mask itself is left as it is. `make test` of nqp and Rakudo gives the
 > same per-file results as before.
 >
 > Found while porting the VMArray REPR to Zig.
 >
 > 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+## 6. Fix round 1
+
+- **Win64 mask** (reviewer's finding, checked against the types):
+  - `n` is MVMuint64 (`uint64_t`, src/moar.h:103), so `n + 0x1000` is 64 bits wide.
+  - Under LLP64, `~0xfffUL` is a 32-bit `unsigned long`, 0xFFFFF000. It is converted to uint64 by
+    zero extension for the `&`, so the upper 32 bits of the sum are cleared.
+  - For `n >= 2**32 - 4096` the result is therefore below `n`. Before this branch that gave a realloc
+    smaller than `n` elements, after which `elems = n`.
+  - With the fix, the `ssize < n` check throws for it, since it tests the result and not the wrap.
+  - Not fixed (no drive-by): the comment and the commit body now say "a rounded size below n", with
+    the wrap as an example, and the commit body and PR text name the Win64 case.
+  - Found by reading only; there is no Windows machine here.
+- **Plain-build wording:** "on a plain build with mimalloc (the default) … a minimal buffer" (mimalloc's
+  `realloc(p, 0)` returns a minimal block, as Task 1 recorded). It no longer says "a buffer of no size".
+- **Commit:** 35f1559a1 → 52aa25019, recreated with `git commit-tree` on f112c3998.
+  `git diff 35f1559a1 52aa25019` is the comment only (2 lines out, 3 in).
+- **Builds:** the prefixes cfix-G and cfix-G-asan were built from 35f1559a1 and not rebuilt, because the
+  only source difference is the comment. All the evidence above comes from those builds.
