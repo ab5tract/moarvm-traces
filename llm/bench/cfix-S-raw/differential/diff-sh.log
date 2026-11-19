@@ -1,0 +1,73 @@
+diff.sh: base through nqp loads /tmp/claude-1000/cfix-base/lib/libmoar.so
+diff.sh: base through rakudo loads /tmp/claude-1000/cfix-base/lib/libmoar.so
+diff.sh: base diff-nqp spesh run 1 (load 2.61)
+diff.sh: base diff-nqp spesh run 2 (load 1.17)
+diff.sh: base diff-nqp spesh run 3 (load 1.17)
+diff.sh: base diff-nqp nospesh run 1 (load 1.23)
+diff.sh: base diff-nqp nospesh run 2 (load 1.22)
+diff.sh: base diff-nqp nospesh run 3 (load 1.36)
+diff.sh: base diff-raku spesh run 1 (load 1.30)
+diff.sh: base diff-raku spesh run 2 (load 1.36)
+diff.sh: base diff-raku spesh run 3 (load 1.30)
+diff.sh: base diff-raku nospesh run 1 (load 1.33)
+diff.sh: base diff-raku nospesh run 2 (load 1.47)
+diff.sh: base diff-raku nospesh run 3 (load 1.44)
+diff.sh: base serial spesh run 1 (load 1.34)
+diff.sh: base serial spesh run 2 (load 1.34)
+diff.sh: base serial spesh run 3 (load 1.34)
+diff.sh: base serial nospesh run 1 (load 1.34)
+diff.sh: base serial nospesh run 2 (load 1.34)
+diff.sh: base serial nospesh run 3 (load 1.34)
+diff.sh: base devirt spesh run 1 (load 1.31)
+diff.sh: base devirt spesh run 2 (load 1.31)
+diff.sh: base devirt spesh run 3 (load 1.31)
+diff.sh: base devirt nospesh run 1 (load 1.31)
+diff.sh: base devirt nospesh run 2 (load 1.31)
+diff.sh: base devirt nospesh run 3 (load 1.31)
+diff.sh: head through nqp loads /tmp/claude-1000/cfix-S-df/lib/libmoar.so
+diff.sh: head through rakudo loads /tmp/claude-1000/cfix-S-df/lib/libmoar.so
+diff.sh: head diff-nqp spesh run 1 (load 1.31)
+diff.sh: head diff-nqp spesh run 2 (load 1.29)
+diff.sh: head diff-nqp spesh run 3 (load 1.29)
+diff.sh: head diff-nqp nospesh run 1 (load 1.35)
+diff.sh: head diff-nqp nospesh run 2 (load 1.32)
+diff.sh: head diff-nqp nospesh run 3 (load 1.27)
+diff.sh: head diff-raku spesh run 1 (load 1.25)
+diff.sh: head diff-raku spesh run 2 (load 1.39)
+diff.sh: head diff-raku spesh run 3 (load 1.41)
+diff.sh: head diff-raku nospesh run 1 (load 1.42)
+diff.sh: head diff-raku nospesh run 2 (load 1.47)
+diff.sh: head diff-raku nospesh run 3 (load 1.45)
+diff.sh: head serial spesh run 1 (load 1.45)
+diff.sh: head serial spesh run 2 (load 1.42)
+diff.sh: head serial spesh run 3 (load 1.42)
+diff.sh: head serial nospesh run 1 (load 1.42)
+diff.sh: head serial nospesh run 2 (load 1.42)
+diff.sh: head serial nospesh run 3 (load 1.42)
+diff.sh: head devirt spesh run 1 (load 1.42)
+diff.sh: head devirt spesh run 2 (load 1.42)
+diff.sh: head devirt spesh run 3 (load 1.42)
+diff.sh: head devirt nospesh run 1 (load 1.42)
+diff.sh: head devirt nospesh run 2 (load 1.42)
+diff.sh: head devirt nospesh run 3 (load 1.42)
+diff.sh: base reads the serialization of head, spesh (load 1.42)
+diff.sh: head reads the serialization of base, spesh (load 1.42)
+diff.sh: base reads the serialization of head, nospesh (load 1.46)
+diff.sh: head reads the serialization of base, nospesh (load 1.46)
+diff.sh: base and head differ (diff-nqp, spesh), first difference at
+line 1775:
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/base-diff-nqp-spesh-1.out: str.selfsplice.middle: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/head-diff-nqp-spesh-1.out: str.selfsplice.middle: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+diff.sh: base and head differ (diff-nqp, nospesh), first difference at
+line 1775:
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/base-diff-nqp-nospesh-1.out: str.selfsplice.middle: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/head-diff-nqp-nospesh-1.out: str.selfsplice.middle: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+diff.sh: base and head differ (diff-raku, spesh), first difference at
+line 80:
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/base-diff-raku-spesh-1.out: int8.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/head-diff-raku-spesh-1.out: int8.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+diff.sh: base and head differ (diff-raku, nospesh), first difference at
+line 80:
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/base-diff-raku-nospesh-1.out: int8.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+  /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/dx-out/head-diff-raku-nospesh-1.out: int8.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+diff.sh exit 1

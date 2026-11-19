@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-S/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S/lib nqp-m P3-splice-cross-kind.nqp int-into-obj (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+int-into-obj: returned, elems 3
+timeout: the monitored command dumped core
+----
+exit: 139

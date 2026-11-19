@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-G/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G/lib nqp-m O1-procasync-buf-type.nqp hash (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawn: returned
+reads: 1
+repr: VMHash
+timeout: the monitored command dumped core
+----
+exit: 139

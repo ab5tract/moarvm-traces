@@ -1,0 +1,10 @@
+accepted without a model check: diff-raku int8.nqp.splice.self.front
+accepted without a model check: diff-raku int16.nqp.splice.self.front
+accepted without a model check: diff-raku int32.nqp.splice.self.front
+accepted without a model check: diff-raku int64.nqp.splice.self.front
+accepted without a model check: diff-raku uint8.nqp.splice.self.front
+accepted without a model check: diff-raku uint16.nqp.splice.self.front
+accepted without a model check: diff-raku uint32.nqp.splice.self.front
+accepted without a model check: diff-raku uint64.nqp.splice.self.front
+accepted without a model check: diff-raku str.splice.self
+accepted without a model check: diff-raku str.splice.self.1

@@ -1,0 +1,29 @@
+probe: /tmp/claude-1000/cfix-G-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P3-splice-cross-kind.nqp int-into-obj (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+int-into-obj: returned, elems 3
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2224084==ERROR: AddressSanitizer: SEGV on unknown address 0x0008a827a829 (pc 0x7f285bea0c4e bp 0x7ffd036e1a20 sp 0x7ffd036e19f0 T0)
+==2224084==The signal is caused by a READ memory access.
+    #0 0x7f285bea0c4e in VMArray_gc_mark (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x981c4e) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #1 0x7f285be3e1bf in process_worklist (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x91f1bf) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #2 0x7f285be3e786 in MVM_gc_collect (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x91f786) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #3 0x7f285be2d9f0 in run_gc (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x90e9f0) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #4 0x7f285be311ac in MVM_gc_enter_from_allocator (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x9121ac) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #5 0x7f285bd34cbf in MVM_interp_run (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x815cbf) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #6 0x5558f0f654d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #7 0x7f285b227780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #8 0x7f285b2278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #9 0x5558f0f65614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2224084==Register values:
+rax = 0x0000000000000003  rbx = 0x00000f6b0b40903c  rcx = 0x00007b585a0481e0  rdx = 0x0000004141414141  
+rdi = 0x00007b885a4297c8  rsi = 0x0000000000000001  rbp = 0x00007ffd036e1a20  rsp = 0x00007ffd036e19f0  
+ r8 = 0x000000414141414e   r9 = 0x0000000828282829  r10 = 0x0000000000000006  r11 = 0x00000f6b0b40903d  
+r12 = 0x00007f285a84c880  r13 = 0x00007b285742fac0  r14 = 0x00007b585a0481e8  r15 = 0x00007ca859de0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x981c4e) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d) in VMArray_gc_mark
+==2224084==ABORTING
+----
+exit: 1

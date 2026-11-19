@@ -1,0 +1,86 @@
+MISMATCH: diff-nqp str.selfsplice.middle
+    memmove model: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+    printed:       elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.middle1
+    memmove model: elems=20 [s0 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+    printed:       elems=20 [s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.middle9
+    memmove model: elems=20 [s0 s1 s2 s3 s4 s5 s6 s7 s8 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s9]
+    printed:       elems=20 [s0 s1 s2 s3 s4 s5 s6 s7 s8 s0 s1 s2 s3 s4 s5 s6 s7 s8 s0 s9]
+MISMATCH: diff-nqp str.selfsplice.replace.2.3
+    memmove model: elems=17 [s0 s1 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+    printed:       elems=17 [s0 s1 s0 s1 s0 s1 s0 s1 s0 s1 s0 s1 s5 s6 s7 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.replace.tail
+    memmove model: elems=17 [s0 s1 s2 s3 s4 s5 s6 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+    printed:       elems=17 [s0 s1 s2 s3 s4 s5 s6 s0 s1 s2 s3 s4 s5 s6 s0 s1 s2]
+MISMATCH: diff-nqp str.selfsplice.replace.5.5
+    memmove model: elems=15 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+    printed:       elems=15 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s0 s1 s2 s3 s4]
+MISMATCH: diff-nqp str.selfsplice.replace.1.9
+    memmove model: elems=11 [s0 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+    printed:       elems=11 [s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0]
+MISMATCH: diff-nqp str.selfsplice.replace.1.20
+    memmove model: elems=11 [s0 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+    printed:       elems=11 [s0 s0 s0 s0 s0 s0 s0 s0 s0 s0 s0]
+MISMATCH: diff-nqp str.selfsplice.neg
+    memmove model: elems=19 [s0 s1 s2 s3 s4 s5 s6 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s8 s9]
+    printed:       elems=19 [s0 s1 s2 s3 s4 s5 s6 s0 s1 s2 s3 s4 s5 s6 s0 s1 s2 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.shifted.middle
+    memmove model: elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+    printed:       elems=20 [s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.shifted.replace.2.3
+    memmove model: elems=17 [s0 s1 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s5 s6 s7 s8 s9]
+    printed:       elems=17 [s0 s1 s0 s1 s0 s1 s0 s1 s0 s1 s0 s1 s5 s6 s7 s8 s9]
+MISMATCH: diff-nqp str.selfsplice.big.middle
+    memmove model: elems=18000 sha1=1F96941DFE937571E2765AA8C61E70FDD5F4EA40 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+    printed:       elems=18000 sha1=07368B4D0016816D3BD4A41547B0943EA74D7AB8 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+MISMATCH: diff-nqp str.selfsplice.big.1
+    memmove model: elems=18000 sha1=58AC75013ECE46348CBCEB261D5BD1EDDE29EB6E head=[s0 s0 s1] tail=[s8997 s8998 s8999]
+    printed:       elems=18000 sha1=30C1ACF743A5DF47B81DCCDBC9EE12F064076CC2 head=[s0 s0 s0] tail=[s8997 s8998 s8999]
+MISMATCH: diff-nqp str.selfsplice.big.replace
+    memmove model: elems=13000 sha1=1D557F52F944AB224B9D420534CA5EC9FBB8FAC0 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+    printed:       elems=13000 sha1=4D9917CB80E8432F9EDD85B9E06804BE4767DCD0 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+MISMATCH: diff-nqp str.selfsplice.big.shifted
+    memmove model: elems=17993 sha1=14742A8CB82B9F0F4BD626263AE16589DF1D7836 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+    printed:       elems=17993 sha1=C5C924E130CE6B96AFE88F8AA7881CA3FEBB8380 head=[s0 s1 s2] tail=[s8997 s8998 s8999]
+MISMATCH: diff-nqp str.selfsplice.twice
+    memmove model: elems=14 [s0 s1 s0 s0 s1 s0 s1 s2 s3 s3 s1 s2 s3 s3]
+    printed:       elems=14 [s0 s1 s0 s0 s1 s0 s0 s1 s0 s0 s1 s0 s1 s3]
+memmove: diff-nqp i64.selfsplice.shifted.prepend
+memmove: diff-nqp i64.selfsplice.shifted.prepend20
+memmove: diff-nqp i64.selfsplice.shifted.replace
+memmove: diff-nqp i32.selfsplice.shifted.prepend
+memmove: diff-nqp i32.selfsplice.shifted.prepend20
+memmove: diff-nqp i32.selfsplice.shifted.replace
+memmove: diff-nqp i16.selfsplice.shifted.prepend
+memmove: diff-nqp i16.selfsplice.shifted.prepend20
+memmove: diff-nqp i16.selfsplice.shifted.replace
+memmove: diff-nqp i8.selfsplice.shifted.prepend
+memmove: diff-nqp i8.selfsplice.shifted.prepend20
+memmove: diff-nqp i8.selfsplice.shifted.replace
+memmove: diff-nqp u64.selfsplice.shifted.prepend
+memmove: diff-nqp u64.selfsplice.shifted.prepend20
+memmove: diff-nqp u64.selfsplice.shifted.replace
+memmove: diff-nqp u32.selfsplice.shifted.prepend
+memmove: diff-nqp u32.selfsplice.shifted.prepend20
+memmove: diff-nqp u32.selfsplice.shifted.replace
+memmove: diff-nqp u16.selfsplice.shifted.prepend
+memmove: diff-nqp u16.selfsplice.shifted.prepend20
+memmove: diff-nqp u16.selfsplice.shifted.replace
+memmove: diff-nqp u8.selfsplice.shifted.prepend
+memmove: diff-nqp u8.selfsplice.shifted.prepend20
+memmove: diff-nqp u8.selfsplice.shifted.replace
+memmove: diff-nqp n64.selfsplice.shifted.prepend
+memmove: diff-nqp n64.selfsplice.shifted.prepend20
+memmove: diff-nqp n64.selfsplice.shifted.replace
+memmove: diff-nqp n32.selfsplice.shifted.prepend
+memmove: diff-nqp n32.selfsplice.shifted.prepend20
+memmove: diff-nqp n32.selfsplice.shifted.replace
+accepted without a model check: diff-nqp obj.gc.splice.promoted
+accepted without a model check: diff-nqp obj.gc.slice.promoted
+accepted without a model check: diff-nqp obj.gc.clone.promoted
+accepted without a model check: diff-nqp obj.gc.selfsplice.promoted
+accepted without a model check: diff-nqp str.gc.splice.promoted
+accepted without a model check: diff-nqp str.gc.slice.promoted
+accepted without a model check: diff-nqp str.gc.clone.promoted
+accepted without a model check: diff-nqp str.gc.selfsplice.promoted

@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-G/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G/lib nqp-m pr-g1.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+setelems(2**64 - 4096): DIED Unable to allocate an array of 18446744073709547520 elements
+still alive: elems 8192
+element 1000000000: 0
+----
+exit: 0

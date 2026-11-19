@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-S-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T1-rejected-pop.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+pop_i: DIED MVMArray: pop expected object register
+elems now: 1
+collections done
+grown back: elems 2
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2222589==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7ff63295af72 bp 0x7ffeecf6a7e0 sp 0x7ffeecf68710 T0)
+==2222589==The signal is caused by a READ memory access.
+==2222589==Hint: address points to the zero page.
+    #0 0x7ff63295af72 in MVM_interp_run (/tmp/claude-1000/cfix-S-asan/lib/libmoar.so+0x83bf72) (BuildId: fcc6188f1516f71a3f7c363c9f7da166d27d31fb)
+    #1 0x5624ac96d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7ff631e27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7ff631e278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x5624ac96d614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2222589==Register values:
+rax = 0x0000000000000007  rbx = 0x00007e0630c3c174  rcx = 0x00007bf62fc06780  rdx = 0x00000fc14617f828  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffeecf6a7e0  rsp = 0x00007ffeecf68710  
+ r8 = 0x00007e0630c3c142   r9 = 0x00000fc0c6187828  r10 = 0x00000fc0c6187827  r11 = 0x00000fc14617f828  
+r12 = 0x00007bf62e13fa38  r13 = 0x00007ff631543628  r14 = 0x0000000000000000  r15 = 0x00007d7630be0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-S-asan/lib/libmoar.so+0x83bf72) (BuildId: fcc6188f1516f71a3f7c363c9f7da166d27d31fb) in MVM_interp_run
+==2222589==ABORTING
+----
+exit: 1

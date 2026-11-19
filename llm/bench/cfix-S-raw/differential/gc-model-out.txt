@@ -1,0 +1,51 @@
+== head-diff-nqp-spesh-1.out
+memmove obj.gc.survive
+memmove obj.gc.barrier
+memmove obj.gc.splice.promoted
+memmove obj.gc.slice.promoted
+memmove obj.gc.clone.promoted
+memmove obj.gc.selfsplice.promoted
+memmove str.gc.survive
+memmove str.gc.barrier
+memmove str.gc.splice.promoted
+memmove str.gc.slice.promoted
+memmove str.gc.clone.promoted
+memmove str.gc.selfsplice.promoted
+== head-diff-nqp-nospesh-1.out
+memmove obj.gc.survive
+memmove obj.gc.barrier
+memmove obj.gc.splice.promoted
+memmove obj.gc.slice.promoted
+memmove obj.gc.clone.promoted
+memmove obj.gc.selfsplice.promoted
+memmove str.gc.survive
+memmove str.gc.barrier
+memmove str.gc.splice.promoted
+memmove str.gc.slice.promoted
+memmove str.gc.clone.promoted
+memmove str.gc.selfsplice.promoted
+== base-diff-nqp-spesh-1.out
+memmove obj.gc.survive
+memmove obj.gc.barrier
+MISMATCH obj.gc.splice.promoted
+    model:   elems=256 sha1=B01EFF53713567CBE616A4AC9B4BB71D8F2A3841 head=[o45 o44 o43] tail=[o42 o43 o44]
+    printed: elems=256 sha1=138714091AC3CA877B264B93C9E8D31223DF1DE4 head=[o45 o44 o43] tail=[o42 o43 o44]
+MISMATCH obj.gc.slice.promoted
+    model:   elems=18 [o39 o0 o45 o44 o43 o39 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 o10 o11]
+    printed: elems=18 [o39 o0 o45 o44 o43 o39 o0 o45 o44 o43 o39 o0 o45 o44 o43 o39 o0 o45]
+MISMATCH obj.gc.clone.promoted
+    model:   elems=257 sha1=13480E48D7135AE93503C77E42B7227B1EEDBF1C head=[o45 o44 o43] tail=[o43 o44 o1]
+    printed: elems=257 sha1=8CFF4BD2F85011953BF71B274994115E9F1D16CC head=[o45 o44 o43] tail=[o43 o44 o1]
+MISMATCH obj.gc.selfsplice.promoted
+memmove str.gc.survive
+memmove str.gc.barrier
+MISMATCH str.gc.splice.promoted
+    model:   elems=256 sha1=39A04094B8EEABC0F2AC01B663E6AD537611C846 head=[s45 s44 s43] tail=[s42 s43 s44]
+    printed: elems=256 sha1=9E275DB96D2D196CBDD77DB48190D3DB14CD1428 head=[s45 s44 s43] tail=[s42 s43 s44]
+MISMATCH str.gc.slice.promoted
+    model:   elems=18 [s39 s0 s45 s44 s43 s39 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11]
+    printed: elems=18 [s39 s0 s45 s44 s43 s39 s0 s45 s44 s43 s39 s0 s45 s44 s43 s39 s0 s45]
+MISMATCH str.gc.clone.promoted
+    model:   elems=257 sha1=F917AC44C976E51AC4B69E4ADB7E19B5DBCD39EF head=[s45 s44 s43] tail=[s43 s44 s1]
+    printed: elems=257 sha1=74B905F3FC78CF48C051A705F4AE6513E99D9D2E head=[s45 s44 s43] tail=[s43 s44 s1]
+MISMATCH str.gc.selfsplice.promoted

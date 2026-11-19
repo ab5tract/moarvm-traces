@@ -1,0 +1,56 @@
+probe: /tmp/claude-1000/cfix-G-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m N1-normalize-ssize-bytes.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+normalized: elems 100
+=================================================================
+==2224516==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7cc58602c490 at pc 0x7f65880a89db bp 0x7fff8fb9de70 sp 0x7fff8fb9de60
+WRITE of size 4 at 0x7cc58602c490 thread T0
+    #0 0x7f65880a89da in MVM_VMArray_push (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x9899da) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #1 0x7f6587f5e388 in MVM_interp_run (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x83f388) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #2 0x555ecf26d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f6587427780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f65874278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x555ecf26d614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7cc58602c490 is located 0 bytes after 528-byte region [0x7cc58602c280,0x7cc58602c490)
+allocated by thread T0 here:
+    #0 0x7f658952b161  (/usr/lib/libasan.so.8+0x12b161) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f65882fdf3a in MVM_unicode_normalize_codepoints (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0xbdef3a) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #2 0x7f6587f3a439 in MVM_interp_run (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x81b439) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d)
+    #3 0x555ecf26d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-G-asan/lib/libmoar.so+0x9899da) (BuildId: 8e47bcfe2555e17f95b15902aad1bb98cb68cc5d) in MVM_VMArray_push
+Shadow bytes around the buggy address:
+  0x7cc58602c200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cc58602c300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cc58602c380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cc58602c400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7cc58602c480: 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7cc58602c700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2224516==ABORTING
+----
+exit: 1

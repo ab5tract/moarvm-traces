@@ -10,7 +10,8 @@
 # 305ff2f77, rakudo c6d6fc3c6b built against cfix-base); for the ASAN run
 # LD_LIBRARY_PATH points them at cfix-asan's libmoar (it wins over their
 # RUNPATH) and libasan is preloaded. -p NAME instead runs only the plain run
-# against /tmp/claude-1000/NAME/lib (for the fix branches later).
+# against /tmp/claude-1000/NAME/lib (for the fix branches later); a NAME
+# ending in -asan gets the ASAN run's preload and ASAN_OPTIONS.
 # ASAN_OPTIONS: detect_leaks=0 (MoarVM does not free everything at exit),
 # abort_on_error=0, and symbolized reports.
 MEM=4G; T=120; ONLY=; O=/home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/traces/llm/bench/cfix-baseline-raw/repro
@@ -35,6 +36,8 @@ one() { # tag libdir preload [program args]
     rc=$?; echo "----"; echo "exit: $rc"; } > "$f"
   echo "== $f"; cat "$f"
 }
-if [ -n "$ONLY" ]; then one "$ONLY" /tmp/claude-1000/$ONLY/lib "" "$@"; exit; fi
+if [ -n "$ONLY" ]; then
+  case $ONLY in *-asan) one "$ONLY" /tmp/claude-1000/$ONLY/lib /usr/lib/libasan.so.8 "$@" ;;
+                *) one "$ONLY" /tmp/claude-1000/$ONLY/lib "" "$@" ;; esac; exit; fi
 one base /tmp/claude-1000/cfix-base/lib "" "$@"
 one asan /tmp/claude-1000/cfix-asan/lib /usr/lib/libasan.so.8 "$@"

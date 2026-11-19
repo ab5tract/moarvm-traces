@@ -1,0 +1,38 @@
+80c80
+< int8.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> int8.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+255c255
+< int16.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> int16.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+430c430
+< int32.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> int32.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+605c605
+< int64.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> int64.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+780c780
+< uint8.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> uint8.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+955c955
+< uint16.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> uint16.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+1130c1130
+< uint32.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> uint32.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+1305c1305
+< uint64.nqp.splice.self.front: elems=10 [90 91 92 0 1 2 2 3 4 5]
+---
+> uint64.nqp.splice.self.front: elems=10 [0 1 2 3 4 5 2 3 4 5]
+1547,1548c1547,1548
+< str.splice.self: elems=12 [a b c a b c a b c d e f]
+< str.splice.self.1: elems=12 [a a a a a a a b c d e f]
+---
+> str.splice.self: elems=12 [a b c a b c d e f d e f]
+> str.splice.self.1: elems=12 [a a b c d e f b c d e f]

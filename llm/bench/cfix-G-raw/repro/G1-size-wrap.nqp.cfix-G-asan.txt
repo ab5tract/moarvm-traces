@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-G-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m G1-size-wrap.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+ssize 8192 reached: elems 8192
+setelems(2**64 - 4096): DIED Unable to allocate an array of 18446744073709547520 elements
+still alive: elems 8192
+element 1000000000: 0
+----
+exit: 0

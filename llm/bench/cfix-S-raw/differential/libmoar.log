@@ -1,0 +1,4 @@
+base nqp libmoar=/tmp/claude-1000/cfix-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+base rakudo libmoar=/tmp/claude-1000/cfix-base/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+head nqp libmoar=/tmp/claude-1000/cfix-S-df/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 
+head rakudo libmoar=/tmp/claude-1000/cfix-S-df/lib/libmoar.so env: MVM_SPESH_DISABLE=1 RAKUDO_NO_PRECOMPILATION=1 

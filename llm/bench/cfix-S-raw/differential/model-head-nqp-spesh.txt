@@ -1,0 +1,114 @@
+memmove: diff-nqp str.selfsplice.middle
+memmove: diff-nqp str.selfsplice.middle1
+memmove: diff-nqp str.selfsplice.middle9
+memmove: diff-nqp str.selfsplice.replace.2.3
+memmove: diff-nqp str.selfsplice.replace.tail
+memmove: diff-nqp str.selfsplice.replace.5.5
+memmove: diff-nqp str.selfsplice.replace.1.9
+memmove: diff-nqp str.selfsplice.replace.1.20
+memmove: diff-nqp str.selfsplice.neg
+memmove: diff-nqp str.selfsplice.shifted.middle
+memmove: diff-nqp str.selfsplice.shifted.replace.2.3
+memmove: diff-nqp str.selfsplice.big.middle
+memmove: diff-nqp str.selfsplice.big.1
+memmove: diff-nqp str.selfsplice.big.replace
+memmove: diff-nqp str.selfsplice.big.shifted
+memmove: diff-nqp str.selfsplice.twice
+MISMATCH: diff-nqp i64.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i64.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i64.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp i32.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i32.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i32.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp i16.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i16.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i16.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp i8.selfsplice.shifted.prepend
+    memmove model: elems=20 [15 18 21 24 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i8.selfsplice.shifted.prepend20
+    memmove model: elems=20 [45 48 51 54 57 60 63 66 69 72 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp i8.selfsplice.shifted.replace
+    memmove model: elems=16 [15 18 21 24 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp u64.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u64.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u64.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp u32.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u32.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u32.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp u16.selfsplice.shifted.prepend
+    memmove model: elems=20 [271 274 277 280 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u16.selfsplice.shifted.prepend20
+    memmove model: elems=20 [301 304 307 310 313 316 319 322 325 328 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u16.selfsplice.shifted.replace
+    memmove model: elems=16 [271 274 277 280 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp u8.selfsplice.shifted.prepend
+    memmove model: elems=20 [15 18 21 24 1 4 7 10 13 16 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u8.selfsplice.shifted.prepend20
+    memmove model: elems=20 [45 48 51 54 57 60 63 66 69 72 1 4 7 10 13 16 19 22 25 28]
+    printed:       elems=20 [1 4 7 10 13 16 19 22 25 28 1 4 7 10 13 16 19 22 25 28]
+MISMATCH: diff-nqp u8.selfsplice.shifted.replace
+    memmove model: elems=16 [15 18 21 24 1 4 7 10 13 16 13 16 19 22 25 28]
+    printed:       elems=16 [1 4 7 10 13 16 19 22 25 28 13 16 19 22 25 28]
+MISMATCH: diff-nqp n64.selfsplice.shifted.prepend
+    memmove model: elems=20 [90.25 91.25 92.25 93.25 0.25 1.25 2.25 3.25 4.25 5.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+MISMATCH: diff-nqp n64.selfsplice.shifted.prepend20
+    memmove model: elems=20 [100.25 101.25 102.25 103.25 104.25 105.25 106.25 107.25 108.25 109.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+MISMATCH: diff-nqp n64.selfsplice.shifted.replace
+    memmove model: elems=16 [90.25 91.25 92.25 93.25 0.25 1.25 2.25 3.25 4.25 5.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=16 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 4.25 5.25 6.25 7.25 8.25 9.25]
+MISMATCH: diff-nqp n32.selfsplice.shifted.prepend
+    memmove model: elems=20 [90.25 91.25 92.25 93.25 0.25 1.25 2.25 3.25 4.25 5.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+MISMATCH: diff-nqp n32.selfsplice.shifted.prepend20
+    memmove model: elems=20 [100.25 101.25 102.25 103.25 104.25 105.25 106.25 107.25 108.25 109.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=20 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25]
+MISMATCH: diff-nqp n32.selfsplice.shifted.replace
+    memmove model: elems=16 [90.25 91.25 92.25 93.25 0.25 1.25 2.25 3.25 4.25 5.25 4.25 5.25 6.25 7.25 8.25 9.25]
+    printed:       elems=16 [0.25 1.25 2.25 3.25 4.25 5.25 6.25 7.25 8.25 9.25 4.25 5.25 6.25 7.25 8.25 9.25]
+accepted without a model check: diff-nqp obj.gc.splice.promoted
+accepted without a model check: diff-nqp obj.gc.slice.promoted
+accepted without a model check: diff-nqp obj.gc.clone.promoted
+accepted without a model check: diff-nqp obj.gc.selfsplice.promoted
+accepted without a model check: diff-nqp str.gc.splice.promoted
+accepted without a model check: diff-nqp str.gc.slice.promoted
+accepted without a model check: diff-nqp str.gc.clone.promoted
+accepted without a model check: diff-nqp str.gc.selfsplice.promoted

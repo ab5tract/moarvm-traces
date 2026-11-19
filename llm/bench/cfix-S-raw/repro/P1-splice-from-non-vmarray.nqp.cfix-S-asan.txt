@@ -1,0 +1,26 @@
+probe: /tmp/claude-1000/cfix-S-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P1-splice-from-non-vmarray.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+before: 3 elements
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2222373==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000008 (pc 0x7fa11a6a6b1b bp 0x7ffec2f1df60 sp 0x7ffec2f1de70 T0)
+==2222373==The signal is caused by a READ memory access.
+==2222373==Hint: address points to the zero page.
+    #0 0x7fa11a6a6b1b in copy_elements (/tmp/claude-1000/cfix-S-asan/lib/libmoar.so+0x987b1b) (BuildId: fcc6188f1516f71a3f7c363c9f7da166d27d31fb)
+    #1 0x7fa11a564d1c in MVM_interp_run (/tmp/claude-1000/cfix-S-asan/lib/libmoar.so+0x845d1c) (BuildId: fcc6188f1516f71a3f7c363c9f7da166d27d31fb)
+    #2 0x562aad3764d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7fa119a27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7fa119a278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x562aad376614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2222373==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ba115c2da78  rcx = 0x0000000000000001  rdx = 0x0000000000000000  
+rdi = 0x00007bd1187ed450  rsi = 0x00007e81187e0898  rbp = 0x00007ffec2f1df60  rsp = 0x00007ffec2f1de70  
+ r8 = 0x00000fd0230fc4b2   r9 = 0x00000000000000f3  r10 = 0x00000f7422e614a0  r11 = 0x00007ba11730a500  
+r12 = 0x00007ba115c2e6f8  r13 = 0x00007ba115c2da78  r14 = 0x0000000000000000  r15 = 0x0000000000000001  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-S-asan/lib/libmoar.so+0x987b1b) (BuildId: fcc6188f1516f71a3f7c363c9f7da166d27d31fb) in copy_elements
+==2222373==ABORTING
+----
+exit: 1

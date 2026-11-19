@@ -1,0 +1,54 @@
+memmove: diff-nqp str.selfsplice.middle
+memmove: diff-nqp str.selfsplice.middle1
+memmove: diff-nqp str.selfsplice.middle9
+memmove: diff-nqp str.selfsplice.replace.2.3
+memmove: diff-nqp str.selfsplice.replace.tail
+memmove: diff-nqp str.selfsplice.replace.5.5
+memmove: diff-nqp str.selfsplice.replace.1.9
+memmove: diff-nqp str.selfsplice.replace.1.20
+memmove: diff-nqp str.selfsplice.neg
+memmove: diff-nqp str.selfsplice.shifted.middle
+memmove: diff-nqp str.selfsplice.shifted.replace.2.3
+memmove: diff-nqp str.selfsplice.big.middle
+memmove: diff-nqp str.selfsplice.big.1
+memmove: diff-nqp str.selfsplice.big.replace
+memmove: diff-nqp str.selfsplice.big.shifted
+memmove: diff-nqp str.selfsplice.twice
+memmove: diff-nqp i64.selfsplice.shifted.prepend
+memmove: diff-nqp i64.selfsplice.shifted.prepend20
+memmove: diff-nqp i64.selfsplice.shifted.replace
+memmove: diff-nqp i32.selfsplice.shifted.prepend
+memmove: diff-nqp i32.selfsplice.shifted.prepend20
+memmove: diff-nqp i32.selfsplice.shifted.replace
+memmove: diff-nqp i16.selfsplice.shifted.prepend
+memmove: diff-nqp i16.selfsplice.shifted.prepend20
+memmove: diff-nqp i16.selfsplice.shifted.replace
+memmove: diff-nqp i8.selfsplice.shifted.prepend
+memmove: diff-nqp i8.selfsplice.shifted.prepend20
+memmove: diff-nqp i8.selfsplice.shifted.replace
+memmove: diff-nqp u64.selfsplice.shifted.prepend
+memmove: diff-nqp u64.selfsplice.shifted.prepend20
+memmove: diff-nqp u64.selfsplice.shifted.replace
+memmove: diff-nqp u32.selfsplice.shifted.prepend
+memmove: diff-nqp u32.selfsplice.shifted.prepend20
+memmove: diff-nqp u32.selfsplice.shifted.replace
+memmove: diff-nqp u16.selfsplice.shifted.prepend
+memmove: diff-nqp u16.selfsplice.shifted.prepend20
+memmove: diff-nqp u16.selfsplice.shifted.replace
+memmove: diff-nqp u8.selfsplice.shifted.prepend
+memmove: diff-nqp u8.selfsplice.shifted.prepend20
+memmove: diff-nqp u8.selfsplice.shifted.replace
+memmove: diff-nqp n64.selfsplice.shifted.prepend
+memmove: diff-nqp n64.selfsplice.shifted.prepend20
+memmove: diff-nqp n64.selfsplice.shifted.replace
+memmove: diff-nqp n32.selfsplice.shifted.prepend
+memmove: diff-nqp n32.selfsplice.shifted.prepend20
+memmove: diff-nqp n32.selfsplice.shifted.replace
+accepted without a model check: diff-nqp obj.gc.splice.promoted
+accepted without a model check: diff-nqp obj.gc.slice.promoted
+accepted without a model check: diff-nqp obj.gc.clone.promoted
+accepted without a model check: diff-nqp obj.gc.selfsplice.promoted
+accepted without a model check: diff-nqp str.gc.splice.promoted
+accepted without a model check: diff-nqp str.gc.slice.promoted
+accepted without a model check: diff-nqp str.gc.clone.promoted
+accepted without a model check: diff-nqp str.gc.selfsplice.promoted

@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/cfix-G/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-G/lib nqp-m B3-writeint-no-storage-kind.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+write 8 bytes at 0: returned
+elems 8
+write 8 bytes at 8: DIED MVMArray: Unhandled slot type
+write 8 bytes at 0 again: returned
+survived
+----
+exit: 0

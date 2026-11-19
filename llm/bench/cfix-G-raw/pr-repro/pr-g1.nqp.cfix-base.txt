@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m pr-g1.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+setelems(2**64 - 4096): returned, elems -4096
+still alive: elems -4096
+timeout: the monitored command dumped core
+----
+exit: 139

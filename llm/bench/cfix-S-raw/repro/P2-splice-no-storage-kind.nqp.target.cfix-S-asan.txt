@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-S-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P2-splice-no-storage-kind.nqp target (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+recomposed to uint4: elems 3
+timeout: the monitored command dumped core
+----
+exit: 134

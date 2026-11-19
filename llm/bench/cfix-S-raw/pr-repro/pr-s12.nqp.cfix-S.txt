@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-S/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S/lib nqp-m pr-s12.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+obj gen2: 1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28
+obj nursery: 1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28
+str: 1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28
+----
+exit: 0

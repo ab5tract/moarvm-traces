@@ -1,0 +1,11 @@
+--- /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/repr/memmove-model.py	2026-11-19 16:38:34.352515828 +0100
++++ /tmp/claude-1000/-home-longwalker-code-raku-x-core-zmoarz/2d9ba902-dcef-4ff9-a5b4-9668d18bc3a7/scratchpad/memmove-model-fixed.py	2026-11-19 17:24:54.871842190 +0100
+@@ -96,7 +96,7 @@
+     elems0, elems1 = n, n
+     if offset < 0:
+         offset += elems0
+-    if offset == 0:
++    if False and offset == 0:  # fixed asplice: no start adjustment when from == root
+         d = elems1 - count
+         if d > start:
+             d = start

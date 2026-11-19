@@ -3,9 +3,10 @@
 # (run.sh), in the order of the bug table, with the memory caps of the
 # campaign: 2G for the growth cases (G1, G2) and the leak (N2), 4G for the
 # rest. M1 is not run (needs ~64 GiB) and D1 is not a runnable reproducer.
-# Usage: run-all.sh [-p PREFIX] (with -p, only the plain run on that prefix,
-# for the fix branches).
-cd "$(dirname "$0")" || exit 1; R=./run.sh; X=; [ "$1" = -p ] && X="-p $2"
+# Usage: run-all.sh [-p PREFIX] [-o OUTDIR] (with -p, only one run on that
+# prefix, for the fix branches: ASAN when PREFIX ends in -asan).
+cd "$(dirname "$0")" || exit 1; R=./run.sh; X=
+while [ $# -gt 1 ]; do case $1 in -p|-o) X="$X $1 $2"; shift 2 ;; *) break ;; esac; done
 # shellcheck disable=SC2086
 {
 $R $X S1-self-splice-overlap.nqp

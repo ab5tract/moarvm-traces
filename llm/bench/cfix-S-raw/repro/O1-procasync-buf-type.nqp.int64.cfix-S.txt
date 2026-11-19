@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/cfix-S/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-S/lib nqp-m O1-procasync-buf-type.nqp int64 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawn: returned
+reads: 1
+got 100 elements
+element 0: 3472328296227680304
+element 99: 2218724000096
+----
+exit: 0
