@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-T-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-T-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T2-rejected-unshift.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+collections done
+unshift_i: DIED MVMArray: unshift expected object register
+elems 2, element 1 is "c"
+element 0: VMArray, first "b"
+----
+exit: 0

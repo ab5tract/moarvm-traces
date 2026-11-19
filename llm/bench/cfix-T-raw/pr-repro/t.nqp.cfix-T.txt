@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-T/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-T/lib nqp-m t.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+pop_i: MVMArray: pop expected object register
+after: elems 3: a b c
+unshift_i: MVMArray: unshift expected object register
+after: elems 3: b c d
+----
+exit: 0

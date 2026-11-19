@@ -1,0 +1,18 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m p3.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+obj into int: returned, elems 1
+  element 0: 3424972547752
+int into num: returned, elems 1
+  element 0: 1
+obj into str: returned, elems 1
+str into obj: returned, elems 1
+  element 0: MVMString
+int into uint8: returned, elems 2
+  elements: 65 44
+delete from str through an empty obj list: a c
+delete from uint8 through an empty num list: elems 1
+int into obj: returned, elems 1
+timeout: the monitored command dumped core
+----
+exit: 139

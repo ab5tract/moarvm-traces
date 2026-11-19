@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P2-splice-no-storage-same-kind.nqp empty-into (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+empty-into: returned, elems 3
+----
+exit: 0

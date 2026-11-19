@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-T/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-T/lib rakudo-m B2-buf-offset-wrap.raku  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+Buf[uint64]: read 2, write ok, after 1 99 3 4
+Buf[uint32]: read 2, write ok, after 1 99 3 4
+----
+exit: 0

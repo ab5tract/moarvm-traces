@@ -1,0 +1,2 @@
+delete one with an empty source: DIED MVMArray: Unhandled slot type, elems 3
+exit 0

@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m p1.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+splice from a hash: DIED MVMArray: Can only splice from a VMArray, got a VMHash
+elems 3: a b c
+delete through an empty hash: a c
+----
+exit: 0

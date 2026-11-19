@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-P/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P/lib nqp-m P1-splice-from-non-vmarray.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+before: 3 elements
+splice from a hash: DIED MVMArray: Can only splice from a VMArray, got a VMHash
+after: 3 elements
+----
+exit: 0

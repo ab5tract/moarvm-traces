@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-P-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-P-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T3-self-splice-overcount.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+count 9: elems 8: 4 7 10 13 16 19 22 null
+count 10: elems 8: 7 10 13 16 19 22 null null
+count 11: elems 8: 10 13 16 19 22 null null null
+count 12: elems 8: 13 16 19 22 null null null null
+----
+exit: 0
