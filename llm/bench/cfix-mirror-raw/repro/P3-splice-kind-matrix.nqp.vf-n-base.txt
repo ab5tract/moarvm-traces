@@ -1,0 +1,136 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m P3-splice-kind-matrix.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+part 1: one element, splice(target, source, 0, 0)
+obj -> obj: returned, VMArray
+obj -> str: DIED MVMArray: Cannot splice from an array of objects into an array of strings (elems 0)
+obj -> int: DIED MVMArray: Cannot splice from an array of objects into an array of integers (elems 0)
+obj -> int8: DIED MVMArray: Cannot splice from an array of objects into an array of integers (elems 0)
+obj -> uint8: DIED MVMArray: Cannot splice from an array of objects into an array of unsigned integers (elems 0)
+obj -> uint64: DIED MVMArray: Cannot splice from an array of objects into an array of unsigned integers (elems 0)
+obj -> num: DIED MVMArray: Cannot splice from an array of objects into an array of numbers (elems 0)
+obj -> num32: DIED MVMArray: Cannot splice from an array of objects into an array of numbers (elems 0)
+str -> obj: returned, MVMString
+str -> str: returned, x
+str -> int: DIED MVMArray: Cannot splice from an array of strings into an array of integers (elems 0)
+str -> int8: DIED MVMArray: Cannot splice from an array of strings into an array of integers (elems 0)
+str -> uint8: DIED MVMArray: Cannot splice from an array of strings into an array of unsigned integers (elems 0)
+str -> uint64: DIED MVMArray: Cannot splice from an array of strings into an array of unsigned integers (elems 0)
+str -> num: DIED MVMArray: Cannot splice from an array of strings into an array of numbers (elems 0)
+str -> num32: DIED MVMArray: Cannot splice from an array of strings into an array of numbers (elems 0)
+int -> obj: DIED MVMArray: Cannot splice from an array of integers into an array of objects (elems 0)
+int -> str: DIED MVMArray: Cannot splice from an array of integers into an array of strings (elems 0)
+int -> int: returned, 7
+int -> int8: returned, 7
+int -> uint8: returned, 7
+int -> uint64: returned, 7
+int -> num: DIED MVMArray: Cannot splice from an array of integers into an array of numbers (elems 0)
+int -> num32: DIED MVMArray: Cannot splice from an array of integers into an array of numbers (elems 0)
+int8 -> obj: DIED MVMArray: Cannot splice from an array of integers into an array of objects (elems 0)
+int8 -> str: DIED MVMArray: Cannot splice from an array of integers into an array of strings (elems 0)
+int8 -> int: returned, 7
+int8 -> int8: returned, 7
+int8 -> uint8: returned, 7
+int8 -> uint64: returned, 7
+int8 -> num: DIED MVMArray: Cannot splice from an array of integers into an array of numbers (elems 0)
+int8 -> num32: DIED MVMArray: Cannot splice from an array of integers into an array of numbers (elems 0)
+uint8 -> obj: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of objects (elems 0)
+uint8 -> str: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of strings (elems 0)
+uint8 -> int: returned, 7
+uint8 -> int8: returned, 7
+uint8 -> uint8: returned, 7
+uint8 -> uint64: returned, 7
+uint8 -> num: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of numbers (elems 0)
+uint8 -> num32: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of numbers (elems 0)
+uint64 -> obj: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of objects (elems 0)
+uint64 -> str: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of strings (elems 0)
+uint64 -> int: returned, 7
+uint64 -> int8: returned, 7
+uint64 -> uint8: returned, 7
+uint64 -> uint64: returned, 7
+uint64 -> num: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of numbers (elems 0)
+uint64 -> num32: DIED MVMArray: Cannot splice from an array of unsigned integers into an array of numbers (elems 0)
+num -> obj: DIED MVMArray: Cannot splice from an array of numbers into an array of objects (elems 0)
+num -> str: DIED MVMArray: Cannot splice from an array of numbers into an array of strings (elems 0)
+num -> int: DIED MVMArray: Cannot splice from an array of numbers into an array of integers (elems 0)
+num -> int8: DIED MVMArray: Cannot splice from an array of numbers into an array of integers (elems 0)
+num -> uint8: DIED MVMArray: Cannot splice from an array of numbers into an array of unsigned integers (elems 0)
+num -> uint64: DIED MVMArray: Cannot splice from an array of numbers into an array of unsigned integers (elems 0)
+num -> num: returned, 1.5
+num -> num32: returned, 1.5
+num32 -> obj: DIED MVMArray: Cannot splice from an array of numbers into an array of objects (elems 0)
+num32 -> str: DIED MVMArray: Cannot splice from an array of numbers into an array of strings (elems 0)
+num32 -> int: DIED MVMArray: Cannot splice from an array of numbers into an array of integers (elems 0)
+num32 -> int8: DIED MVMArray: Cannot splice from an array of numbers into an array of integers (elems 0)
+num32 -> uint8: DIED MVMArray: Cannot splice from an array of numbers into an array of unsigned integers (elems 0)
+num32 -> uint64: DIED MVMArray: Cannot splice from an array of numbers into an array of unsigned integers (elems 0)
+num32 -> num: returned, 1.5
+num32 -> num32: returned, 1.5
+part 2: empty source, splice(target of 2, empty, 0, 1)
+obj -> obj: elems 1
+obj -> str: elems 1
+obj -> int: elems 1
+obj -> int8: elems 1
+obj -> uint8: elems 1
+obj -> uint64: elems 1
+obj -> num: elems 1
+obj -> num32: elems 1
+str -> obj: elems 1
+str -> str: elems 1
+str -> int: elems 1
+str -> int8: elems 1
+str -> uint8: elems 1
+str -> uint64: elems 1
+str -> num: elems 1
+str -> num32: elems 1
+int -> obj: elems 1
+int -> str: elems 1
+int -> int: elems 1
+int -> int8: elems 1
+int -> uint8: elems 1
+int -> uint64: elems 1
+int -> num: elems 1
+int -> num32: elems 1
+int8 -> obj: elems 1
+int8 -> str: elems 1
+int8 -> int: elems 1
+int8 -> int8: elems 1
+int8 -> uint8: elems 1
+int8 -> uint64: elems 1
+int8 -> num: elems 1
+int8 -> num32: elems 1
+uint8 -> obj: elems 1
+uint8 -> str: elems 1
+uint8 -> int: elems 1
+uint8 -> int8: elems 1
+uint8 -> uint8: elems 1
+uint8 -> uint64: elems 1
+uint8 -> num: elems 1
+uint8 -> num32: elems 1
+uint64 -> obj: elems 1
+uint64 -> str: elems 1
+uint64 -> int: elems 1
+uint64 -> int8: elems 1
+uint64 -> uint8: elems 1
+uint64 -> uint64: elems 1
+uint64 -> num: elems 1
+uint64 -> num32: elems 1
+num -> obj: elems 1
+num -> str: elems 1
+num -> int: elems 1
+num -> int8: elems 1
+num -> uint8: elems 1
+num -> uint64: elems 1
+num -> num: elems 1
+num -> num32: elems 1
+num32 -> obj: elems 1
+num32 -> str: elems 1
+num32 -> int: elems 1
+num32 -> int8: elems 1
+num32 -> uint8: elems 1
+num32 -> uint64: elems 1
+num32 -> num: elems 1
+num32 -> num32: elems 1
+done
+----
+exit: 0

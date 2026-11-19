@@ -1,0 +1,187 @@
+start 2026-11-19 20:03:56 load 1.99 2.00 2.04 commit 32dae23af dirty 1 args: 
+unit-test
++- run test repr-test 56 pass, 3 fail (59 total)
+error: 'test.vmarray_elements_test.test.a splice from a non-empty source that is not a VMArray throws before changing anything' failed:
+       child output lacks "Unhandled exception: MVMArray: Can only splice from a VMArray, got a VMHash
+       ":
+       
+       (signal .SEGV, exit null)
+error: 'test.vmarray_elements_test.test.a splice into or out of a kind without storage throws before changing anything' failed:
+       child output lacks "Unhandled exception: MVMArray: Unhandled slot type
+       ":
+       
+       (signal .ABRT, exit null)
+error: 'test.vmarray_elements_test.test.a splice between kinds whose registers would be reinterpreted throws; the others copy' failed:
+       child output lacks "Unhandled exception: MVMArray: Cannot splice from an array of objects into an array of strings
+       ":
+       returned
+       state: elems=4 start=0 ssize=8 bytes=203a80517f050000a09a70517f050000c09a70517f050000503a80517f050000
+       
+       (signal null, exit 0)
+failed command: ./.zig-cache/o/0a09792f57e2f5c2cf261144f836c2b5/repr-test --cache-dir=./.zig-cache --seed=0x85ec970 --listen=-
+
+Build Summary: 91/93 steps succeeded (1 failed); 56/59 tests passed (3 failed)
+unit-test transitive failure
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:40M
+|     +- options cached
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 10ms MaxRSS:35M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 4ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 9ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 10ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test shim-test cached
+|  +- compile test shim-test fast native-native cached 16ms MaxRSS:39M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h cached
+|     +- WriteFile moar cached
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- compile lib moar fast native-native cached 19ms MaxRSS:40M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile jit/core_templates.h cached
+|     |  |  +- run exe expr_template_compiler (core_templates.h) cached
+|     |  |  |  +- compile exe expr_template_compiler safe native cached 10ms MaxRSS:41M
+|     |  |  +- run exe tiler_table_generator (tile_pattern.h) cached
+|     |  |     +- compile exe tiler_table_generator safe native cached 6ms MaxRSS:41M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile obj moar_zig fast native-native cached 15ms MaxRSS:41M
+|     |  |  +- options cached
+|     |  |  +- translate-c moar_c cached
+|     |  |  |  +- compile exe translate-c debug native cached 7ms MaxRSS:41M
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- run exe generate-def (aarch64.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native cached 8ms MaxRSS:39M
+|     |  |  |  |  +- run exe generate-def (amdgcn.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (arm.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (bpf.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (common.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (hexagon.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (loongarch.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (mips.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (neon.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (nvptx.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (powerpc.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (riscv.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (s390x.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (ve.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (wasm.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (x86_64.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (x86.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (xcore.zig) cached
+|     |  |  |  |     +- compile exe generate-def debug native (reused)
+|     |  |  |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile lib uv fast native-native cached 14ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib tommath fast native-native cached 15ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib dyncall fast native-native cached 14ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib sha1 fast native-native cached 15ms MaxRSS:38M
+|     |  +- WriteFile cached
+|     |  +- compile lib cmp fast native-native cached 12ms MaxRSS:40M
+|     |  +- run exe minilua (emit.c) cached
+|     |  |  +- compile exe minilua fast native cached 18ms MaxRSS:40M
+|     |  +- run exe fill_prefix (config.c) cached
+|     |  |  +- compile exe fill_prefix debug native cached 10ms MaxRSS:35M
+|     |  |  +- WriteFile config.c.in cached
+|     |  +- compile obj moar_zig fast native-native (+3 more reused dependencies)
+|     |  +- compile lib uv fast native-native (reused)
+|     |  +- compile lib tommath fast native-native (reused)
+|     |  +- compile lib dyncall fast native-native (reused)
+|     |  +- compile lib sha1 fast native-native (reused)
+|     |  +- compile lib cmp fast native-native (reused)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
++- run test hash-str-test cached
+|  +- compile test hash-str-test fast native-native cached 16ms MaxRSS:41M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- WriteFile moar (+2 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- options cached
+|     +- options (reused)
++- run test gc-test cached
+|  +- compile test gc-test fast native-native cached 16ms MaxRSS:42M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- WriteFile moar (+2 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- options (reused)
++- run test repr-test 56 pass, 3 fail (59 total)
+   +- compile test repr-test fast native-native success 19s MaxRSS:711M
+      +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+      +- WriteFile moar (+2 more reused dependencies)
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+      +- translate-c moar_c (+2 more reused dependencies)
+      +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+      +- options (reused)
+
+exit 1 end 2026-11-19 20:04:16

@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib nqp-m T1-rejected-pop.nqp control (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+control: setelems 1
+elems now: 1
+collections done
+grown back: elems 2
+element 1: null
+----
+exit: 0

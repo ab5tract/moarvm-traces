@@ -1,0 +1,78 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m R-recompose-matrix.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+none -> obj: allowed; live elems 0; fresh elems 1: VMArray(7)
+none -> obj2: allowed; live elems 0; fresh elems 1: VMArray(7)
+none -> int8: allowed; live elems 0; fresh elems 1: 7
+none -> uint8: allowed; live elems 0; fresh elems 1: 7
+none -> int64: allowed; live elems 0; fresh elems 1: 7
+none -> uint64: allowed; live elems 0; fresh elems 1: 7
+none -> num64: allowed; live elems 0; fresh elems 1: 7.5
+none -> str: allowed; live elems 0; fresh elems 1: z
+obj -> obj: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> obj2: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> obj: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> obj2: allowed; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+obj2 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: VMArray(5) VMArray(6); fresh elems 1: VMArray(7)
+int8 -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> int8: allowed; live elems 2: 5 6; fresh elems 1: 7
+int8 -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int8 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> uint8: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint8 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> int64: allowed; live elems 2: 5 6; fresh elems 1: 7
+int64 -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+int64 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> uint64: allowed; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+uint64 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5 6; fresh elems 1: 7
+num64 -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> num64: allowed; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+num64 -> str: DIED MVMArray: Type  is already composed with another element kind; live elems 2: 5.5 6.5; fresh elems 1: 7.5
+str -> obj: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> obj2: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> int8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> uint8: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> int64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> uint64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> num64: DIED MVMArray: Type  is already composed with another element kind; live elems 2: x y; fresh elems 1: z
+str -> str: allowed; live elems 2: x y; fresh elems 1: z
+done
+----
+exit: 0

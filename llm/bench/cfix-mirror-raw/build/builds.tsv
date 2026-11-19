@@ -1,0 +1,2 @@
+2026-11-19 20:38:15 CET	vf-c-base	exit 0	48s	load 1.73	commit 282b04734	opts -Dzig-reprs=false	This is MoarVM version 2026.09-375-g282b04734 built with JIT support
+2026-11-19 20:39:54 CET	vf-n-base	exit 0	39s	load 1.75	commit 282b04734	opts 	This is MoarVM version 2026.09-375-g282b04734 built with JIT support

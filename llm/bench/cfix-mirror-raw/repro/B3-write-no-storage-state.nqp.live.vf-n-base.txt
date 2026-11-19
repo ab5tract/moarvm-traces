@@ -1,0 +1,17 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m B3-write-no-storage-state.nqp live (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+before recompose: elems 3; [0] 1; [1] 4; [2] 7
+MVMArray: Type  is already composed with another element kind
+   at B3-write-no-storage-state.nqp:58  (<ephemeral file>:MAIN)
+ from B3-write-no-storage-state.nqp:52  (<ephemeral file>:<mainline>)
+ from NQP::src/HLL/Compiler.nqp:197  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:eval)
+ from NQP::src/HLL/Compiler.nqp:423  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:evalfiles)
+ from NQP::src/HLL/Compiler.nqp:346  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:command_eval)
+ from NQP::src/HLL/Compiler.nqp:269  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:command_line)
+ from NQP::src/NQP/Compiler.nqp:36  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:MAIN)
+ from NQP::src/NQP/Compiler.nqp:34  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<mainline>)
+ from <unknown>:1  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<main>)
+ from <unknown>:1  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<entry>)
+----
+exit: 1

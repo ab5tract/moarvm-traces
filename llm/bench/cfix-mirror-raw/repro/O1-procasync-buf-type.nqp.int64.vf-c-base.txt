@@ -1,0 +1,18 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib nqp-m O1-procasync-buf-type.nqp int64 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawn: DIED spawnprocasync buf_type must be an array of uint8 or int8
+reads: 0
+elems requires a concrete object (got a NQPMu type object instead)
+   at O1-procasync-buf-type.nqp:76  (<ephemeral file>:MAIN)
+ from O1-procasync-buf-type.nqp:37  (<ephemeral file>:<mainline>)
+ from NQP::src/HLL/Compiler.nqp:197  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:eval)
+ from NQP::src/HLL/Compiler.nqp:423  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:evalfiles)
+ from NQP::src/HLL/Compiler.nqp:346  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:command_eval)
+ from NQP::src/HLL/Compiler.nqp:269  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/NQPHLL.moarvm:command_line)
+ from NQP::src/NQP/Compiler.nqp:36  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:MAIN)
+ from NQP::src/NQP/Compiler.nqp:34  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<mainline>)
+ from <unknown>:1  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<main>)
+ from <unknown>:1  (/tmp/claude-1000/tune-zig-prefix/share/nqp/lib/nqp.moarvm:<entry>)
+----
+exit: 1

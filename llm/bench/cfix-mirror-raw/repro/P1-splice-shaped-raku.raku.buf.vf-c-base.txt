@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m P1-splice-shaped-raku.raku buf (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+a shaped native array: array[int], REPR MultiDimArray
+buf: DIED MVMArray: Can only splice from a VMArray, got a MultiDimArray
+survived
+----
+exit: 0

@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m B2-buf-offset-wrap.raku  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+Buf[uint64]: read DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 4 count 8, write DIED Unable to allocate an array of 2305843009213693961 elements, after 1 2 3 4
+Buf[uint32]: read DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 4 count 4, write DIED Unable to allocate an array of 4611686018427387909 elements, after 1 2 3 4
+----
+exit: 0

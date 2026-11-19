@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m B3-write-first-compose.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+first compose to uint4 with live array: returned
+write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+write at 8: died: MVMArray: write_buf requires an integer type; elems 3
+write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+----
+exit: 0

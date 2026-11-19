@@ -1,0 +1,166 @@
+start 2026-11-19 19:47:17 load 1.77 1.54 2.08 commit 8ec451aa6 dirty 2 args: 
+Build Summary: 93/93 steps succeeded; 231/243 tests passed (12 skipped)
+unit-test success
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options cached
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 7ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:38M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 8ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 11ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:39M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:38M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 5ms MaxRSS:40M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:41M
+|     +- options (reused)
++- run test cached
+|  +- compile test debug native cached 6ms MaxRSS:40M
+|     +- options (reused)
++- run test shim-test 12 pass (12 total) 49ms MaxRSS:57M
+|  +- compile test shim-test fast native-native success 12s MaxRSS:492M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h cached
+|     +- WriteFile moar cached
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- compile lib moar fast native-native success 35s MaxRSS:792M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile jit/core_templates.h cached
+|     |  |  +- run exe expr_template_compiler (core_templates.h) cached
+|     |  |  |  +- compile exe expr_template_compiler safe native cached 8ms MaxRSS:41M
+|     |  |  +- run exe tiler_table_generator (tile_pattern.h) cached
+|     |  |     +- compile exe tiler_table_generator safe native cached 12ms MaxRSS:41M
+|     |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile obj moar_zig fast native-native success 2s MaxRSS:207M
+|     |  |  +- options cached
+|     |  |  +- translate-c moar_c cached
+|     |  |  |  +- compile exe translate-c debug native cached 8ms MaxRSS:41M
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- options cached
+|     |  |  |  |  +- run exe generate-def (aarch64.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native cached 10ms MaxRSS:40M
+|     |  |  |  |  +- run exe generate-def (amdgcn.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (arm.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (bpf.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (common.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (hexagon.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (loongarch.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (mips.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (neon.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (nvptx.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (powerpc.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (riscv.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (s390x.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (ve.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (wasm.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (x86_64.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (x86.zig) cached
+|     |  |  |  |  |  +- compile exe generate-def debug native (reused)
+|     |  |  |  |  +- run exe generate-def (xcore.zig) cached
+|     |  |  |  |     +- compile exe generate-def debug native (reused)
+|     |  |  |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  |  +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     |  +- WriteFile cached
+|     |  +- compile lib uv fast native-native cached 13ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib tommath fast native-native cached 12ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib dyncall fast native-native cached 15ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib sha1 fast native-native cached 10ms MaxRSS:40M
+|     |  +- WriteFile cached
+|     |  +- compile lib cmp fast native-native cached 10ms MaxRSS:40M
+|     |  +- run exe minilua (emit.c) cached
+|     |  |  +- compile exe minilua fast native cached 13ms MaxRSS:40M
+|     |  +- run exe fill_prefix (config.c) cached
+|     |  |  +- compile exe fill_prefix debug native cached 12ms MaxRSS:41M
+|     |  |  +- WriteFile config.c.in cached
+|     |  +- compile obj moar_zig fast native-native (+3 more reused dependencies)
+|     |  +- compile lib uv fast native-native (reused)
+|     |  +- compile lib tommath fast native-native (reused)
+|     |  +- compile lib dyncall fast native-native (reused)
+|     |  +- compile lib sha1 fast native-native (reused)
+|     |  +- compile lib cmp fast native-native (reused)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
++- run test hash-str-test 103 pass, 7 skip (110 total) 834ms MaxRSS:59M
+|  +- compile test hash-str-test fast native-native success 22s MaxRSS:768M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- WriteFile moar (+2 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- options cached
+|     +- options (reused)
++- run test gc-test 61 pass, 5 skip (66 total) 488ms MaxRSS:73M
+|  +- compile test gc-test fast native-native success 14s MaxRSS:563M
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- WriteFile moar (+2 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- compile lib moar fast native-native (+24 more reused dependencies)
+|     +- translate-c moar_c (+2 more reused dependencies)
+|     +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+|     +- options (reused)
++- run test repr-test 55 pass (55 total) 236ms MaxRSS:62M
+   +- compile test repr-test fast native-native success 19s MaxRSS:719M
+      +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+      +- WriteFile moar (+2 more reused dependencies)
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+      +- compile lib moar fast native-native (+24 more reused dependencies)
+      +- translate-c moar_c (+2 more reused dependencies)
+      +- configure autoconf_at header build/config.h.in to gen/config.h (reused)
+      +- options (reused)
+
+exit 0 end 2026-11-19 19:48:19
