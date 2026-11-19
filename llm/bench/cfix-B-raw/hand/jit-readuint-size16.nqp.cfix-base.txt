@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m jit-readuint-size16.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+*** stack smashing detected ***: terminated
+timeout: the monitored command dumped core
+----
+exit: 134

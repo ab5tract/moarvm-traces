@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-B-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m B2-buf-offset-before-storage.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+read: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 4
+write: DIED Unable to allocate an array of 9223372036854775811 elements
+after: elems 8: 1 2 3 4 5 6 7 8
+----
+exit: 0

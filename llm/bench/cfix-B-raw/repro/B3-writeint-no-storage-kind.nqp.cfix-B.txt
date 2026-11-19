@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/cfix-B/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B/lib nqp-m B3-writeint-no-storage-kind.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+write 8 bytes at 0: DIED MVMArray: write_buf requires an integer type
+elems 3
+write 8 bytes at 8: DIED MVMArray: write_buf requires an integer type
+write 8 bytes at 0 again: DIED MVMArray: write_buf requires an integer type
+survived
+----
+exit: 0

@@ -1,0 +1,58 @@
+probe: /tmp/claude-1000/cfix-M-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-M-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 rakudo-m B1-read-buf-past-storage.raku  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+elems 6
+last: 8
+=================================================================
+==2344706==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b65fa041bb8 at pc 0x7f45fd129a22 bp 0x7ffe76012620 sp 0x7ffe76011dc8
+READ of size 1 at 0x7b65fa041bb8 thread T0
+    #0 0x7f45fd129a21 in memcpy (/usr/lib/libasan.so.8+0x129a21) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f45fbca1f05 in read_buf (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x981f05) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #2 0x7f45fbb333ae in MVM_interp_run (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x8133ae) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #3 0x561c777aa6ed in main (/tmp/claude-1000/cfix-base/bin/rakudo-m+0x16ed) (BuildId: d483f688eb320d4061ed0cc48a6eb438ce7533e3)
+    #4 0x7f45fb027780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7f45fb0278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x561c777aa924 in _start (/tmp/claude-1000/cfix-base/bin/rakudo-m+0x1924) (BuildId: d483f688eb320d4061ed0cc48a6eb438ce7533e3)
+
+0x7b65fa041bb8 is located 0 bytes after 8-byte region [0x7b65fa041bb0,0x7b65fa041bb8)
+allocated by thread T0 here:
+    #0 0x7f45fd12c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f45fbca9644 in MVM_VMArray_push (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x989644) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #2 0x7f45fbb5f318 in MVM_interp_run (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x83f318) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #3 0x561c777aa6ed in main (/tmp/claude-1000/cfix-base/bin/rakudo-m+0x16ed) (BuildId: d483f688eb320d4061ed0cc48a6eb438ce7533e3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x981f05) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab) in read_buf
+Shadow bytes around the buggy address:
+  0x7b65fa041900: fa fa 02 fa fa fa 00 00 fa fa 00 00 fa fa 00 00
+  0x7b65fa041980: fa fa 00 00 fa fa 00 00 fa fa 00 fa fa fa 02 fa
+  0x7b65fa041a00: fa fa 00 00 fa fa 01 fa fa fa 00 fa fa fa fd fd
+  0x7b65fa041a80: fa fa 00 00 fa fa 00 00 fa fa 00 00 fa fa 00 fa
+  0x7b65fa041b00: fa fa 02 fa fa fa 00 00 fa fa 01 fa fa fa 00 fa
+=>0x7b65fa041b80: fa fa 00 fa fa fa 00[fa]fa fa 00 00 fa fa 00 00
+  0x7b65fa041c00: fa fa 00 fa fa fa 02 fa fa fa 00 00 fa fa 01 fa
+  0x7b65fa041c80: fa fa 00 fa fa fa 00 00 fa fa 00 00 fa fa 00 00
+  0x7b65fa041d00: fa fa 00 00 fa fa 00 fa fa fa 00 00 fa fa fd fd
+  0x7b65fa041d80: fa fa 00 00 fa fa 00 00 fa fa 00 04 fa fa fa fa
+  0x7b65fa041e00: fa fa fa fa fa fa 01 fa fa fa 00 fa fa fa 02 fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2344706==ABORTING
+----
+exit: 1

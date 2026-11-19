@@ -1,0 +1,13 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m r.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+compose with int8: returned
+recompose with int64: returned
+elems 8, element 2: 64, element 7: 3912022129048
+compose with int64: returned
+recompose with an object type: returned
+push an object: died: MVMArray: push expected int register
+recompose with another int64 type: returned
+first compose of a fresh type with int8: returned
+----
+exit: 0

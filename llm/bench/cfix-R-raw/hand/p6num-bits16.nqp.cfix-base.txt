@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m p6num-bits16.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+P6num compose: MVMP6num: Unsupported num size (16bit)
+VMArray compose with it: returned
+push_n 1.5, read back: 1.5
+----
+exit: 0

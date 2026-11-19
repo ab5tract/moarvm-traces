@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-B/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B/lib nqp-m B1-read-buf-past-storage.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+elems 6
+last: 8
+past1: DIED MVMArray: read_buf out of bounds offset 6 start 2 elems 6 count 1
+past4: DIED MVMArray: read_buf out of bounds offset 4 start 2 elems 6 count 4
+----
+exit: 0

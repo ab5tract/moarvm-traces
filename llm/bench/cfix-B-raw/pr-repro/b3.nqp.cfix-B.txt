@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-B/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B/lib nqp-m b3.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+write at 8: died: MVMArray: write_buf requires an integer type; elems 3
+write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+----
+exit: 0

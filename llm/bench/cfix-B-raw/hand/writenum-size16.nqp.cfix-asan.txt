@@ -1,0 +1,89 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m writenum-size16.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+=================================================================
+==2352192==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b7333406168 at pc 0x7f7337729a22 bp 0x7ffc99d0d8f0 sp 0x7ffc99d0d098
+READ of size 16 at 0x7b7333406168 thread T0
+    #0 0x7f7337729a21 in memcpy (/usr/lib/libasan.so.8+0x129a21) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f733616ca0f in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x84da0f) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x55f92aab94d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f7335627780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f73356278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x55f92aab9614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+Address 0x7b7333406168 is located in stack of thread T0 at offset 360 in frame
+    #0 0x7f7336130c0f in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x811c0f) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+
+  This frame has 35 object(s):
+    [32, 40) 'cur_op' (line 152)
+    [64, 72) 'bytecode_start' (line 155)
+    [96, 104) 'reg_base' (line 159)
+    [128, 136) 'cu' (line 162)
+    [160, 168) 'value' (line 1715)
+    [192, 200) 'ncr' (line 2772)
+    [224, 232) 'sc' (line 3031)
+    [256, 264) 'result' (line 5240)
+    [288, 296) 'value' (line 5292)
+    [320, 328) 'value' (line 5324)
+    [352, 360) 'value' (line 5337) <== Memory access at offset 360 overflows this variable
+    [384, 408) 'args' (line 6662)
+    [448, 472) 'args' (line 6676)
+    [512, 536) 'args' (line 6691)
+    [576, 600) 'args' (line 6706)
+    [640, 664) 'args' (line 6721)
+    [704, 728) 'args' (line 6736)
+    [768, 792) 'args' (line 6750)
+    [832, 856) 'args' (line 6763)
+    [896, 920) 'args' (line 6777)
+    [960, 984) 'args' (line 6791)
+    [1024, 1048) 'args' (line 6805)
+    [1088, 1112) 'args' (line 6819)
+    [1152, 1176) 'args' (line 6833)
+    [1216, 1240) 'args' (line 6847)
+    [1280, 1304) 'args' (line 6862)
+    [1344, 1368) 'args' (line 6877)
+    [1408, 1432) 'args' (line 6892)
+    [1472, 1496) 'args' (line 6907)
+    [1536, 1552) 'waste' (line 522)
+    [1568, 1584) 'waste' (line 2880)
+    [1600, 1616) 'waste' (line 5276)
+    [1632, 1656) 'waste' (line 3592)
+    [1696, 1736) 'gi'
+    [1776, 1848) 'decoded' (line 5239)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x84da0f) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in MVM_interp_run
+Shadow bytes around the buggy address:
+  0x7b7333405e80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b7333405f00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b7333405f80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7b7333406000: f1 f1 f1 f1 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
+  0x7b7333406080: 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2
+=>0x7b7333406100: 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00[f2]f2 f2
+  0x7b7333406180: 00 00 00 f2 f2 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+  0x7b7333406200: 00 00 00 f2 f2 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+  0x7b7333406280: 00 00 00 f2 f2 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+  0x7b7333406300: 00 00 00 f2 f2 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+  0x7b7333406380: 00 00 00 f2 f2 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2352192==ABORTING
+----
+exit: 1

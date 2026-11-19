@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-R/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-R/lib nqp-m G2-limit-boundary.nqp under (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+MoarVM panic: Memory allocation failed; could not allocate 9223372036854775800 bytes
+----
+exit: 1

@@ -1,0 +1,2 @@
+nqp	cfix-R	exit 0	18s	load 1.44	2026-11-19 18:28:28	Files=150, Tests=13746, 18 wallclock secs ( 0.41 usr  0.16 sys + 15.44 cusr  1.41 csys = 17.42 CPU)	Result: PASS
+rakudo	cfix-R	exit 0	129s	load 1.51	2026-11-19 18:30:37	Files=599, Tests=11162, 129 wallclock secs ( 3.72 usr  1.04 sys + 884.21 cusr 73.45 csys = 962.42 CPU)	Result: PASS

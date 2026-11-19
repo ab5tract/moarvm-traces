@@ -1,0 +1,91 @@
+probe: /tmp/claude-1000/cfix-R-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-R-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T-rejected-leaves-array.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+== pop_i (obj array)
+before: elems 4: a b c d
+rejected: DIED MVMArray: pop expected object register
+after:  elems 3: a b c
+valid op: elems 2: a b
+== pop_n (obj array, after a shift)
+before: elems 3: b c d
+rejected: DIED MVMArray: pop expected object register
+after:  elems 2: b c
+valid op: elems 1: b
+== pop_s (obj array)
+before: elems 4: a b c d
+rejected: DIED MVMArray: pop expected object register
+after:  elems 3: a b c
+valid op: elems 2: a b
+== pop (int array)
+before: elems 4: 1 2 3 4
+rejected: DIED MVMArray: pop expected int register
+after:  elems 3: 1 2 3
+valid op: elems 2: 1 2
+== pop_s (int array, after a shift)
+before: elems 3: 2 3 4
+rejected: DIED MVMArray: pop expected int register
+after:  elems 2: 2 3
+valid op: elems 1: 2
+== pop_i (str array)
+before: elems 4: a b c d
+rejected: DIED MVMArray: pop expected string register
+after:  elems 3: a b c
+valid op: elems 2: a b
+== pop_i (num array)
+before: elems 4: 1.5 2.5 3.5 4.5
+rejected: DIED MVMArray: pop expected num register
+after:  elems 3: 1.5 2.5 3.5
+valid op: elems 2: 1.5 2.5
+== pop_n (uint8 array)
+before: elems 4: 1 2 3 4
+rejected: DIED MVMArray: pop expected int register
+after:  elems 3: 1 2 3
+valid op: elems 2: 1 2
+== shift_i (reference) (obj array)
+before: elems 4: a b c d
+rejected: DIED MVMArray: shift expected object register
+after:  elems 4: a b c d
+valid op: elems 3: b c d
+== unshift_i (obj array)
+before: elems 4: a b c d
+rejected: DIED MVMArray: unshift expected object register
+after:  elems 4: null a b c
+valid op: elems 5: z null a b c
+== unshift_i (obj array, after a shift)
+before: elems 3: b c d
+rejected: DIED MVMArray: unshift expected object register
+after:  elems 3: a b c
+valid op: elems 4: z a b c
+== unshift_s (obj array, after a shift)
+before: elems 3: b c d
+rejected: DIED MVMArray: unshift expected object register
+after:  elems 3: a b c
+valid op: elems 4: z a b c
+== unshift (int array)
+before: elems 4: 1 2 3 4
+rejected: DIED MVMArray: unshift expected int register
+after:  elems 4: 0 1 2 3
+valid op: elems 5: 9 0 1 2 3
+== unshift_s (int array, after a shift)
+before: elems 3: 2 3 4
+rejected: DIED MVMArray: unshift expected int register
+after:  elems 3: 1 2 3
+valid op: elems 4: 9 1 2 3
+== unshift_i (str array, after a shift)
+before: elems 3: b c d
+rejected: DIED MVMArray: unshift expected string register
+after:  elems 3: a b c
+valid op: elems 4: z a b c
+== unshift_i (num array, after a shift)
+before: elems 3: 2.5 3.5 4.5
+rejected: DIED MVMArray: unshift expected num register
+after:  elems 3: 1.5 2.5 3.5
+valid op: elems 4: 9.5 1.5 2.5 3.5
+== unshift_n (uint8 array, after a shift)
+before: elems 3: 2 3 4
+rejected: DIED MVMArray: unshift expected int register
+after:  elems 3: 1 2 3
+valid op: elems 4: 9 1 2 3
+done
+----
+exit: 0

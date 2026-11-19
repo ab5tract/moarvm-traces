@@ -1,0 +1,12 @@
+probe: /tmp/claude-1000/cfix-B-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 rakudo-m b.raku  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+elems 6: 3 4 5 6 7 8
+read-uint8(5): 8
+read-uint8(6): died: MVMArray: read_buf out of bounds offset 6 start 2 elems 6 count 1
+read-uint32(4): died: MVMArray: read_buf out of bounds offset 4 start 2 elems 6 count 4
+Buf[uint64] at 2305843009213693953: read died: MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 4 count 8; write died: Unable to allocate an array of 2305843009213693961 elements; now 1 2 3 4
+Buf[uint32] at 4611686018427387905: read died: MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 4 count 4; write died: Unable to allocate an array of 4611686018427387909 elements; now 1 2 3 4
+buf16 at 9223372036854775807: read died: MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 4; write died: Unable to allocate an array of 9223372036854775811 elements; now 1 2 3 4 5 6 7 8
+----
+exit: 0

@@ -1,0 +1,9 @@
+upstream (MVMuint32 items/alloc, MVMint32 presize count)
+E = 1000000     alloc after presize 1000100     no write past the list (1000 steps)
+E = 2147483000  alloc after presize 2147483100  no write past the list (1000 steps)
+E = 2147483548  alloc after presize 2147483648  WRITE PAST THE LIST: checked add (add_slow) (step 0): index 2147483648 >= capacity 0
+E = 2147483648  alloc after presize 2147483748  WRITE PAST THE LIST: checked add (add_slow) (step 0): index 2147483748 >= capacity 200
+E = 3221225472  alloc after presize 3221225572  WRITE PAST THE LIST: checked add (add_slow) (step 0): index 3221225572 >= capacity 2147483848
+E = 4294967000  alloc after presize 4294967100  WRITE PAST THE LIST: checked add (add_slow) (step 0): index 4294967100 >= capacity 4294966904
+E = 4294967312  alloc after presize 256         WRITE PAST THE LIST: _nocheck add (step 156): index 256 >= capacity 256
+E = 8589934592  alloc after presize 256         WRITE PAST THE LIST: _nocheck add (step 156): index 256 >= capacity 256

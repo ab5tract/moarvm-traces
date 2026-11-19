@@ -1,0 +1,11 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m B3-write-no-storage-state.nqp fresh (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+fresh uint4 array: elems 0
+write 8 bytes at 0: DIED MVMArray: Unhandled slot type
+  after: elems 0
+write 8 bytes at 0 again: DIED MVMArray: Unhandled slot type
+  after: elems 0
+survived
+----
+exit: 0

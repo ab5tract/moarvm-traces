@@ -1,0 +1,232 @@
+probe: /tmp/claude-1000/cfix-R-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-R-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m B-buf-grid.nqp  (timeout 300 s, MemoryMax=4G, ulimit -c 0)
+----
+R kind=int8 start=0 elems=8 off=-1 size=1: DIED MVMArray: read_buf out of bounds offset -1 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=-1 size=1: DIED MVMArray: Index out of bounds, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=-1 size=2: DIED MVMArray: read_buf out of bounds offset -1 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=-1 size=2: DIED MVMArray: Index out of bounds, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=-1 size=4: DIED MVMArray: read_buf out of bounds offset -1 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=-1 size=4: DIED MVMArray: Index out of bounds, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=-1 size=8: DIED MVMArray: read_buf out of bounds offset -1 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=-1 size=8: DIED MVMArray: Index out of bounds, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=-1 size=0: DIED MVMArray: read_buf out of bounds offset -1 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=-1 size=0: DIED MVMArray: Index out of bounds, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=0 size=1: 1
+W kind=int8 start=0 elems=8 off=0 size=1: ok, elems 8: 0 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=0 size=2: 4609
+W kind=int8 start=0 elems=8 off=0 size=2: ok, elems 8: 0 17 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=0 size=4: 874713601
+W kind=int8 start=0 elems=8 off=0 size=4: ok, elems 8: 0 17 34 51 69 86 103 120
+R kind=int8 start=0 elems=8 off=0 size=8: 8675998062379995649
+W kind=int8 start=0 elems=8 off=0 size=8: ok, elems 8: 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=0 size=0: 0
+W kind=int8 start=0 elems=8 off=0 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=1 size=1: 18
+W kind=int8 start=0 elems=8 off=1 size=1: ok, elems 8: 1 0 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=1 size=2: 8978
+W kind=int8 start=0 elems=8 off=1 size=2: ok, elems 8: 1 0 17 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=1 size=4: 1161044754
+W kind=int8 start=0 elems=8 off=1 size=4: ok, elems 8: 1 0 17 34 51 86 103 120
+R kind=int8 start=0 elems=8 off=1 size=8: DIED MVMArray: read_buf out of bounds offset 1 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=1 size=8: ok, elems 9: 1 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=1 size=0: 0
+W kind=int8 start=0 elems=8 off=1 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=2 size=1: 35
+W kind=int8 start=0 elems=8 off=2 size=1: ok, elems 8: 1 18 0 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=2 size=2: 13347
+W kind=int8 start=0 elems=8 off=2 size=2: ok, elems 8: 1 18 0 17 69 86 103 120
+R kind=int8 start=0 elems=8 off=2 size=4: 1447375907
+W kind=int8 start=0 elems=8 off=2 size=4: ok, elems 8: 1 18 0 17 34 51 103 120
+R kind=int8 start=0 elems=8 off=2 size=8: DIED MVMArray: read_buf out of bounds offset 2 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=2 size=8: ok, elems 10: 1 18 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=2 size=0: 0
+W kind=int8 start=0 elems=8 off=2 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=3 size=1: 52
+W kind=int8 start=0 elems=8 off=3 size=1: ok, elems 8: 1 18 35 0 69 86 103 120
+R kind=int8 start=0 elems=8 off=3 size=2: 17716
+W kind=int8 start=0 elems=8 off=3 size=2: ok, elems 8: 1 18 35 0 17 86 103 120
+R kind=int8 start=0 elems=8 off=3 size=4: 1733707060
+W kind=int8 start=0 elems=8 off=3 size=4: ok, elems 8: 1 18 35 0 17 34 51 120
+R kind=int8 start=0 elems=8 off=3 size=8: DIED MVMArray: read_buf out of bounds offset 3 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=3 size=8: ok, elems 11: 1 18 35 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=3 size=0: 0
+W kind=int8 start=0 elems=8 off=3 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=4 size=1: 69
+W kind=int8 start=0 elems=8 off=4 size=1: ok, elems 8: 1 18 35 52 0 86 103 120
+R kind=int8 start=0 elems=8 off=4 size=2: 22085
+W kind=int8 start=0 elems=8 off=4 size=2: ok, elems 8: 1 18 35 52 0 17 103 120
+R kind=int8 start=0 elems=8 off=4 size=4: 2020038213
+W kind=int8 start=0 elems=8 off=4 size=4: ok, elems 8: 1 18 35 52 0 17 34 51
+R kind=int8 start=0 elems=8 off=4 size=8: DIED MVMArray: read_buf out of bounds offset 4 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=4 size=8: ok, elems 12: 1 18 35 52 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=4 size=0: 0
+W kind=int8 start=0 elems=8 off=4 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=5 size=1: 86
+W kind=int8 start=0 elems=8 off=5 size=1: ok, elems 8: 1 18 35 52 69 0 103 120
+R kind=int8 start=0 elems=8 off=5 size=2: 26454
+W kind=int8 start=0 elems=8 off=5 size=2: ok, elems 8: 1 18 35 52 69 0 17 120
+R kind=int8 start=0 elems=8 off=5 size=4: DIED MVMArray: read_buf out of bounds offset 5 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=5 size=4: ok, elems 9: 1 18 35 52 69 0 17 34 51
+R kind=int8 start=0 elems=8 off=5 size=8: DIED MVMArray: read_buf out of bounds offset 5 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=5 size=8: ok, elems 13: 1 18 35 52 69 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=5 size=0: 0
+W kind=int8 start=0 elems=8 off=5 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=6 size=1: 103
+W kind=int8 start=0 elems=8 off=6 size=1: ok, elems 8: 1 18 35 52 69 86 0 120
+R kind=int8 start=0 elems=8 off=6 size=2: 30823
+W kind=int8 start=0 elems=8 off=6 size=2: ok, elems 8: 1 18 35 52 69 86 0 17
+R kind=int8 start=0 elems=8 off=6 size=4: DIED MVMArray: read_buf out of bounds offset 6 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=6 size=4: ok, elems 10: 1 18 35 52 69 86 0 17 34 51
+R kind=int8 start=0 elems=8 off=6 size=8: DIED MVMArray: read_buf out of bounds offset 6 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=6 size=8: ok, elems 14: 1 18 35 52 69 86 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=6 size=0: 0
+W kind=int8 start=0 elems=8 off=6 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=7 size=1: 120
+W kind=int8 start=0 elems=8 off=7 size=1: ok, elems 8: 1 18 35 52 69 86 103 0
+R kind=int8 start=0 elems=8 off=7 size=2: DIED MVMArray: read_buf out of bounds offset 7 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=7 size=2: ok, elems 9: 1 18 35 52 69 86 103 0 17
+R kind=int8 start=0 elems=8 off=7 size=4: DIED MVMArray: read_buf out of bounds offset 7 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=7 size=4: ok, elems 11: 1 18 35 52 69 86 103 0 17 34 51
+R kind=int8 start=0 elems=8 off=7 size=8: DIED MVMArray: read_buf out of bounds offset 7 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=7 size=8: ok, elems 15: 1 18 35 52 69 86 103 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=7 size=0: 0
+W kind=int8 start=0 elems=8 off=7 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=8 size=1: DIED MVMArray: read_buf out of bounds offset 8 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=8 size=1: ok, elems 9: 1 18 35 52 69 86 103 120 0
+R kind=int8 start=0 elems=8 off=8 size=2: DIED MVMArray: read_buf out of bounds offset 8 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=8 size=2: ok, elems 10: 1 18 35 52 69 86 103 120 0 17
+R kind=int8 start=0 elems=8 off=8 size=4: DIED MVMArray: read_buf out of bounds offset 8 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=8 size=4: ok, elems 12: 1 18 35 52 69 86 103 120 0 17 34 51
+R kind=int8 start=0 elems=8 off=8 size=8: DIED MVMArray: read_buf out of bounds offset 8 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=8 size=8: ok, elems 16: 1 18 35 52 69 86 103 120 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=8 size=0: 0
+W kind=int8 start=0 elems=8 off=8 size=0: ok, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=9 size=1: DIED MVMArray: read_buf out of bounds offset 9 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=9 size=1: ok, elems 10: 1 18 35 52 69 86 103 120 0 0
+R kind=int8 start=0 elems=8 off=9 size=2: DIED MVMArray: read_buf out of bounds offset 9 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=9 size=2: ok, elems 11: 1 18 35 52 69 86 103 120 0 0 17
+R kind=int8 start=0 elems=8 off=9 size=4: DIED MVMArray: read_buf out of bounds offset 9 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=9 size=4: ok, elems 13: 1 18 35 52 69 86 103 120 0 0 17 34 51
+R kind=int8 start=0 elems=8 off=9 size=8: DIED MVMArray: read_buf out of bounds offset 9 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=9 size=8: ok, elems 17: 1 18 35 52 69 86 103 120 0 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=9 size=0: DIED MVMArray: read_buf out of bounds offset 9 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=9 size=0: ok, elems 9: 1 18 35 52 69 86 103 120 0
+R kind=int8 start=0 elems=8 off=10 size=1: DIED MVMArray: read_buf out of bounds offset 10 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=10 size=1: ok, elems 11: 1 18 35 52 69 86 103 120 0 0 0
+R kind=int8 start=0 elems=8 off=10 size=2: DIED MVMArray: read_buf out of bounds offset 10 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=10 size=2: ok, elems 12: 1 18 35 52 69 86 103 120 0 0 0 17
+R kind=int8 start=0 elems=8 off=10 size=4: DIED MVMArray: read_buf out of bounds offset 10 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=10 size=4: ok, elems 14: 1 18 35 52 69 86 103 120 0 0 0 17 34 51
+R kind=int8 start=0 elems=8 off=10 size=8: DIED MVMArray: read_buf out of bounds offset 10 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=10 size=8: ok, elems 18: 1 18 35 52 69 86 103 120 0 0 0 17 34 51 68 85 102 119
+R kind=int8 start=0 elems=8 off=10 size=0: DIED MVMArray: read_buf out of bounds offset 10 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=10 size=0: ok, elems 10: 1 18 35 52 69 86 103 120 0 0
+R kind=int8 start=0 elems=8 off=1152921504606846981 size=1: DIED MVMArray: read_buf out of bounds offset 1152921504606846981 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=1152921504606846981 size=1: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=1152921504606846981 size=2: DIED MVMArray: read_buf out of bounds offset 1152921504606846981 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=1152921504606846981 size=2: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=1152921504606846981 size=4: DIED MVMArray: read_buf out of bounds offset 1152921504606846981 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=1152921504606846981 size=4: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=1152921504606846981 size=8: DIED MVMArray: read_buf out of bounds offset 1152921504606846981 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=1152921504606846981 size=8: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=1152921504606846981 size=0: DIED MVMArray: read_buf out of bounds offset 1152921504606846981 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=1152921504606846981 size=0: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=2305843009213693953 size=1: DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=2305843009213693953 size=1: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=2305843009213693953 size=2: DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=2305843009213693953 size=2: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=2305843009213693953 size=4: DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=2305843009213693953 size=4: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=2305843009213693953 size=8: DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=2305843009213693953 size=8: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=2305843009213693953 size=0: DIED MVMArray: read_buf out of bounds offset 2305843009213693953 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=2305843009213693953 size=0: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=4611686018427387905 size=1: DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=4611686018427387905 size=1: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=4611686018427387905 size=2: DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=4611686018427387905 size=2: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=4611686018427387905 size=4: DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=4611686018427387905 size=4: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=4611686018427387905 size=8: DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=4611686018427387905 size=8: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=4611686018427387905 size=0: DIED MVMArray: read_buf out of bounds offset 4611686018427387905 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=4611686018427387905 size=0: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=9223372036854775807 size=1: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 1
+W kind=int8 start=0 elems=8 off=9223372036854775807 size=1: skipped (would reach malloc)
+R kind=int8 start=0 elems=8 off=9223372036854775807 size=2: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 2
+W kind=int8 start=0 elems=8 off=9223372036854775807 size=2: DIED Unable to allocate an array of 9223372036854775809 elements, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=9223372036854775807 size=4: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 4
+W kind=int8 start=0 elems=8 off=9223372036854775807 size=4: DIED Unable to allocate an array of 9223372036854775811 elements, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=9223372036854775807 size=8: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 8
+W kind=int8 start=0 elems=8 off=9223372036854775807 size=8: DIED Unable to allocate an array of 9223372036854775815 elements, elems 8: 1 18 35 52 69 86 103 120
+R kind=int8 start=0 elems=8 off=9223372036854775807 size=0: DIED MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 0
+W kind=int8 start=0 elems=8 off=9223372036854775807 size=0: skipped (would reach malloc)
+R kind=int8 start=1 elems=7 off=-1 size=1: DIED MVMArray: read_buf out of bounds offset -1 start 1 elems 7 count 1
+W kind=int8 start=1 elems=7 off=-1 size=1: DIED MVMArray: Index out of bounds, elems 7: 18 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=-1 size=2: DIED MVMArray: read_buf out of bounds offset -1 start 1 elems 7 count 2
+W kind=int8 start=1 elems=7 off=-1 size=2: DIED MVMArray: Index out of bounds, elems 7: 18 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=-1 size=4: DIED MVMArray: read_buf out of bounds offset -1 start 1 elems 7 count 4
+W kind=int8 start=1 elems=7 off=-1 size=4: DIED MVMArray: Index out of bounds, elems 7: 18 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=-1 size=8: DIED MVMArray: read_buf out of bounds offset -1 start 1 elems 7 count 8
+W kind=int8 start=1 elems=7 off=-1 size=8: DIED MVMArray: Index out of bounds, elems 7: 18 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=-1 size=0: DIED MVMArray: read_buf out of bounds offset -1 start 1 elems 7 count 0
+W kind=int8 start=1 elems=7 off=-1 size=0: DIED MVMArray: Index out of bounds, elems 7: 18 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=0 size=1: 18
+W kind=int8 start=1 elems=7 off=0 size=1: ok, elems 7: 0 35 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=0 size=2: 8978
+W kind=int8 start=1 elems=7 off=0 size=2: ok, elems 7: 0 17 52 69 86 103 120
+R kind=int8 start=1 elems=7 off=0 size=4: 1161044754
+W kind=int8 start=1 elems=7 off=0 size=4: ok, elems 7: 0 17 34 51 86 103 120
+=================================================================
+==2345387==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b51d3eb0598 at pc 0x7f31d6f29a22 bp 0x7ffd6e80d510 sp 0x7ffd6e80ccb8
+READ of size 8 at 0x7b51d3eb0598 thread T0
+    #0 0x7f31d6f29a21 in memcpy (/usr/lib/libasan.so.8+0x129a21) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f31d5aa17e5 in read_buf (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x9827e5) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #2 0x7f31d593241e in MVM_interp_run (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x81341e) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #3 0x55a0bd63d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #4 0x7f31d4e27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7f31d4e278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x55a0bd63d614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7b51d3eb0598 is located 0 bytes after 8-byte region [0x7b51d3eb0590,0x7b51d3eb0598)
+allocated by thread T0 here:
+    #0 0x7f31d6f2c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f31d5aa9294 in MVM_VMArray_push (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x98a294) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #2 0x7f31d595e388 in MVM_interp_run (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x83f388) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #3 0x55a0bd63d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x9827e5) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8) in read_buf
+Shadow bytes around the buggy address:
+  0x7b51d3eb0300: fa fa 00 fa fa fa 00 00 fa fa 00 00 fa fa 00 fa
+  0x7b51d3eb0380: fa fa 00 fa fa fa 00 fa fa fa 00 00 fa fa 00 00
+  0x7b51d3eb0400: fa fa 00 00 fa fa 00 00 fa fa 00 fa fa fa 00 fa
+  0x7b51d3eb0480: fa fa 00 fa fa fa 00 fa fa fa 00 fa fa fa 00 fa
+  0x7b51d3eb0500: fa fa 00 fa fa fa 00 03 fa fa 00 fa fa fa 00 fa
+=>0x7b51d3eb0580: fa fa 00[fa]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b51d3eb0600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b51d3eb0680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b51d3eb0700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b51d3eb0780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b51d3eb0800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2345387==ABORTING
+----
+exit: 1

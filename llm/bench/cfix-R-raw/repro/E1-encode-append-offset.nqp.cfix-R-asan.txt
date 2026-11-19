@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-R-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-R-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m E1-encode-append-offset.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+u16: 1 97 98 0
+u8s: 2 97 98 0
+u8: 1 2 97 98
+----
+exit: 0

@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-M/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-M/lib nqp-m N2-strtocodes-leak.nqp control (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+control: elems 3, RSS grew by 18 MB
+----
+exit: 0

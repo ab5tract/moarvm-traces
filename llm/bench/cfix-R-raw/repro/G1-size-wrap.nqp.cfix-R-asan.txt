@@ -1,0 +1,19 @@
+probe: /tmp/claude-1000/cfix-R-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-R-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m G1-size-wrap.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+ssize 8192 reached: elems 8192
+=================================================================
+==2341525==ERROR: AddressSanitizer: negative-size-param: (size=-65536)
+    #0 0x7f8ee2328951 in memset (/usr/lib/libasan.so.8+0x128951) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f8ee0ea7a20 in set_elems (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x988a20) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #2 0x7f8ee0d770ce in MVM_interp_run (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x8580ce) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8)
+    #3 0x55f0834254d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #4 0x7f8ee0227780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7f8ee02278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x55f083425614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+Address 0x000000010000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: negative-size-param (/tmp/claude-1000/cfix-R-asan/lib/libmoar.so+0x988a20) (BuildId: 084aadc49fe53e130ac5729980c32968514479d8) in set_elems
+==2341525==ABORTING
+----
+exit: 1

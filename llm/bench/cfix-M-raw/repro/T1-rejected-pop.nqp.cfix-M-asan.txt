@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-M-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-M-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T1-rejected-pop.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+pop_i: DIED MVMArray: pop expected object register
+elems now: 1
+collections done
+grown back: elems 2
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2344224==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f45fb55bf02 bp 0x7fff584343e0 sp 0x7fff58432310 T0)
+==2344224==The signal is caused by a READ memory access.
+==2344224==Hint: address points to the zero page.
+    #0 0x7f45fb55bf02 in MVM_interp_run (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x83bf02) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #1 0x5621cf5154d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7f45faa27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7f45faa278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x5621cf515614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2344224==Register values:
+rax = 0x0000000000000007  rbx = 0x00007d55f983c174  rcx = 0x00007b45f8806780  rdx = 0x00000fab3f2ff828  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007fff584343e0  rsp = 0x00007fff58432310  
+ r8 = 0x00007d55f983c142   r9 = 0x00000faabf307828  r10 = 0x00000faabf307827  r11 = 0x00000fab3f2ff828  
+r12 = 0x00007b45f6d3fa38  r13 = 0x00007f45fa143628  r14 = 0x0000000000000000  r15 = 0x00007cc5f97e0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x83bf02) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab) in MVM_interp_run
+==2344224==ABORTING
+----
+exit: 1

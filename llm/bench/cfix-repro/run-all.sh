@@ -5,6 +5,8 @@
 # rest. M1 is not run (needs ~64 GiB) and D1 is not a runnable reproducer.
 # Usage: run-all.sh [-p PREFIX] [-o OUTDIR] (with -p, only one run on that
 # prefix, for the fix branches: ASAN when PREFIX ends in -asan).
+# Task 4 added B2-buf-offset-before-storage, B-buf-grid, B3-write-no-storage-state
+# and R-recompose-matrix.
 cd "$(dirname "$0")" || exit 1; R=./run.sh; X=
 while [ $# -gt 1 ]; do case $1 in -p|-o) X="$X $1 $2"; shift 2 ;; *) break ;; esac; done
 # shellcheck disable=SC2086
@@ -26,6 +28,7 @@ $R $X -t 120 P3-splice-kind-matrix.nqp
 $R $X -t 60 T-rejected-leaves-array.nqp
 $R $X -t 60 B1-read-buf-past-storage.nqp; $R $X -t 60 B1-read-buf-past-storage.raku
 $R $X -t 60 B2-buf-offset-wrap.nqp; $R $X -t 60 B2-buf-offset-wrap.raku
+$R $X -t 60 B2-buf-offset-before-storage.nqp
 $R $X -t 60 B3-writeint-no-storage-kind.nqp
 $R $X -t 60 R1-recompose-object-type.nqp
 $R $X -t 60 N1-normalize-ssize-bytes.nqp
@@ -34,5 +37,8 @@ $R $X -t 60 E1-encode-append-offset.nqp
 $R $X -t 60 E2-encode-append-rounding.nqp
 for c in int64 hash; do $R $X -t 60 O1-procasync-buf-type.nqp $c; done
 $R $X -t 60 X1-recompose-wider-kind.nqp
+$R $X -t 300 B-buf-grid.nqp
+for c in live fresh; do $R $X -t 60 B3-write-no-storage-state.nqp $c; done
+$R $X -t 60 R-recompose-matrix.nqp
 } > /dev/null 2>&1
 echo "done: $(date '+%F %T')"

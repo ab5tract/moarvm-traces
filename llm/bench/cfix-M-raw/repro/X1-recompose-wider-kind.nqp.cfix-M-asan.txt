@@ -1,0 +1,65 @@
+probe: /tmp/claude-1000/cfix-M-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-M-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m X1-recompose-wider-kind.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+recomposed to int64: elems 3
+=================================================================
+==2345030==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b3e247d0348 at pc 0x7f1e264a40df bp 0x7ffdfe4156c0 sp 0x7ffdfe4156b0
+READ of size 8 at 0x7b3e247d0348 thread T0
+    #0 0x7f1e264a40de in MVM_VMArray_at_pos (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x9840de) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #1 0x7f1e263630a4 in MVM_interp_run (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x8430a4) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #2 0x5593cc60d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f1e25827780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f1e258278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x5593cc60d614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7b3e247d0348 is located 8 bytes before 2-byte region [0x7b3e247d0350,0x7b3e247d0352)
+allocated by thread T0 here:
+    #0 0x7f1e2792c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f1e2630ea89 in MVM_callsite_drop_positionals (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x7eea89) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #2 0x7f1e2653fbfe in MVM_capture_drop_args (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa1fbfe) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #3 0x7f1e26597727 in MVM_disp_program_record_capture_drop_args (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa77727) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #4 0x7f1e26573924 in boot_code (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa53924) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #5 0x7f1e2658704c in run_dispatch (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa6704c) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #6 0x7f1e265aafb3 in MVM_disp_program_record_end (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa8afb3) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #7 0x7f1e263b3d2e in MVM_callstack_unwind_dispatch_record (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x893d2e) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #8 0x7f1e26587058 in run_dispatch (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa67058) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #9 0x7f1e265923c0 in MVM_disp_program_run_dispatch (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa723c0) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #10 0x7f1e2657b9a3 in dispatch_initial (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0xa5b9a3) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #11 0x7f1e2634afae in MVM_interp_run (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x82afae) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab)
+    #12 0x5593cc60d4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-M-asan/lib/libmoar.so+0x9840de) (BuildId: 6ee977650511c94638e410b7e333f4f61b85daab) in MVM_VMArray_at_pos
+Shadow bytes around the buggy address:
+  0x7b3e247d0080: fa fa 00 01 fa fa 00 01 fa fa 04 fa fa fa 00 01
+  0x7b3e247d0100: fa fa 00 00 fa fa 00 01 fa fa 02 fa fa fa 00 00
+  0x7b3e247d0180: fa fa 02 fa fa fa 00 00 fa fa fd fd fa fa 00 00
+  0x7b3e247d0200: fa fa 00 00 fa fa fa fa fa fa fa fa fa fa 00 00
+  0x7b3e247d0280: fa fa 00 00 fa fa 00 00 fa fa 00 00 fa fa 00 00
+=>0x7b3e247d0300: fa fa 00 fa fa fa 00 00 fa[fa]02 fa fa fa 00 00
+  0x7b3e247d0380: fa fa 00 00 fa fa fd fd fa fa 00 00 fa fa 00 00
+  0x7b3e247d0400: fa fa 00 00 fa fa 00 00 fa fa 00 00 fa fa 00 00
+  0x7b3e247d0480: fa fa 00 00 fa fa 00 00 fa fa 01 fa fa fa 00 fa
+  0x7b3e247d0500: fa fa 00 00 fa fa fd fd fa fa 00 00 fa fa 00 00
+  0x7b3e247d0580: fa fa 00 06 fa fa fa fa fa fa fa fa fa fa 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2345030==ABORTING
+----
+exit: 1
