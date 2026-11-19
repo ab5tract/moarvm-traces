@@ -13,15 +13,23 @@
 #     1,0  -> 1 1 4 7 10 13 16 19 22 25 28 4 7 10 13 16 19 22 25 28
 #     2,3  -> 1 4 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28
 #     5,0  -> 1 4 7 10 13 1 4 7 10 13 16 19 22 25 28 16 19 22 25 28
-# The "str" lines are the STR kind, which is copied element by element going
-# forward (defined, not memcpy): it repeats the leading elements instead, and
-# is printed for comparison only (see the report: whether that path should
-# also copy as memmove does is a separate choice).
-# The bug: the fast-path kinds print what this libc's memcpy leaves, which
-# differs by element size (the plain build printed patterns that are neither
-# the memmove result nor a forward copy, e.g. "1 1 4 4 7 10 10 10 19 22 28 ..."
-# for i8 in campaign 8); the AddressSanitizer build stops at the first case
-# with "memcpy-param-overlap" in copy_elements.
+# The "str" lines (STR kind) and the "obj gen2" line (an OBJ array promoted
+# to gen2) go element by element, forward (defined, not memcpy): they repeat
+# the leading elements ("1 1 1 1 ..."). The "obj nursery" line is the same
+# OBJ splice on a nursery array, which takes the memcpy path: the result
+# depends on the array's GC generation. After area S's fix (memmove, and an
+# overlap-safe element path for a self-splice) every line is the memmove
+# result above.
+# The bug as this build shows it: the memcpy call overlaps (undefined
+# behaviour); the AddressSanitizer build stops at the first one, the
+# "obj nursery" case, with "memcpy-param-overlap" in copy_elements. On the
+# plain build the fast-path lines print the memmove result: with glibc 2.44
+# on this CPU (AMD Ryzen 9 5900X) memcpy and memmove bind to the same code
+# in a process (cfix-baseline-raw/ifunc/), and libmoar's copy_elements
+# tail-calls memcpy@plt. That is a property of this glibc, version and CPU,
+# not something memcpy promises: campaign 8's libmoar, which linked its own
+# memcpy, printed patterns that were neither (va-differential.md section 5).
+# The STR and gen2 lines are wrong today on every build.
 
 sub inttype(int $bits, int $unsigned) {
     my $t := nqp::newtype(nqp::null(), 'P6int');
@@ -50,6 +58,24 @@ sub showi($name, $a) {
 }
 
 sub fill($a, $set) { my int $i := 0; while $i < 10 { $set($a, $i * 3 + 1); $i++ } }
+# OBJ: the same self-splice (offset 1, count 0) on an object array that has
+# been promoted to gen2 (it survived two nursery collections: the first sets
+# NURSERY_SEEN, the second promotes, src/gc/collect.c:254-310) and on a
+# fresh one in the nursery. copy_elements takes the element-by-element path
+# for a gen2 target (VMArray.c:942-946, d_needs_barrier) and memcpy for a
+# nursery one: the result depends on the GC generation. Promoted first: the
+# fresh case is a memcpy, where the AddressSanitizer build stops.
+{
+    my $old := nqp::list();
+    fill($old, -> $a, $v { nqp::push($a, ~$v) });
+    nqp::force_gc(); nqp::force_gc();
+    nqp::splice($old, $old, 1, 0);
+    show("obj gen2 1,0", $old);
+    my $new := nqp::list();
+    fill($new, -> $a, $v { nqp::push($a, ~$v) });
+    nqp::splice($new, $new, 1, 0);
+    show("obj nursery 1,0", $new);
+}
 for ((1, 0), (2, 3), (5, 0)) -> $c {
     my int $off := $c[0]; my int $cnt := $c[1];
     my $s := nqp::list_s();

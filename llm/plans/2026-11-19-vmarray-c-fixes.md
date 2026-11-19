@@ -126,8 +126,11 @@ Two branches off f112c3998, each per the Global Constraints: fix, rebuild plain 
 (`cfix-<area>` / `cfix-<area>-asan`), run the area's reproducers and show them flip, run every other
 reproducer of `cfix-repro/` to show nothing else changed, nqp and rakudo `make test` against Task 1's lists.
 For S, also run campaign 8's differential (`tools/bench/repr/` lives on `zig-hash-engine`, so copy the
-programs out before switching branches) between `cfix-base` and the fixed build: the only differing lines
-must be the 195 listed self-splice lines, each now equal to the memmove model. Write `cfix-<area>.md` per
+programs out before switching branches) between `cfix-base` and the fixed build. (Amended after Task 1:
+the plain upstream build already prints the memmove result on the fast path with this glibc, so) the only
+differing lines may be self-splice lines of the element-by-element path, each now equal to the memmove model;
+the fast path's evidence is the AddressSanitizer run of the S reproducers going clean. Area S also carries T3
+and makes the element-by-element path overlap-safe for a self-splice (controller's ruling, ledger). Write `cfix-<area>.md` per
 area with the evidence and a draft PR text (title, body in the style of #2069: what is wrong, how it is
 reached, what the fix does and what behaviour it defines, the reproducer inline, how it was found).
 

@@ -5,6 +5,6 @@ spawn: returned
 reads: 1
 got 100 elements
 element 0: 3472328296227680304
-element 99: 5934412989304
+element 99: 256
 ----
 exit: 0

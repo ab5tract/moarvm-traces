@@ -18,11 +18,13 @@
 # (the same exception every other size above the limit gets; reading past
 # elems gives 0). The bug: the AddressSanitizer build stops in zero_slots
 # ("negative-size-param", the memset over (0 - 8192) * 8 bytes, on the NULL
-# that realloc(p, 0) returned). On the plain build (mimalloc: realloc to 0
-# bytes returns a minimal block) the memset's end pointer wraps below its
-# start, so it returns after writing a few bytes around the block; setelems
-# "succeeds" with elems = 2**64 - 4096 over a 0-slot buffer, and the read of
-# element 10**9 goes to unmapped memory (SIGSEGV).
+# that realloc(p, 0) returned). On the plain build setelems returns
+# ("succeeds" with elems = 2**64 - 4096 over a buffer realloc'ed to 0 bytes;
+# mimalloc returns a minimal block for that), and the read of element 10**9
+# goes to unmapped memory (SIGSEGV). Why the memset over 2**64 - 65536 bytes
+# returns instead of faulting is NOT verified; a guess: the memset variant
+# computes an end pointer that wraps below its start and stops after its
+# head/tail stores, writing a few bytes around the block.
 
 my $a := nqp::list_i();
 nqp::setelems($a, 8192);

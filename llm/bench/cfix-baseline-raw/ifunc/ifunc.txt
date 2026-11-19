@@ -1,0 +1,9 @@
+$ gcc -O0 -o ifunc ifunc.c && ./ifunc   (2026-11-19 16:56:29)
+memcpy  -> 0x7ff12a176380 (dlsym 0x7ff12a176380)
+memmove -> 0x7ff12a176380 (dlsym 0x7ff12a176380)
+same: yes
+GNU C Library (GNU libc) stable release version 2.44.
+model name	: AMD Ryzen 9 5900X 12-Core Processor
+cpu flags present: avx2 erms fsrm (no avx512f)
+libmoar imports:  U memcpy@GLIBC_2.14; U memmove@GLIBC_2.2.5;
+copy_elements:   2c4859:	jmp    243e50 <memcpy@plt>

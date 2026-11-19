@@ -3,7 +3,7 @@ run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib rakudo-m B1-read-buf-past-
 ----
 elems 6
 last: 8
-past1: 232
-past4: 1676150791
+past1: 40
+past4: 1713899527
 ----
 exit: 0

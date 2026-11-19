@@ -17,14 +17,20 @@
 #          written over a hash body that does not have them.
 # A correct VM prints, for either, an exception at spawnprocasync (or when
 # the output arrives) naming buf_type, and no read. The bug:
-#   int64: "got 100 elements", then element 99 is read 664 bytes past the
-#          128-byte buffer: garbage on the plain build; AddressSanitizer
-#          reports heap-buffer-overflow READ in MVM_VMArray_at_pos_i/atpos.
+#   int64: "got 100 elements", then element 99 is read at bytes 792..799 of
+#          the adopted 128-byte buffer, 664 bytes past its end: garbage on
+#          the plain build; AddressSanitizer reports heap-buffer-overflow
+#          READ in MVM_VMArray_at_pos (its "located ... after 128-byte
+#          region" names the nearest chunk, a freed earlier read buffer, not
+#          the adopted one).
 #   hash:  the hash object's body is overwritten; using it crashes or
 #          misbehaves (MoarVM-managed nursery memory: ASAN cannot see the
 #          overrun itself).
 # Not reachable from Rakudo's Proc::Async, which always passes buf8
-# (src/core.c/Proc/Async.rakumod).
+# (src/core.c/Proc/Async.rakumod). Note: async_read looks the type up in the
+# caller's live config hash at every read (procops.c:681; si->callbacks is
+# that hash, 1323), so a check made only at spawn could be bypassed by
+# rebinding "buf_type" afterwards, and a missing key gives a null type.
 
 my class Queue is repr('ConcBlockingQueue') { }
 

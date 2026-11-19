@@ -4,36 +4,36 @@ run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasa
 elems 6
 last: 8
 =================================================================
-==2173569==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b4829a237f8 at pc 0x7f282cd29a22 bp 0x7fffec57ea80 sp 0x7fffec57e228
-READ of size 1 at 0x7b4829a237f8 thread T0
-    #0 0x7f282cd29a21 in memcpy (/usr/lib/libasan.so.8+0x129a21) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
-    #1 0x7f282b8a17e5 in read_buf (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9827e5) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
-    #2 0x7f282b73241e in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x81341e) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
-    #3 0x56110f8194d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
-    #4 0x7f282ac27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #5 0x7f282ac278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #6 0x56110f819614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+==2202664==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b7f7dc237b8 at pc 0x7f5f80d29a22 bp 0x7ffe71bea900 sp 0x7ffe71bea0a8
+READ of size 1 at 0x7b7f7dc237b8 thread T0
+    #0 0x7f5f80d29a21 in memcpy (/usr/lib/libasan.so.8+0x129a21) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f5f7f8a17e5 in read_buf (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9827e5) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f5f7f73241e in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x81341e) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x55dbd3a914d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #4 0x7f5f7ec27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7f5f7ec278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x55dbd3a91614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
 
-0x7b4829a237f8 is located 0 bytes after 8-byte region [0x7b4829a237f0,0x7b4829a237f8)
+0x7b7f7dc237b8 is located 0 bytes after 8-byte region [0x7b7f7dc237b0,0x7b7f7dc237b8)
 allocated by thread T0 here:
-    #0 0x7f282cd2c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
-    #1 0x7f282b8a8f24 in MVM_VMArray_push (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x989f24) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
-    #2 0x7f282b75e388 in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x83f388) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
-    #3 0x56110f8194d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #0 0x7f5f80d2c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f5f7f8a8f24 in MVM_VMArray_push (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x989f24) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f5f7f75e388 in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x83f388) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x55dbd3a914d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9827e5) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in read_buf
 Shadow bytes around the buggy address:
-  0x7b4829a23500: fa fa 00 00 fa fa 02 fa fa fa 00 00 fa fa fd fd
-  0x7b4829a23580: fa fa 00 00 fa fa 00 00 fa fa fa fa fa fa fa fa
-  0x7b4829a23600: fa fa 00 00 fa fa 00 00 fa fa 00 00 fa fa 00 00
-  0x7b4829a23680: fa fa 01 fa fa fa 00 fa fa fa 00 00 fa fa fd fd
-  0x7b4829a23700: fa fa 00 00 fa fa 00 00 fa fa 00 04 fa fa fa fa
-=>0x7b4829a23780: fa fa fa fa fa fa 00 00 fa fa 00 00 fa fa 00[fa]
-  0x7b4829a23800: fa fa 00 00 fa fa 01 fa fa fa 00 fa fa fa 00 00
-  0x7b4829a23880: fa fa fd fd fa fa 00 00 fa fa 00 00 fa fa 00 06
-  0x7b4829a23900: fa fa fa fa fa fa fa fa fa fa 00 00 fa fa 00 fa
-  0x7b4829a23980: fa fa 00 00 fa fa fd fd fa fa 00 00 fa fa 00 00
-  0x7b4829a23a00: fa fa 04 fa fa fa fa fa fa fa fa fa fa fa 00 00
+  0x7b7f7dc23500: fa fa 00 00 fa fa fd fd fa fa 00 00 fa fa 00 00
+  0x7b7f7dc23580: fa fa fa fa fa fa fa fa fa fa 00 00 fa fa 00 00
+  0x7b7f7dc23600: fa fa 00 00 fa fa 00 00 fa fa 01 fa fa fa 00 fa
+  0x7b7f7dc23680: fa fa 00 00 fa fa fd fd fa fa 00 00 fa fa 00 00
+  0x7b7f7dc23700: fa fa 00 04 fa fa fa fa fa fa fa fa fa fa 00 00
+=>0x7b7f7dc23780: fa fa 00 00 fa fa 00[fa]fa fa 00 00 fa fa 01 fa
+  0x7b7f7dc23800: fa fa 00 fa fa fa 00 00 fa fa fd fd fa fa 00 00
+  0x7b7f7dc23880: fa fa 00 00 fa fa 00 06 fa fa fa fa fa fa fa fa
+  0x7b7f7dc23900: fa fa 00 00 fa fa 00 fa fa fa 00 00 fa fa fd fd
+  0x7b7f7dc23980: fa fa 00 00 fa fa 00 00 fa fa 04 fa fa fa fa fa
+  0x7b7f7dc23a00: fa fa fa fa fa fa 00 00 fa fa 00 00 fa fa 02 fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -53,6 +53,6 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==2173569==ABORTING
+==2202664==ABORTING
 ----
 exit: 1

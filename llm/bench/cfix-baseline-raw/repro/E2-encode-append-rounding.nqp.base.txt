@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m E2-encode-append-rounding.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+timeout: the monitored command dumped core
+----
+exit: 139

@@ -11,7 +11,12 @@
 # The program: a VMArray type composed with int64 elements, recomposed with
 # an object element type (BOOTHash, the hash type object), and new arrays of it
 # (created after the recompose, so no live array changes kind here).
-# A correct VM prints
+# What a correct VM prints depends on the fix chosen; the ruling for area R
+# is to refuse a second compose that changes the element kind (as P6opaque
+# refuses any second compose), so the fixed VM dies at the second
+# composetype ("recompose to an object type: DIED ..."), after which the
+# array is an int64 array as before. Without that choice, a correct VM would
+# print
 #     push an object: returned, elems 1
 #     push_i: DIED MVMArray: push expected object register
 #     composed once: push an object: returned, elems 1
@@ -37,7 +42,7 @@ sub t($name, &code) {
 my $obj := nqp::what(nqp::hash());   # BOOTHash: an object type (BP_NONE)
 my $ty := nqp::newtype(nqp::null(), 'VMArray');
 nqp::composetype($ty, nqp::hash('array', nqp::hash('type', inttype(64, 0))));
-nqp::composetype($ty, nqp::hash('array', nqp::hash('type', $obj)));
+t('recompose to an object type', { nqp::composetype($ty, nqp::hash('array', nqp::hash('type', $obj))); 'returned' });
 my $a := nqp::create($ty);
 t('push an object', { nqp::push($a, nqp::list()); 'returned, elems ' ~ nqp::elems($a) });
 my $b := nqp::create($ty);

@@ -6,23 +6,23 @@ elems 8
 write 8 bytes at 8: DIED MVMArray: Unhandled slot type
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==2173730==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7fe89c576408 bp 0x7ffe04144610 sp 0x7ffe04142528 T0)
-==2173730==The signal is caused by a WRITE memory access.
-==2173730==Hint: address points to the zero page.
-    #0 0x7fe89c576408  (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #1 0x7fe89cf32217 in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x813217) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
-    #2 0x5649777e64d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
-    #3 0x7fe89c427780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #4 0x7fe89c4278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
-    #5 0x5649777e6614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+==2202838==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7fa079976408 bp 0x7ffda16c3990 sp 0x7ffda16c18a8 T0)
+==2202838==The signal is caused by a WRITE memory access.
+==2202838==Hint: address points to the zero page.
+    #0 0x7fa079976408  (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #1 0x7fa07a332217 in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x813217) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x560083d654d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7fa079827780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7fa0798278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x560083d65614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
 
-==2173730==Register values:
-rax = 0x0000000000000000  rbx = 0x00007be898532dd8  rcx = 0x1122334455667788  rdx = 0x0000000000000008  
-rdi = 0x0000000000000000  rsi = 0x1122334455667788  rbp = 0x00007ffe04144610  rsp = 0x00007ffe04142528  
+==2202838==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ba075932dd8  rcx = 0x1122334455667788  rdx = 0x0000000000000008  
+rdi = 0x0000000000000000  rsi = 0x1122334455667788  rbp = 0x00007ffda16c3990  rsp = 0x00007ffda16c18a8  
  r8 = 0x000000007fff8000   r9 = 0x0000000000000000  r10 = 0x0000000000000007  r11 = 0x0000000000000007  
-r12 = 0x00007d689afe0080  r13 = 0x00007be898532cd8  r14 = 0x00007fe89de31fe0  r15 = 0x00007be89a006780  
+r12 = 0x00007d20783e0080  r13 = 0x00007ba075932cd8  r14 = 0x00007fa07b231fe0  r15 = 0x00007ba077406780  
 AddressSanitizer can not provide additional info.
 SUMMARY: AddressSanitizer: SEGV (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b) 
-==2173730==ABORTING
+==2202838==ABORTING
 ----
 exit: 1
