@@ -234,6 +234,17 @@ compared them, and `cfix-P-raw/cmp.txt` has 67 same and 27 differing:
 
 The P1, P2 and P3 controls, the empty-source programs, and S1, T3, G1 and the rest are among the same.
 
+**Task 4's programs.** By the time of the round-1 runs, Task 4 had added its own programs to run-all
+(traces 020f6b2): `B-buf-grid.nqp`, `B2-buf-offset-before-storage.nqp`, `B3-write-no-storage-state.nqp
+fresh|live` and `R-recompose-matrix.nqp`. So the run-alls on cfix-P and cfix-P-asan ran them too, and
+their outputs are in cfix-P-raw/repro/. cmp-repro.sh does not cover them, so I compared them by hand,
+with the same normalisation, against Task 4's upstream outputs (cfix-B-raw/repro/ and
+cfix-R-raw/repro/, `.base` and `.asan`):
+- 9 of the 10 are the same.
+- The tenth, `B-buf-grid.nqp` plain, differs only in `R kind=int8 start=3 ...` lines. Those lines print
+  bytes read past the storage (the B1 bug), and they vary between upstream runs too (Task 4's
+  `cfix-B-raw/base-rerun/` differs from its base run in the same lines). Noise.
+
 ## 4. Suites
 
 `cfix-maketest-driver.sh cfix-P-raw/suites cfix-P` ran on the first build, from e9c533194. The probes
