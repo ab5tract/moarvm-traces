@@ -88,8 +88,21 @@ Lines are those of the branch tip.
   one by the pick, the Zig one by this commit; `-Dzig-gc=false` builds were not run (not part of the gate).
 
 The one deliberate difference left (va-kind-differences.md section 3): for the six kinds without storage
-the Zig array keeps `slots` NULL where the C holds `malloc(0)`'s block. Every new throw for those kinds
-(P2, B3) comes before any allocation in both, so the difference shows nowhere new.
+the Zig array keeps `slots` NULL where the C holds `malloc(0)`'s block. The new throws for those kinds
+(P2 in splice, B3 in write_buf) come before any allocation in both, so these two paths no longer reach
+it. The fixes do not remove it elsewhere: `push`, `bind_pos` (index >= 0), `unshift`, `set_elems(n > 0)`
+and a slice into such an array still grow first, and the C stores `MVM_malloc(8 * 0)` (or
+`MVM_realloc(slots, 0)`) in `slots` before `zero_slots` throws "MVMArray: Unhandled slot type", while
+the Zig array leaves `slots` as it was (NULL). Why that still cannot be seen from the VM, argued by
+reading (not run): `ssize` and `elems` are set only after `zero_slots` in both, so they stay as they were
+(0 for a fresh array); every operation that would read or copy the slots of such an array throws or
+returns first (at_pos, pop and shift by kind or emptiness, serialize/deserialize, read_buf by its bounds,
+write_buf, splice and slice by P2 and their bounds), copy_to copies nothing for `elems == 0`, the mark
+and describe_refs do nothing for these kinds and unmanaged_size is `ssize * 0`, and the adopting sites
+(encode, decode, normalize, I/O) refuse these kinds. The one place the pointer value itself leaves the
+array is the one va-kind-differences.md section 3 already names: `MVM_nativecall_unmarshal_vmarray`
+passes `slots + start * 0` to native code, NULL in the Zig array where the C passes the zero-byte block;
+a failed push before that call is one more way to get there, not a new kind of difference.
 
 ## 3. Unit tests
 
@@ -227,3 +240,23 @@ fix-branch output (`cfix-<A>-raw/**/<x>.cfix-<A>.txt`; T3-* belongs to S; X1 to 
   systemd-coredump stored that core (2026-11-19 20:27:01, pid 2549307, 9.4M; nothing in the tree).
 </content>
 </invoke>
+
+## 7. Final fix wave (after the reviews)
+
+P commit 0d759048a (comment and tests only; nothing compiled into libmoar changes, so the gate prefixes,
+the differential, the suites and the reproducers were not re-run):
+- `storage.zig` `grow`'s doc said a wrapped size throws "before anything is changed"; with `start > 0`
+  and `n + start > ssize` (no wrap there) `setSize` has already moved the elements to start 0, as the C
+  does. Now: before anything is reallocated, the elements unchanged. The G test pins it: a shifted
+  array (start 3) grown to 2**64 - 4095 throws "Unable to allocate an array of 18446744073709547521
+  elements" and is left with start 0, elems 8,997, ssize 12,288 and the same element bytes.
+- repr-test's `composeWith` roots its two types and both info hashes (temp roots, a defer pops them).
+- The gcMark test's `alloc` comparison is `u64` (it was the one `u32` left among the items/alloc
+  comparisons of section 3).
+- Section 2's last paragraph now gives the wider argument for the NULL-slots difference (above).
+
+Unit tests at 0d759048a (`gate/wave-unit-*.log`; zig fmt --check clean): default 93/93 steps, 240/252
+passed, 12 skipped; -Dzig-reprs=false 240/252, 12 skipped; -Dgc-debug=1 245/252, 7 skipped; repr-test
+63/63 on all three (the new case is inside the existing G test). The last two runs show "dirty 1": the
+traces submodule with this record's edit, not compiled.
+
