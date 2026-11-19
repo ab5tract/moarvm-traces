@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m B3-write-first-compose.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+first compose to uint4 with live array: returned
+write at 0: returned; elems 8
+write at 8: died: MVMArray: Unhandled slot type; elems 8
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2398500==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7f25b4d76408 bp 0x7ffecba95d00 sp 0x7ffecba93c18 T0)
+==2398500==The signal is caused by a WRITE memory access.
+==2398500==Hint: address points to the zero page.
+    #0 0x7f25b4d76408  (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #1 0x7f25b5732217 in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x813217) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x55f9d51624d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f25b4c27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f25b4c278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x55f9d5162614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2398500==Register values:
+rax = 0x0000000000000000  rbx = 0x00007b25b0ee2aa8  rcx = 0x0000000000000001  rdx = 0x0000000000000008  
+rdi = 0x0000000000000000  rsi = 0x0000000000000001  rbp = 0x00007ffecba95d00  rsp = 0x00007ffecba93c18  
+ r8 = 0x000000007fff8000   r9 = 0x0000000000000000  r10 = 0x0000000000000007  r11 = 0x0000000000000007  
+r12 = 0x00007ca5b39e0080  r13 = 0x00007b25b0ee29e8  r14 = 0x00007f25b6631fe0  r15 = 0x00007b25b2a06780  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b) 
+==2398500==ABORTING
+----
+exit: 1

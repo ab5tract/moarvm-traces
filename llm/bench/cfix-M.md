@@ -165,7 +165,8 @@ Body:
 > compiled against the header: worklist.c, the macros, the two functions above, and the gc_mark functions
 > that test `include_gen2`. Nothing in the JIT or spesh knows the layout. Code built against the old header
 > that uses the worklist macros (a REPR's gc_mark in an extension) has to be rebuilt; Rakudo's dynops don't
-> use them. I have not measured performance. `make test` of nqp and Rakudo gives the same per-file results
+> use them. I have not measured performance. If 64-bit counts on 32-bit hosts are unwelcome, `size_t`
+> would do as well (a list cannot hold more entries than the address space); I can change it. `make test` of nqp and Rakudo gives the same per-file results
 > as before.
 >
 > Found by reading while porting the VMArray REPR to Zig; not reproduced.

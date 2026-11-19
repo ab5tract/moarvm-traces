@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-B/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-B/lib nqp-m write-zero-bytes-no-storage.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+uint4, zero-byte write at 0: died: MVMArray: write_buf requires an integer type; elems 0
+uint8, zero-byte write at 0: returned; elems 0
+----
+exit: 0

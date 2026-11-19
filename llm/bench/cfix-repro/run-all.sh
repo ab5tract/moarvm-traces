@@ -6,7 +6,8 @@
 # Usage: run-all.sh [-p PREFIX] [-o OUTDIR] (with -p, only one run on that
 # prefix, for the fix branches: ASAN when PREFIX ends in -asan).
 # Task 4 added B2-buf-offset-before-storage, B-buf-grid, B3-write-no-storage-state
-# and R-recompose-matrix.
+# and R-recompose-matrix; fix round 1 added B3-write-first-compose and
+# R-first-compose-gap (the review's programs).
 cd "$(dirname "$0")" || exit 1; R=./run.sh; X=
 while [ $# -gt 1 ]; do case $1 in -p|-o) X="$X $1 $2"; shift 2 ;; *) break ;; esac; done
 # shellcheck disable=SC2086
@@ -41,5 +42,7 @@ $R $X -t 60 X1-recompose-wider-kind.nqp
 $R $X -t 300 B-buf-grid.nqp
 for c in live fresh; do $R $X -t 60 B3-write-no-storage-state.nqp $c; done
 $R $X -t 60 R-recompose-matrix.nqp
+$R $X -t 60 B3-write-first-compose.nqp
+$R $X -t 60 R-first-compose-gap.nqp
 } > /dev/null 2>&1
 echo "done: $(date '+%F %T')"

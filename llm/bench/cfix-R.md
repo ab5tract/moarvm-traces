@@ -77,11 +77,21 @@ evidence (an int8 array's 8-byte buffer read and written as eight int64 slots, a
   refused: arrays would be reinterpreted (campaign 8's differential has such recomposed cases; the Zig mirror
   has to follow).
 
-**What this closes.** R1, X1, and with them the only route to a live array of a storage-less kind (int1/2/4,
-uint1/2/4 with storage): an array gets such a kind only through a recompose of its type while it is alive.
-Two defects that need such an array are fixed independently on their own branches (a splice into or out of
-such a kind, area P; a writeint on it, area B); with this branch their reproducers cannot be set up
-(section 3).
+**What this closes, and what it does not** (corrected at fix round 1: the first version called this "the
+only route to a live array of a storage-less kind", which is false). It closes R1 and X1: a type composed
+with an element type can no longer change kind under its arrays. It does not protect arrays that exist
+**before the type's first compose with an element type**: `nqp::newtype`, `nqp::create`, push objects, then
+the first compose (allowed with any kind, as before, since elem_type is still NULL) reinterprets the object
+slots under the new kind. The matrix's "none" row composes such a type with a live (emptied) array; the
+review's `R-first-compose-gap.nqp` (section 2) composes one holding a hash to str, and `atpos_s` then reads
+the MVMHash as a string (`chars: 0`, a type confusion, no crash) on upstream and on this branch alike. The
+same route gives a live array of a storage-less kind with storage (`cfix-repro/B3-write-first-compose.nqp`:
+on cfix-R and cfix-R-asan it behaves as upstream, ending in SEGV on address 0 under ASAN), so the
+independent fixes of areas P (splice into or out of such a kind) and B (writeint on it) stay needed for
+memory safety. This branch only stops the reproducers of those two areas that set their case up by
+*re*composing (section 3).
+Ruling (fix round 1): the rule is not widened; the REPR does not know whether instances exist. The PR text
+names the limitation.
 
 **Search of nqp and Rakudo for a recompose to another kind** (the STOP condition): none.
 - nqp 305ff2f77, `git grep composetype -- src` (MoarVM backend): IO.nqp:9 and testing.nqp:80 compose a fresh
@@ -103,6 +113,7 @@ such a kind, area P; a writeint on it, area B); with this branch their reproduce
 |---|---|---|
 | `R1-recompose-object-type.nqp` | `recompose to an object type: returned`, `push an object: DIED MVMArray: push expected int register`, `push_i: returned, elems 1`; composed once: `push an object: returned` | `recompose to an object type: DIED MVMArray: Type  is already composed with another element kind`; then the type is still int64: `push an object: DIED ... push expected int register`, `push_i: returned, elems 1`; composed once unchanged; both builds |
 | `X1-recompose-wider-kind.nqp` | plain `element 7: 524296`, `bound element 7: 42` on an 8-byte buffer; ASAN heap-buffer-overflow READ in MVM_VMArray_at_pos | dies at the recompose, `MVMArray: Type  is already composed with another element kind` (exit 1: the program does not catch it); both builds, no ASAN report |
+| `R-first-compose-gap.nqp` (new at fix round 1, the review's program; a **known remaining gap, not a flip**) | `composed to str with a live object array`, `chars: 0` (plain and ASAN) | identical: the first compose is allowed (cfix-R and cfix-R-asan) |
 | `R-recompose-matrix.nqp` (new) | all 72 pairs `allowed` (plain and ASAN identical: the program avoids every unsafe read, see its header) | 18 allowed, 54 `DIED`; below |
 
 (The name in the message is the type's debug name; these test types have none, hence `Type  is`. The PR
@@ -132,6 +143,10 @@ and a fresh array. `cfix-R-raw/matrix-check.py base.txt cfix-R.txt` checks (cfix
   is garbage), N2 on ASAN (RSS growth 396 vs 397 MB), and the plain B-buf-grid (its B1 lines print bytes past
   the block; `cfix-B-raw/grid-check.py base cfix-R --unchanged`: 117 such lines differ, 0 others).
 
+Fix round 1 added `R-first-compose-gap.nqp` and `B3-write-first-compose.nqp` to run-all and ran both on
+cfix-base, cfix-asan, cfix-R and cfix-R-asan: neither changes on this branch (the gap, and the B3 route
+that does not need a recompose). No build or suite was rerun: this branch's commit is unchanged.
+
 ## 4. Suites
 
 `cfix-maketest-driver.sh cfix-R-raw/suites cfix-R` (probes map `/tmp/claude-1000/cfix-R/lib/libmoar.so`):
@@ -154,6 +169,11 @@ Body:
 > stays allowed, also with another object type. A type that was never composed with an element type
 > (BOOTArray, or one fresh from `nqp::newtype`) can still be composed once with anything. The new
 > message is "MVMArray: Type <name> is already composed with another element kind".
+>
+> A type that already has instances when it is first composed with an element type is not protected:
+> VMArray cannot know about those arrays, and their object slots are then read as the new kind. Closing
+> that would need the REPR to note when the first array of a type is allocated and to refuse a change of
+> kind from then on, which costs a store in every allocation; this change does not do that.
 >
 > The alternative would be to give object element types object slots in spec_to_repr_data, which sets
 > nothing for them today, and keep allowing every recompose. That fixes the second problem below but not
@@ -235,8 +255,8 @@ Body:
 >
 > After the refused compose the int8 array is still an int8 array, and the int64 type is still an int64
 > type. I also ran every pair of nine kinds (never composed, two object types, int8, uint8, int64, uint64,
-> num64, str), each with a live array of two elements. With this change, the pairs that keep the kind
-> (18) print exactly what they printed before. The other 54 die, and the live array and the type stay as
+> num64, str), each with a live array of two elements. With this change, the 18 allowed pairs (same
+> kind, or no element type before) print exactly what they printed before. The other 54 die, and the live array and the type stay as
 > they were. Types that only differ in signedness (int8 and uint8, int64 and uint64) or are int64 and num64
 > count as different kinds, because existing elements would be reinterpreted.
 >

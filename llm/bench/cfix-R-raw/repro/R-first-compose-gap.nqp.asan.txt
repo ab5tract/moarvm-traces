@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m R-first-compose-gap.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+composed to str with a live object array
+chars: 0
+----
+exit: 0

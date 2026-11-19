@@ -2,24 +2,30 @@
 
 ```
 Branch:    vmarray-buf-bounds, from origin/main f112c3998, in P (local only, not pushed)
-Commits:   19624425dcc9254c965f20c1a92b4a0998f84dc0 "Bound VMArray read_buf by elems, not by start + elems" (B1)
-           bbbccb01a1f932a852c0a81218051836c435ca23 "Compare VMArray read_buf and write_buf offsets in elements first" (B2)
-           440b862c6d6bcf0e046c7f7a8cc5c1cdcb5d28d3 "Refuse VMArray write_buf on element kinds without storage" (B3)
+Commits:   1569576548dced664154a124655f73bb70aaf164 "Bound VMArray read_buf by elems, not by start + elems" (B1)
+           2acff2df5374ca832c8ab23718b2302692a6bd0e "Compare VMArray read_buf and write_buf offsets in elements first" (B2)
+           f3ff579458ad10a81b64242265b708bd348b17fc "Refuse VMArray write_buf on element kinds without storage" (B3)
+           (fix round 1: messages of B2 and B3 corrected; trees identical to 19624425d / bbbccb01a /
+           440b862c6, the ids of the first report: 32e49bcb5, 06aed2233, a33b3ead1)
 Diff:      src/6model/reprs/VMArray.c, +8 -5, three hunks: write_buf's kind check (B3), write_buf's
            size check (B2), read_buf's bounds check (B1, B2)
 Prefixes:  /tmp/claude-1000/cfix-B (defaults: gcc -O3, mimalloc), /tmp/claude-1000/cfix-B-asan
            (--asan --no-mimalloc), built from `git archive` copies /tmp/claude-1000/cfix-src-B{,-asan}
            (cfix-T-raw/build/export-build.sh, unchanged); the built VMArray.c is byte-identical to the
            branch's; make exit 0, 10 s / 20 s, no warning in VMArray.c (729 warnings in all, as cfix-T).
-           (Built from 109f773a2, which has the same tree as 440b862c6: only B2's message was reworded
+           (Built from 109f773a2, which has the same tree as f3ff57945: only messages were reworded
            after the build.)
 nqp/rakudo: Task 1's builds (nqp 305ff2f77, rakudo c6d6fc3c6b in cfix-base and /tmp/claude-1000/cfix-ws),
            only the libmoar swapped through LD_LIBRARY_PATH
 Raw:       cfix-B-raw/repro/ (run-all on both prefixes; the new programs also on cfix-base and cfix-asan),
            cfix-B-raw/cmp.txt and cmp-repro.sh (comparison; Task 4's copy, also used for R and M),
            cfix-B-raw/grid-check.py, predicates.py (the checks of section 2), cfix-B-raw/base-rerun/,
-           cfix-B-raw/pr-repro/ (the PR text's programs on cfix-base, cfix-asan, cfix-B, cfix-B-asan),
-           cfix-B-raw/hand/ (two seen-on-the-way checks, section 6), cfix-B-raw/suites/, cfix-B-raw/build/
+           cfix-B-raw/pr-repro/ (the PR text's programs on cfix-base, cfix-asan, cfix-B, cfix-B-asan;
+           r16.raku is the buf16 case run alone, renamed at fix round 1 to match the name its run line
+           records; b3.nqp is the first version's bug-3 program, replaced in the PR text at fix round 1 by
+           cfix-repro/B3-write-first-compose.nqp, whose outputs are in repro/),
+           cfix-B-raw/hand/ (two seen-on-the-way checks, section 6, and the zero-byte write check),
+           cfix-B-raw/suites/, cfix-B-raw/build/
            (logs, mkcommit.sh: commits made without checking the branch out, build-all.sh)
 ```
 
@@ -64,7 +70,10 @@ write-* methods (Buf.rakumod), which do no bounds check of their own.
   `start * elem_size` of slack. Write_buf already used `elems`.
 - B2, the arithmetic: storage is limited by set_size_internal to `ssize <= 2**(64 - a)` elements
   (a = 4, 3, 2, 1 for 8, 4, 2, 1 bytes), i.e. at most 2**63 bytes, and `start + elems <= ssize`. So
-  `(elems - offset) * elem_size` (with `offset <= elems`) cannot wrap. The old expression
+  `(elems - offset) * elem_size` (with `offset <= elems`) cannot wrap, as long as set_size_internal keeps
+  that limit (at this base, growing to within 4096 of 2**64 elements wraps its size computation and breaks
+  it: a separate defect, fixed elsewhere; the texts say "absent a separate overflow in growth"). The old
+  expression
   `offset * elem_size + count` wraps for offset >= (2**64 - count) / elem_size: 2**61 and up for 8-byte
   kinds, 2**62 for 4-byte kinds, just under 2**63 for 2-byte kinds (the sum, not the product); never for
   1-byte kinds (offset < 2**63).
@@ -77,15 +86,27 @@ write-* methods (Buf.rakumod), which do no bounds check of their own.
   the elements and elems are unchanged, as for any too-large write today.
 - B3: the six storage-less kinds (U4, U2, U1, I4, I2, I1; slot types 12-17) have elem_size 0. With elem_size
   0 the old size check `elems * 0 < offset * 0 + count` was true for every count > 0, so every such write
-  called set_size_internal, which reallocs the slots to `ssize * 0 = 0` bytes and then throws in zero_slots
-  ("Unhandled slot type") before it updates ssize. The new test refuses before anything. read_buf is not
-  changed for B3: with elem_size 0 its check (old and new) throws for any count > 0; count 0 copies nothing.
+  called set_size_internal. A write with offset + count <= ssize only set elems (the first write of the
+  reproducers returns with elems 8); one needing more than ssize slots realloc'ed them to `ssize * 0 = 0`
+  bytes and then threw in zero_slots ("Unhandled slot type") before updating ssize. The new test refuses
+  before anything. read_buf is not changed for B3: with elem_size 0 its check (old and new) throws for any
+  count > 0; count 0 copies nothing.
+- B3's reach (corrected at fix round 1; the first version said only a recompose gives such an array
+  storage, which is false): an array has storage under a storage-less kind whenever its type gets that kind
+  while the array is alive, which includes the *first* compose of a type that already has instances
+  (`nqp::newtype`, `nqp::create`, pushes, then compose with uint4). A first compose is allowed whatever the
+  kind, so B3 is needed for memory safety independently of any refusal of recomposes
+  (`B3-write-first-compose.nqp`, the review's program: on a build that refuses kind-changing recomposes
+  but lacks this check, it still ends in SEGV on address 0 under ASAN).
 - What else the hunks change (all checked by a program, section 2):
   - a read of zero bytes (flags 32: `1 << 8` truncated to 0 by the ops' unsigned char, which passes their
     `size > 8` check) starting past the last element but before `start + elems` now throws: the B1 change,
     for count 0;
   - a write to a fresh array of a storage-less kind now throws "write_buf requires an integer type" instead
     of "Unhandled slot type", and no longer allocates first;
+  - a zero-byte write (flags 32) on a storage-less kind, which returned without doing anything, now throws
+    too (`cfix-B-raw/hand/write-zero-bytes-no-storage.nqp`: cfix-base `returned; elems 0`, cfix-B
+    `died: MVMArray: write_buf requires an integer type; elems 0`; on uint8 both return);
   - nothing else: for every offset whose old byte expression does not wrap, the new checks give the same
     answer as the old ones (B1's check for reads, the original one for writes).
 
@@ -118,6 +139,7 @@ B2 touch the same condition in read_buf, so B2's commit is on top of B1's.
 | `B3-writeint-no-storage-kind.nqp` | first write returns, `elems 8`; second `DIED MVMArray: Unhandled slot type`; third returns; ASAN: SEGV on address 0 (memcpy) | every write `DIED MVMArray: write_buf requires an integer type`, `elems 3`, `survived`; both builds |
 | `B3-write-no-storage-state.nqp live` (new) | as above, with elems after each write: 8, 8, 8; ASAN SEGV at the third | each write DIED (requires an integer type), elems 3 after each; both builds |
 | `B3-write-no-storage-state.nqp fresh` (new) | each write `DIED MVMArray: Unhandled slot type`, elems 0 | each write `DIED MVMArray: write_buf requires an integer type`, elems 0 |
+| `B3-write-first-compose.nqp` (new, fix round 1; the review's program) | `first compose to uint4 with live array: returned`, `write at 0: returned; elems 8`, `write at 8: died: MVMArray: Unhandled slot type; elems 8`, `write at 0: returned; elems 8`; ASAN: SEGV on address 0 at the third write | compose returns as before; each write `died: MVMArray: write_buf requires an integer type; elems 3`; both builds |
 | `B-buf-grid.nqp` (new) | 2200 reads and 2200 writes (below); ASAN stops at the first B1 read (heap-buffer-overflow, 0 bytes after an 8-byte region, case `R kind=int8 start=1 elems=7 off=0 size=8`) | `grid-check.py`: 0 violations on cfix-B and cfix-B-asan (identical counts) |
 
 In the B3 programs the element reads print `DIED MVMArray: Unhandled slot type, got 'unknown'` on every
@@ -164,6 +186,11 @@ script, extended for this task's prefixes and new upstream outputs). Result (`cf
 live and fresh, and the grid, each on both builds. The usual noise (B1's raku program, O1 int64, N2's
 RSS) is all inside these flips or the same this time: no other file differs.
 
+Fix round 1 added `B3-write-first-compose.nqp` to run-all; it was run on cfix-base, cfix-asan, cfix-B and
+cfix-B-asan (table above) and, to show B3 is needed even where kind-changing recomposes are refused, on
+cfix-R and cfix-R-asan (`cfix-R-raw/repro/`: same as upstream, SEGV under
+ASAN). No build or suite was rerun in fix round 1: only commit messages changed (trees identical).
+
 ## 4. Suites
 
 `cfix-maketest-driver.sh cfix-B-raw/suites cfix-B` (probes map `/tmp/claude-1000/cfix-B/lib/libmoar.so`):
@@ -185,8 +212,9 @@ Body:
 > not lie within the elements throws "read_buf out of bounds". A write at an offset so large that its byte
 > position wraps around throws "Unable to allocate an array of N elements". That is what a write at an
 > offset past the array size limit that does not wrap already throws; "Index out of bounds", which a
-> negative offset gets, would be the other choice. A write to an element kind VMArray has no storage for throws "write_buf
-> requires an integer type", as object and string arrays already do. One commit per bug.
+> negative offset gets, would be the other choice. A write to an element kind VMArray has no storage
+> for throws "write_buf requires an integer type", as object and string arrays already do. One commit
+> per bug.
 >
 > 1. read_buf checked a read against `(start + elems) * elem_size`, but reads from
 >    `slots + (start + offset) * elem_size`. Once elements had been shifted off the front, a read could
@@ -196,16 +224,20 @@ Body:
 >    more on an 8-byte kind, 2**62 on a 4-byte kind, and just under 2**63 on a 2-byte kind. The check then
 >    saw a small position, and the access went to an aliased slot or, near 2**63, before the first element.
 >    Both now first check that the offset is not past elems, and then compare the bytes from the offset to
->    the last element with count. Neither can wrap, because the storage is limited to 2**63 bytes. A write
->    at such an offset now asks set_size_internal for offset + count elements, which is over its limit, so
->    it throws. The array keeps its elements.
+>    the last element with count. Neither can wrap while the array stays within set_size_internal's limit
+>    of 2**63 bytes, which it does absent a separate overflow in growth. A write at such an offset now
+>    asks set_size_internal for offset + count elements, which is over its limit, so it throws. The array
+>    keeps its elements.
 > 3. write_buf refused only the object and string kinds. On int1/int2/int4/uint1/uint2/uint4 (element size
->    0) every write called set_size_internal. That reallocates the slots to 0 bytes and then throws
->    "Unhandled slot type" before updating ssize. An array that had storage then wrote through the freed
->    pointer on the next write within the old size. Such an array can only exist if its type was
->    recomposed while it was alive. On a type composed with such a kind from the start, the message changes
->    from "Unhandled slot type" to the one above. read_buf needs no change for this: its check already
->    throws for any read of one byte or more there.
+>    0) every write of one byte or more called set_size_internal. A write within the old size only set
+>    elems; one that needed more slots than ssize reallocated them to 0 bytes and then threw "Unhandled
+>    slot type" before updating ssize. An array that had storage then wrote through the freed pointer on
+>    the next write within the old size. Such an array exists when its type is composed (or recomposed)
+>    with such a kind while an array of it is alive, for example an array created before its type's first
+>    compose. On a type composed with such a kind from the start, the message changes from "Unhandled slot
+>    type" to the one above. A write of zero bytes (flags can ask for one) to any array of these kinds,
+>    which did nothing, now throws too. read_buf needs no change for this: its check already throws for
+>    any read of one byte or more there.
 >
 > Bugs 1 and 2 are reachable from plain Raku:
 >
@@ -257,33 +289,47 @@ Body:
 > buf16 at 9223372036854775807: read died: MVMArray: read_buf out of bounds offset 9223372036854775807 start 0 elems 8 count 4; write died: Unable to allocate an array of 9223372036854775811 elements; now 1 2 3 4 5 6 7 8
 > ```
 >
-> Bug 3, in nqp, with an int8 array whose type is recomposed to uint4 while it is alive:
+> Bug 3, in nqp, with an array created from a type before the type's first compose, which then gives it
+> the uint4 kind:
 >
 > ```
-> sub int_type(int $bits) {
+> sub int_type(int $bits, int $u) {
 >     my $t := nqp::newtype(nqp::null(), 'P6int');
->     nqp::composetype($t, nqp::hash('integer', nqp::hash('bits', $bits, 'unsigned', 1)));
+>     nqp::composetype($t, nqp::hash('integer', nqp::hash('bits', $bits, 'unsigned', $u)));
 >     $t
 > }
+> my $t := nqp::newtype(nqp::null(), 'VMArray');
+> my $a := nqp::create($t);
+> nqp::push($a, nqp::hash()); nqp::push($a, nqp::hash()); nqp::push($a, nqp::hash());
+> my $r := 'returned';
+> try { nqp::composetype($t, nqp::hash('array', nqp::hash('type', int_type(4, 1)))); CATCH { $r := 'died: ' ~ nqp::getmessage($!) } }
+> say("first compose to uint4 with live array: $r");
 > sub try_write($a, int $off) {
 >     my $r := 'returned';
 >     try { nqp::writeint($a, $off, 1, 12); CATCH { $r := 'died: ' ~ nqp::getmessage($!) } }
 >     say("write at $off: $r; elems " ~ nqp::elems($a));
 > }
-> my $type := nqp::newtype(nqp::null(), 'VMArray');
-> nqp::composetype($type, nqp::hash('array', nqp::hash('type', int_type(8))));
-> my $a := nqp::create($type);
-> nqp::push_i($a, 1); nqp::push_i($a, 4); nqp::push_i($a, 7);
-> nqp::composetype($type, nqp::hash('array', nqp::hash('type', int_type(4))));
-> try_write($a, 0);
-> try_write($a, 8);
-> try_write($a, 0);
+> try_write($a, 0); try_write($a, 8); try_write($a, 0);
 > ```
 >
-> Before: `write at 0: returned; elems 8`, `write at 8: died: MVMArray: Unhandled slot type; elems 8`,
-> `write at 0: returned; elems 8`. The last write goes through the pointer that `realloc(p, 0)` left;
-> with AddressSanitizer it is a SEGV on address 0. After, on both builds, each of the three lines is
-> `died: MVMArray: write_buf requires an integer type; elems 3`.
+> Before:
+>
+> ```
+> first compose to uint4 with live array: returned
+> write at 0: returned; elems 8
+> write at 8: died: MVMArray: Unhandled slot type; elems 8
+> write at 0: returned; elems 8
+> ```
+>
+> The last write goes through the pointer that `realloc(p, 0)` left; with AddressSanitizer it is a SEGV
+> on address 0. After, on both builds:
+>
+> ```
+> first compose to uint4 with live array: returned
+> write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+> write at 8: died: MVMArray: write_buf requires an integer type; elems 3
+> write at 0: died: MVMArray: write_buf requires an integer type; elems 3
+> ```
 >
 > I also checked the new conditions against the old ones over a grid: ten element kinds, start 0, 1 and 3,
 > every offset from -1 to two past the end plus the large ones above, and sizes 0, 1, 2, 4 and 8, each a read
@@ -308,5 +354,11 @@ Body:
 - **writenum has no size check.** Its default arm (any size but 4) copies `size` bytes from an 8-byte local:
   `cfix-B-raw/hand/writenum-size16.nqp`, `nqp::writenum($a, 0, 1.5, 16)`: plain cfix-base returns with elems
   16; cfix-asan: stack-buffer-overflow READ of size 16 in MVM_interp_run (the interpreter, no JIT).
+- **The JIT's writeint/writeuint path skips both checks** (by reading, graph.c:2385-2430; added at fix round
+  1 after the review): the interpreter refuses `(flags & 3) == 3` and `size > 8` ("Invalid flags ... or size
+  ... for writeint", interp.c:5297-5299); the JIT bails out only for `MVM_SWITCHENDIAN` (and for flags that
+  are not a known value), computes `size = 1 << (flags >> 2)` in an unsigned char and calls write_buf (or
+  MVM_repr_write_buf) with the register's address and that size. So flags 3 is taken as native order, and
+  a size of 16..128 copies that many bytes from the address of an 8-byte register. Not run.
 - write_buf still grows to `offset + count` elements, with count in bytes (Task 1's note: over-allocation for
   wide kinds); unchanged here.
