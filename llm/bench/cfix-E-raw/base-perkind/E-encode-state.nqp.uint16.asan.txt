@@ -1,0 +1,86 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m E-encode-state.nqp uint16 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+uint16 fresh utf8 0 bytes: ok; elems 0: 
+uint16 fresh utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint16 fresh utf8 2 bytes: ok; elems 1: 25185
+uint16 fresh utf8 3 bytes: MISMATCH want 25185 99; elems 1: 25185
+uint16 fresh utf8 5 bytes: MISMATCH want 25185 25699 101; elems 2: 25185 25699
+uint16 fresh utf16 4 bytes: ok; elems 2: 97 98
+uint16 filled utf8 0 bytes: ok; elems 2: 1 2
+uint16 filled utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 1 97
+uint16 filled utf8 2 bytes: MISMATCH want 1 2 25185; elems 3: 1 25185 0
+uint16 filled utf8 3 bytes: MISMATCH want 1 2 25185 99; elems 3: 1 25185 99
+uint16 filled utf8 5 bytes: MISMATCH want 1 2 25185 25699 101; elems 4: 1 25185 25699 101
+uint16 filled utf16 4 bytes: MISMATCH want 1 2 97 98; elems 4: 1 97 98 0
+uint16 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint16 shifted utf8 1 bytes: MISMATCH want 2 3 97; elems 2: 97 3
+uint16 shifted utf8 2 bytes: MISMATCH want 2 3 25185; elems 3: 25185 3 0
+uint16 shifted utf8 3 bytes: MISMATCH want 2 3 25185 99; elems 3: 25185 99 0
+uint16 shifted utf8 5 bytes: MISMATCH want 2 3 25185 25699 101; elems 4: 25185 25699 101 0
+uint16 shifted utf16 4 bytes: MISMATCH want 2 3 97 98; elems 4: 97 98 0 0
+uint16 popped utf8 0 bytes: ok; elems 2: 1 2
+uint16 popped utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 1 97
+uint16 popped utf8 2 bytes: MISMATCH want 1 2 25185; elems 3: 1 25185 0
+uint16 popped utf8 3 bytes: MISMATCH want 1 2 25185 99; elems 3: 1 25185 99
+uint16 popped utf8 5 bytes: MISMATCH want 1 2 25185 25699 101; elems 4: 1 25185 25699 101
+uint16 popped utf16 4 bytes: MISMATCH want 1 2 97 98; elems 4: 1 97 98 0
+uint16 emptied utf8 0 bytes: ok; elems 0: 
+uint16 emptied utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint16 emptied utf8 2 bytes: ok; elems 1: 25185
+uint16 emptied utf8 3 bytes: MISMATCH want 25185 99; elems 1: 25185
+uint16 emptied utf8 5 bytes: MISMATCH want 25185 25699 101; elems 2: 25185 25699
+uint16 emptied utf16 4 bytes: ok; elems 2: 97 98
+=================================================================
+==2436444==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7b7cc9c88640 at pc 0x7f5cccf28ed9 bp 0x7ffdf1499a40 sp 0x7ffdf14991f8
+WRITE of size 17 at 0x7b7cc9c88640 thread T0
+    #0 0x7f5cccf28ed8 in memmove (/usr/lib/libasan.so.8+0x128ed8) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f5ccbcdeae9 in MVM_string_encode_to_buf_config (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0xbbfae9) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f5ccb95fd6d in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x840d6d) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x55895e5aa4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #4 0x7f5ccae27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7f5ccae278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x55895e5aa614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7b7cc9c88640 is located 0 bytes after 16-byte region [0x7b7cc9c88630,0x7b7cc9c88640)
+allocated by thread T0 here:
+    #0 0x7f5cccf2c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f5ccbaa77af in set_elems (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9887af) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f5ccb9770ce in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x8580ce) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x55895e5aa4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0xbbfae9) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in MVM_string_encode_to_buf_config
+Shadow bytes around the buggy address:
+  0x7b7cc9c88380: fa fa 00 00 fa fa 06 fa fa fa fd fa fa fa 00 00
+  0x7b7cc9c88400: fa fa 00 fa fa fa fd fa fa fa 00 00 fa fa 00 02
+  0x7b7cc9c88480: fa fa fd fd fa fa fd fd fa fa 00 00 fa fa 00 06
+  0x7b7cc9c88500: fa fa fd fd fa fa fd fd fa fa 00 00 fa fa fd fa
+  0x7b7cc9c88580: fa fa 06 fa fa fa fd fa fa fa fd fa fa fa fd fd
+=>0x7b7cc9c88600: fa fa fd fd fa fa 00 00[fa]fa fa fa fa fa fa fa
+  0x7b7cc9c88680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b7cc9c88700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b7cc9c88780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b7cc9c88800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7b7cc9c88880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2436444==ABORTING
+----
+exit: 1

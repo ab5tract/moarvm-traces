@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m n.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+normalized: 2 elements: 233 97
+after 300 pushes: 302 elements, some read back wrong
+strtocodes: 3 elements; 100 rounds grew RSS by 408 MB
+----
+exit: 0

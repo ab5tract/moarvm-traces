@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-N/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N/lib nqp-m P2-splice-no-storage-same-kind.nqp same-fit (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+same-fit: returned, elems 4
+back to int8: elems 4: 1 4 7 0
+----
+exit: 0

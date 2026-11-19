@@ -1,0 +1,136 @@
+probe: /tmp/claude-1000/cfix-D/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D/lib nqp-m P3-splice-kind-matrix.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+part 1: one element, splice(target, source, 0, 0)
+obj -> obj: returned, VMArray
+obj -> str: returned, elems 1
+obj -> int: returned, elems 1
+obj -> int8: returned, elems 1
+obj -> uint8: returned, elems 1
+obj -> uint64: returned, elems 1
+obj -> num: returned, elems 1
+obj -> num32: returned, elems 1
+str -> obj: returned, MVMString
+str -> str: returned, x
+str -> int: returned, elems 1
+str -> int8: returned, elems 1
+str -> uint8: returned, elems 1
+str -> uint64: returned, elems 1
+str -> num: returned, elems 1
+str -> num32: returned, elems 1
+int -> obj: returned, elems 1
+int -> str: returned, elems 1
+int -> int: returned, 7
+int -> int8: returned, 7
+int -> uint8: returned, 7
+int -> uint64: returned, 7
+int -> num: returned, elems 1
+int -> num32: returned, elems 1
+int8 -> obj: returned, elems 1
+int8 -> str: returned, elems 1
+int8 -> int: returned, 7
+int8 -> int8: returned, 7
+int8 -> uint8: returned, 7
+int8 -> uint64: returned, 7
+int8 -> num: returned, elems 1
+int8 -> num32: returned, elems 1
+uint8 -> obj: returned, elems 1
+uint8 -> str: returned, elems 1
+uint8 -> int: returned, 7
+uint8 -> int8: returned, 7
+uint8 -> uint8: returned, 7
+uint8 -> uint64: returned, 7
+uint8 -> num: returned, elems 1
+uint8 -> num32: returned, elems 1
+uint64 -> obj: returned, elems 1
+uint64 -> str: returned, elems 1
+uint64 -> int: returned, 7
+uint64 -> int8: returned, 7
+uint64 -> uint8: returned, 7
+uint64 -> uint64: returned, 7
+uint64 -> num: returned, elems 1
+uint64 -> num32: returned, elems 1
+num -> obj: returned, elems 1
+num -> str: returned, elems 1
+num -> int: returned, elems 1
+num -> int8: returned, elems 1
+num -> uint8: returned, elems 1
+num -> uint64: returned, elems 1
+num -> num: returned, 1.5
+num -> num32: returned, 1.5
+num32 -> obj: returned, elems 1
+num32 -> str: returned, elems 1
+num32 -> int: returned, elems 1
+num32 -> int8: returned, elems 1
+num32 -> uint8: returned, elems 1
+num32 -> uint64: returned, elems 1
+num32 -> num: returned, 1.5
+num32 -> num32: returned, 1.5
+part 2: empty source, splice(target of 2, empty, 0, 1)
+obj -> obj: elems 1
+obj -> str: elems 1
+obj -> int: elems 1
+obj -> int8: elems 1
+obj -> uint8: elems 1
+obj -> uint64: elems 1
+obj -> num: elems 1
+obj -> num32: elems 1
+str -> obj: elems 1
+str -> str: elems 1
+str -> int: elems 1
+str -> int8: elems 1
+str -> uint8: elems 1
+str -> uint64: elems 1
+str -> num: elems 1
+str -> num32: elems 1
+int -> obj: elems 1
+int -> str: elems 1
+int -> int: elems 1
+int -> int8: elems 1
+int -> uint8: elems 1
+int -> uint64: elems 1
+int -> num: elems 1
+int -> num32: elems 1
+int8 -> obj: elems 1
+int8 -> str: elems 1
+int8 -> int: elems 1
+int8 -> int8: elems 1
+int8 -> uint8: elems 1
+int8 -> uint64: elems 1
+int8 -> num: elems 1
+int8 -> num32: elems 1
+uint8 -> obj: elems 1
+uint8 -> str: elems 1
+uint8 -> int: elems 1
+uint8 -> int8: elems 1
+uint8 -> uint8: elems 1
+uint8 -> uint64: elems 1
+uint8 -> num: elems 1
+uint8 -> num32: elems 1
+uint64 -> obj: elems 1
+uint64 -> str: elems 1
+uint64 -> int: elems 1
+uint64 -> int8: elems 1
+uint64 -> uint8: elems 1
+uint64 -> uint64: elems 1
+uint64 -> num: elems 1
+uint64 -> num32: elems 1
+num -> obj: elems 1
+num -> str: elems 1
+num -> int: elems 1
+num -> int8: elems 1
+num -> uint8: elems 1
+num -> uint64: elems 1
+num -> num: elems 1
+num -> num32: elems 1
+num32 -> obj: elems 1
+num32 -> str: elems 1
+num32 -> int: elems 1
+num32 -> int8: elems 1
+num32 -> uint8: elems 1
+num32 -> uint64: elems 1
+num32 -> num: elems 1
+num32 -> num32: elems 1
+done
+----
+exit: 0

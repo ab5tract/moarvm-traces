@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m e.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+uint16 1 2, append "ab" as utf16: 4 elements: 1 61 62 0
+uint8 2 3 (after a shift), append "ab" as utf8: 4 elements: 2 61 62 0
+fresh uint16, "abc" as utf8: 1 elements: 6261
+uint16 with room for 8, none used, append 17 bytes of utf8: 8 elements: 6261 6463 6665 6867 6a69 6c6b 6e6d 706f
+----
+exit: 0

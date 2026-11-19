@@ -1,0 +1,26 @@
+probe: /tmp/claude-1000/cfix-E-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P2-splice-no-storage-same-kind.nqp same-grow (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+same-grow: DIED MVMArray: Unhandled slot type
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2448925==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7f8ac7ca43d3 bp 0x7ffc596c9ce0 sp 0x7ffc596c9cd0 T0)
+==2448925==The signal is caused by a READ memory access.
+==2448925==Hint: address points to the zero page.
+    #0 0x7f8ac7ca43d3 in MVM_VMArray_at_pos (/tmp/claude-1000/cfix-E-asan/lib/libmoar.so+0x9843d3) (BuildId: 9f84f5ee06c4f17fbe295b62924487879eadf711)
+    #1 0x7f8ac7b63114 in MVM_interp_run (/tmp/claude-1000/cfix-E-asan/lib/libmoar.so+0x843114) (BuildId: 9f84f5ee06c4f17fbe295b62924487879eadf711)
+    #2 0x5624ee9df4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f8ac7027780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f8ac70278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x5624ee9df614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2448925==Register values:
+rax = 0x0000000000000000  rbx = 0x00007b8ac32b4ae0  rcx = 0x00007b8ac32b4af8  rdx = 0x00007f8ac661c9b0  
+rdi = 0x0000000000000000  rsi = 0x00000f7158656960  rbp = 0x00007ffc596c9ce0  rsp = 0x00007ffc596c9cd0  
+ r8 = 0x0000000000000000   r9 = 0x00007f8ac661c9b0  r10 = 0x00007d0ac5be0080  r11 = 0x00007d0ac5be0228  
+r12 = 0x00007b8ac32b4760  r13 = 0x00007f8ac661c998  r14 = 0x00007b8ac4c06020  r15 = 0x00007f8ac661c988  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-E-asan/lib/libmoar.so+0x9843d3) (BuildId: 9f84f5ee06c4f17fbe295b62924487879eadf711) in MVM_VMArray_at_pos
+==2448925==ABORTING
+----
+exit: 1

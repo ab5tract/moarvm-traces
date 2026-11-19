@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-E/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E/lib nqp-m T3-self-splice-shifted.nqp control (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+collections done
+spliced: elems 4
+elems 4: c d c d
+----
+exit: 0

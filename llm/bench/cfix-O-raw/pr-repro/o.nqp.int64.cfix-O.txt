@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-O/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O/lib nqp-m o.nqp int64 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawnprocasync died: spawnprocasync buf_type must be an array of uint8 or int8
+----
+exit: 0

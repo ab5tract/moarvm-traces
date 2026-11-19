@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m O-buf-type-cases.nqp pty-missing (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+MoarVM exception in event loop thread treated as oops: Cannot create an instance of null type
+
+----
+exit: 1

@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-E/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E/lib nqp-m N1-normalize-ssize-bytes.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+normalized: elems 100
+pushed: elems 300, element 299 = 299, sum ok
+----
+exit: 0

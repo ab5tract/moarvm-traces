@@ -1,0 +1,14 @@
+probe: /tmp/claude-1000/cfix-N/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N/lib nqp-m B3-write-no-storage-state.nqp live (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+before recompose: elems 3; [0] 1; [1] 4; [2] 7
+recomposed to uint4: elems 3
+write 8 bytes at 0: returned
+  after: elems 8; [0] DIED MVMArray: Unhandled slot type, got 'unknown'; [1] DIED MVMArray: Unhandled slot type, got 'unknown'; [2] DIED MVMArray: Unhandled slot type, got 'unknown'; [3] DIED MVMArray: Unhandled slot type, got 'unknown'; [4] DIED MVMArray: Unhandled slot type, got 'unknown'; [5] DIED MVMArray: Unhandled slot type, got 'unknown'; [6] DIED MVMArray: Unhandled slot type, got 'unknown'; [7] DIED MVMArray: Unhandled slot type, got 'unknown'
+write 8 bytes at 8: DIED MVMArray: Unhandled slot type
+  after: elems 8; [0] DIED MVMArray: Unhandled slot type, got 'unknown'; [1] DIED MVMArray: Unhandled slot type, got 'unknown'; [2] DIED MVMArray: Unhandled slot type, got 'unknown'; [3] DIED MVMArray: Unhandled slot type, got 'unknown'; [4] DIED MVMArray: Unhandled slot type, got 'unknown'; [5] DIED MVMArray: Unhandled slot type, got 'unknown'; [6] DIED MVMArray: Unhandled slot type, got 'unknown'; [7] DIED MVMArray: Unhandled slot type, got 'unknown'
+write 8 bytes at 0 again: returned
+  after: elems 8; [0] DIED MVMArray: Unhandled slot type, got 'unknown'; [1] DIED MVMArray: Unhandled slot type, got 'unknown'; [2] DIED MVMArray: Unhandled slot type, got 'unknown'; [3] DIED MVMArray: Unhandled slot type, got 'unknown'; [4] DIED MVMArray: Unhandled slot type, got 'unknown'; [5] DIED MVMArray: Unhandled slot type, got 'unknown'; [6] DIED MVMArray: Unhandled slot type, got 'unknown'; [7] DIED MVMArray: Unhandled slot type, got 'unknown'
+survived
+----
+exit: 0

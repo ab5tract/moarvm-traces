@@ -1,0 +1,26 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T3-self-splice-shifted.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+collections done
+spliced: elems 4
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2455682==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f8443159f72 bp 0x7ffc18133a00 sp 0x7ffc18131930 T0)
+==2455682==The signal is caused by a READ memory access.
+==2455682==Hint: address points to the zero page.
+    #0 0x7f8443159f72 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x83bf72) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #1 0x5565d6c074d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7f8442627780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7f84426278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x5565d6c07614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2455682==Register values:
+rax = 0x0000000000000007  rbx = 0x00007d8441239aa0  rcx = 0x00007b8440206780  rdx = 0x00000fb10823f34f  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffc18133a00  rsp = 0x00007ffc18131930  
+ r8 = 0x00007d8441239a7e   r9 = 0x00000fb08824734f  r10 = 0x00000fb08824734f  r11 = 0x00000fb10823f350  
+r12 = 0x00007b843e6ef4f8  r13 = 0x00007f8441c7c5f8  r14 = 0x0000000000000000  r15 = 0x00007d04411e0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x83bf72) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2) in MVM_interp_run
+==2455682==ABORTING
+----
+exit: 1

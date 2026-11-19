@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m B3-writeint-no-storage-kind.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+write 8 bytes at 0: returned
+elems 8
+write 8 bytes at 8: DIED MVMArray: Unhandled slot type
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2456290==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7f7a3e176408 bp 0x7ffebac43a70 sp 0x7ffebac41988 T0)
+==2456290==The signal is caused by a WRITE memory access.
+==2456290==Hint: address points to the zero page.
+    #0 0x7f7a3e176408  (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #1 0x7f7a3eb31217 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x813217) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x556706e334d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f7a3e027780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f7a3e0278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x556706e33614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2456290==Register values:
+rax = 0x0000000000000000  rbx = 0x00007b7a3a132cf8  rcx = 0x1122334455667788  rdx = 0x0000000000000008  
+rdi = 0x0000000000000000  rsi = 0x1122334455667788  rbp = 0x00007ffebac43a70  rsp = 0x00007ffebac41988  
+ r8 = 0x000000007fff8000   r9 = 0x0000000000000000  r10 = 0x0000000000000007  r11 = 0x0000000000000007  
+r12 = 0x00007cfa3cbe0080  r13 = 0x00007b7a3a132bf8  r14 = 0x00007f7a3fa31fe0  r15 = 0x00007b7a3bc06780  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b) 
+==2456290==ABORTING
+----
+exit: 1

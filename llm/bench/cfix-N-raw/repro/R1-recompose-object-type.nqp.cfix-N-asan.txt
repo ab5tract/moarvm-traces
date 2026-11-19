@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-N-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m R1-recompose-object-type.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+recompose to an object type: returned
+push an object: DIED MVMArray: push expected int register
+push_i: returned, elems 1
+composed once: push an object: returned, elems 1
+----
+exit: 0

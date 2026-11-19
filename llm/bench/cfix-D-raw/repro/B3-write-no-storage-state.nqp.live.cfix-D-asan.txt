@@ -1,0 +1,31 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m B3-write-no-storage-state.nqp live (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+before recompose: elems 3; [0] 1; [1] 4; [2] 7
+recomposed to uint4: elems 3
+write 8 bytes at 0: returned
+  after: elems 8; [0] DIED MVMArray: Unhandled slot type, got 'unknown'; [1] DIED MVMArray: Unhandled slot type, got 'unknown'; [2] DIED MVMArray: Unhandled slot type, got 'unknown'; [3] DIED MVMArray: Unhandled slot type, got 'unknown'; [4] DIED MVMArray: Unhandled slot type, got 'unknown'; [5] DIED MVMArray: Unhandled slot type, got 'unknown'; [6] DIED MVMArray: Unhandled slot type, got 'unknown'; [7] DIED MVMArray: Unhandled slot type, got 'unknown'
+write 8 bytes at 8: DIED MVMArray: Unhandled slot type
+  after: elems 8; [0] DIED MVMArray: Unhandled slot type, got 'unknown'; [1] DIED MVMArray: Unhandled slot type, got 'unknown'; [2] DIED MVMArray: Unhandled slot type, got 'unknown'; [3] DIED MVMArray: Unhandled slot type, got 'unknown'; [4] DIED MVMArray: Unhandled slot type, got 'unknown'; [5] DIED MVMArray: Unhandled slot type, got 'unknown'; [6] DIED MVMArray: Unhandled slot type, got 'unknown'; [7] DIED MVMArray: Unhandled slot type, got 'unknown'
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2456571==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7fc7a4576408 bp 0x7ffcc968d1d0 sp 0x7ffcc968b0e8 T0)
+==2456571==The signal is caused by a WRITE memory access.
+==2456571==Hint: address points to the zero page.
+    #0 0x7fc7a4576408  (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #1 0x7fc7a4f31217 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x813217) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x55e734a4c4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7fc7a4427780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7fc7a44278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x55e734a4c614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2456571==Register values:
+rax = 0x0000000000000000  rbx = 0x00007bc7a061ebe0  rcx = 0x1122334455667788  rdx = 0x0000000000000008  
+rdi = 0x0000000000000000  rsi = 0x1122334455667788  rbp = 0x00007ffcc968d1d0  rsp = 0x00007ffcc968b0e8  
+ r8 = 0x000000007fff8000   r9 = 0x0000000000000000  r10 = 0x0000000000000007  r11 = 0x0000000000000007  
+r12 = 0x00007d47a2fe0080  r13 = 0x00007bc7a061eae0  r14 = 0x00007fc7a5e31fe0  r15 = 0x00007bc7a2006780  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/usr/lib/libc.so.6+0x176408) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b) 
+==2456571==ABORTING
+----
+exit: 1

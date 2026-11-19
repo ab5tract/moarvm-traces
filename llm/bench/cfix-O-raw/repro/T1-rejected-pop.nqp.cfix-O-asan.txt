@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-O-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T1-rejected-pop.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+pop_i: DIED MVMArray: pop expected object register
+elems now: 1
+collections done
+grown back: elems 2
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2451826==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f6c6a559f72 bp 0x7ffe55c6b420 sp 0x7ffe55c69350 T0)
+==2451826==The signal is caused by a READ memory access.
+==2451826==Hint: address points to the zero page.
+    #0 0x7f6c6a559f72 in MVM_interp_run (/tmp/claude-1000/cfix-O-asan/lib/libmoar.so+0x83bf72) (BuildId: e95bced3f148907e1ac7dc60f6136ac7b2be0ff2)
+    #1 0x55c12c38c4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7f6c69a27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7f6c69a278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x55c12c38c614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2451826==Register values:
+rax = 0x0000000000000007  rbx = 0x00007d7c6863c174  rcx = 0x00007b6c67606780  rdx = 0x00000fb00d0bf828  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffe55c6b420  rsp = 0x00007ffe55c69350  
+ r8 = 0x00007d7c6863c142   r9 = 0x00000faf8d0c7828  r10 = 0x00000faf8d0c7827  r11 = 0x00000fb00d0bf828  
+r12 = 0x00007b6c65b3f9b8  r13 = 0x00007f6c68fdc628  r14 = 0x0000000000000000  r15 = 0x00007cec685e0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-O-asan/lib/libmoar.so+0x83bf72) (BuildId: e95bced3f148907e1ac7dc60f6136ac7b2be0ff2) in MVM_interp_run
+==2451826==ABORTING
+----
+exit: 1

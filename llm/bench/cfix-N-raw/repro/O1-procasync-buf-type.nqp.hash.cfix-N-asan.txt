@@ -1,0 +1,28 @@
+probe: /tmp/claude-1000/cfix-N-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m O1-procasync-buf-type.nqp hash (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawn: returned
+reads: 1
+repr: VMHash
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2446110==ERROR: AddressSanitizer: SEGV on unknown address 0x00000000007a (pc 0x7fae59eaa611 bp 0x7ffd02ac28b0 sp 0x7ffd02ac28a0 T0)
+==2446110==The signal is caused by a READ memory access.
+==2446110==Hint: address points to the zero page.
+    #0 0x7fae59eaa611 in elems (/tmp/claude-1000/cfix-N-asan/lib/libmoar.so+0x98b611) (BuildId: a86bf1b5749b13d1cdf512e732725bc0774961f8)
+    #1 0x7fae59d76f40 in MVM_interp_run (/tmp/claude-1000/cfix-N-asan/lib/libmoar.so+0x857f40) (BuildId: a86bf1b5749b13d1cdf512e732725bc0774961f8)
+    #2 0x5586b263b4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7fae59227780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7fae592278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x5586b263b614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2446110==Register values:
+rax = 0x0000000000000064  rbx = 0x00007bae52dc28c8  rcx = 0x0000000000000000  rdx = 0x000000000000007a  
+rdi = 0x00007d2e57de0080  rsi = 0x0000000000000002  rbp = 0x00007ffd02ac28b0  rsp = 0x00007ffd02ac28a0  
+ r8 = 0x00007e1e57ebd8df   r9 = 0x0000000000000030  r10 = 0x0000000000000030  r11 = 0x00007e1e57ebd8c0  
+r12 = 0x00007e8e57de0898  r13 = 0x00007bae56e06020  r14 = 0x00007bae56e06060  r15 = 0x00007fae5ac321e0  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-N-asan/lib/libmoar.so+0x98b611) (BuildId: a86bf1b5749b13d1cdf512e732725bc0774961f8) in elems
+==2446110==ABORTING
+----
+exit: 1

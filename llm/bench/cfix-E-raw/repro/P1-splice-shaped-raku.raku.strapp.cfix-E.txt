@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-E/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E/lib rakudo-m P1-splice-shaped-raku.raku strapp (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+a shaped native array: array[int], REPR MultiDimArray
+timeout: the monitored command dumped core
+----
+exit: 139

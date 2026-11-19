@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m O-buf-type-cases.nqp missing (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+MoarVM exception in event loop thread treated as oops: Cannot create an instance of null type
+
+----
+exit: 1

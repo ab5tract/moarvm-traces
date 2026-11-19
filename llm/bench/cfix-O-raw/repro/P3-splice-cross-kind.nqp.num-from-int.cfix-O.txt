@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-O/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O/lib nqp-m P3-splice-cross-kind.nqp num-from-int (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+num-from-int: returned, element 0 = 1
+----
+exit: 0

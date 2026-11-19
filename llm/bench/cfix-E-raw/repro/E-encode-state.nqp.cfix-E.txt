@@ -1,0 +1,264 @@
+probe: /tmp/claude-1000/cfix-E/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E/lib nqp-m E-encode-state.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+uint8 fresh utf8 0 bytes: ok; elems 0: 
+uint8 fresh utf8 1 bytes: ok; elems 1: 97
+uint8 fresh utf8 2 bytes: ok; elems 2: 97 98
+uint8 fresh utf8 3 bytes: ok; elems 3: 97 98 99
+uint8 fresh utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+uint8 fresh utf16 4 bytes: ok; elems 4: 97 0 98 0
+uint8 filled utf8 0 bytes: ok; elems 2: 1 2
+uint8 filled utf8 1 bytes: ok; elems 3: 1 2 97
+uint8 filled utf8 2 bytes: ok; elems 4: 1 2 97 98
+uint8 filled utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+uint8 filled utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+uint8 filled utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+uint8 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint8 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+uint8 shifted utf8 2 bytes: ok; elems 4: 2 3 97 98
+uint8 shifted utf8 3 bytes: ok; elems 5: 2 3 97 98 99
+uint8 shifted utf8 5 bytes: ok; elems 7: 2 3 97 98 99 100 101
+uint8 shifted utf16 4 bytes: ok; elems 6: 2 3 97 0 98 0
+uint8 popped utf8 0 bytes: ok; elems 2: 1 2
+uint8 popped utf8 1 bytes: ok; elems 3: 1 2 97
+uint8 popped utf8 2 bytes: ok; elems 4: 1 2 97 98
+uint8 popped utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+uint8 popped utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+uint8 popped utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+uint8 emptied utf8 0 bytes: ok; elems 0: 
+uint8 emptied utf8 1 bytes: ok; elems 1: 97
+uint8 emptied utf8 2 bytes: ok; elems 2: 97 98
+uint8 emptied utf8 3 bytes: ok; elems 3: 97 98 99
+uint8 emptied utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+uint8 emptied utf16 4 bytes: ok; elems 4: 97 0 98 0
+uint8 emptied utf8 9 bytes: ok; elems 9: 120 120 120 120 120 120 120 120 120
+int8 fresh utf8 0 bytes: ok; elems 0: 
+int8 fresh utf8 1 bytes: ok; elems 1: 97
+int8 fresh utf8 2 bytes: ok; elems 2: 97 98
+int8 fresh utf8 3 bytes: ok; elems 3: 97 98 99
+int8 fresh utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+int8 fresh utf16 4 bytes: ok; elems 4: 97 0 98 0
+int8 filled utf8 0 bytes: ok; elems 2: 1 2
+int8 filled utf8 1 bytes: ok; elems 3: 1 2 97
+int8 filled utf8 2 bytes: ok; elems 4: 1 2 97 98
+int8 filled utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+int8 filled utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+int8 filled utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+int8 shifted utf8 0 bytes: ok; elems 2: 2 3
+int8 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+int8 shifted utf8 2 bytes: ok; elems 4: 2 3 97 98
+int8 shifted utf8 3 bytes: ok; elems 5: 2 3 97 98 99
+int8 shifted utf8 5 bytes: ok; elems 7: 2 3 97 98 99 100 101
+int8 shifted utf16 4 bytes: ok; elems 6: 2 3 97 0 98 0
+int8 popped utf8 0 bytes: ok; elems 2: 1 2
+int8 popped utf8 1 bytes: ok; elems 3: 1 2 97
+int8 popped utf8 2 bytes: ok; elems 4: 1 2 97 98
+int8 popped utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+int8 popped utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+int8 popped utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+int8 emptied utf8 0 bytes: ok; elems 0: 
+int8 emptied utf8 1 bytes: ok; elems 1: 97
+int8 emptied utf8 2 bytes: ok; elems 2: 97 98
+int8 emptied utf8 3 bytes: ok; elems 3: 97 98 99
+int8 emptied utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+int8 emptied utf16 4 bytes: ok; elems 4: 97 0 98 0
+int8 emptied utf8 9 bytes: ok; elems 9: 120 120 120 120 120 120 120 120 120
+uint16 fresh utf8 0 bytes: ok; elems 0: 
+uint16 fresh utf8 1 bytes: ok; elems 1: 97
+uint16 fresh utf8 2 bytes: ok; elems 1: 25185
+uint16 fresh utf8 3 bytes: ok; elems 2: 25185 99
+uint16 fresh utf8 5 bytes: ok; elems 3: 25185 25699 101
+uint16 fresh utf16 4 bytes: ok; elems 2: 97 98
+uint16 filled utf8 0 bytes: ok; elems 2: 1 2
+uint16 filled utf8 1 bytes: ok; elems 3: 1 2 97
+uint16 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+uint16 filled utf8 3 bytes: ok; elems 4: 1 2 25185 99
+uint16 filled utf8 5 bytes: ok; elems 5: 1 2 25185 25699 101
+uint16 filled utf16 4 bytes: ok; elems 4: 1 2 97 98
+uint16 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint16 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+uint16 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+uint16 shifted utf8 3 bytes: ok; elems 4: 2 3 25185 99
+uint16 shifted utf8 5 bytes: ok; elems 5: 2 3 25185 25699 101
+uint16 shifted utf16 4 bytes: ok; elems 4: 2 3 97 98
+uint16 popped utf8 0 bytes: ok; elems 2: 1 2
+uint16 popped utf8 1 bytes: ok; elems 3: 1 2 97
+uint16 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+uint16 popped utf8 3 bytes: ok; elems 4: 1 2 25185 99
+uint16 popped utf8 5 bytes: ok; elems 5: 1 2 25185 25699 101
+uint16 popped utf16 4 bytes: ok; elems 4: 1 2 97 98
+uint16 emptied utf8 0 bytes: ok; elems 0: 
+uint16 emptied utf8 1 bytes: ok; elems 1: 97
+uint16 emptied utf8 2 bytes: ok; elems 1: 25185
+uint16 emptied utf8 3 bytes: ok; elems 2: 25185 99
+uint16 emptied utf8 5 bytes: ok; elems 3: 25185 25699 101
+uint16 emptied utf16 4 bytes: ok; elems 2: 97 98
+uint16 emptied utf8 17 bytes: ok; elems 9: 30840 30840 30840 30840 30840 30840 30840 30840 120
+int16 fresh utf8 0 bytes: ok; elems 0: 
+int16 fresh utf8 1 bytes: ok; elems 1: 97
+int16 fresh utf8 2 bytes: ok; elems 1: 25185
+int16 fresh utf8 3 bytes: ok; elems 2: 25185 99
+int16 fresh utf8 5 bytes: ok; elems 3: 25185 25699 101
+int16 fresh utf16 4 bytes: ok; elems 2: 97 98
+int16 filled utf8 0 bytes: ok; elems 2: 1 2
+int16 filled utf8 1 bytes: ok; elems 3: 1 2 97
+int16 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+int16 filled utf8 3 bytes: ok; elems 4: 1 2 25185 99
+int16 filled utf8 5 bytes: ok; elems 5: 1 2 25185 25699 101
+int16 filled utf16 4 bytes: ok; elems 4: 1 2 97 98
+int16 shifted utf8 0 bytes: ok; elems 2: 2 3
+int16 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+int16 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+int16 shifted utf8 3 bytes: ok; elems 4: 2 3 25185 99
+int16 shifted utf8 5 bytes: ok; elems 5: 2 3 25185 25699 101
+int16 shifted utf16 4 bytes: ok; elems 4: 2 3 97 98
+int16 popped utf8 0 bytes: ok; elems 2: 1 2
+int16 popped utf8 1 bytes: ok; elems 3: 1 2 97
+int16 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+int16 popped utf8 3 bytes: ok; elems 4: 1 2 25185 99
+int16 popped utf8 5 bytes: ok; elems 5: 1 2 25185 25699 101
+int16 popped utf16 4 bytes: ok; elems 4: 1 2 97 98
+int16 emptied utf8 0 bytes: ok; elems 0: 
+int16 emptied utf8 1 bytes: ok; elems 1: 97
+int16 emptied utf8 2 bytes: ok; elems 1: 25185
+int16 emptied utf8 3 bytes: ok; elems 2: 25185 99
+int16 emptied utf8 5 bytes: ok; elems 3: 25185 25699 101
+int16 emptied utf16 4 bytes: ok; elems 2: 97 98
+int16 emptied utf8 17 bytes: ok; elems 9: 30840 30840 30840 30840 30840 30840 30840 30840 120
+uint32 fresh utf8 0 bytes: ok; elems 0: 
+uint32 fresh utf8 1 bytes: ok; elems 1: 97
+uint32 fresh utf8 2 bytes: ok; elems 1: 25185
+uint32 fresh utf8 3 bytes: ok; elems 1: 6513249
+uint32 fresh utf8 5 bytes: ok; elems 2: 1684234849 101
+uint32 fresh utf16 4 bytes: ok; elems 1: 6422625
+uint32 filled utf8 0 bytes: ok; elems 2: 1 2
+uint32 filled utf8 1 bytes: ok; elems 3: 1 2 97
+uint32 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+uint32 filled utf8 3 bytes: ok; elems 3: 1 2 6513249
+uint32 filled utf8 5 bytes: ok; elems 4: 1 2 1684234849 101
+uint32 filled utf16 4 bytes: ok; elems 3: 1 2 6422625
+uint32 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint32 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+uint32 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+uint32 shifted utf8 3 bytes: ok; elems 3: 2 3 6513249
+uint32 shifted utf8 5 bytes: ok; elems 4: 2 3 1684234849 101
+uint32 shifted utf16 4 bytes: ok; elems 3: 2 3 6422625
+uint32 popped utf8 0 bytes: ok; elems 2: 1 2
+uint32 popped utf8 1 bytes: ok; elems 3: 1 2 97
+uint32 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+uint32 popped utf8 3 bytes: ok; elems 3: 1 2 6513249
+uint32 popped utf8 5 bytes: ok; elems 4: 1 2 1684234849 101
+uint32 popped utf16 4 bytes: ok; elems 3: 1 2 6422625
+uint32 emptied utf8 0 bytes: ok; elems 0: 
+uint32 emptied utf8 1 bytes: ok; elems 1: 97
+uint32 emptied utf8 2 bytes: ok; elems 1: 25185
+uint32 emptied utf8 3 bytes: ok; elems 1: 6513249
+uint32 emptied utf8 5 bytes: ok; elems 2: 1684234849 101
+uint32 emptied utf16 4 bytes: ok; elems 1: 6422625
+uint32 emptied utf8 33 bytes: ok; elems 9: 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 120
+uint32 normalized utf8 0 bytes: ok; elems 2: 233 97
+uint32 normalized utf8 1 bytes: ok; elems 3: 233 97 97
+uint32 normalized utf8 2 bytes: ok; elems 3: 233 97 25185
+uint32 normalized utf8 3 bytes: ok; elems 3: 233 97 6513249
+uint32 normalized utf16 4 bytes: ok; elems 3: 233 97 6422625
+int32 fresh utf8 0 bytes: ok; elems 0: 
+int32 fresh utf8 1 bytes: ok; elems 1: 97
+int32 fresh utf8 2 bytes: ok; elems 1: 25185
+int32 fresh utf8 3 bytes: ok; elems 1: 6513249
+int32 fresh utf8 5 bytes: ok; elems 2: 1684234849 101
+int32 fresh utf16 4 bytes: ok; elems 1: 6422625
+int32 filled utf8 0 bytes: ok; elems 2: 1 2
+int32 filled utf8 1 bytes: ok; elems 3: 1 2 97
+int32 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+int32 filled utf8 3 bytes: ok; elems 3: 1 2 6513249
+int32 filled utf8 5 bytes: ok; elems 4: 1 2 1684234849 101
+int32 filled utf16 4 bytes: ok; elems 3: 1 2 6422625
+int32 shifted utf8 0 bytes: ok; elems 2: 2 3
+int32 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+int32 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+int32 shifted utf8 3 bytes: ok; elems 3: 2 3 6513249
+int32 shifted utf8 5 bytes: ok; elems 4: 2 3 1684234849 101
+int32 shifted utf16 4 bytes: ok; elems 3: 2 3 6422625
+int32 popped utf8 0 bytes: ok; elems 2: 1 2
+int32 popped utf8 1 bytes: ok; elems 3: 1 2 97
+int32 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+int32 popped utf8 3 bytes: ok; elems 3: 1 2 6513249
+int32 popped utf8 5 bytes: ok; elems 4: 1 2 1684234849 101
+int32 popped utf16 4 bytes: ok; elems 3: 1 2 6422625
+int32 emptied utf8 0 bytes: ok; elems 0: 
+int32 emptied utf8 1 bytes: ok; elems 1: 97
+int32 emptied utf8 2 bytes: ok; elems 1: 25185
+int32 emptied utf8 3 bytes: ok; elems 1: 6513249
+int32 emptied utf8 5 bytes: ok; elems 2: 1684234849 101
+int32 emptied utf16 4 bytes: ok; elems 1: 6422625
+int32 emptied utf8 33 bytes: ok; elems 9: 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 120
+int32 normalized utf8 0 bytes: ok; elems 2: 233 97
+int32 normalized utf8 1 bytes: ok; elems 3: 233 97 97
+int32 normalized utf8 2 bytes: ok; elems 3: 233 97 25185
+int32 normalized utf8 3 bytes: ok; elems 3: 233 97 6513249
+int32 normalized utf16 4 bytes: ok; elems 3: 233 97 6422625
+uint64 fresh utf8 0 bytes: ok; elems 0: 
+uint64 fresh utf8 1 bytes: ok; elems 1: 97
+uint64 fresh utf8 2 bytes: ok; elems 1: 25185
+uint64 fresh utf8 3 bytes: ok; elems 1: 6513249
+uint64 fresh utf8 5 bytes: ok; elems 1: 435475931745
+uint64 fresh utf16 4 bytes: ok; elems 1: 6422625
+uint64 filled utf8 0 bytes: ok; elems 2: 1 2
+uint64 filled utf8 1 bytes: ok; elems 3: 1 2 97
+uint64 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+uint64 filled utf8 3 bytes: ok; elems 3: 1 2 6513249
+uint64 filled utf8 5 bytes: ok; elems 3: 1 2 435475931745
+uint64 filled utf16 4 bytes: ok; elems 3: 1 2 6422625
+uint64 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint64 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+uint64 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+uint64 shifted utf8 3 bytes: ok; elems 3: 2 3 6513249
+uint64 shifted utf8 5 bytes: ok; elems 3: 2 3 435475931745
+uint64 shifted utf16 4 bytes: ok; elems 3: 2 3 6422625
+uint64 popped utf8 0 bytes: ok; elems 2: 1 2
+uint64 popped utf8 1 bytes: ok; elems 3: 1 2 97
+uint64 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+uint64 popped utf8 3 bytes: ok; elems 3: 1 2 6513249
+uint64 popped utf8 5 bytes: ok; elems 3: 1 2 435475931745
+uint64 popped utf16 4 bytes: ok; elems 3: 1 2 6422625
+uint64 emptied utf8 0 bytes: ok; elems 0: 
+uint64 emptied utf8 1 bytes: ok; elems 1: 97
+uint64 emptied utf8 2 bytes: ok; elems 1: 25185
+uint64 emptied utf8 3 bytes: ok; elems 1: 6513249
+uint64 emptied utf8 5 bytes: ok; elems 1: 435475931745
+uint64 emptied utf16 4 bytes: ok; elems 1: 6422625
+uint64 emptied utf8 65 bytes: ok; elems 9: 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 120
+int64 fresh utf8 0 bytes: ok; elems 0: 
+int64 fresh utf8 1 bytes: ok; elems 1: 97
+int64 fresh utf8 2 bytes: ok; elems 1: 25185
+int64 fresh utf8 3 bytes: ok; elems 1: 6513249
+int64 fresh utf8 5 bytes: ok; elems 1: 435475931745
+int64 fresh utf16 4 bytes: ok; elems 1: 6422625
+int64 filled utf8 0 bytes: ok; elems 2: 1 2
+int64 filled utf8 1 bytes: ok; elems 3: 1 2 97
+int64 filled utf8 2 bytes: ok; elems 3: 1 2 25185
+int64 filled utf8 3 bytes: ok; elems 3: 1 2 6513249
+int64 filled utf8 5 bytes: ok; elems 3: 1 2 435475931745
+int64 filled utf16 4 bytes: ok; elems 3: 1 2 6422625
+int64 shifted utf8 0 bytes: ok; elems 2: 2 3
+int64 shifted utf8 1 bytes: ok; elems 3: 2 3 97
+int64 shifted utf8 2 bytes: ok; elems 3: 2 3 25185
+int64 shifted utf8 3 bytes: ok; elems 3: 2 3 6513249
+int64 shifted utf8 5 bytes: ok; elems 3: 2 3 435475931745
+int64 shifted utf16 4 bytes: ok; elems 3: 2 3 6422625
+int64 popped utf8 0 bytes: ok; elems 2: 1 2
+int64 popped utf8 1 bytes: ok; elems 3: 1 2 97
+int64 popped utf8 2 bytes: ok; elems 3: 1 2 25185
+int64 popped utf8 3 bytes: ok; elems 3: 1 2 6513249
+int64 popped utf8 5 bytes: ok; elems 3: 1 2 435475931745
+int64 popped utf16 4 bytes: ok; elems 3: 1 2 6422625
+int64 emptied utf8 0 bytes: ok; elems 0: 
+int64 emptied utf8 1 bytes: ok; elems 1: 97
+int64 emptied utf8 2 bytes: ok; elems 1: 25185
+int64 emptied utf8 3 bytes: ok; elems 1: 6513249
+int64 emptied utf8 5 bytes: ok; elems 1: 435475931745
+int64 emptied utf16 4 bytes: ok; elems 1: 6422625
+int64 emptied utf8 65 bytes: ok; elems 9: 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 120
+done
+----
+exit: 0

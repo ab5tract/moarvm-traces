@@ -1,0 +1,38 @@
+probe: /tmp/claude-1000/cfix-N/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N/lib nqp-m E-encode-state.nqp uint32 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+uint32 fresh utf8 0 bytes: ok; elems 0: 
+uint32 fresh utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint32 fresh utf8 2 bytes: MISMATCH want 25185; elems 0: 
+uint32 fresh utf8 3 bytes: MISMATCH want 6513249; elems 0: 
+uint32 fresh utf8 5 bytes: MISMATCH want 1684234849 101; elems 1: 1684234849
+uint32 fresh utf16 4 bytes: ok; elems 1: 6422625
+uint32 filled utf8 0 bytes: ok; elems 2: 1 2
+uint32 filled utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 6356993 2
+uint32 filled utf8 2 bytes: MISMATCH want 1 2 25185; elems 2: 1650524161 2
+uint32 filled utf8 3 bytes: MISMATCH want 1 2 6513249; elems 2: 1650524161 99
+uint32 filled utf8 5 bytes: MISMATCH want 1 2 1684234849 101; elems 3: 1650524161 6644835 0
+uint32 filled utf16 4 bytes: MISMATCH want 1 2 6422625; elems 3: 6356993 98 0
+uint32 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint32 shifted utf8 1 bytes: MISMATCH want 2 3 97; elems 2: 2 3
+uint32 shifted utf8 2 bytes: MISMATCH want 2 3 25185; elems 2: 2 3
+uint32 shifted utf8 3 bytes: MISMATCH want 2 3 6513249; elems 2: 99 3
+uint32 shifted utf8 5 bytes: MISMATCH want 2 3 1684234849 101; elems 3: 6644835 3 0
+uint32 shifted utf16 4 bytes: MISMATCH want 2 3 6422625; elems 3: 98 3 0
+uint32 popped utf8 0 bytes: ok; elems 2: 1 2
+uint32 popped utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 6356993 2
+uint32 popped utf8 2 bytes: MISMATCH want 1 2 25185; elems 2: 1650524161 2
+uint32 popped utf8 3 bytes: MISMATCH want 1 2 6513249; elems 2: 1650524161 99
+uint32 popped utf8 5 bytes: MISMATCH want 1 2 1684234849 101; elems 3: 1650524161 6644835 0
+uint32 popped utf16 4 bytes: MISMATCH want 1 2 6422625; elems 3: 6356993 98 0
+uint32 emptied utf8 0 bytes: ok; elems 0: 
+uint32 emptied utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint32 emptied utf8 2 bytes: MISMATCH want 25185; elems 0: 
+uint32 emptied utf8 3 bytes: MISMATCH want 6513249; elems 0: 
+uint32 emptied utf8 5 bytes: MISMATCH want 1684234849 101; elems 1: 1684234849
+uint32 emptied utf16 4 bytes: ok; elems 1: 6422625
+uint32 emptied utf8 33 bytes: MISMATCH want 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 120; elems 8: 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080 2021161080
+uint32 normalized utf8 0 bytes: ok; elems 2: 233 97
+timeout: the monitored command dumped core
+----
+exit: 139

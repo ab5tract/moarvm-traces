@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/cfix-N/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N/lib nqp-m X1-recompose-wider-kind.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+recomposed to int64: elems 3
+element 7: 524296
+bound element 7: 42
+----
+exit: 0

@@ -1,0 +1,26 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 rakudo-m P1-splice-shaped-raku.raku intapp (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+a shaped native array: array[int], REPR MultiDimArray
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2455946==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000008 (pc 0x7fda2a6a5b15 bp 0x7ffd64e77710 sp 0x7ffd64e77620 T0)
+==2455946==The signal is caused by a READ memory access.
+==2455946==Hint: address points to the zero page.
+    #0 0x7fda2a6a5b15 in copy_elements (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x987b15) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #1 0x7fda2a563d1c in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x845d1c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x555596f216ed in main (/tmp/claude-1000/cfix-base/bin/rakudo-m+0x16ed) (BuildId: d483f688eb320d4061ed0cc48a6eb438ce7533e3)
+    #3 0x7fda29a27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7fda29a278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x555596f21924 in _start (/tmp/claude-1000/cfix-base/bin/rakudo-m+0x1924) (BuildId: d483f688eb320d4061ed0cc48a6eb438ce7533e3)
+
+==2455946==Register values:
+rax = 0x0000000000000002  rbx = 0x00007fda2907da80  rcx = 0x0000000000000000  rdx = 0x0000000000000001  
+rdi = 0x00007bda1e5ea868  rsi = 0x00000000000000f3  rbp = 0x00007ffd64e77710  rsp = 0x00007ffd64e77620  
+ r8 = 0x00007c0a28b16200   r9 = 0x00007bda2719dd00  r10 = 0x00000f7b44e33ba0  r11 = 0x0000000000000027  
+r12 = 0x0000000000000002  r13 = 0x00007bda1e5eb4e0  r14 = 0x00007bda1e607880  r15 = 0x00007d5a285e0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x987b15) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2) in copy_elements
+==2455946==ABORTING
+----
+exit: 1

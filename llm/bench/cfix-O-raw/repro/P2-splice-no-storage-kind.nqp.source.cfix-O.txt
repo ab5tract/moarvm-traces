@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-O/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O/lib nqp-m P2-splice-no-storage-kind.nqp source (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+recomposed to uint4: elems 3
+timeout: the monitored command dumped core
+----
+exit: 134

@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/cfix-D/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D/lib nqp-m P2-splice-no-storage-same-kind.nqp same-grow (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+same-grow: DIED MVMArray: Unhandled slot type
+back to int8: elems 3: 0 0 0
+----
+exit: 0

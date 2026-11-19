@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/cfix-O-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 rakudo-m E-fresh-partial.raku  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+Blob[uint16] 'abc': elems 1: 6261
+Blob[uint16] 'abcd': elems 2: 6261 6463
+Blob[uint32] 'abcde': elems 1: 64636261
+Blob[uint64] 'abc': elems 0: 
+Blob[uint8] 'abc': elems 3: 61 62 63
+----
+exit: 0

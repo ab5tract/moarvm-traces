@@ -1,0 +1,91 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m O1-procasync-buf-type.nqp int64 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+spawn: returned
+reads: 1
+got 100 elements
+element 0: 3472328296227680304
+=================================================================
+==2456469==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c441e35c2d8 at pc 0x7f84202a29bf bp 0x7ffcf8e5d950 sp 0x7ffcf8e5d940
+READ of size 8 at 0x7c441e35c2d8 thread T0
+    #0 0x7f84202a29be in MVM_VMArray_at_pos (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x9849be) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #1 0x7f8420161114 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x843114) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x5560c30e24d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #3 0x7f841f627780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x7f841f6278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x5560c30e2614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7c441e35c2d8 is located 472 bytes after 128-byte region [0x7c441e35c080,0x7c441e35c100)
+freed by thread T2 here:
+    #0 0x7f842172ae91  (/usr/lib/libasan.so.8+0x12ae91) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f842025b1be in async_read (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x93d1be) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7f842025be66 in async_spawn_stdout_bytes_read (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x93de66) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x7f842066503a in uv__read (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd4703a) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #4 0x7f8420665c7c in uv__stream_io (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd47c7c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #5 0x7f8420631145 in uv__io_poll (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd13145) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #6 0x7f8420641fcf in uv_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd23fcf) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #7 0x7f84201bae7f in thread_initial_invoke (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x89ce7f) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #8 0x7f842012ffd3 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x811fd3) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #9 0x7f84201bb141 in start_thread (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x89d141) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #10 0x7f8421661858  (/usr/lib/libasan.so.8+0x61858) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #11 0x7f841f698041  (/usr/lib/libc.so.6+0x98041) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+
+previously allocated by thread T2 here:
+    #0 0x7f842172c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f8420257009 in on_alloc (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x939009) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7f84206641ce in uv__read (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd461ce) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x7f8420665c7c in uv__stream_io (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd47c7c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #4 0x7f8420631145 in uv__io_poll (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd13145) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #5 0x7f8420641fcf in uv_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd23fcf) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #6 0x7f84201bae7f in thread_initial_invoke (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x89ce7f) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #7 0x7f842012ffd3 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x811fd3) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #8 0x7f84201bb141 in start_thread (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x89d141) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #9 0x7f8421661858  (/usr/lib/libasan.so.8+0x61858) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #10 0x7f841f698041  (/usr/lib/libc.so.6+0x98041) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+
+Thread T2 created by T0 here:
+    #0 0x7f84217226f4 in pthread_create (/usr/lib/libasan.so.8+0x1226f4) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f842066a6fd in uv_thread_create_ex (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd4c6fd) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7f842066a87d in uv_thread_create (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0xd4c87d) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x7f84201bbe73 in MVM_thread_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x89de73) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #4 0x7f842024a84f in MVM_io_eventloop_start (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x92c84f) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #5 0x7f842024aaea in MVM_io_eventloop_queue_work (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x92caea) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #6 0x7f842026085d in MVM_proc_spawn_async (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x94285d) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #7 0x7f8420134351 in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x816351) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #8 0x5560c30e24d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x9849be) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2) in MVM_VMArray_at_pos
+Shadow bytes around the buggy address:
+  0x7c441e35c000: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x7c441e35c080: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x7c441e35c100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x7c441e35c280: fa fa fa fa fa fa fa fa fa fa fa[fa]fa fa fa fa
+  0x7c441e35c300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c441e35c500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2456469==ABORTING
+----
+exit: 1

@@ -1,0 +1,37 @@
+probe: /tmp/claude-1000/cfix-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-base/lib nqp-m E-encode-state.nqp int8 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+int8 fresh utf8 0 bytes: ok; elems 0: 
+int8 fresh utf8 1 bytes: ok; elems 1: 97
+int8 fresh utf8 2 bytes: ok; elems 2: 97 98
+int8 fresh utf8 3 bytes: ok; elems 3: 97 98 99
+int8 fresh utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+int8 fresh utf16 4 bytes: ok; elems 4: 97 0 98 0
+int8 filled utf8 0 bytes: ok; elems 2: 1 2
+int8 filled utf8 1 bytes: ok; elems 3: 1 2 97
+int8 filled utf8 2 bytes: ok; elems 4: 1 2 97 98
+int8 filled utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+int8 filled utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+int8 filled utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+int8 shifted utf8 0 bytes: ok; elems 2: 2 3
+int8 shifted utf8 1 bytes: MISMATCH want 2 3 97; elems 3: 2 97 0
+int8 shifted utf8 2 bytes: MISMATCH want 2 3 97 98; elems 4: 2 97 98 0
+int8 shifted utf8 3 bytes: MISMATCH want 2 3 97 98 99; elems 5: 2 97 98 99 0
+int8 shifted utf8 5 bytes: MISMATCH want 2 3 97 98 99 100 101; elems 7: 2 97 98 99 100 101 0
+int8 shifted utf16 4 bytes: MISMATCH want 2 3 97 0 98 0; elems 6: 2 97 0 98 0 0
+int8 popped utf8 0 bytes: ok; elems 2: 1 2
+int8 popped utf8 1 bytes: ok; elems 3: 1 2 97
+int8 popped utf8 2 bytes: ok; elems 4: 1 2 97 98
+int8 popped utf8 3 bytes: ok; elems 5: 1 2 97 98 99
+int8 popped utf8 5 bytes: ok; elems 7: 1 2 97 98 99 100 101
+int8 popped utf16 4 bytes: ok; elems 6: 1 2 97 0 98 0
+int8 emptied utf8 0 bytes: ok; elems 0: 
+int8 emptied utf8 1 bytes: ok; elems 1: 97
+int8 emptied utf8 2 bytes: ok; elems 2: 97 98
+int8 emptied utf8 3 bytes: ok; elems 3: 97 98 99
+int8 emptied utf8 5 bytes: ok; elems 5: 97 98 99 100 101
+int8 emptied utf16 4 bytes: ok; elems 4: 97 0 98 0
+int8 emptied utf8 9 bytes: ok; elems 9: 120 120 120 120 120 120 120 120 120
+done
+----
+exit: 0

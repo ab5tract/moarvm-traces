@@ -1,0 +1,27 @@
+probe: /tmp/claude-1000/cfix-O-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m T2-rejected-unshift.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+collections done
+unshift_i: DIED MVMArray: unshift expected object register
+elems 2, element 1 is "b"
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2451877==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000038 (pc 0x7f916f759f72 bp 0x7ffe37aab140 sp 0x7ffe37aa9070 T0)
+==2451877==The signal is caused by a READ memory access.
+==2451877==Hint: address points to the zero page.
+    #0 0x7f916f759f72 in MVM_interp_run (/tmp/claude-1000/cfix-O-asan/lib/libmoar.so+0x83bf72) (BuildId: e95bced3f148907e1ac7dc60f6136ac7b2be0ff2)
+    #1 0x55ebe3dfc4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #2 0x7f916ec27780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #3 0x7f916ec278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #4 0x55ebe3dfc614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==2451877==Register values:
+rax = 0x0000000000000007  rbx = 0x00007da16da4c53c  rcx = 0x00007b916ca06780  rdx = 0x00000fb4adb418a4  
+rdi = 0x0000000000000038  rsi = 0x0000000000000000  rbp = 0x00007ffe37aab140  rsp = 0x00007ffe37aa9070  
+ r8 = 0x00007da16da4c526   r9 = 0x00000fb42db498a4  r10 = 0x00000fb42db498a4  r11 = 0x00000fb4adb418a5  
+r12 = 0x00007b916af29b38  r13 = 0x00007f916e3135f8  r14 = 0x0000000000000000  r15 = 0x00007d116d9e0080  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/tmp/claude-1000/cfix-O-asan/lib/libmoar.so+0x83bf72) (BuildId: e95bced3f148907e1ac7dc60f6136ac7b2be0ff2) in MVM_interp_run
+==2451877==ABORTING
+----
+exit: 1

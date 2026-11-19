@@ -1,0 +1,17 @@
+make start 2026-11-19 19:07:58 CET load 0.12 0.22 0.97
+make exit 0, 10 s, end 2026-11-19 19:08:08 CET
+make start 2026-11-19 19:08:10 CET load 1.38 0.50 1.05
+make exit 0, 20 s, end 2026-11-19 19:08:30 CET
+make start 2026-11-19 19:09:12 CET load 1.47 0.79 1.12
+make exit 0, 10 s, end 2026-11-19 19:09:22 CET
+make start 2026-11-19 19:09:44 CET load 1.77 0.96 1.17
+make exit 0, 20 s, end 2026-11-19 19:10:04 CET
+make start 2026-11-19 19:10:45 CET load 1.62 1.20 1.24
+make exit 0, 10 s, end 2026-11-19 19:10:55 CET
+make start 2026-11-19 19:11:17 CET load 1.46 1.22 1.25
+make exit 0, 20 s, end 2026-11-19 19:11:37 CET
+make start 2026-11-19 19:12:18 CET load 1.85 1.49 1.35
+make exit 0, 11 s, end 2026-11-19 19:12:29 CET
+make start 2026-11-19 19:13:10 CET load 1.78 1.60 1.40
+make exit 0, 21 s, end 2026-11-19 19:13:31 CET
+ALLDONE

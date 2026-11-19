@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-O-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m P3-splice-cross-kind.nqp str-into-obj (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+str-into-obj: elems 3, element 1: MVMString
+----
+exit: 0

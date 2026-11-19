@@ -1,0 +1,5 @@
+cfix-asan:
+NFC (233 97)
+push died: Cannot resolve caller push(NFC:D: Int:D); none of these signatures matches:
+    (Any:U \SELF:: |values)
+assign died: Index out of range. Is: 5, should be in 0..1

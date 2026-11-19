@@ -7,7 +7,9 @@
 # prefix, for the fix branches: ASAN when PREFIX ends in -asan).
 # Task 4 added B2-buf-offset-before-storage, B-buf-grid, B3-write-no-storage-state
 # and R-recompose-matrix; fix round 1 added B3-write-first-compose and
-# R-first-compose-gap (the review's programs).
+# R-first-compose-gap (the review's programs). Task 5 added N-adopt-state,
+# E-encode-state, E-fresh-partial and O-buf-type-cases (all modes but
+# "late", whose outcome is a race and is run separately).
 cd "$(dirname "$0")" || exit 1; R=./run.sh; X=
 while [ $# -gt 1 ]; do case $1 in -p|-o) X="$X $1 $2"; shift 2 ;; *) break ;; esac; done
 # shellcheck disable=SC2086
@@ -44,5 +46,9 @@ for c in live fresh; do $R $X -t 60 B3-write-no-storage-state.nqp $c; done
 $R $X -t 60 R-recompose-matrix.nqp
 $R $X -t 60 B3-write-first-compose.nqp
 $R $X -t 60 R-first-compose-gap.nqp
+$R $X -t 60 N-adopt-state.nqp
+$R $X -t 120 E-encode-state.nqp
+$R $X -t 60 E-fresh-partial.raku
+for c in valid missing rebind noread pty-missing; do $R $X -t 60 O-buf-type-cases.nqp $c; done
 } > /dev/null 2>&1
 echo "done: $(date '+%F %T')"

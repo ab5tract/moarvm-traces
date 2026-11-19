@@ -1,0 +1,37 @@
+probe: /tmp/claude-1000/cfix-N/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-N/lib nqp-m E-encode-state.nqp uint64 (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+uint64 fresh utf8 0 bytes: ok; elems 0: 
+uint64 fresh utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint64 fresh utf8 2 bytes: MISMATCH want 25185; elems 0: 
+uint64 fresh utf8 3 bytes: MISMATCH want 6513249; elems 0: 
+uint64 fresh utf8 5 bytes: MISMATCH want 435475931745; elems 0: 
+uint64 fresh utf16 4 bytes: MISMATCH want 6422625; elems 0: 
+uint64 filled utf8 0 bytes: ok; elems 2: 1 2
+uint64 filled utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 6356993 2
+uint64 filled utf8 2 bytes: MISMATCH want 1 2 25185; elems 2: 1650524161 2
+uint64 filled utf8 3 bytes: MISMATCH want 1 2 6513249; elems 2: 426852286465 2
+uint64 filled utf8 5 bytes: MISMATCH want 1 2 435475931745; elems 2: 28539350662840321 2
+uint64 filled utf16 4 bytes: MISMATCH want 1 2 6422625; elems 2: 420913152001 2
+uint64 shifted utf8 0 bytes: ok; elems 2: 2 3
+uint64 shifted utf8 1 bytes: MISMATCH want 2 3 97; elems 2: 2 3
+uint64 shifted utf8 2 bytes: MISMATCH want 2 3 25185; elems 2: 2 3
+uint64 shifted utf8 3 bytes: MISMATCH want 2 3 6513249; elems 2: 2 3
+uint64 shifted utf8 5 bytes: MISMATCH want 2 3 435475931745; elems 2: 2 3
+uint64 shifted utf16 4 bytes: MISMATCH want 2 3 6422625; elems 2: 2 3
+uint64 popped utf8 0 bytes: ok; elems 2: 1 2
+uint64 popped utf8 1 bytes: MISMATCH want 1 2 97; elems 2: 6356993 2
+uint64 popped utf8 2 bytes: MISMATCH want 1 2 25185; elems 2: 1650524161 2
+uint64 popped utf8 3 bytes: MISMATCH want 1 2 6513249; elems 2: 426852286465 2
+uint64 popped utf8 5 bytes: MISMATCH want 1 2 435475931745; elems 2: 28539350662840321 2
+uint64 popped utf16 4 bytes: MISMATCH want 1 2 6422625; elems 2: 420913152001 2
+uint64 emptied utf8 0 bytes: ok; elems 0: 
+uint64 emptied utf8 1 bytes: MISMATCH want 97; elems 0: 
+uint64 emptied utf8 2 bytes: MISMATCH want 25185; elems 0: 
+uint64 emptied utf8 3 bytes: MISMATCH want 6513249; elems 0: 
+uint64 emptied utf8 5 bytes: MISMATCH want 435475931745; elems 0: 
+uint64 emptied utf16 4 bytes: MISMATCH want 6422625; elems 0: 
+uint64 emptied utf8 65 bytes: MISMATCH want 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 120; elems 8: 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760 8680820740569200760
+done
+----
+exit: 0

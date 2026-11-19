@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-E-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m E2-encode-append-rounding.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+elems 9
+----
+exit: 0

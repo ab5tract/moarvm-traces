@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/cfix-E/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-E/lib nqp-m P3-splice-cross-kind.nqp obj-into-int (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+obj-into-int: returned, element 1 = 6383668816440
+----
+exit: 0

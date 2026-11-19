@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-O/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-O/lib nqp-m B3-write-first-compose.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+first compose to uint4 with live array: returned
+write at 0: returned; elems 8
+write at 8: died: MVMArray: Unhandled slot type; elems 8
+write at 0: returned; elems 8
+----
+exit: 0

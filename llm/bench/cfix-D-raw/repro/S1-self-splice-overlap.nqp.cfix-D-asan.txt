@@ -1,0 +1,34 @@
+probe: /tmp/claude-1000/cfix-D-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-D-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m S1-self-splice-overlap.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+obj gen2 1,0: 1 1 1 1 1 1 1 1 1 1 1 4 7 10 13 16 19 22 25 28
+=================================================================
+==2454715==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x7cef87de8548,0x7cef87de8598) and [0x7cef87de8540, 0x7cef87de8590) overlap
+    #0 0x7fdf8a529547 in memcpy (/usr/lib/libasan.so.8+0x129547) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7fdf890a5eef in copy_elements (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x987eef) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7fdf88f63d1c in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x845d1c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x55d20d99c4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+    #4 0x7fdf88427780  (/usr/lib/libc.so.6+0x27780) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #5 0x7fdf884278b8 in __libc_start_main (/usr/lib/libc.so.6+0x278b8) (BuildId: d320029ad1a23be2f4bce117fd321cbd23a2014b)
+    #6 0x55d20d99c614 in _start (/tmp/claude-1000/cfix-base/bin/nqp-m+0x1614) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7cef87de8548 is located 8 bytes inside of 256-byte region [0x7cef87de8540,0x7cef87de8640)
+allocated by thread T0 here:
+    #0 0x7fdf8a52b161  (/usr/lib/libasan.so.8+0x12b161) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7fdf890a1a45 in set_size_internal (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x983a45) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7fdf890a632c in asplice (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x98832c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x7fdf88f63d1c in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x845d1c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #4 0x55d20d99c4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+0x7cef87de8540 is located 0 bytes inside of 256-byte region [0x7cef87de8540,0x7cef87de8640)
+allocated by thread T0 here:
+    #0 0x7fdf8a52b161  (/usr/lib/libasan.so.8+0x12b161) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7fdf890a1a45 in set_size_internal (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x983a45) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #2 0x7fdf890a632c in asplice (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x98832c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #3 0x7fdf88f63d1c in MVM_interp_run (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x845d1c) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2)
+    #4 0x55d20d99c4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap (/tmp/claude-1000/cfix-D-asan/lib/libmoar.so+0x987eef) (BuildId: b8d7b0366d7ec15aacfe5e2809d2c9e91058baf2) in copy_elements
+==2454715==ABORTING
+----
+exit: 1
