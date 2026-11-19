@@ -1,0 +1,7 @@
+nqp source 305ff2f7732aaf8855d685f99603e3d5281a6797 (2026.09-11-g305ff2f77); checkout HEAD 41e7210ba29ce648d72aafd86ce6577447963662, status lines 0
+rakudo source c6d6fc3c6baa71a138e12f5eaca9fcca63f7c406 (2026.09-232-gc6d6fc3c6b); checkout HEAD 042608fb82f2592a48a16ef6f7721c978c1b59ff, status lines 0
+moar This is MoarVM version 2026.11 built with JIT support
+nqp make start 2026-11-19 16:14:27 load 1.52 1.75 1.04
+nqp make end 2026-11-19 16:14:47
+rakudo make start 2026-11-19 16:14:47 load 1.94 1.84 1.09
+rakudo make end 2026-11-19 16:19:30

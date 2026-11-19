@@ -1,0 +1,5 @@
+Found /tmp/claude-1000/cfix-base/bin/moar version 2026.11, which is new enough.
+Cleaning up ...
+You can now use 'make' to build NQP.
+After that, 'make test' will run some tests and
+'make install' will install NQP.

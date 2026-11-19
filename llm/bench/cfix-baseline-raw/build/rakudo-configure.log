@@ -1,0 +1,6 @@
+Using /tmp/claude-1000/cfix-base/bin/nqp (version 2026.09-11-g305ff2f77 / MoarVM 2026.11).
+Cleaning up ...
+
+You can now use 'make' to build Rakudo.
+After that, 'make test' will run some tests and
+'make install' will install Rakudo.

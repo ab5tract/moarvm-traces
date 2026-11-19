@@ -1,0 +1,75 @@
+Welcome to MoarVM!
+
+Configuring native build environment ................... 
+    trying to compile a simple C program ............... YES
+    probing support of -Werror=* ....................... YES
+    Testing pkgconfig .................................. 3.0.7
+    probing stdatomic .................................. YES
+Defaulting to mimalloc because you have <stdatomic.h>
+OK
+
+    probing whether your compiler thinks that it is gcc  YES
+    probing how your compiler does static inline ....... static __inline__
+    probing if your compiler offers thread local storage  _Thread_local
+    probing if your pow() handles NaN and Inf corner cases  YES
+    probing if your log() returns NaN for negative values  YES
+    probing if your log10() returns NaN for negative values  YES
+    probing if your asin() returns NaN for negative values  YES
+    probing if your acos() returns NaN for negative values  YES
+    probing if you have isnan .......................... YES
+    probing if you have isinf .......................... YES
+    probing if you have signbit ........................ YES
+    your CPU can read unaligned values for all of int32 int64 num64
+    probing the size of pointers ....................... 8
+    probing C type support for booleans ................ _Bool
+    probing computed goto support ...................... YES
+    probing pthread_yield support ...................... NO
+    probing pthread_setname_np support (optional) ...... YES
+    probing existance of optional malloc_trim() ........ YES
+    probing support of rdtscp intrinsic ................ YES
+
+        make: make
+     compile: gcc -fwrapv -std=gnu99 -Wextra -Wall -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -Werror=pointer-arith -O3 -DNDEBUG  -D_REENTRANT -D_FILE_OFFSET_BITS=64 -fPIC -fno-omit-frame-pointer -fsanitize=address -DMVM_HEAPSNAPSHOT_FORMAT=3 -D_GNU_SOURCE
+    includes:   -I3rdparty/libuv/include -I3rdparty/libuv/src -I3rdparty/libtommath -I3rdparty/dyncall/dynload -I3rdparty/dyncall/dyncall -I3rdparty/dyncall/dyncallback -I3rdparty/mimalloc/include -I3rdparty/mimalloc/src -I3rdparty/zmij/ -I3rdparty/zmij/
+        link: gcc  -O3 -DNDEBUG -Wl,-rpath,"/@libdir@" -fsanitize=address
+        libs:  -lasan  -lm -lpthread -lrt -ldl -lzstd 
+
+  byte order: little endian
+
+Checking perl5 modules ................................. OK
+Configuring 3rdparty libs .............................. OK
+
+  3rdparty: 3rdparty/cmp/libcmp.a
+            3rdparty/dyncall/dyncall/libdyncall_s.a
+            3rdparty/dyncall/dyncallback/libdyncallback_s.a
+            3rdparty/dyncall/dynload/libdynload_s.a
+            3rdparty/libtommath/libtommath.a
+            3rdparty/libuv/libuv.a
+            3rdparty/sha1/libsha1.a
+
+Generating src/gen/config.c ............................ OK
+Generating src/gen/config.h ............................ OK
+Generating Makefile .................................... OK
+Generating tools/check.mk .............................. OK
+Generating build/mk-moar-pc.pl ......................... OK
+
+
+    !!  Attention  !!  Attention  !!
+
+You have built moarvm with ASAN (address sanitizer) turned on.
+In order to successfully build nqp and rakudo, you need to set this environment
+variable, since moarvm doesn't fully clean up on shutdown by default.
+
+    export ASAN_OPTIONS=detect_leaks=0
+
+For more information about available asan options, you can run moar with
+
+    export ASAN_OPTIONS=help=1
+
+in your environment.
+
+
+Configuration SUCCESS.
+
+Type 'make' to build and 'make help' to see a list of
+available make targets.

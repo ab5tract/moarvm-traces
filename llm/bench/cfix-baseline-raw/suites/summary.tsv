@@ -1,0 +1,2 @@
+nqp	cfix-base	exit 0	18s	load 0.87	2026-11-19 16:33:54	Files=150, Tests=13746, 18 wallclock secs ( 0.45 usr  0.14 sys + 15.09 cusr  1.42 csys = 17.10 CPU)	Result: PASS
+rakudo	cfix-base	exit 0	145s	load 0.94	2026-11-19 16:36:19	Files=599, Tests=11162, 145 wallclock secs ( 3.68 usr  1.13 sys + 984.42 cusr 80.43 csys = 1069.66 CPU)	Result: PASS
