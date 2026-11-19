@@ -170,4 +170,39 @@ decisions the maintainers may want to revisit. The mirror branch is handed back 
 
 ## Outcome
 
-(filled at the end)
+Finished 2026-11-19. Ledger: `traces/llm/bench/cfix-ledger.md`.
+
+**Upstream PRs (MoarVM/MoarVM, all open, each off origin/main f112c3998):**
+
+| area | PR | branch | how found |
+|---|---|---|---|
+| S | #2076 | vmarray-self-splice-memmove | reproduced (ASAN + wrong results + crash) |
+| G | #2077 | vmarray-size-overflow | reproduced |
+| T | #2078 | vmarray-stale-slots | reproduced |
+| P | #2079 | vmarray-splice-guards | reproduced (shaped arrays reach it from Raku) |
+| B | #2080 | vmarray-buf-bounds | reproduced |
+| R | #2081 | vmarray-recompose | reproduced |
+| M | #2082 | vmarray-mark-presize | by reading (needs 16 GiB of slots) |
+| N | #2083 | normalize-array-result | reproduced |
+| E | #2084 | encode-append-offset | reproduced |
+| O | #2085 | procops-buf-type | reproduced |
+| D | #2086 | serialization-root-array-var | by reading, not reproduced |
+
+G2 dropped (not a bug). Final review: the 55 branch pairs merge without conflict; none depends on another.
+Known interplay: once #2081 merges, #2079's case-2 program stops at its second composetype (noted in
+the PR body).
+
+**Mirror:** branch `zig-vmarray-c-fixes`, d23749ada..9fdcef83a, local, not merged, not pushed. 21
+cherry-picks, one Zig commit per VMArray area and one for the worklist, harness with an empty
+undefined-lines list. Gate at 282b04734: diff.sh exit 0, exports equal, unit tests 240/252 (default and
+-Dzig-reprs=false) and 245/252 (-Dgc-debug=1), nqp PASS on both, rakudo fails on both only in
+t/04-nativecall/02-simple-args.t 17-18 (as before the branch). Unit tests re-run at 0d759048a after the
+fix wave. Not run: ASAN (the port has no ASAN build), -Dzig-gc=false.
+
+**Seen and not fixed** (candidates for further PRs): the Win64 `~0xfffUL` mask in set_size_internal; a
+VMArray type object as splice source; JIT readuint/writeint/writeuint size checks and writenum's
+missing one; adopted buffers leaving room past elems unwritten (setelems exposes it); MVMHash.c:194-200
+key held across read_ref; at_pos default arm passing a slot type to MVM_reg_get_debug_name; a rejected
+push/bindpos having grown the array; write_buf over-allocating for wide kinds; normalizecodes of empty
+input; encode leaking its buffer when the resize throws; the recompose gap (first compose with live
+instances); #2081's message having a double space for a type without a debug name.
