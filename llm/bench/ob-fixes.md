@@ -890,3 +890,11 @@ Likely reasons, by reading the diffs only (the libraries are stripped; not profi
   and deserialize plus `slot_budget` in set_size_internal's reallocating path (ec2ad02f7). So no source
   change on the int push/pop path explains the +6.7 %, and code layout (alignment) of the push/pop loop is
   the likely cause. This is not verified.
+
+### Seen on the way (not verified, not fixed)
+
+- P6opaque.c `oslice` passes the `dest` that interp's OP(slice) made with `MVM_repr_alloc_init` of the
+  P6opaque source on to the positional delegate's `slice`. The delegate is a VMArray, so `aslice` then
+  treats the P6opaque's body as an `MVMArrayBody` (`set_size_internal` and `copy_elements` on it). This is
+  type confusion if `nqp::slice` is ever applied to a P6opaque with a positional delegate. By reading only;
+  a candidate for the bug list.
