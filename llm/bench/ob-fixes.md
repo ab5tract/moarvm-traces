@@ -61,9 +61,9 @@ Every program shows its bug on both builds:
 |---|---|---|
 | OB2 nqp | `source is concrete: 0`, then exit 137 (the 2G cap) | `DIED MVMArray: Cannot splice from a type object`, elems 3 |
 | OB2 Raku | `MoarVM panic: Memory allocation failed; could not allocate 264965122424860 bytes`, exit 1 | a caught exception |
-| OB3 (a) readuint | flags 3: died some, returned some (JIT); flags 16: SIGSEGV, exit 139 (the record had "stack smashing detected" on cfix-base); `.nojit`: died all; `.jitlog`: the same, and every specialization holding readuint `compiled` | died all, with and without the JIT; `.jitlog`: every specialization holding readuint `not compiled; BAIL: ...` |
-| OB3 (b) writeint/writeuint | all four cases: died some, returned some, element 0 1 (JIT); `.nojit`: died all, element 0 0; `.jitlog`: as the JIT run, every specialization holding the op `compiled` | died all, element 0 0; `.jitlog`: `not compiled; BAIL: ...` |
-| OB3 (c) writenum | flags 16, 0, 3, 4 return with elems 16, 1, 1, 2 (with and without the JIT; `.jitlog`: no specialization of the file holds writenum, the op runs in the mainline, interpreted) | `Cannot write a num of N bytes` for sizes 16, 1, 2 |
+| OB3 (a) readuint | flags 3: died some, returned some (JIT); flags 16: SIGSEGV, exit 139 (the record had "stack smashing detected" on cfix-base); `.nojit`: died all; `.jitlog`: the same, and every specialization holding readuint `compiled` | died all, with and without the JIT; `.jitlog`: died all, and the lines `not compiled; BAIL: ...` (a bail) or `compiled` (a checked call), see JIT evidence |
+| OB3 (b) writeint/writeuint | all four cases: died some, returned some, element 0 1 (JIT); `.nojit`: died all, element 0 0; `.jitlog`: as the JIT run, every specialization holding the op `compiled` | died all, element 0 0; `.jitlog`: died all, lines as for readuint |
+| OB3 (c) writenum | flags 16, 0, 3, 4 return with elems 16, 1, 1, 2 (with and without the JIT; `.jitlog`: no specialization of the file holds writenum: the op is in the body of a top-level `for` loop that runs 7 times, too few for spesh, so it runs interpreted) | `Cannot write a num of N bytes` for sizes 16, 1, 2 |
 | OB4 | `element 2 != 0 (bytes never written for this array)` | `element 2 = 0` |
 | OB7 push | every rejected push leaves elems 3 | elems 2 |
 | OB7 bind_pos | rejected bind at 5 leaves elems 6 (at 1: elems 2) | elems 2 |
@@ -119,7 +119,11 @@ frame of the program's own file whose final code holds readuint, writeint, write
 Source of each part, by reading: `MVMSpeshCandidate.c` (around lines 304-334) runs
 `MVM_jit_try_make_graph` and then prints the "After:" dump of the spesh graph and "JIT was [not]
 successful"; the JIT's bail-outs in `src/jit/graph.c` leave a "BAIL: op <...>" comment on the instruction
-(`MVM_spesh_graph_add_comment`), which that After dump prints. The log is deleted after extraction. The
+(`MVM_spesh_graph_add_comment`), which that After dump prints. The log is deleted after extraction. A frame counts as the program's when the path in its
+`file: <path>:<line>` header is the path the runner was given or ends in `/<basename>` (fix round 2: the
+first version compared the bare basename only, and gave "no specialization" for a program passed with a
+directory; run-all.sh passes bare names from inside ob-repro/, so the before outputs were not affected,
+and their re-run differs only in the temporary log's name on the `run:` line). The
 port's build supports this as upstream (`MVM_SPESH_LOG` in src/moar.c; `MVM_JIT_DEBUG` only adds spill and
 dump details, not used).
 
@@ -154,9 +158,13 @@ comment and `return 0` from `consume_ins`, which makes `MVM_jit_try_make_graph` 
 specialization; the specialized bytecode then runs in the interpreter, whose op checks the flags. So after
 the fix every line of the readuint and writeint `.jitlog` files should read `not compiled; BAIL: op
 <readuint|writeint|writeuint>, ...` (wording of the new comment set by Task 6), with "died all" in the same
-run. A fix that instead emitted a call to a throwing C helper would give `compiled` with "died all"; that
-is not the design's shape and would need its own evidence. writenum is unaffected (no JIT case; the
-interpreter's op).
+run. That expectation holds only if the fix adds a bail. A fix that instead emits a checked call (a C
+helper that applies the interpreter's checks and throws) would honestly show `compiled` with "died all".
+Either is acceptable evidence of the fix, as long as the `.jitlog` run's counts say "died all" (and returned
+none) under `MVM_SPESH_BLOCKING=1`: `not compiled` shows the op left to the interpreter, `compiled` shows the
+compiled code itself refusing. What is not acceptable is "died all" with no line for the op at all (`jit: no
+specialization of this file holds the op`), which would mean the op was never specialized. writenum is
+unaffected (no JIT case; the interpreter's op).
 
 ### Benchmark
 

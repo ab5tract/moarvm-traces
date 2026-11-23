@@ -60,12 +60,16 @@ one() { # tag extra_env [program args]
     rc=$?; echo "----"; echo "exit: $rc"; } > "$f"
   echo "== $f"; cat "$f"
 }
-jit_evidence() { # spesh log, program file name
-  awk -v prog="$2" '
+jit_evidence() { # spesh log, program path as passed to the runner, its basename
+  # A frame is the program's when the "file: <path>:<line>" of a "Spesh of"
+  # header names the program: the path as given, or any path ending in
+  # /<basename> (the log holds the path the way the runner was given it).
+  awk -v given="$2" -v base="$3" '
     /^Specialization of \x27/ { name = $3; in_section = 1; in_after = 0; mine = 0; ops = ""; bails = ""; jit = ""; next }
     !in_section { next }
     /^After:$/ { in_after = 1; next }
-    index($0, "file: " prog ":") { mine = 1 }
+    match($0, /file: [^ ]*:[0-9]+\)/) { f = substr($0, RSTART + 6, RLENGTH - 7); sub(/:[0-9]+$/, "", f)
+                                         if (f == given || f == base || substr(f, length(f) - length(base)) == "/" base) mine = 1 }
     in_after && /^      (readuint|writeint|writeuint|writenum) / { if (index(ops, " " $1 " ") == 0) ops = ops " " $1 " " }
     in_after && /BAIL: / { b = substr($0, index($0, "BAIL: ")); if (index(bails, b) == 0) bails = bails "; " b }
     /^JIT was successful/ { jit = "compiled" }
@@ -80,7 +84,7 @@ case $(basename "$P") in OB3-*)
   spesh_log=$(mktemp /tmp/claude-1000/ob-spesh-log.XXXXXX) || exit 1
   one "jitlog.$ONLY" "MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=$spesh_log" "$@" > /dev/null
   f="$O/$name.jitlog.$ONLY.txt"
-  evidence=$(jit_evidence "$spesh_log" "$(basename "$P")")
+  evidence=$(jit_evidence "$spesh_log" "$P" "$(basename "$P")")
   { echo "---- jit evidence (MVM_SPESH_LOG)"; if [ -n "$evidence" ]; then echo "$evidence"; else echo "jit: no specialization of this file holds the op"; fi; } >> "$f"
   rm -f "${spesh_log:?}"
   echo "== $f"; cat "$f" ;;

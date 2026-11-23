@@ -1,5 +1,5 @@
 probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
-run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.hYJxsI nqp-m  OB3-readuint-jit.nqp flags_16 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.7YrnlL nqp-m  OB3-readuint-jit.nqp flags_16 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
 ----
 readuint flags_16: start
 timeout: the monitored command dumped core
