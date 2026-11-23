@@ -7,7 +7,7 @@ Spec:      traces/llm/specs/2026-11-20-open-bugs-port-fixes-design.md
 Bug list:  traces/llm/bench/cfix-open-bugs.md
 Before:    /tmp/claude-1000/vf-c-base (-Dzig-reprs=false, the C array) and /tmp/claude-1000/vf-n-base (defaults,
            the Zig array), built at 282b04734 (identical in src/ to 99f7ce8cd; cfix-mirror-raw/build/), not modified
-After:     /tmp/claude-1000/ob-c and /tmp/claude-1000/ob-n, built by ob-repro/build-prefixes.sh (not built yet)
+After:     /tmp/claude-1000/ob-c and /tmp/claude-1000/ob-n, built by ob-repro/build-prefixes.sh (first built in Task 2)
 Runners:   nqp-m of /tmp/claude-1000/tune-zig-prefix (read only) and the rakudo checkout's rakudo-m, with
            RAKUDO_NO_PRECOMPILATION=1 and -I<rakudo>/lib; only the libmoar swapped through LD_LIBRARY_PATH
 Raw:       ob-fixes-raw/before/ (reproducer outputs and benchmark lines on the before prefixes)
@@ -27,6 +27,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `cmp.sh DIR PREFIX_A PREFIX_B` | `c=n` / `C!=N` per output after cfix-mirror-raw/cmp-repro.sh's normalisation (12+-digit numbers kept) |
 | `run-bench.sh [-n RUNS] -o OUTDIR PREFIX...` | the push benchmark, RUNS rounds with the prefixes alternating, load below 2.0 before each run, medians in `bench-medians.txt` |
 | `build-prefixes.sh [ob-c] [ob-n]` | cfix-mirror-raw/build/build.sh from `git archive HEAD` copies (with 3rdparty at the recorded commits) under /tmp/claude-1000/ob-src-{c,n}; logs, builds.tsv and export lists in `ob-fixes-raw/build/` |
+| `maketest-driver.sh OUTDIR [project:prefix ...]` | cfix-mirror-raw/maketest-driver.sh re-pointed at /tmp/claude-1000/ob-{c,n} (default `nqp:c nqp:n rakudo:c rakudo:n`); added in Task 2 |
 | `OB2-typeobj-splice.nqp` | cfix-P-raw/round1/typeobj/typeobj.nqp, plus the target's elems after |
 | `OB2-buf-new-array.raku` | `Buf.new(array[int])` in a try |
 | `OB3-readuint-jit.nqp flags_3\|flags_16` | cfix-B-raw/hand/jit-readuint-size16.nqp, one case per process |
@@ -204,3 +205,111 @@ The spread within a case is up to about 9 % (vf-c-base obj.pushpop8: 0.0875 to 0
 - OB4 after the fix: `element 2 = 0` cannot be told from a slot that happens to be zero except by the
   "heap prepared" line (element 2 of the filler results is 99) and by the before output showing `!= 0` with
   the same preparation.
+
+## K and M
+
+### The fix
+
+Commits in P (zig-open-bugs): ce6393516 (C, area K), 75e171c31 (Zig mirror), 02289298c (C, area M, names
+#2081), a1fa9aed7 (Zig mirror), 9b511d4e3 (tools/bench/repr harness).
+
+- K: `spec_to_repr_data` (VMArray.c) and `specToReprData` (serial.zig), at the top of the integer branch
+  (`BP_INT`, `BP_UINT64`), before the signedness switch: `spec->bits < 8` throws `MVMArray: Cannot compose
+  an array of %d-bit integers, element types need at least 8 bits`. Before the fix the 4-, 2- and 1-bit
+  widths (the only ones below 8 that P6int accepts, P6int.c:154-156) mapped to `MVM_ARRAY_U4` .. `I1` with
+  `elem_size` 0; no other storage spec gives `elem_size` 0 (`BP_NUM` 32/64, `BP_STR` 8, other box kinds
+  leave the object kind). In `compose` the function writes into a local kind, so the throw comes before the
+  #2081 recompose check and before anything is stored: a fresh type stays an object array, a composed type
+  keeps its kind and element type. `deserialize_repr_data` calls the same function and so throws the same
+  message for a serialized type naming such an element type (by reading; no program drives it, as the
+  design expects: no compiled file holds such a type). There, as before for any throw of that function,
+  the new REPR data (object kind, the element type stored) is already in `st->REPR_data`.
+- M: the #2081 message prints `<anon>` when `MVM_6model_get_stable_debug_name` gives `""` (no debug name, or
+  an empty one).
+- Left as they are (unreachable now): the `Unhandled slot type` arms, the storage-less guards of #2079 and
+  #2080, Zig `setInt`'s `kinds.unstored` arm, Zig `grow`'s NULL-slots case.
+
+### What the list entries become
+
+- OB6 (at_pos default arm's name table) and OB17 (storage spec and debugger misreport): not fixed separately;
+  no array of such a kind can exist, so neither is reachable.
+- OB18 second half (storage-less kinds cannot be deserialized): such a type is refused at
+  `deserialize_repr_data` with the compose message, before any array of it is read.
+- OB20 (growth of a storage-less kind stores realloc's result, then throws): unreachable.
+- OB15d (NULL slots in Zig, `malloc(0)` in C): unreachable; the one documented pointer-value difference
+  can no longer be observed.
+- OB12: fixed (M).
+
+### Reproducers, before and after
+
+`run.sh -p ob-c|ob-n -o ob-fixes-raw/after-t2 ob-repro/<file>`; `cmp.sh ob-fixes-raw/after-t2 ob-c ob-n`:
+`c=n` for all three.
+
+| program | before (vf-c-base = vf-n-base) | after (ob-c = ob-n) |
+|---|---|---|
+| K-compose-small.nqp | 4/2/1 bits: `compose: returned`, `push_i: DIED MVMArray: Unhandled slot type; elems 0` | `compose: DIED MVMArray: Cannot compose an array of N-bit integers, element types need at least 8 bits`, `push_i: DIED MVMArray: push expected object register; elems 1`; 8-bit controls unchanged |
+| K-smallnatives.raku | `declared, elems 0`, `push 3: DIED MVMArray: Unhandled slot type`, `[]` | `declare: DIED MVMArray: Cannot compose an array of 4-bit integers, element types need at least 8 bits`, `push 3 and say: skipped, no array` |
+| OB12-anon-recompose.nqp | `DIED [MVMArray: Type  is already composed with another element kind]` | `DIED [MVMArray: Type <anon> is already composed with another element kind]`; named control unchanged |
+
+K-smallnatives.raku: the message comes at the declaration (`my uint4 @a`, compiled through EVAL).
+K-compose-small.nqp's `elems 1` after the refused `push_i` is OB7 (push grows before the kind check),
+area Q's subject, not K's.
+
+### Unit tests
+
+`zig build unit-test --summary all` (1-minute load 1.82, 1.93, 1.96 at the starts):
+
+| setting | baseline at 99f7ce8cd | after | arithmetic |
+|---|---|---|---|
+| default | 240/252 (12 skipped) | 239/251 (12 skipped) | 240 - 3 removed + 2 new = 239 |
+| `-Dzig-reprs=false` | 240/252 | 239/251 (12 skipped) | the same |
+| `-Dgc-debug=1` | 245/252 (7 skipped) | 244/251 (7 skipped) | 245 - 3 + 2 = 244 |
+
+Floor (baseline minus removed): 237, 237, 242; all above it. New tests (vmarray_elements_test.zig):
+"compose refuses integer element types narrower than 8 bits" (bits 4, 2, 1, signed and unsigned, on a fresh
+type and on a type composed to int64: the message, REPR data unchanged) and "recompose message names an
+anonymous type <anon>" (no debug name, an empty one, a named control). Both failed before the fix (compose
+returned; `Type  is`).
+
+Removed, because their subject (an array of a kind without storage) can no longer be made:
+- "the kinds without storage: what does not throw does nothing and keeps slots NULL"
+- "a splice into or out of a kind without storage throws before changing anything"
+- "write_buf on a kind without storage throws the integer-type message, even for 0 bytes"
+
+Rewritten (kept): "specToReprData maps each storage spec to the C's slot type and element size"
+(vmarray_serial_test.zig) loses its twelve rows for 4, 2 and 1 bits, which now throw in-process; "a composed
+array type may not change its element kind; a failed compose changes nothing" expects `Type <anon> is`.
+The storage-level tests with `elem_size` 0 (vmarray_storage_test.zig: alloc of 0 bytes, free of a
+zero-capacity buffer) test the kept dead code and stay.
+
+### Harness
+
+`vmarray-diff.nqp`: `odd_kinds()` composed outside `t()`; the compose is now made inside each case
+(`odd_array`, until one succeeds), so each `<kind>.odd.*` line prints the compose message, plus a new
+`<kind>.odd.compose` line. The `<kind>.late.*` cases, `u4.late.serialize` and the `recomposed.refused.*`
+pairs with `u4` already composed inside `t()` and print the message unchanged in structure.
+`vmarray-serial.nqp` also needed a change (not in the brief's file list): `write_case('u4', ...)` built
+its type outside the `try`, which would have ended the program before `done: 1` (diff.sh exit 4); the type
+is now made inside the `try` (`u4.0.blob: DIED <message>`, roundtrip and read `DIED no blob`). README.md
+records both.
+
+`diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t2`:
+exit 0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 10453 diff-nqp/nospesh 10453
+diff-raku/spesh 2487 diff-raku/nospesh 2487 serial/spesh 196 serial/nospesh 196 devirt/spesh 10
+devirt/nospesh 10; cross-read identical)` (log: ob-fixes-raw/diff-t2.log). undefined-lines.txt unchanged
+(empty). Exported symbols: exports-ob-c.txt = exports-ob-n.txt.
+
+### Prefixes and suites
+
+`build-prefixes.sh` (first run): ob-c and ob-n both exit 0 at 9b511d4e3, 60 s each, load 1.81 and 1.63;
+builds.tsv in ob-fixes-raw/build/. It worked unchanged.
+
+`ob-repro/maketest-driver.sh ob-fixes-raw/suites-t2`: nqp PASS on both (Files=150, Tests=13746); Rakudo
+FAIL on both (Files=599, Tests=11162) with only `t/04-nativecall/02-simple-args.t` (tests 17-18, OB15a)
+not ok. The per-file lists equal cfix-mirror-raw/suites/ for all four runs.
+
+### Not verified
+
+- `deserialize_repr_data`'s throw: by reading only (no crafted blob with a 4-bit element type).
+- The new check uses `bits < 8`; widths 0, 3, 5, 6 and 7 would now get the new message instead of
+  "Unsupported int size", but P6int refuses them at its own compose, so no type with such a spec is known.
