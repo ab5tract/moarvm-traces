@@ -29,6 +29,8 @@ $R $X -t 60 OB12-anon-recompose.nqp
 $R $X -t 60 OB16-num-buf-message.nqp
 $R $X -m 2G -t 60 OB18-deserialize-size.nqp
 $R $X -t 60 OB19-holes.nqp
+$R $X -t 60 OB19-hole-to-sub.nqp
+$R $X -t 60 OB19-serialized-hole.nqp
 $R $X -t 120 K-smallnatives.raku
 $R $X -t 60 K-compose-small.nqp
 } > /dev/null 2>&1

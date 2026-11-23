@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB8-write-buf-growth.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+uint16 array 1 2 3, writeint offset 1, 8 bytes (flags 13): returned; elems 5: 1 1800 1286 772 258
+empty int64 array, writeint offset 0, 8 bytes (flags 13): returned; elems 1: 7
+uint32 array 1, writeint offset 1, 2 bytes (flags 5): returned; elems 2: 1 258
+uint16 array 1 2 3, writeint offset 1, 4 bytes, no growth needed (control): returned; elems 3: 1 772 258
+----
+exit: 0

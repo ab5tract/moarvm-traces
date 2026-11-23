@@ -43,6 +43,8 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `OB16-num-buf-message.nqp` | the list's program, plus readint, and a str array |
 | `OB18-deserialize-size.nqp` | a crafted blob (the list gives none): see Baseline |
 | `OB19-holes.nqp` | holes via atpos, pop, shift; a splice of holes into a gen2 and a nursery target |
+| `OB19-hole-to-sub.nqp` | a hole popped and shifted into a variable and passed to a sub (the crash Task 1 saw); added in Task 4 |
+| `OB19-serialized-hole.nqp` | an object array with a hole and an `nqp::null()` element, serialized and read back, then atpos/pop/shift; added in Task 4 |
 | `K-compose-small.nqp` | compose, then push_i, for 4-, 2-, 1-bit signed and unsigned, and 8-bit controls |
 | `K-smallnatives.raku` | the plan's program; the declaration compiled through EVAL inside its try |
 
@@ -464,3 +466,169 @@ new message, so no suite file splices or slices from a type object.
   MVMNull REPR's own error; not run.
 - The slice fix's message was adapted from the brief's rule ("splice" replaced by "slice"); it is not in the
   global constraints' list of exact messages.
+
+## W, V and H
+
+### The fix
+
+Commits in P (zig-open-bugs): 48fd69052 (C, area W), 1c80e9440 (Zig mirror), ec2ad02f7 (C, area V),
+63a911508 (Zig mirror), bb0eda68f (C, area H), 922bbfb4d (Zig mirror), 3393c5932 (tools/bench/repr harness).
+
+- W, growth: `write_buf` (VMArray.c) and `writeBuf` (elements.zig) grow a write that does not fit to
+  `offset + ceil(count / elem_size)` elements, computed as `count / elem_size + (count % elem_size != 0)`
+  (no `count + elem_size - 1`, which can wrap). Before, the target was `offset + count`, count being bytes.
+  The growth condition of #2080 (`offset > elems || (elems - offset) * elem_size < count`) and the #2077
+  bounds rules are unchanged; the C commit names #2080. Visible change: `elems` after a write into a wide
+  Buf. `buf16.new(1,2,3).write-uint64(1,1)` leaves 5 elements, not 9; an 8-byte `writeint` into an empty
+  int64 array leaves 1, not 8. The spare bytes of the last element are zero, because growth that
+  reallocates zeroes (growth inside existing storage does not until area Z: Review Focus 4 below).
+- W, wrap: no wrap is possible under the checks before the growth, for the callers there are. `offset` is
+  in [0, 2**63 - 1], because a negative offset throws first. `ceil(count / elem_size) <= ceil((2**64 - 1) /
+  elem_size)`, which is at most 2**63 for `elem_size >= 2`, so the sum is at most 2**64 - 1. For
+  `elem_size == 1` the sum is `offset + count`, as before; it can wrap only for `count > 2**64 - 1 -
+  offset`, that is `count >= 2**63`. No caller passes that: OP(writeint)/writeuint/writenum pass 1 to 8
+  bytes, the JIT passes the op's size, and `nqp::serializetobuffer` passes the blob's length. It is not
+  checked: that would be a new check, beyond the brief.
+- W, message: the gate is unchanged (only OBJ and STR are refused, plus the storage-less kinds, which no
+  longer exist). The texts change from `MVMArray: write_buf requires an integer type` / `MVMArray: read_buf
+  requires an integer type` to `MVMArray: write_buf requires an integer or num type` / `MVMArray: read_buf
+  requires an integer or num type`.
+- V: `deserialize` reads the count into a local and throws `Unable to allocate an array of <count>
+  elements` before it stores anything in the body or allocates. It throws when the count is over the limit
+  `set_size_internal` applies, or when `count * elem_size` would wrap. That limit is 2**60 elements of 8
+  bytes, 2**61 of 4, 2**62 of 2, 2**63 of 1, compared with `>`, as `set_size_internal` does. The wrap check
+  is already implied by the limit, but kept as the brief asks. The limit moved into `slot_budget()` (C) /
+  `storage.slotBudget` (Zig), which `set_size_internal` / `grow` now call. `deserialize` reads its count
+  with `MVM_serialization_read_int`, the bounds-checked varint reader, as before; the unit test feeds the
+  count through the library's `MVM_serialization_write_int`.
+- H: `pop` and `shift` give `tc->instance->VMNull` for a NULL slot of an object array, as `at_pos` does
+  (C: in their OBJ arms; Zig: `Arm(op).load`). `copy_elements` is not changed.
+- H, other paths: every pop/shift path calls the REPR's `pos_funcs.pop`/`.shift`, so none returns the raw
+  slot. That covers OP(pop_o)/OP(shift_o) (interp.c), `MVM_repr_pop_o`/`shift_o` (reprconv.c), the JIT's
+  devirtualized path (jit/graph.c, the function pointer taken from the REPR), its `op_to_func` fallback
+  (`MVM_repr_pop_o`) and the expression templates `pop_o!`/`shift_o!` (core_templates.expr, a `callv` of
+  `pos_funcs.pop`/`.shift`). Spesh has no fast path for pop or shift (optimize.c only lists them among the
+  ops that read facts), and `find_fast_impl_for_jit` offers none.
+- H, serialized hole: a NULL slot serializes as `REFVAR_NULL` and reads back as NULL; an `nqp::null()`
+  element is written as `REFVAR_VM_NULL` and reads back as VMNull (serialization.c `write_ref`/`read_ref`).
+  So a deserialized array holds its hole as a NULL slot again, and every read now gives VMNull. Shown by
+  `OB19-serialized-hole.nqp`: before, `pop (the hole): VMNull 0`; after, `1`. vmarray-serial.nqp already
+  has a hole: its `obj.3` case is `'first'`, a setelems hole, then a list. That case's lines did not change
+  (it reads through atpos).
+
+### What the list entries become
+
+- OB8: fixed. Rakudo: the `write-*` methods of Buf.rakumod (1209-1308,
+  `grep -rn 'write-u\?int\|write-num' ../../src/core.c/Buf.rakumod`) pass `$offset` and the size flags
+  straight to `nqp::writeint`/`writeuint`/`writenum`. Nothing in them reads `elems` after the write.
+  `write-int128`/`write-uint128` write two 64-bit halves at `$offset` and `$offset + 8`: a byte offset,
+  meaningful for a buf8, where nothing changes. On a wider Buf the elems after such a write change too
+  (buf16 at 0: 12 elements, was 16). No Rakudo code relies on the old count, as far as the grep shows. The
+  nqp compiler's own `nqp::writeuint` calls (QASTCompilerMAST.nqp, QASTOperationsMAST.nqp) write into byte
+  buffers (elem_size 1), where nothing changes. The suites (below) agree.
+- OB16: fixed (message only, as the spec decided; the nums stay accepted).
+- OB18, first half: fixed. Task 1 left open whether the fixed path throws from inside lazy deserialization
+  and the program then reaches its last line. It does, on both prefixes: `deserialize of the patched blob:
+  DIED Unable to allocate an array of 2305843009213693953 elements`, then `done`, exit 0.
+- OB19: fixed for pop and shift. Task 1's observation is gone: a hole popped into a variable and passed to
+  an nqp sub no longer segfaults (`OB19-hole-to-sub.nqp`: exit 139 on vf-c-base, vf-n-base and the Task 3
+  ob-c/ob-n before; `isnull 1` twice and exit 0 after).
+
+### Reproducers, before and after
+
+`run.sh -p ob-c|ob-n -o ob-fixes-raw/after-t4 ob-repro/<file>`; `cmp.sh ob-fixes-raw/after-t4 ob-c ob-n`:
+`c=n` for all seven. Before: ob-fixes-raw/before-t4/. Those are ob-c and ob-n at a8a712e6c (Task 3's
+builds) for every program. The two new programs also ran on vf-c-base and vf-n-base, `c=n` there too.
+
+| program | before (C = Zig) | after (ob-c = ob-n) |
+|---|---|---|
+| OB8-write-buf-growth.nqp | `elems 9: 1 1800 1286 772 258 0 0 0 0`; `elems 8: 7 0 0 0 0 0 0 0`; uint32 `elems 3: 1 258 0`; control `elems 3` | `elems 5: 1 1800 1286 772 258`; `elems 1: 7`; `elems 2: 1 258`; control unchanged |
+| OB8-write-uint64.raku | `elems 9: 1 1 0 0 0 0 0 0 0`; buf32 `elems 3: 1 258 0` | `elems 5: 1 1 0 0 0`; `elems 2: 1 258` |
+| OB16-num-buf-message.nqp | `... requires an integer type` (4 lines); num array accepted | `... requires an integer or num type`; num array unchanged |
+| OB18-deserialize-size.nqp | control line, then a segfault (exit 139) | control, `DIED Unable to allocate an array of 2305843009213693953 elements`, `done` (exit 0) |
+| OB19-holes.nqp | pop, shift and the young-target splice `VMNull 0` | `VMNull 1` on every line |
+| OB19-hole-to-sub.nqp (new) | segfault, exit 139 (also on vf-*-base) | `isnull 1` twice, `done` |
+| OB19-serialized-hole.nqp (new) | `pop (the hole): VMNull 0` (vf-*-base) | `VMNull 1`; the other lines unchanged |
+
+### Unit tests
+
+`zig build unit-test --summary all` at 922bbfb4d (1-minute load 1.86, 1.88, 1.88 at the starts):
+
+| setting | before (Task 3) | after | arithmetic |
+|---|---|---|---|
+| default | 244/256 (12 skipped) | 248/261 (13 skipped) | 244 + 4 new passing; 1 new skipped |
+| `-Dzig-reprs=false` | 244/256 (12 skipped) | 248/261 (13 skipped) | the same |
+| `-Dgc-debug=1` | 249/256 (7 skipped) | 253/261 (8 skipped) | 249 + 4; 1 new skipped |
+
+New tests (vmarray_elements_test.zig):
+- "write_buf grows by whole elements": every 2-, 4- and 8-byte numeric kind, 1 to 9 bytes at elems - 1,
+  elems and elems + 2 of a 3-element array. Checks elems, the bytes written, the old bytes kept, and every
+  other new byte zero.
+- "read_buf and write_buf name integer or num": OBJ and STR, array unchanged. It restores the message
+  coverage Task 2 removed, with the new text.
+- "deserialize refuses a size it cannot allocate": every stored kind; counts 2**63, 2**64 - 1,
+  2**64 / elem_size + 1 and limit + 1; body left at `elems=0 start=0 ssize=0 bytes=null`.
+- "pop and shift return VMNull for a hole": a nursery and a gen2 holey array; the results stored into a
+  gen2 array, then two nursery collections and, in the `-Dgc-debug=1` build, a forced full one (Review
+  Focus 5); the stored slots are VMNull.
+- "write_buf into spare room of an adopted buffer" (Review Focus 4): skipped with the reason "needs area
+  Z". It is a 3-element array given a malloc'd 8-slot buffer full of 0xaa, then a 1-byte write at elems;
+  Task 5 enables it.
+
+Each of these tests runs through `E` and through the library's table, so the `-Dzig-reprs=false` run tests
+the C functions too. Two existing tests pinned the old growth and now expect the new counts: "writeBuf and
+readBuf copy bytes for the integer kinds" and "read_buf and write_buf compare the offset with elems
+first". In the latter the #2080 throws still throw but name `offset + 1` and `offset + 2` elements
+(2305843009213693954, 2**63 + 1), and the append at elems gives 5 elements, not 12. Before the fixes the
+four new tests and those two failed.
+
+Exception: 2**63 one-byte elements is the limit itself (`>`), so it is not refused. The allocation fails
+instead, with `MoarVM panic: Memory allocation failed; could not allocate 9223372036854775808 bytes`
+(exit 1), as a setelems of that size does, and the test pins that. The brief listed 2**63 for every
+element size; this follows the spec's "the same limit as set_size_internal" instead.
+
+### Harness
+
+`vmarray-diff.nqp` `ob_cases()` gains:
+- `ob.writebuf.growth.<kind>.f<1|5|9|13>.<at2|at3|at5|empty>`: every numeric kind, 160 lines.
+- `ob.holes.pop`, `ob.holes.shift`: the hole compared with `nqp::null()` before it is bound.
+- `ob.holes.stored`: the results pushed into an old array across a collection.
+
+`vmarray-diff.raku` gains `ob.writebuf.{buf16.write-uint64, buf16.write-uint32, buf32.write-uint64,
+buf32.write-uint16, buf64.write-num32}`. README.md records them.
+
+Lines that changed against the Task 3 output (the base side, ob-c at a8a712e6c vs 3393c5932):
+- nqp, the wide kinds: the `<kind>.buf.*` writes that need growth (`writeint.f*`, `.neg`, `.grow`, `.end`,
+  `.empty`, `.shifted`, `writeuint`, `writenum.*`). i8 and u8 are unchanged.
+- nqp, `<kind>.buf.writeint.wrap.*`: the refused size in the message.
+- nqp, obj and str: the new message text.
+- Raku: `Buf[uint16]`/`Blob[uint16].nqp.writeint` (elems 9 -> 5); `cfix.Buf[uint{64,32,16}].write.wrap`
+  (the refused size); `str.nqp.readint`, `str.nqp.writeint`, `list.nqp.readint`, `array.reified.readint`
+  (the message).
+- serial: no line changed.
+
+`diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t4`: exit
+0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 11056 diff-nqp/nospesh 11056 diff-raku/spesh
+2497 diff-raku/nospesh 2497 serial/spesh 196 serial/nospesh 196 devirt/spesh 10 devirt/nospesh 10;
+cross-read identical)` (log: ob-fixes-raw/diff-t4.log). undefined-lines.txt unchanged.
+
+### Prefixes and suites
+
+`build-prefixes.sh`: ob-c and ob-n exit 0 at 3393c5932 (61 s and 59 s, load 1.50 and 1.95); export lists
+equal.
+
+`ob-repro/maketest-driver.sh ob-fixes-raw/suites-t4`: nqp PASS on both (Files=150, Tests=13746); Rakudo
+FAIL on both (Files=599, Tests=11162) with only `t/04-nativecall/02-simple-args.t` (OB15a) not ok. The
+per-file lists equal cfix-mirror-raw/suites/ for all four runs. No suite output contains the new message
+texts or "Unable to allocate", so no suite file writes into an object or string array or hits a refused
+growth or deserialize. The Rakudo setting, its precompiled modules and the nqp stage files load (they
+deserialize every VMArray they hold through the changed deserialize).
+
+### Not verified
+
+- `write_buf` with `count >= 2**63` on a 1-byte kind can still wrap `offset + count`, as before. No caller
+  passes such a count; it is not checked.
+- Area V is not driven by diff.sh (no crafted blob in vmarray-serial.nqp). It is covered by the unit test
+  (both implementations) and by OB18-deserialize-size.nqp on both prefixes.
+- 2**63 one-byte elements from a crafted blob still ends the VM with the allocator's panic, as a setelems of
+  that size does (see Unit tests).

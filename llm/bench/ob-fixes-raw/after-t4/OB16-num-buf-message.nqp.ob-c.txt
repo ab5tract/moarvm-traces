@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB16-num-buf-message.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+num array, writeint then readint: returned, atpos_n 1, readint 4607182418800017408
+obj array, writeint: DIED MVMArray: write_buf requires an integer or num type
+obj array, readint: DIED MVMArray: read_buf requires an integer or num type
+str array, writeint: DIED MVMArray: write_buf requires an integer or num type
+str array, readint: DIED MVMArray: read_buf requires an integer or num type
+----
+exit: 0
