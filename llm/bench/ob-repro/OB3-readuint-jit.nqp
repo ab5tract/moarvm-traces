@@ -2,7 +2,7 @@
 # ((flags & 3) == 3, size > 8). From cfix-B-raw/hand/jit-readuint-size16.nqp,
 # one case per run (argument flags_3 or flags_16; one case per process, so
 # that the specialization of one case does not decide the other's): a sub
-# with the flags as a constant, called 200,000 times from the mainline (each
+# with the flags as a constant, called 200,000 times from a loop inside sub MAIN (each
 # call in a try), so that spesh and the JIT compile it with the flags as a
 # known value. The interpreter (MVM_JIT_DISABLE=1, the .nojit output) throws
 # "Invalid flags value for readuint" on every call. Before, with the JIT:

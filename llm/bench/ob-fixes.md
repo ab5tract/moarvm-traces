@@ -22,7 +22,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 
 | file | what it does |
 |---|---|
-| `run.sh -p PREFIX [-m MEM] [-t SECS] [-o OUTDIR] PROGRAM [ARGS]` | cfix-mirror-raw/run-port.sh for one prefix: probe (the libmoar mapped), command, output, exit status in `OUTDIR/<file>[.<args>].<PREFIX>.txt`; an `OB3-*` program also runs with `MVM_JIT_DISABLE=1` into `<file>[.<args>].nojit.<PREFIX>.txt` |
+| `run.sh -p PREFIX [-m MEM] [-t SECS] [-o OUTDIR] PROGRAM [ARGS]` | cfix-mirror-raw/run-port.sh for one prefix: probe (the libmoar mapped), command, output, exit status in `OUTDIR/<file>[.<args>].<PREFIX>.txt`; an `OB3-*` program also runs with `MVM_JIT_DISABLE=1` into `<file>[.<args>].nojit.<PREFIX>.txt`, and with `MVM_SPESH_BLOCKING=1` and `MVM_SPESH_LOG` into `<file>[.<args>].jitlog.<PREFIX>.txt`, which ends with the JIT evidence lines (see "JIT evidence") |
 | `run-all.sh -p PREFIX -o OUTDIR` | every program, 2G cap for OB2 and OB18, 4G for the rest |
 | `cmp.sh DIR PREFIX_A PREFIX_B` | `c=n` / `C!=N` per output after cfix-mirror-raw/cmp-repro.sh's normalisation (12+-digit numbers kept) |
 | `run-bench.sh [-n RUNS] -o OUTDIR PREFIX...` | the push benchmark, RUNS rounds with the prefixes alternating, load below 2.0 before each run, medians in `bench-medians.txt` |
@@ -49,8 +49,9 @@ Benchmark: `tools/bench/repr/vmarray-push-bench.nqp` in P (cases `int.push10m`, 
 ## Baseline
 
 Run on 2026-11-23 with `run-all.sh -p vf-c-base` and `-p vf-n-base` into `ob-fixes-raw/before/`, 1-minute
-load 0.6-0.8. `cmp.sh ob-fixes-raw/before vf-c-base vf-n-base`: all 28 outputs `c=n` (17 programs, the OB3
-JIT programs with 2 and 4 cases, each OB3 output also as `.nojit`). The list expects C and Zig to differ
+load 0.6-0.8. `cmp.sh ob-fixes-raw/before vf-c-base vf-n-base`: all 35 outputs `c=n` (17 programs, the OB3
+JIT programs with 2 and 4 cases, each OB3 output also as `.nojit` and `.jitlog`; the OB3 outputs were re-run
+in fix round 1). The list expects C and Zig to differ
 only in OB20 and OB15d; no program here reaches either (OB20's growth of a storage-less kind with storage is
 not driven), so no difference was expected and none was seen.
 
@@ -60,9 +61,9 @@ Every program shows its bug on both builds:
 |---|---|---|
 | OB2 nqp | `source is concrete: 0`, then exit 137 (the 2G cap) | `DIED MVMArray: Cannot splice from a type object`, elems 3 |
 | OB2 Raku | `MoarVM panic: Memory allocation failed; could not allocate 264965122424860 bytes`, exit 1 | a caught exception |
-| OB3 (a) readuint | flags 3: died some, returned some (JIT); flags 16: SIGSEGV, exit 139 (the record had "stack smashing detected" on cfix-base); `.nojit`: died all | died all, with and without the JIT |
-| OB3 (b) writeint/writeuint | all four cases: died some, returned some, element 0 1 (JIT); `.nojit`: died all, element 0 0 | died all, element 0 0 |
-| OB3 (c) writenum | flags 16, 0, 3, 4 return with elems 16, 1, 1, 2 (with and without the JIT) | `Cannot write a num of N bytes` for sizes 16, 1, 2 |
+| OB3 (a) readuint | flags 3: died some, returned some (JIT); flags 16: SIGSEGV, exit 139 (the record had "stack smashing detected" on cfix-base); `.nojit`: died all; `.jitlog`: the same, and every specialization holding readuint `compiled` | died all, with and without the JIT; `.jitlog`: every specialization holding readuint `not compiled; BAIL: ...` |
+| OB3 (b) writeint/writeuint | all four cases: died some, returned some, element 0 1 (JIT); `.nojit`: died all, element 0 0; `.jitlog`: as the JIT run, every specialization holding the op `compiled` | died all, element 0 0; `.jitlog`: `not compiled; BAIL: ...` |
+| OB3 (c) writenum | flags 16, 0, 3, 4 return with elems 16, 1, 1, 2 (with and without the JIT; `.jitlog`: no specialization of the file holds writenum, the op runs in the mainline, interpreted) | `Cannot write a num of N bytes` for sizes 16, 1, 2 |
 | OB4 | `element 2 != 0 (bytes never written for this array)` | `element 2 = 0` |
 | OB7 push | every rejected push leaves elems 3 | elems 2 |
 | OB7 bind_pos | rejected bind at 5 leaves elems 6 (at 1: elems 2) | elems 2 |
@@ -84,11 +85,11 @@ Differences from the bug list and decisions taken while writing the programs:
   12-byte malloc then reuses one, and element 2 is non-zero on both builds. Only zero/non-zero is printed.
 - OB3: one process ran both readuint cases, and four writeint cases, at first. Then which sub was compiled
   depended on the order and on timing (the flags 16 readuint was never compiled; writeint cases differed
-  between C and Zig). With one case per process and the loop in the mainline (as the record's program) the
-  outcome was the same in every run on each build (per case: readuint 4 runs, writeint 3 runs, run-all's
-  included). The counts still depend on when the JIT takes
-  over, so the programs print none/some/all. `MVM_SPESH_BLOCKING` is not set (spesh/JIT defaults, as the
-  plan says).
+  between C and Zig). With one case per process, the loop inside `sub MAIN` and each case's sub called by
+  name in its own branch (the readuint program's shape; fix round 1 reshaped the writeint program to it,
+  see "JIT evidence") the outcome was the same in every run on each build. The counts still depend on when
+  the JIT takes over, so the programs print none/some/all. The plain and `.nojit` runs leave
+  `MVM_SPESH_BLOCKING` unset (spesh/JIT defaults, as the plan says); the `.jitlog` run sets it.
 - OB3 readuint flags 16 ends in SIGSEGV on both builds, not in glibc's stack-protector abort the record saw
   on cfix-base (a Perl/Configure build of upstream).
 - OB3 writeint/writeuint (b) is shown for the first time: the JIT path writes where the interpreter throws,
@@ -104,6 +105,58 @@ Differences from the bug list and decisions taken while writing the programs:
 - K-smallnatives.raku: `my uint4 @a` inside a `try` would scope `@a` to the try block, and the fixed build may
   throw while compiling the declaration; the declaration is therefore `EVAL 'my uint4 @a; @a'` inside its
   try, and the later statements are skipped (with a line saying so) when it failed.
+
+### JIT evidence (fix round 1)
+
+The plain run's "died all" after a fix would be indistinguishable from "the JIT never compiled the frame"
+(it is byte-identical to the `.nojit` output). So `run.sh` runs each `OB3-*` program a third time with
+`MVM_SPESH_BLOCKING=1` (what is compiled no longer depends on thread timing) and
+`MVM_SPESH_LOG=<temporary file>`, and appends to `<x>.jitlog.<PREFIX>.txt` one line per specialization of a
+frame of the program's own file whose final code holds readuint, writeint, writeuint or writenum:
+
+    jit: specialization of '<frame>' holding <ops>: compiled | not compiled[; BAIL: <comment>]
+
+Source of each part, by reading: `MVMSpeshCandidate.c` (around lines 304-334) runs
+`MVM_jit_try_make_graph` and then prints the "After:" dump of the spesh graph and "JIT was [not]
+successful"; the JIT's bail-outs in `src/jit/graph.c` leave a "BAIL: op <...>" comment on the instruction
+(`MVM_spesh_graph_add_comment`), which that After dump prints. The log is deleted after extraction. The
+port's build supports this as upstream (`MVM_SPESH_LOG` in src/moar.c; `MVM_JIT_DEBUG` only adds spill and
+dump details, not used).
+
+Before, on both builds (the `.jitlog` lines; C and Zig equal):
+
+    OB3-readuint-jit flags_3 and flags_16:
+      jit: specialization of '' holding readuint: compiled
+      jit: specialization of 'read_flags_<N>' holding readuint: compiled
+    OB3-writeint-jit <case> (all four):
+      jit: specialization of '' holding writeint|writeuint: compiled
+      jit: specialization of '<case>' holding writeint|writeuint: compiled
+    OB3-writenum-size:
+      jit: no specialization of this file holds the op
+
+('' is the try block of the loop, into which spesh inlined the case's sub.) In the same runs the bug shows:
+readuint flags 3 and every writeint/writeuint case "died some, returned some", readuint flags 16 SIGSEGV.
+There is no inline fast path to tell apart: with known flags the JIT emits a C call, to
+`MVM_repr_read_buf`/`MVM_repr_write_buf` or (with a known concrete type, graph.c 2395-2406 and 2442-2452)
+the REPR's `read_buf`/`write_buf`, with the size taken from the flags and none of the interpreter's checks.
+
+A caution found while doing this: the first writeint program called the case's sub through a variable; with
+`MVM_SPESH_BLOCKING=1` spesh inlined it into `MAIN`, whose specialization the JIT did not compile, so the
+op ran interpreted ("died all") although the line for the sub's own specialization said `compiled`. One
+`compiled` line therefore does not prove the op ran compiled; the counts in the same `.jitlog` run do. The
+writeint program now has the readuint program's shape (each case's sub called by name in its own loop), and
+its `.jitlog` runs show the bug.
+
+Expected after the fix (design: "the JIT does not compile the fast path for flags it cannot prove safe and
+falls back to the interpreter's op"). By reading graph.c, the JIT's only way to leave an op to the
+interpreter is the bail-out it already uses for an endian switch or unknown flags: add a "BAIL: ..."
+comment and `return 0` from `consume_ins`, which makes `MVM_jit_try_make_graph` give up on the whole
+specialization; the specialized bytecode then runs in the interpreter, whose op checks the flags. So after
+the fix every line of the readuint and writeint `.jitlog` files should read `not compiled; BAIL: op
+<readuint|writeint|writeuint>, ...` (wording of the new comment set by Task 6), with "died all" in the same
+run. A fix that instead emitted a call to a throwing C helper would give `compiled` with "died all"; that
+is not the design's shape and would need its own evidence. writenum is unaffected (no JIT case; the
+interpreter's op).
 
 ### Benchmark
 
@@ -131,5 +184,15 @@ The spread within a case is up to about 9 % (vf-c-base obj.pushpop8: 0.0875 to 0
   by reading only.
 - OB2 Raku's fixed output depends on how Rakudo reports the new exception; not predicted beyond "caught".
 - build-prefixes.sh was checked with `sh -n`/`bash -n` and read against cfix-mirror-raw/build/build.sh; it
-  was not run. Whether `zig build` in a copy without `.git` behaves as in P was not tried (the version
-  string comes from VERSION then, by reading build/zig/version.zig).
+  was not run. It copies P's git-ignored `zig-pkg/` (translate_c, and aro which translate_c's own
+  build.zig.zon names) into each copy. Checked in fix round 1 on a throw-away archive copy, configure stage
+  only (`zig build --help`, 1 s): exit 0 with zig-pkg copied; also exit 0 without it, zig then re-creating
+  zig-pkg/ from the global cache's tarballs (~/.cache/zig/p/*.tar.gz), so the copy is a safeguard rather
+  than a necessity on this machine. The full build in a copy, and the version string (from VERSION without
+  `.git`, by reading build/zig/version.zig), were not tried.
+- OB18's fixed path: the throw comes from inside lazy deserialization (`nqp::scgetobj` demanding the
+  object); whether the program then reaches its "done" line cleanly, and with which message wrapping, is
+  not known until a fixed build runs it.
+- OB4 after the fix: `element 2 = 0` cannot be told from a slot that happens to be zero except by the
+  "heap prepared" line (element 2 of the filler results is 99) and by the before output showing `!= 0` with
+  the same preparation.

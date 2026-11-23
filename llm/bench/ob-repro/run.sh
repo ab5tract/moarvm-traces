@@ -6,7 +6,17 @@
 #   - the default OUTDIR is ob-fixes-raw/adhoc;
 #   - .raku programs get -I<rakudo checkout>/lib (for `use experimental`);
 #   - an OB3-* program is run a second time with MVM_JIT_DISABLE=1, into a
-#     second file whose name has ".nojit" before the prefix name.
+#     second file whose name has ".nojit" before the prefix name, and a third
+#     time with MVM_SPESH_BLOCKING=1 and MVM_SPESH_LOG=<temporary file>, into
+#     a file with ".jitlog" there: after the exit status it gets the lines
+#     "jit: specialization of '<frame>' holding <ops>: compiled|not compiled"
+#     (with any "BAIL: ..." comment the JIT left on the frame), one per
+#     specialization of a frame of PROGRAM's own file whose final ("After:")
+#     code holds readuint, writeint, writeuint or writenum, read from the
+#     spesh log (MVMSpeshCandidate.c prints the After dump, which carries the
+#     JIT's BAIL comments, and "JIT was [not ]successful" for every
+#     specialization). This is the evidence that the op ran in JIT-compiled
+#     code (the plain run's counts alone cannot show it). The log is deleted.
 #
 # run.sh -p PREFIX_NAME [-m MEM] [-t SECS] [-o OUTDIR] PROGRAM [ARGS...]
 # Runs PROGRAM (.nqp with nqp-m, .raku with rakudo-m) against the libmoar of
@@ -50,5 +60,28 @@ one() { # tag extra_env [program args]
     rc=$?; echo "----"; echo "exit: $rc"; } > "$f"
   echo "== $f"; cat "$f"
 }
+jit_evidence() { # spesh log, program file name
+  awk -v prog="$2" '
+    /^Specialization of \x27/ { name = $3; in_section = 1; in_after = 0; mine = 0; ops = ""; bails = ""; jit = ""; next }
+    !in_section { next }
+    /^After:$/ { in_after = 1; next }
+    index($0, "file: " prog ":") { mine = 1 }
+    in_after && /^      (readuint|writeint|writeuint|writenum) / { if (index(ops, " " $1 " ") == 0) ops = ops " " $1 " " }
+    in_after && /BAIL: / { b = substr($0, index($0, "BAIL: ")); if (index(bails, b) == 0) bails = bails "; " b }
+    /^JIT was successful/ { jit = "compiled" }
+    /^JIT was not successful/ { jit = "not compiled" }
+    /^========$/ { if (mine && ops != "") { gsub(/  +/, " ", ops); sub(/^ /, "", ops); sub(/ $/, "", ops)
+                     print "jit: specialization of " name " holding " ops ": " (jit == "" ? "no JIT line" : jit) bails }
+                   in_section = 0 }' "$1" | sort -u
+}
 one "$ONLY" "" "$@"
-case $(basename "$P") in OB3-*) one "nojit.$ONLY" "MVM_JIT_DISABLE=1" "$@" ;; esac
+case $(basename "$P") in OB3-*)
+  one "nojit.$ONLY" "MVM_JIT_DISABLE=1" "$@"
+  spesh_log=$(mktemp /tmp/claude-1000/ob-spesh-log.XXXXXX) || exit 1
+  one "jitlog.$ONLY" "MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=$spesh_log" "$@" > /dev/null
+  f="$O/$name.jitlog.$ONLY.txt"
+  evidence=$(jit_evidence "$spesh_log" "$(basename "$P")")
+  { echo "---- jit evidence (MVM_SPESH_LOG)"; if [ -n "$evidence" ]; then echo "$evidence"; else echo "jit: no specialization of this file holds the op"; fi; } >> "$f"
+  rm -f "${spesh_log:?}"
+  echo "== $f"; cat "$f" ;;
+esac

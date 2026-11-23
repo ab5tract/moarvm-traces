@@ -10,7 +10,11 @@
 # /tmp/claude-1000/ob-src-c and ob-src-n, so that nothing is built inside P
 # and nothing uncommitted reaches a prefix; and the exported symbols of each
 # libmoar are written next to the log (as cfix-mirror.md's "exports" row).
-# The traces submodule is not copied (not part of the build).
+# The traces submodule is not copied (not part of the build). P's zig-pkg/
+# is copied into each copy: it is git-ignored (.gitignore), so `git archive`
+# leaves it out, and it holds the project-local packages of build.zig.zon's
+# dependencies (translate_c and aro, the latter a dependency of translate_c),
+# which zig would otherwise have to fetch from the network.
 # Refuses to run when tracked files of P other than the traces pointer
 # differ from HEAD (they would not be in the copy). An earlier copy and
 # prefix of the same name are removed first. Per prefix, as build.sh: wait
@@ -43,6 +47,8 @@ for name in "$@"; do
   for m in $(git ls-tree HEAD 3rdparty/ | awk '$2=="commit"{print $4}'); do
     mkdir -p "$src/$m"; git -C "$m" archive "$(git ls-tree HEAD "$m" | awk '{print $3}')" | tar -x -C "$src/$m" || exit 1
   done
+  [ -d "$M/zig-pkg" ] || { echo "build-prefixes.sh: $M/zig-pkg missing" >&2; exit 1; }
+  cp -a "$M/zig-pkg" "$src/zig-pkg" || exit 1
   until awk '{ exit !($1 < 2.0) }' /proc/loadavg; do echo "$name: load $(cut -d' ' -f1 /proc/loadavg), waiting" >> "$O/builds.log"; sleep 60; done
   l=$(cut -d' ' -f1 /proc/loadavg)
   rm -f "$src/src/gen/config.h" "$src/src/gen/config.c" "$src/src/gen/config.o"
