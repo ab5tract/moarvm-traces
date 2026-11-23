@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib nqp-m  OB2-typeobj-splice.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+source is concrete: 0
+----
+exit: 137

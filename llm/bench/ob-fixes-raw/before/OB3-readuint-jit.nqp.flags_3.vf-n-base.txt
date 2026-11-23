@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m  OB3-readuint-jit.nqp flags_3 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+readuint flags_3: start
+readuint flags_3: calls 200000, died some, returned some, first message [Invalid flags value for readuint], last value returned [0]
+----
+exit: 0

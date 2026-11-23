@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m -I/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib OB8-write-uint64.raku  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+buf16.new(1,2,3).write-uint64(1, 1): elems 9: 1 1 0 0 0 0 0 0 0
+buf32.new(1).write-uint16(1, 0x0102): elems 3: 1 258 0
+----
+exit: 0

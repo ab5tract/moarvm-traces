@@ -1,0 +1,14 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m  OB3-writenum-size.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+writenum flags 16 (size 16): returned; elems 16
+writenum flags 0 (size 1): returned; elems 1
+writenum flags 3 (size 1): returned; elems 1
+writenum flags 4 (size 2): returned; elems 2
+writenum flags 8 (size 4): returned; elems 4
+writenum flags 12 (size 8): returned; elems 8
+writenum flags 15 (size 8): returned; elems 8
+readnum flags 12 of the 1.5 written with flags 12 (control): returned 1.5
+readnum flags 16 (control): DIED Cannot read a num of 16 bytes
+----
+exit: 0

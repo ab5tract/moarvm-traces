@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m  OB18-deserialize-size.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+unpatched round trip (control): returned, elems 3, elements 9128161956862029837 1 2
+count 3 and first element found once in the blob
+patched: count 2**61 + 1 (9-byte form), first element 0 (1-byte form)
+timeout: the monitored command dumped core
+----
+exit: 139

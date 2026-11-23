@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m -I/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib K-smallnatives.raku  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+declared, elems 0
+push 3: DIED MVMArray: Unhandled slot type
+[]
+----
+exit: 0

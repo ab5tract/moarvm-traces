@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m -I/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib OB2-buf-new-array.raku  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+Buf.new(array[int]):
+MoarVM panic: Memory allocation failed; could not allocate 264965122424860 bytes
+----
+exit: 1

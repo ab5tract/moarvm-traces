@@ -1,0 +1,12 @@
+probe: /tmp/claude-1000/vf-c-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-c-base/lib nqp-m  OB19-holes.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+atpos 1: VMNull 1
+pop: VMNull 0
+shift: VMNull 0
+elems left: 1
+splice of holes into an old (gen2) array, pop: VMNull 1
+splice of holes into a young (nursery) array, pop: VMNull 0
+done
+----
+exit: 0
