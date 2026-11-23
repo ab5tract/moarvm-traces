@@ -1,0 +1,11 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  OB7-rejected-bindpos.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+obj array, bindpos_i 5: DIED MVMArray: bindpos expected object register; elems 6
+obj array, element 5 isnull: 1
+obj array, bindpos_n 5: DIED MVMArray: bindpos expected object register; elems 6
+obj array, bindpos_i 1: DIED MVMArray: bindpos expected object register; elems 2
+int array, bindpos 5: DIED MVMArray: bindpos I64 expected int register; elems 6
+str array, bindpos_i 5: DIED MVMArray: bindpos expected string register; elems 6
+----
+exit: 0

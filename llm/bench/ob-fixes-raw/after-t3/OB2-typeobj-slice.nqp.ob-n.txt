@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  OB2-typeobj-slice.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+slice of a type object: DIED MVMArray: Cannot slice from a type object
+----
+exit: 0

@@ -1,0 +1,21 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  K-compose-small.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+bits 4 unsigned 1: compose: DIED MVMArray: Cannot compose an array of 4-bit integers, element types need at least 8 bits
+bits 4 unsigned 1: push_i: DIED MVMArray: push expected object register; elems 0
+bits 4 unsigned 0: compose: DIED MVMArray: Cannot compose an array of 4-bit integers, element types need at least 8 bits
+bits 4 unsigned 0: push_i: DIED MVMArray: push expected object register; elems 0
+bits 2 unsigned 1: compose: DIED MVMArray: Cannot compose an array of 2-bit integers, element types need at least 8 bits
+bits 2 unsigned 1: push_i: DIED MVMArray: push expected object register; elems 0
+bits 2 unsigned 0: compose: DIED MVMArray: Cannot compose an array of 2-bit integers, element types need at least 8 bits
+bits 2 unsigned 0: push_i: DIED MVMArray: push expected object register; elems 0
+bits 1 unsigned 1: compose: DIED MVMArray: Cannot compose an array of 1-bit integers, element types need at least 8 bits
+bits 1 unsigned 1: push_i: DIED MVMArray: push expected object register; elems 0
+bits 1 unsigned 0: compose: DIED MVMArray: Cannot compose an array of 1-bit integers, element types need at least 8 bits
+bits 1 unsigned 0: push_i: DIED MVMArray: push expected object register; elems 0
+bits 8 unsigned 1: compose: returned
+bits 8 unsigned 1: push_i: returned; elems 1
+bits 8 unsigned 0: compose: returned
+bits 8 unsigned 0: push_i: returned; elems 1
+----
+exit: 0

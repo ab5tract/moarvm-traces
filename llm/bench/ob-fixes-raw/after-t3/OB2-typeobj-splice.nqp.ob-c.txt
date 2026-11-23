@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB2-typeobj-splice.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+source is concrete: 0
+splice from a type object: DIED MVMArray: Cannot splice from a type object
+target elems after: 3
+----
+exit: 0

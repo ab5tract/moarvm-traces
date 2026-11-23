@@ -14,12 +14,14 @@ case $X in *-p*) ;; *) echo "usage: run-all.sh -p PREFIX_NAME -o OUTDIR" >&2; ex
 {
 $R $X -m 2G -t 60 OB2-typeobj-splice.nqp
 $R $X -m 2G -t 120 OB2-buf-new-array.raku
+$R $X -m 2G -t 60 OB2-typeobj-slice.nqp
 for c in flags_3 flags_16; do $R $X -t 120 OB3-readuint-jit.nqp $c; done
 for c in writeint_flags_3 writeint_flags_16 writeuint_flags_3 writeuint_flags_16; do $R $X -t 120 OB3-writeint-jit.nqp $c; done
 $R $X -t 60 OB3-writenum-size.nqp
 $R $X -t 60 OB4-adopted-setelems.nqp
 $R $X -t 60 OB7-rejected-push.nqp
 $R $X -t 60 OB7-rejected-bindpos.nqp
+$R $X -t 60 OB7-negative-bindpos.nqp
 $R $X -t 60 OB8-write-buf-growth.nqp
 $R $X -t 120 OB8-write-uint64.raku
 $R $X -t 60 OB9-normalize-empty.nqp

@@ -30,11 +30,13 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `maketest-driver.sh OUTDIR [project:prefix ...]` | cfix-mirror-raw/maketest-driver.sh re-pointed at /tmp/claude-1000/ob-{c,n} (default `nqp:c nqp:n rakudo:c rakudo:n`); added in Task 2 |
 | `OB2-typeobj-splice.nqp` | cfix-P-raw/round1/typeobj/typeobj.nqp, plus the target's elems after |
 | `OB2-buf-new-array.raku` | `Buf.new(array[int])` in a try |
+| `OB2-typeobj-slice.nqp` | `nqp::slice` of a VMArray type object (the slice side of OB2); added in Task 3 |
 | `OB3-readuint-jit.nqp flags_3\|flags_16` | cfix-B-raw/hand/jit-readuint-size16.nqp, one case per process |
 | `OB3-writeint-jit.nqp writeint_flags_3\|writeint_flags_16\|writeuint_flags_3\|writeuint_flags_16` | the same shape for writeint/writeuint (OB3 (b), never run before) |
 | `OB3-writenum-size.nqp` | cfix-B-raw/hand/writenum-size16.nqp for flags 16, 0, 3, 4, 8, 12, 15, and two readnum controls |
 | `OB4-adopted-setelems.nqp` | cfix-E-raw/hand-unwritten-slot.nqp after a heap preparation (see Baseline) |
 | `OB7-rejected-push.nqp`, `OB7-rejected-bindpos.nqp` | the list's programs, one case per register kind |
+| `OB7-negative-bindpos.nqp` | bindpos with the wrong register kind at -1 and -5 on three elements (which error wins); added in Task 3 |
 | `OB8-write-buf-growth.nqp`, `OB8-write-uint64.raku` | the list's programs, plus a uint32 case and a no-growth control |
 | `OB9-normalize-empty.nqp` | the list's program, plus a non-empty normalizecodes control |
 | `OB12-anon-recompose.nqp` | the list's program, plus a named-type control |
@@ -313,3 +315,152 @@ not ok. The per-file lists equal cfix-mirror-raw/suites/ for all four runs.
 - `deserialize_repr_data`'s throw: by reading only (no crafted blob with a 4-bit element type).
 - The new check uses `bits < 8`; widths 0, 3, 5, 6 and 7 would now get the new message instead of
   "Unsupported int size", but P6int refuses them at its own compose, so no type with such a spec is known.
+
+## Y and Q
+
+### The fix
+
+Commits in P (zig-open-bugs): 771b359b6 (C, area Y), 14b817180 (Zig mirror), 981c4a8f2 (C, area Q),
+7ff607fd1 (Zig mirror), a8a712e6c (tools/bench/repr harness).
+
+- Y, splice: `asplice` (VMArray.c) and `asplice` (elements.zig) throw `MVMArray: Cannot splice from a type
+  object` when `from` is not concrete, whatever its REPR, as the first thing done with the source: before
+  `REPR(from)->elems` is read, so before the offset check, #2079's REPR check and the cross-kind check,
+  and before the target is changed. Zig's `objectOrFault` (only asplice uses it) now faults for a NULL
+  `from` at the offset of `header.flags1`, the C's first read (`IS_CONCRETE`); both still die of SIGSEGV.
+- Y, slice: `OP(slice)` (interp.c), `MVM_repr_pos_slice` (reprconv.c, the JIT's path) and P6opaque's
+  `oslice` never check that the array sliced from is concrete, and `aslice` read `elems` from the type
+  object's missing body (nqp: a segfault on both builds before). `aslice` now throws `MVMArray: Cannot
+  slice from a type object` before that read (after `STABLE(dest)->REPR_data` is loaded, as declared; the
+  destination is the fresh object OP(slice) allocated, left empty).
+- Entry points checked for a second array (`grep -n 'IS_CONCRETE\|REPR(from)\|REPR(dest)'` and the
+  callers): `copy_elements` is reached only from `asplice` and `aslice`, both now guarded; `copy_to`'s
+  destination is a fresh clone; `OP(splice)` checks only its target (`CHECK_CONC`), the source is the
+  guarded `from`; `OP(slice)`'s destination comes from `MVM_repr_alloc_init`. No other VMArray function
+  takes a second object.
+- Q: `MVM_VMArray_push` and `MVM_VMArray_bind_pos` check the register kind in a switch of their own before
+  `set_size_internal`, with the same conditions and messages per slot type (push's eight integer arms and
+  bind_pos's two num arms share a case label now; the texts are the old ones), and store without a check
+  after the growth. bind_pos resolves a negative index first, as before. Zig: `Arm(op).check` dispatched
+  with `Otherwise.nothing` before `setSize`/`bindIndex`, then `storeElem` dispatched with the old
+  `unhandled`. A slot type with no arm passes the check switch and is refused by the store switch after
+  the growth, as before (unreachable since area K).
+- JIT entry points: `MVM_VMArray_find_fast_impl_for_jit` returns `vmarray_bind_pos_int64` only for
+  `bindpos_i` with an int64 register on an I64 array and `bindpos_u` with a uint64 register on a U64
+  array (jit/graph.c derives the kind from the opcode); both kinds are accepted there. Not changed (Zig
+  `bindPosKind` likewise). The harness confirms the generic path in compiled code: `i64.hot.sub.after` and
+  `i8.hot.sub.after` (a hot sub's rejected `bindpos_u` at 40000 under spesh) changed their SHA-1 because
+  the array no longer grows to 40001.
+
+### Negative index (Review Focus 3)
+
+Before the fix, on ob-c and ob-n at 9b511d4e3 (ob-fixes-raw/before-t3/negidx.nqp.*, the program now
+`ob-repro/OB7-negative-bindpos.nqp`, also run on vf-c-base and vf-n-base): `bindpos_i` at -1 on a 3-element
+object array gives `MVMArray: bindpos expected object register`, at -5 `MVMArray: Index out of bounds`; the
+same order on an int array (`bindpos I64 expected int register` / `Index out of bounds`). The fix keeps the
+negative-index fix-up before the kind check (it changes nothing), so the order is the same after; the unit
+test "bind_pos with a negative index and the wrong kind" asserts it for every kind.
+
+### Callers that can pass a type object (Review Focus 2)
+
+`grep -rn 'nqp::splice' ../../src ../src`: 155 hits. All but these pass a literal or fresh list, a
+module-level `$empty`, a `:D`-typed parameter, a value whose `nqp::elems` is taken first (OP(elems) does
+`CHECK_CONC`), or an internal list that is concrete by construction (Metamodel HOW lists, QAST, NFA,
+Backend, Str/Iterator/Internals buffers). The ones that can pass a type object, all in Buf.rakumod, all the
+`int @values` candidates without `:D`:
+
+| caller | route | after |
+|---|---|---|
+| `Blob.new(int @values)` (410) | `Buf.new(array[int])` | `DIED MVMArray: Cannot splice from a type object` |
+| `Buf.STORE(int @values)` (1193) | `$buf.STORE(array[int])` | the same; buffer unchanged |
+| `Buf.append(int @values)` (1411) | `$buf.append(array[int])` | the same |
+| `Buf.prepend(int @values)` (1428) | `$buf.prepend(array[int])` | the same |
+| `Buf.splice(..., int @values)` (1369, via `!splice-native`: `nqp::islist` is true for a VMArray type object) | `$buf.splice(1, 0, array[int])` | the same |
+
+All five are `ob.typeobj.buf.*` lines in vmarray-diff.raku. `Blob.allocate(n, int @values)` calls
+`nqp::elems` on the type object first (CHECK_CONC throws), so it never reaches the splice. Before the fix
+`Buf.new(array[int])` panicked ("MoarVM panic: Memory allocation failed; could not allocate 264965122424860
+bytes", not catchable); the others were not run before (the same route). The suites (below) hit no
+type-object splice.
+
+### What the list entries become
+
+- OB2: fixed for splice (any REPR's type object) and for slice (found here: the same gap in `aslice`).
+- OB7: fixed. K-compose-small.nqp's line after the refused `push_i` now shows `elems 0` (was `elems 1`):
+  the refused push no longer grows the (object) array.
+
+### Reproducers, before and after
+
+`run.sh -p ob-c|ob-n -o ob-fixes-raw/after-t3 ob-repro/<file>`; `cmp.sh ob-fixes-raw/after-t3 ob-c ob-n`:
+`c=n` for all seven. Before: ob-fixes-raw/before-t3/ (ob-c and ob-n at 9b511d4e3; the two new programs also
+on vf-c-base and vf-n-base); before was equal on both builds for every program.
+
+| program | before | after (ob-c = ob-n) |
+|---|---|---|
+| OB2-typeobj-splice.nqp | `source is concrete: 0`, then killed by the 2G cap (exit 137) | `DIED MVMArray: Cannot splice from a type object`, `target elems after: 3` |
+| OB2-buf-new-array.raku | `MoarVM panic: Memory allocation failed; could not allocate 264965122424860 bytes` (exit 1) | `DIED MVMArray: Cannot splice from a type object`, `done` |
+| OB2-typeobj-slice.nqp | segfault (exit 139) | `DIED MVMArray: Cannot slice from a type object` |
+| OB7-rejected-push.nqp | the messages, `elems 3` in every case | the same messages, `elems 2` |
+| OB7-rejected-bindpos.nqp | the messages, `elems 6` past the end (`element 5 isnull: 1`), `elems 2` inside | the same messages, `elems 2` everywhere (`no element 5`) |
+| OB7-negative-bindpos.nqp | kind message at -1, `Index out of bounds` at -5, `elems 3` | unchanged |
+| K-compose-small.nqp | 4/2/1 bits: `push_i: DIED MVMArray: push expected object register; elems 1` | `...; elems 0`; 8-bit controls unchanged |
+
+### Unit tests
+
+`zig build unit-test --summary all` (1-minute load 1.65, 1.92, 1.99 at the starts):
+
+| setting | before (Task 2) | after | arithmetic |
+|---|---|---|---|
+| default | 239/251 (12 skipped) | 244/256 (12 skipped) | 239 + 5 new |
+| `-Dzig-reprs=false` | 239/251 | 244/256 (12 skipped) | the same |
+| `-Dgc-debug=1` | 244/251 (7 skipped) | 249/256 (7 skipped) | 244 + 5 |
+
+New tests (vmarray_elements_test.zig): "asplice refuses a type object as source" (the target kind's own
+type object, another VMArray type's and BOOTHash's; count 0 and 2; an empty and a 5-element target, OBJ and
+I64; plus an offset the offset check would refuse: the type-object message wins), "aslice refuses a type
+object as source", "a rejected push leaves the array as it was" (every stored kind, every register kind of
+obj/str/int64/num64/uint64 its push refuses, which includes `refusedStackKind`; 3 elements and 8 = ssize),
+"a rejected bind_pos leaves the array as it was" (every stored kind and refused register kind, at elems + 3
+and at 2), "bind_pos with a negative index and the wrong kind". Each compares `stateOf` (elems, start, ssize,
+bytes) before and after in a forked child. Before the fixes the first four failed (a splice: "Unable to
+allocate an array of 18446744069414584321 elements"; a slice: "Slice index out of bounds", read from the
+garbage elems; push: `elems=4`; bind: `elems=9 ssize=16`); the fifth passed (it pins today's order). No test
+removed. The Zig tests exercise elements.zig directly; the C side is covered by the prefixes (reproducers,
+diff.sh, suites).
+
+### Harness
+
+`vmarray-diff.nqp` gets `ob_cases()` (after `cfix_cases()`): `ob.typeobj.splice.<kind>.<own|other|hash>.<0|2>`
+and `.empty`, `ob.typeobj.slice.<kind>`, `ob.push.rejected.<kind>.<class>.<3|8|shifted>`,
+`ob.bindpos.rejected.<kind>.<class>.<6|1|-1|-5>` (440 lines, every one a DIED line with the array as it
+was). `vmarray-diff.raku` gets `ob.typeobj.buf.{new,append,prepend,splice,store}`. README.md records them.
+Lines that changed against the Task 2 output (same base build kind, ob-c at 9b511d4e3 vs a8a712e6c):
+nqp `i64.hot.sub.after`, `i8.hot.sub.after` (above); Raku `<int type>.nqp.push.wrong.after` for the eight
+integer types (`elems=6 [0 1 2 3 4 0]` -> `elems=5 [0 1 2 3 4]`) and `num32`/`num64`/`str.nqp.wrongkind.after`.
+The `<kind>.kind.*.state` lines did not change (they `setelems(6)` first).
+
+`diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t3`:
+exit 0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 10893 diff-nqp/nospesh 10893
+diff-raku/spesh 2492 diff-raku/nospesh 2492 serial/spesh 196 serial/nospesh 196 devirt/spesh 10
+devirt/nospesh 10; cross-read identical)` (log: ob-fixes-raw/diff-t3.log). undefined-lines.txt unchanged.
+
+### Prefixes and suites
+
+`build-prefixes.sh`: ob-c and ob-n exit 0 at a8a712e6c (60 s and 61 s, load 1.57 and 1.83).
+
+`ob-repro/maketest-driver.sh ob-fixes-raw/suites-t3`: nqp PASS on both (Files=150, Tests=13746); Rakudo
+FAIL on both (Files=599, Tests=11162) with only `t/04-nativecall/02-simple-args.t` (tests 17-18, OB15a)
+not ok. The per-file lists equal cfix-mirror-raw/suites/ for all four runs (the nqp lists' three
+`t/hll/0[234]-*.t notok` entries are in the baseline lists too). No output of any suite contains either
+new message, so no suite file splices or slices from a type object.
+
+### Not verified
+
+- P6opaque's `oslice`/`osplice` and all other positional delegations pass the delegate's body on without a
+  concreteness check; a delegate attribute holding a type object would reach `aslice`/`asplice` (and every
+  other VMArray op) as a type-object *target* body. Not this area's subject (a target, not a source), not
+  reached by any known program; not changed.
+- `nqp::null` (VMNull, a type object) as a splice source now gets the type-object message instead of the
+  MVMNull REPR's own error; not run.
+- The slice fix's message was adapted from the brief's rule ("splice" replaced by "slice"); it is not in the
+  global constraints' list of exact messages.

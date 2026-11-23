@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m  OB7-negative-bindpos.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+obj array of 3, bindpos_i -1: DIED MVMArray: bindpos expected object register; elems 3
+obj array of 3, bindpos_i -5: DIED MVMArray: Index out of bounds; elems 3
+int array of 3, bindpos -1: DIED MVMArray: bindpos I64 expected int register; elems 3
+int array of 3, bindpos -5: DIED MVMArray: Index out of bounds; elems 3
+----
+exit: 0
