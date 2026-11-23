@@ -634,7 +634,7 @@ deserialize every VMArray they hold through the changed deserialize).
 - 2**63 one-byte elements from a crafted blob still ends the VM with the allocator's panic, as a setelems of
   that size does (see Unit tests).
 
-## Z (BLOCKED by the benchmark)
+## Z, first mechanism (rejected)
 
 Status: the fix is committed and correct by the tests, but the benchmark's stop rule fired on every case of
 both builds. Per the plan, no other design was tried and the fix was not tuned. The controller decides
@@ -763,3 +763,130 @@ Not investigated.
 The following were not run: diff.sh, the suites, and the rest of run-all.sh. The new diff cases have
 never run. Until diff.sh runs, nothing shows that C and Zig agree beyond the unit test and the two
 reproducers.
+
+## Z, second mechanism (BLOCKED by the benchmark)
+
+The controller ruled on the first block as follows. Growth within the storage still only exposes zeroed
+slots by default. The callers that write every slot they expose grow through an entry that does not zero.
+The splice defect is OB21. The pre-Z gap is to be localised only.
+
+### The change
+
+Commits in P: 963665442 (C), 8b1ff900c (Zig mirror with the tests). These are follow-ups on
+top of 591f3c20b / 8223cc952; history is not rewritten.
+
+- C: the body of `set_size_internal` becomes `set_size_internal_with(..., MVMuint8 zero_exposed_slots)`,
+  which applies the first mechanism's zeroing only when the flag is set. `set_size_internal` passes 1, and
+  every caller keeps it. `set_size_internal_caller_writes` passes 0 and is used only by push and unshift.
+  All three are plain `static`.
+- Zig: `setSize` (true) and `setSizeCallerWrites` (false) both go through `inline fn setSizeWith(...,
+  comptime zero_exposed_slots: bool)`. push and unshift use `setSizeCallerWrites`.
+- Which callers opt out:
+  - push opts out. It checks the register kind before growing (981c4a8f2; Zig `Arm(.push).check` before
+    `setSize`). Between the growth and the store nothing can throw except the store switch's default arm,
+    which serves only slot types without storage. Area K makes those impossible to compose, and they have
+    no bytes to expose. `MVM_ASSIGN_REF` does not throw. The exposed slot `start + elems - 1` is stored.
+  - unshift at start 0 opts out. The growth to `elems + n` is followed by the memmove of the elements to
+    `n .. n + elems` and by `zero_slots(0, n)`. That covers `0 .. n + elems`, the whole exposed range. Only
+    `zero_slots`' default arm (no storage, as above) can throw in between. The register-kind check comes
+    after `elems` is set back. Slots past `n + elems` keep what they held, still past the window, and a
+    later zeroing growth starts from that window's end.
+  - aslice does not opt out. `copy_elements` can throw after the growth: the element path calls bind_pos
+    with the destination's kind, and aslice does not compare kinds, so the C API can hand it a destination
+    of another kind. Its callers (interp OP(slice), MVM_repr_pos_slice, the JIT's call of that) pass a
+    fresh `alloc_init` destination (ssize 0), so its growth always reallocates and the zeroing default
+    costs nothing there.
+  - bind_pos, `vmarray_bind_pos_int64` (JIT), set_elems, write_buf and asplice stay on the default.
+
+### OB21 (found in Task 5)
+
+`asplice` at offset 0 with `count - elems1 >= elems` sets `start = 0, elems = 0` without clearing the
+removed elements' slots (VMArray.c asplice, the `n <= -(MVMint64)elems0` arm; Zig asplice the same). Growth
+within the storage then brought them back; for an object array they are pointers the collector no longer
+marks. Area Z's zeroing default covers it, and there is no second fix at the reset (ruling).
+`ob-repro/Z-splice-clear-setelems.nqp`:
+
+| prefix | int: setelems 4 after splice(0, 4) | obj: bindpos 2 after splice(0, 3) |
+|---|---|---|
+| vf-c-base, vf-n-base (before-z) | `11 22 33 44` | `a b z` |
+| ob-c, ob-n pre-Z at 3f4dd1c69 (before-z) | `11 22 33 44` | `a b z` |
+| ob-c, ob-n first mechanism at ec2e4f080 (after-z) | `0 0 0 0` | `<null> <null> z` |
+
+Unit test "OB21: a splice at offset 0 removing every element leaves nothing for growth to bring back":
+- an int and an object array, through E and the library;
+- the object array's elements are fresh nursery objects, with two nursery collections between the splice
+  and the growth (and a forced full one under -Dgc-debug=1);
+- after setelems 3: NULL slots, VMNull from at_pos, and zeros for the int array.
+
+Differential: `ob.splice.clear.setelems.<kind>` and `ob.splice.clear.bindpos.<kind>` (ec2e4f080). They have
+not run yet (see below).
+
+### Tests
+
+Unit tests at 8b1ff900c (loads 1.94, 1.77, 1.84):
+- default 252/264 (12 skipped);
+- -Dzig-reprs=false 252/264 (12 skipped);
+- -Dgc-debug=1 257/264 (7 skipped).
+
+That is the first mechanism's totals plus the two new tests:
+- "push, unshift and aslice into dirty spare room leave no stale slot observable": every stored kind, E and
+  the library. The spare room is dirtied with 0xa5, then a push into 8 slots, an unshift at start 0 into 16
+  slots and an aslice into a destination with 8 slots, each staying within ssize. Every element is read,
+  then a setelems over the rest reads holes.
+- the OB21 test above.
+
+Probe (not committed): with the Zig default turned to "no zeroing" temporarily, the four Z tests failed on
+their E pass. The new push/unshift/aslice test failed at the follow-up setelems, which read 0xa5... as an
+object pointer. The OB21 test read 11. So the tests see stale slots.
+
+### Benchmark
+
+`run-bench.sh -n 15 -o ob-fixes-raw/bench-z2-post vf-c-base vf-n-base ob-c ob-n`, with ob-c/ob-n at 8b1ff900c,
+started at load 1.24 (loads at the starts 1.24-1.99). Compared with the pre-Z numbers of
+ob-fixes-raw/bench-z-pre (same method); the vf prefixes ran alongside as the machine control.
+
+| build | case | vf baseline (pre run) | pre-Z | post-Z (second mechanism) | post vs pre | verdict | vf in this run vs its pre run |
+|---|---|---|---|---|---|---|---|
+| ob-c | int.push10m | 0.5816 (0.5769-0.5854) | 0.5931 (0.5870-0.6077) | 0.6018 (0.5933-0.6217) | +1.5 % | not worse | 0.5921 (+1.8 %) |
+| ob-c | obj.push10m | 0.5878 (0.5838-0.5941) | 0.6313 (0.6034-0.6378) | 0.6212 (0.6149-0.6301) | -1.6 % | not worse | 0.6025 (+2.5 %) |
+| ob-c | int.pushpop8 | 0.8457 (0.8299-0.8614) | 0.8997 (0.8810-0.9781) | 0.9375 (0.9011-0.9699) | +4.2 % | not worse | 0.8422 (-0.4 %) |
+| ob-c | obj.pushpop8 | 0.8620 (0.8449-0.8940) | 0.9299 (0.9123-1.0274) | 0.9865 (0.9347-1.0320) | +6.1 % | not worse | 0.8652 (+0.4 %) |
+| ob-n | int.push10m | 0.5848 (0.5757-0.5890) | 0.5456 (0.5432-0.5494) | 0.5628 (0.5559-0.5737) | +3.2 % | not worse | 0.5925 (+1.3 %) |
+| ob-n | obj.push10m | 0.5807 (0.5786-0.5908) | 0.5585 (0.5533-0.5641) | 0.5875 (0.5758-0.5980) | +5.2 % | worse | 0.5972 (+2.8 %) |
+| ob-n | int.pushpop8 | 0.8106 (0.8095-0.8156) | 0.7359 (0.7317-0.7635) | 0.7437 (0.7103-0.7861) | +1.1 % | not worse | 0.8184 (+1.0 %) |
+| ob-n | obj.pushpop8 | 0.8244 (0.8236-0.8304) | 0.8050 (0.7560-0.8088) | 0.8295 (0.7986-0.8890) | +3.0 % | not worse | 0.8343 (+1.2 %) |
+One case is worse under the rule: ob-n obj.push10m, pre 0.5585 (p75 0.5641), post 0.5875, +5.2 %. In the
+same run vf-n-base obj.push10m was +2.8 % against its own pre run, so the machine accounts for part of it.
+The rule was applied as it stands. ob-c obj.pushpop8 is +6.1 % but below the pre-Z p75 (1.0274), so it is
+not worse. Every other case is within +4.2 %. Status BLOCKED. Per the ruling, the remaining steps were not
+run: diff.sh, the suites, and the post-change OB4 / Z reproducer runs on these builds.
+
+### The pre-Z gap (ruling 4, localisation only)
+
+C-REPR prefixes were built from `git archive` copies (scratch script `build-c-at.sh`, the
+build-prefixes.sh steps for one commit): /tmp/claude-1000/ob-c-t2 at d6dcc43e3 (after Task 2), ob-c-t3 at
+cd2826682 (after Task 3) and ob-c-t4 at 2e32a3191 (after Task 4, = pre-Z src). The run was `run-bench.sh -n
+15 -o ob-fixes-raw/bench-z-gap vf-c-base ob-c-t2 ob-c-t3 ob-c-t4`, interleaved, starting at load 1.24 (1.24-1.96).
+Medians (p25-p75), and the change against vf-c-base in the same run:
+
+| case | vf-c-base | ob-c-t2 (Task 2) | ob-c-t3 (Task 3) | ob-c-t4 (Task 4) |
+|---|---|---|---|---|
+| int.push10m | 0.6022 (0.5925-0.6051) +0.0 % | 0.5916 (0.5900-0.5958) -1.8 % | 0.6029 (0.5994-0.6162) +0.1 % | 0.6074 (0.5990-0.6120) +0.9 % |
+| obj.push10m | 0.5998 (0.5983-0.6050) +0.0 % | 0.5991 (0.5970-0.6023) -0.1 % | 0.6327 (0.6204-0.6528) +5.5 % | 0.6280 (0.6117-0.6462) +4.7 % |
+| int.pushpop8 | 0.8447 (0.8366-0.8656) +0.0 % | 0.8625 (0.8363-0.8684) +2.1 % | 0.8531 (0.8388-0.8824) +1.0 % | 0.9016 (0.8910-0.9395) +6.7 % |
+| obj.pushpop8 | 0.8644 (0.8535-0.8698) +0.0 % | 0.8984 (0.8672-0.9177) +3.9 % | 0.9935 (0.9482-1.0507) +14.9 % | 0.9815 (0.9200-1.0396) +13.5 % |
+- obj.pushpop8 (+14.9 %) and obj.push10m (+5.5 %): the change comes with Task 3. ob-c-t2 is at +3.9 %
+  and +0 %.
+- int.pushpop8 (+6.7 %): the change comes with Task 4. ob-c-t3 is at +1.0 %.
+
+Likely reasons, by reading the diffs only (the libraries are stripped; not profiled):
+- Task 3, 981c4a8f2 split `MVM_VMArray_push` into a register-kind switch before `set_size_internal` and a
+  store switch after it: two dispatches on `slot_type` where there was one. For OBJ the store is
+  `MVM_ASSIGN_REF`, which reloads `body->start`/`body->elems` and `root` after the call. Why OBJ pays more
+  than the int kinds is not explained by the source alone; code layout or inlining is likely to have changed
+  with the larger function.
+- Task 4, bb0eda68f (pop/shift OBJ arm: `found ? found : VMNull`) touches only the OBJ arm, so it does not
+  explain int.pushpop8. The other VMArray.c changes in Task 4 are outside push/pop: write_buf (48fd69052),
+  and deserialize plus `slot_budget` in set_size_internal's reallocating path (ec2ad02f7). So no source
+  change on the int push/pop path explains the +6.7 %, and code layout (alignment) of the push/pop loop is
+  the likely cause. This is not verified.
