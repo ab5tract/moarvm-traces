@@ -25,7 +25,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `run.sh -p PREFIX [-m MEM] [-t SECS] [-o OUTDIR] PROGRAM [ARGS]` | cfix-mirror-raw/run-port.sh for one prefix: probe (the libmoar mapped), command, output, exit status in `OUTDIR/<file>[.<args>].<PREFIX>.txt`; an `OB3-*` program also runs with `MVM_JIT_DISABLE=1` into `<file>[.<args>].nojit.<PREFIX>.txt`, and with `MVM_SPESH_BLOCKING=1` and `MVM_SPESH_LOG` into `<file>[.<args>].jitlog.<PREFIX>.txt`, which ends with the JIT evidence lines (see "JIT evidence") |
 | `run-all.sh -p PREFIX -o OUTDIR` | every program, 2G cap for OB2 and OB18, 4G for the rest |
 | `cmp.sh DIR PREFIX_A PREFIX_B` | `c=n` / `C!=N` per output after cfix-mirror-raw/cmp-repro.sh's normalisation (12+-digit numbers kept) |
-| `run-bench.sh [-n RUNS] -o OUTDIR PREFIX...` | the push benchmark, RUNS rounds with the prefixes alternating, load below 2.0 before each run, medians in `bench-medians.txt` |
+| `run-bench.sh [-n RUNS] -o OUTDIR PREFIX...` | the push benchmark, RUNS rounds with the prefixes alternating, load below 2.0 before each run, medians (and from Task 5 p25/p75) in `bench-medians.txt` |
 | `build-prefixes.sh [ob-c] [ob-n]` | cfix-mirror-raw/build/build.sh from `git archive HEAD` copies (with 3rdparty at the recorded commits) under /tmp/claude-1000/ob-src-{c,n}; logs, builds.tsv and export lists in `ob-fixes-raw/build/` |
 | `maketest-driver.sh OUTDIR [project:prefix ...]` | cfix-mirror-raw/maketest-driver.sh re-pointed at /tmp/claude-1000/ob-{c,n} (default `nqp:c nqp:n rakudo:c rakudo:n`); added in Task 2 |
 | `OB2-typeobj-splice.nqp` | cfix-P-raw/round1/typeobj/typeobj.nqp, plus the target's elems after |
@@ -45,6 +45,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `OB19-holes.nqp` | holes via atpos, pop, shift; a splice of holes into a gen2 and a nursery target |
 | `OB19-hole-to-sub.nqp` | a hole popped and shifted into a variable and passed to a sub (the crash Task 1 saw); added in Task 4 |
 | `OB19-serialized-hole.nqp` | an object array with a hole and an `nqp::null()` element, serialized and read back, then atpos/pop/shift; added in Task 4 |
+| `Z-splice-clear-setelems.nqp` | a splice at offset 0 removing every element, then setelems / bindpos past the end (the removed elements came back); added in Task 5 |
 | `K-compose-small.nqp` | compose, then push_i, for 4-, 2-, 1-bit signed and unsigned, and 8-bit controls |
 | `K-smallnatives.raku` | the plan's program; the declaration compiled through EVAL inside its try |
 
@@ -632,3 +633,133 @@ deserialize every VMArray they hold through the changed deserialize).
   (both implementations) and by OB18-deserialize-size.nqp on both prefixes.
 - 2**63 one-byte elements from a crafted blob still ends the VM with the allocator's panic, as a setelems of
   that size does (see Unit tests).
+
+## Z (BLOCKED by the benchmark)
+
+Status: the fix is committed and correct by the tests, but the benchmark's stop rule fired on every case of
+both builds. Per the plan, no other design was tried and the fix was not tuned. The controller decides
+whether the commits stay.
+
+### The fix
+
+Commits in P (zig-open-bugs): 3f4dd1c69 (benchmark, longer cases, before the fix), 591f3c20b (C),
+8223cc952 (Zig mirror, with the tests), ec2e4f080 (tools/bench/repr harness).
+
+- `set_size_internal` (VMArray.c) / `setSize` (storage.zig) take `old_window_end = start + elems` before
+  anything changes. In the `n <= ssize` branch, if `body->start + n > old_window_end`, slots
+  `old_window_end .. body->start + n` (absolute indices) are zeroed with `zero_slots` / `zeroSlots`, then
+  `elems = n` as before. Without a move this is the old elements' end to the new end. After the move to
+  start 0, the move has already zeroed `elems .. old start + elems`, so only `old start + elems .. n` is
+  zeroed (nothing twice). A shrink never satisfies the condition. The reallocating path (`grow`) is not
+  touched. C and Zig zero the same range. The unit test checks that slots past the new end keep their
+  bytes.
+
+### Which growth paths can expose non-zero slots (reading)
+
+The REPR keeps slots past the window zero by itself in these places: pop zeroes the slot it leaves, a
+shrink zeroes the dropped slots, a reallocation zeroes the new room, and the move to start 0 zeroes the
+vacated part. shift does not zero the slot it leaves, but that slot is before `start`. Only the move can
+bring it back, and the move zeroes it. Two sources break the invariant, and `set_size_internal` cannot tell
+them from a clean array:
+- the adopting sites (OB4): normalize.c twice, procops.c, asyncsocket.c and asyncsocketudp.c set
+  `ssize > elems` over memory never written. encode (ops.c), Decoder.c and io.c adopt with
+  `ssize == elems`, so there is no room to expose there;
+- new, found here: `asplice` at offset 0 with `count - elems1 >= elems` (a splice that removes every
+  element) sets `start = 0, elems = 0` without clearing the removed elements' slots. `ob-repro/Z-splice-
+  clear-setelems.nqp`: on vf-*-base and pre-Z ob-c/ob-n, `setelems 4` after `splice($a, [], 0, 4)` gives
+  back `11 22 33 44`, and a bindpos at 2 of an emptied object array gives back `a b`. Those are pointers the
+  collector no longer marks, so this is memory unsafety, not only a wrong result. It is not in the bug list
+  (OB1-OB20). After the fix: `0 0 0 0` and `<null> <null> z` on both prefixes.
+
+The callers that raise `elems` within the storage:
+- setelems (`set_elems`) can expose old bytes (OB4, the splice case), so the zeroing is needed.
+- bind_pos past the end (`MVM_VMArray_bind_pos`, the JIT's `vmarray_bind_pos_int64`, Zig `bindIndex`)
+  exposes `elems .. index - 1` unwritten, so the zeroing is needed.
+- write_buf past the end exposes the gap before the offset and the spare bytes of the last element, so the
+  zeroing is needed (Task 4's skipped test, enabled now).
+- asplice exposes `elems0 .. offset` when offset > elems0, so the zeroing is needed there. When the offset
+  is within elems, everything exposed is then written by the tail memmove and copy_elements, and the zeroing
+  is redundant.
+- push exposes one slot and writes it right after `set_size_internal`, so the zeroing is redundant there. It
+  is the hot path the benchmark measures.
+- unshift at start 0 grows by n, then moves the elements up and zeroes `0 .. n`, so everything exposed is
+  written and the zeroing is redundant.
+- aslice: the destination is written over `0 .. elems` by copy_elements, so the zeroing is redundant.
+- asplice's offset-0 adjustment (`start - n`, n > 0) and unshift's `elems = live` set `elems` directly. The
+  slots they expose (before the old start) are then written by copy_elements / the unshift store, so they
+  need no zeroing.
+
+The design asks for one place (`set_size_internal`), and that place cannot tell a push from a setelems.
+Not zeroing on push would need a variant or a flag at the callers that write the slot right away, which
+is another design and was not tried.
+
+### Benchmark
+
+The cases were lengthened first (controller's ruling; 3f4dd1c69). pushpop8 runs 10,000,000 rounds, and
+push10m is done 3 times into fresh arrays and summed. `run-bench.sh` now also prints p25/p75 (rank
+(n+1)/4 and 3(n+1)/4: the 4th and 12th of 15). There were 15 runs per case per prefix, prefixes alternating,
+`MVM_SPESH_BLOCKING=1`, and the load below 2.0 at every start:
+- pre: `run-bench.sh -n 15 -o ob-fixes-raw/bench-z-pre vf-c-base vf-n-base ob-c ob-n`, with ob-c/ob-n
+  built at 3f4dd1c69 (2e32a3191 plus the benchmark commit; src identical to 3393c5932). Loads 1.09-1.52.
+- post: `-o ob-fixes-raw/bench-z-post ob-c ob-n`, with ob-c/ob-n at ec2e4f080. Loads 1.61-1.94.
+- control: the post loads were higher, so the post run was repeated interleaved with the unchanged vf
+  prefixes (`-o ob-fixes-raw/bench-z-post-control vf-c-base vf-n-base ob-c ob-n`, started at load < 1.3,
+  loads 1.39-1.98). vf moved by -0.7 to +2.7 %, and ob moved as in the post run. So the slowdown is the
+  fix, not the machine.
+
+The raw lines are in `bench-<prefix>.txt` and the values in `bench-medians.txt` of each directory. Seconds
+are shown as median (p25-p75). The rule: worse when the post median is > 5 % above the pre median and above
+the pre p75.
+
+| build | case | vf baseline | pre-Z | post-Z | post vs pre | verdict | control run: post-Z, and vf vs its baseline |
+|---|---|---|---|---|---|---|---|
+| ob-c | int.push10m | 0.5816 (0.5769-0.5854) | 0.5931 (0.5870-0.6077) | 0.7033 (0.6882-0.7289) | +18.6 % | worse | 0.6922 (+16.7 %); vf 0.5927 (+1.9 %) |
+| ob-c | obj.push10m | 0.5878 (0.5838-0.5941) | 0.6313 (0.6034-0.6378) | 0.7174 (0.6930-0.7269) | +13.6 % | worse | 0.6979 (+10.5 %); vf 0.6001 (+2.1 %) |
+| ob-c | int.pushpop8 | 0.8457 (0.8299-0.8614) | 0.8997 (0.8810-0.9781) | 1.1259 (1.1120-1.1588) | +25.1 % | worse | 1.1170 (+24.2 %); vf 0.8395 (-0.7 %) |
+| ob-c | obj.pushpop8 | 0.8620 (0.8449-0.8940) | 0.9299 (0.9123-1.0274) | 1.1838 (1.1414-1.2674) | +27.3 % | worse | 1.1485 (+23.5 %); vf 0.8804 (+2.1 %) |
+| ob-n | int.push10m | 0.5848 (0.5757-0.5890) | 0.5456 (0.5432-0.5494) | 0.6619 (0.6470-0.6853) | +21.3 % | worse | 0.6555 (+20.1 %); vf 0.5939 (+1.6 %) |
+| ob-n | obj.push10m | 0.5807 (0.5786-0.5908) | 0.5585 (0.5533-0.5641) | 0.6944 (0.6612-0.7101) | +24.3 % | worse | 0.6729 (+20.5 %); vf 0.5963 (+2.7 %) |
+| ob-n | int.pushpop8 | 0.8106 (0.8095-0.8156) | 0.7359 (0.7317-0.7635) | 0.9448 (0.9338-1.0203) | +28.4 % | worse | 0.9494 (+29.0 %); vf 0.8178 (+0.9 %) |
+| ob-n | obj.pushpop8 | 0.8244 (0.8236-0.8304) | 0.8050 (0.7560-0.8088) | 1.1036 (1.0393-1.1517) | +37.1 % | worse | 1.0331 (+28.3 %); vf 0.8373 (+1.6 %) |
+Every case is worse on both builds, by +13.6 % to +37.1 % (worst: ob-n obj.pushpop8, pre 0.8050, p75 0.8088;
+post 1.1036). The likely cost is one out-of-line `zero_slots` / `zeroSlots` (a switch and a one-slot
+memset) on every push into spare room, a slot that push overwrites at once. This is by reading; not
+profiled.
+
+The vf column is context only. vf and pre-Z differ by Tasks 2-4's fixes. On the pushpop8 cases pre-Z ob-c
+is 6-8 % slower than vf-c-base, and ob-n 9 % faster than vf-n-base, measured in the same interleaved run.
+Not investigated.
+
+### Tests and reproducers
+
+- Unit tests at 8223cc952 (load 1.72, 1.90, under 2.0 for the gc-debug run):
+  - default 250/262 (12 skipped);
+  - `-Dzig-reprs=false` 250/262 (12 skipped);
+  - `-Dgc-debug=1` 255/262 (7 skipped).
+
+  That is Task 4's 248/261 (13), 248/261 (13), 253/261 (8), plus the new test and the enabled one. Before
+  the fix (default) both failed: 248/262, 2 failed.
+- New test "growth within storage zeroes the exposed slots", run through E and the library's table: every
+  stored kind, three cases on 8 slots with 0xa5 past the window:
+  - start 0, elems 3 -> 6;
+  - start 1, elems 2 -> 5 (no move);
+  - start 1, elems 2 -> 8 (move).
+
+  It checks elems, ssize, start, the live bytes, the exposed slots being zero and the slots past the new end
+  being kept. It clears every slot before any check can return.
+- "write_buf into spare room of an adopted buffer" is enabled (the `growth_within_storage_zeroes` switch is
+  removed).
+- OB4-adopted-setelems.nqp (ob-fixes-raw/before-z, after-z):
+  - before, on vf-c-base, vf-n-base, ob-c and ob-n: `heap prepared ... = 99` and `element 2 != 0`;
+  - after, on ob-c and ob-n: `heap prepared ... = 99` and `element 2 = 0`.
+
+  cmp.sh gives c=n.
+- Harness ec2e4f080: `ob.adopted.setelems.normalizecodes`, `ob.adopted.setelems.encode` (a control: encode
+  adopts with ssize = elems, so it reallocates; the brief named encode), and `ob.splice.clear.{setelems,
+  bindpos}.<kind>`.
+
+### Not run (stopped by the rule)
+
+The following were not run: diff.sh, the suites, and the rest of run-all.sh. The new diff cases have
+never run. Until diff.sh runs, nothing shows that C and Zig agree beyond the unit test and the two
+reproducers.

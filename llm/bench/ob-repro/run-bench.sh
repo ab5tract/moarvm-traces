@@ -11,7 +11,10 @@
 # Writes OUTDIR/bench-<prefix>.txt: per run a header line
 # "# run <k> <date> load <1-min load> libmoar <path the run mapped>" and the
 # program's lines "<case> <seconds>"; then OUTDIR/bench-medians.txt: per
-# prefix and case the values in run order and their median.
+# prefix and case the values in run order, their median and their 25th and
+# 75th percentiles (p25, p75: the sorted values at rank (runs + 1) / 4 and
+# 3 (runs + 1) / 4, interpolated between neighbours; for 15 runs the 4th and
+# the 12th value; added in Task 5).
 N=7; O=
 while getopts n:o: f; do case $f in n) N=$OPTARG ;; o) O=$OPTARG ;; *) exit 64 ;; esac; done
 shift $((OPTIND - 1))
@@ -43,6 +46,8 @@ for p in "$@"; do
     END { for (i = 1; i <= c; i++) { k = order[i]; m = split(substr(v[k], 2), a, " ");
             for (x = 1; x <= m; x++) for (y = x + 1; y <= m; y++) if (a[y] + 0 < a[x] + 0) { t = a[x]; a[x] = a[y]; a[y] = t }
             med = (m % 2) ? a[(m + 1) / 2] : (a[m / 2] + a[m / 2 + 1]) / 2;
-            printf "%s %s runs %d median %s values%s\n", p, k, m, med, v[k] } }' "$O/bench-$p.txt"
+            printf "%s %s runs %d median %s p25 %.4f p75 %.4f values%s\n", p, k, m, med, rank(a, m, (m + 1) / 4), rank(a, m, 3 * (m + 1) / 4), v[k] } }
+    function rank(sorted, count, position,    whole) { if (position <= 1) return sorted[1]; if (position >= count) return sorted[count];
+            whole = int(position); return sorted[whole] + (position - whole) * (sorted[whole + 1] - sorted[whole]) }' "$O/bench-$p.txt"
 done > "$O/bench-medians.txt"
 cat "$O/bench-medians.txt"

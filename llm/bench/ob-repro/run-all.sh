@@ -1,6 +1,7 @@
 #!/bin/sh
 # ob-repro/run-all.sh -p PREFIX_NAME -o OUTDIR: every reproducer of ob-repro on
-# one prefix (run.sh), in the order of the bug ids, then area K. Adapted from
+# one prefix (run.sh), in the order of the bug ids, then area Z's splice
+# case (found in Task 5), then area K. Adapted from
 # cfix-mirror-raw/run-all-port.sh (same shape: run from the programs'
 # directory, one line per program, outputs only in files). Memory caps: 2G
 # for the programs whose "before" makes a huge allocation (OB2) or writes
@@ -31,6 +32,7 @@ $R $X -m 2G -t 60 OB18-deserialize-size.nqp
 $R $X -t 60 OB19-holes.nqp
 $R $X -t 60 OB19-hole-to-sub.nqp
 $R $X -t 60 OB19-serialized-hole.nqp
+$R $X -t 60 Z-splice-clear-setelems.nqp
 $R $X -t 120 K-smallnatives.raku
 $R $X -t 60 K-compose-small.nqp
 } > /dev/null 2>&1

@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  Z-splice-clear-setelems.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+int: after splice(0, 4) elems 0
+int: setelems 4: 11 22 33 44
+obj: after splice(0, 3) elems 0
+obj: bindpos 2: a b z
+----
+exit: 0
