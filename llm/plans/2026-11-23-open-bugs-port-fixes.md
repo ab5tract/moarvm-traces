@@ -368,4 +368,30 @@ changes, every ruling with its cost if wrong. The branch is handed back unmerged
 
 ## Outcome
 
-(filled at the end)
+Finished 2026-11-24. Branch `zig-open-bugs`, 99f7ce8cd..a2fc519a4 (last src commit 96a9a1a07), local, not
+merged, not pushed. Ledger: `traces/llm/bench/ob-ledger.md`. Record: `traces/llm/bench/ob-fixes.md` (per
+area, Gate, Not verified, Commits by bug id, Decisions for the owner). Bug list with a status line per entry:
+`traces/llm/bench/cfix-open-bugs.md`.
+
+**Fixed in the port (C and Zig):** K (OB6, OB17, OB20, OB15d, OB18 second half gone: integer element types
+narrower than 8 bits refused at compose), M (OB12), Y (OB2, plus nqp::slice on a type object), Q (OB7), W
+(OB8, OB16), V (OB18 first half), H (OB19), Z (OB4, and OB21 found on the way).
+**Fixed in shared C:** OB1, OB3 (with the SC write barrier, the concreteness check and the size helper),
+OB5, OB9, OB10.
+**Not fixed:** OB11 (first-compose gap, type-confusion case remains, documented), OB13, OB14, OB15a-c (not
+in this campaign), and the bugs found on the way: OB22 (P6opaque slice hands its body to the delegate
+array's slice), OB23 (JIT generic repr calls skip the concreteness check), OB24 (deserialization holds its
+object unrooted; by reading), OB25 (strtocodes "" calls malloc(0)).
+
+**Gate at the final tip:** fmt clean; unit tests 253/265, 253/265 (-Dzig-reprs=false), 258/265
+(-Dgc-debug=1); exports equal and unchanged; diff.sh exit 0 with an empty undefined-lines list; ob-repro
+41/41 equal between C and Zig. At d68a0ec8c (library byte-identical to the tip): nqp PASS on both, rakudo
+failing on both only t/04-nativecall/02-simple-args.t 17-18; cfix-repro 62/62 equal.
+**Not verified:** no ASAN build of the port, no Win64, no -Dzig-gc=false; OB1, OB5, OB10 by reading.
+
+**Deviations from the plan:** area Z's mechanism (zero by default, push and unshift opt out) after the
+benchmark stop rule fired twice; the review then found the move-then-reallocate path unzeroed and it was
+fixed; C push restructured to one dispatch; a sixth new message (`Cannot slice from a type object`); OB3
+grew by three fixes. **Open for the owner:** the nine decisions in ob-fixes.md, first among them the net
+cost on the C array's push/pop path (obj.pushpop8 +7.1 % / +5.4 % in two runs against the build before
+the campaign, cause unverified; the Zig array is faster on all four cases).
