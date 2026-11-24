@@ -1,0 +1,4 @@
+ob-c/lib/libmoar.so 11339152
+76490a8a2dcf596c207b3463d60d9ef5340fe699f4b0f0ecbd12b46052558659  ob-c/lib/libmoar.so
+ob-n/lib/libmoar.so 11331472
+e6f3b342fafb0411018996a7dd5d989a03dd907c749a6a4f1c8a972d218cecfa  ob-n/lib/libmoar.so

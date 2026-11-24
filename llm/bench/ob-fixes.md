@@ -1340,7 +1340,12 @@ prefixes built at f2c32559a (the OB3 commit alone), with the same outputs as aft
 
 ## Gate (Task 7)
 
-On the branch tip d68a0ec8c. No source change since 2c7d1dfb9 (`git log --oneline d68a0ec8c..HEAD -- src` is
+Final tip (final fix wave): 96a9a1a07. It adds two src commits after d68a0ec8c: 4d962a5f0 (Zig test: the
+rejected push and bind_pos tests also run through the library) and 96a9a1a07 (C: designated initialisers
+and a compile-time check for push_register_kinds). The table below is the gate at d68a0ec8c. "Final tip" (after
+the table) lists what was re-run at 96a9a1a07 and what was not.
+
+The table: on the branch tip d68a0ec8c. No source change since 2c7d1dfb9 (`git log --oneline d68a0ec8c..HEAD -- src` is
 empty); Task 7 changes only docs and records. The raw column gives paths relative to `ob-fixes-raw/`.
 
 Loads: the builds, unit-test runs and suite runs started at a 1-minute load below 2.0 (values in the table).
@@ -1364,6 +1369,38 @@ waited for a load below 2.0 once per batch, not before each program.
 | 11 | OB3, three modes | (in 9) | readuint flags 3 and 16, writeint and writeuint flags 3 and 16: `died all, returned none` in the plain, `.nojit` and `.jitlog` runs on both; every `.jitlog` line `not compiled; BAIL: op <op>, - invalid flags (N), left to the interpreter`; writenum: `Cannot write a num of 16\|1\|1\|2 bytes` in all three modes, flags 8, 12, 15 return | after-t7/OB3-* |
 | 12 | cfix-repro | `cfix-mirror-raw/run-all-port.sh -p ob-c\|ob-n -o ob-fixes-raw/gate-t7/cfix-repro`; `gate-t7/cmp-cfix-repro.sh` | 62 outputs, all `c=n`; 47 equal to cfix-mirror-raw/repro/ on both builds, 15 differ, each explained below | gate-t7/cfix-repro/, gate-t7/cmp-cfix-repro.txt |
 | 13 | push benchmark at the tip | `ob-repro/run-bench.sh -n 15 -o ob-fixes-raw/bench-t7 vf-c-base vf-n-base ob-c ob-n` (Task 5's method; fix round 1), then `-o ob-fixes-raw/bench-t7-gap vf-c-base ob-c-t5 ob-c` | the last benchmark had run at bf39c32cc (Task 5 fix round); Task 6 changed src after it. Seven cases within the bound. **ob-c int.pushpop8 is +5.6 % on Task 5's last median and above its p75 (control -1.4 %, so +7.0 % after the control's drift); in an interleaved run against a C build of bf39c32cc it is +5.9 %.** See "Benchmark at the tip" | bench-t7/, bench-t7-gap/ |
+
+### Final tip (96a9a1a07)
+
+Re-run at 96a9a1a07, raw in ob-fixes-raw/gate-final/ unless named otherwise:
+
+| check | command | result | raw |
+|---|---|---|---|
+| format | `zig fmt --check src/zig build.zig build/zig tools/zig` | exit 0 | gate-final/fmt.txt |
+| unit tests | `zig build unit-test --summary all` [`-Dzig-reprs=false`, `-Dgc-debug=1`] | 253/265 (12 skipped), 253/265 (12 skipped), 258/265 (7 skipped): the totals do not change, since the two tests gained cases, not tests; loads 1.47, 1.63, 1.63 | gate-final/unit-*.log |
+| prefixes | `ob-repro/build-prefixes.sh` | ob-c and ob-n exit 0 at 96a9a1a07 (59 s each; loads 1.83, 1.81), no warnings | build/builds.tsv |
+| generated code | `stat` and `sha256sum` of each libmoar.so, before (d68a0ec8c builds) and after | byte-identical: ob-c 11,339,152 bytes, ob-n 11,331,472 bytes, the same SHA-256 before and after | gate-final/libmoar-{before,after}.txt |
+| exports | build-prefixes.sh's lists | ob-c = ob-n; unchanged from d68a0ec8c (2,850) | build/exports-ob-{c,n}.txt |
+| differential | `diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-final` | exit 0, identical (nqp 11106, raku 2497, serial 196, devirt 10, spesh and nospesh each; cross-read identical); run-start loads 1.37-1.96; `undefined-lines.txt` unchanged (no entries) | diff-final.log, gate-final/diff-final-load.log |
+| reproducers | `run-all.sh -p ob-c\|ob-n -o ob-fixes-raw/after-final`; `cmp.sh` | 41 of 41 outputs `c=n`; all 82 outputs equal to after-t7's (probe and run lines dropped) | after-final/, gate-final/cmp-after-final.txt |
+
+Not re-run at 96a9a1a07: the suites, cfix-repro, the probes and the benchmark. The C change produces a
+byte-identical libmoar.so for both builds, and the other change is a unit test. So nothing a suite, a probe or
+the benchmark runs has changed since d68a0ec8c, where they ran.
+
+Test change (4d962a5f0): "a rejected push leaves the array as it was" and "a rejected bind_pos leaves the
+array as it was" now run every case through E and through the library's table, as the W, V, H and Z tests do.
+Under `-Dzig-reprs=false` the library is the C REPR, so area Q's C side is pinned on that setting. The refused
+register kinds include a uint64 register into push on every integer kind (push takes int64 only), which only
+the C API can pass. The C and the Zig arrays gave the same messages and left the arrays unchanged (the
+`-Dzig-reprs=false` run, which runs both). It was first run on that setting alone before commit (load 0.05):
+253/265.
+
+C change (96a9a1a07): the jit/expr.h macro `MVM_STATIC_ASSERT` exists, but it typedefs one fixed name. That
+name is already defined in every file through moar.h, and C99 does not allow a typedef to be defined twice. So
+the check uses the same negative-size-array idiom under its own name. It also uses designated initialisers
+(`[MVM_ARRAY_OBJ] = ...`). Checked on a stand-alone copy of the table: it compiles with gcc and zig cc in c99,
+gnu99 and gnu11 with -Wall -Wextra -pedantic, and fails to compile when MVM_ARRAY_U8 is changed.
 
 ### Benchmark at the tip (fix round 1)
 
@@ -1400,8 +1437,11 @@ vf-c-base ob-c-t5 ob-c`, loads 1.01-1.26):
 | int.pushpop8 | 0.8320 (0.8296-0.8441) | 0.8141 (0.8128-0.8629) | 0.8619 (0.8610-0.8644) | **+5.9 %** | -2.2 % | +3.6 % |
 | obj.pushpop8 | 0.8632 (0.8511-0.8941) | 0.9060 (0.8867-0.9450) | 0.9245 (0.8929-0.9546) | +2.0 % | +5.0 % | +7.1 % |
 
-So the int.pushpop8 change in the C build comes with Task 6's commits, not with the machine. The tip is +3.6 %
-on vf-c-base, the before build. By reading, no Task 6 change is on that loop's path. pushpop8 keeps 8
+What was measured: in this one interleaved run of 15, the tip's ob-c median is +5.9 % on the bf39c32cc build's,
+with the control (vf-c-base) where it was in bench-t7. One run cannot separate a Task 6 change from run-to-run
+spread: the bf39c32cc build's p75 (0.8629) reaches the tip's median (0.8619), and its runs split into two
+groups (eleven from 0.808 to 0.833, four from 0.863 to 0.880). The cause is unverified. The tip is +3.6 % on vf-c-base, the before build,
+in the same run. By reading, no Task 6 change is on that loop's path. pushpop8 keeps 8
 elements, so set_size_internal_with never reaches OB1's mask (the `ssize >= 8192` branch). The other four
 commits touch the JIT's buffer ops, interp.c's buffer ops, MVMHash deserialize, normalize.c and encode. Code
 layout of libmoar is the likely cause, as for Task 4's +6.7 % on the same case with no change on its path
@@ -1542,7 +1582,7 @@ on this branch) then 30134b931 applies; ec2ad02f7 then 30134b931 without #2077 f
 | K: OB6, OB17, OB18 second half, OB20, OB15d (gone) | ce6393516 | 75e171c31 | none (applies) | - (spec_to_repr_data only) |
 | OB12 (M) | 02289298c | a1fa9aed7 | #2081 (fails on origin/main: the hunk is #2081's compose check) | - |
 | OB2 and its slice sibling (Y) | 771b359b6 | 14b817180 | none (applies) | - (asplice, aslice) |
-| OB7 (Q) | 981c4a8f2, then b87b79815 (push restructured, C only) | 7ff607fd1 | none for 981c4a8f2; b87b79815 needs 963665442 (its context is 963665442's `set_size_internal_caller_writes` call and comment) | push: 981c4a8f2, then 963665442, then b87b79815 |
+| OB7 (Q) | 981c4a8f2, then b87b79815 (push restructured, C only), then 96a9a1a07 (the table's order pinned; no code change) | 7ff607fd1, 4d962a5f0 (tests through the library) | none for 981c4a8f2; b87b79815 needs 963665442 (its context is 963665442's `set_size_internal_caller_writes` call and comment) | push: 981c4a8f2, then 963665442, then b87b79815 |
 | OB8, OB16 (W) | 48fd69052 | 1c80e9440 | #2080 (named in the message; 2 of 3 hunks fail on origin/main), also #2077's rules | - (write_buf, read_buf) |
 | OB18 first half (V) | ec2ad02f7 | 63a911508 | none (applies) | set_size_internal, but no shared lines: Z's and OB1's hunks apply with or without it (their hunk headers name slot_budget only as the enclosing function) |
 | OB19 (H) | bb0eda68f | 922bbfb4d | none (applies) | - (pop, shift) |
@@ -1567,6 +1607,7 @@ For PRs:
   call. So it cannot be squashed into Q's PR as it is. Either it goes as its own PR after Z, or into Z's PR.
   Or it is squashed into Q, rewritten against plain `set_size_internal`, and Z's push hunk is then rebased onto
   the table form.
+- 96a9a1a07 only rewrites b87b79815's table, so it is squashed into whichever PR carries b87b79815.
 - So the order where hunks meet is Q (981c4a8f2), then Z (591f3c20b, 963665442, eb98fd0ba), then b87b79815.
   V and OB1 are textually independent of Z. OB1 needs only #2077.
 - W after #2080, M after #2081, OB9 after #2083, OB10 after #2084 (to be named in its PR text). K, Y, H, V,
@@ -1581,10 +1622,10 @@ For PRs:
    5 % rule, with +2.8 % control drift in the same run.
 3. Push in C was restructured (b87b79815: one dispatch, the kind check through a table), while Zig's push keeps
    its two-step shape (check dispatch, then store dispatch). The facts: after Task 3 (981c4a8f2) object push
-   in the C build was about 15 % slower (obj.pushpop8 +14.9 % against vf-c-base, "The pre-Z gap"), and the
-   restructure brought it back to within 3.9 % of the build after Task 2 ("Push follow-up"). The Zig build
-   showed no such slowdown (pre-Z ob-n was faster than vf-n-base on pushpop8). Zig's shape was not measured on
-   its own.
+   in the C build was about 15 % slower (obj.pushpop8 +14.9 % against vf-c-base, "The pre-Z gap"). The
+   restructure recovered most of that in Task 5's measurement ("Push follow-up"). The Zig build showed no
+   such slowdown (pre-Z ob-n was faster than vf-n-base on pushpop8). Zig's shape was not measured on its own.
+   For what the campaign costs in the end, see item 9.
 4. The sixth message, `MVMArray: Cannot slice from a type object`, is not in the constraints' list.
 5. Five Rakudo Buf candidates (`Blob.new`, `STORE`, `append`, `prepend`, `splice` with `int @values`) now throw
    an internal VM message for a type-object argument (`MVMArray: Cannot splice from a type object`). Before:
@@ -1593,6 +1634,16 @@ For PRs:
    path (one per string-heap entry) is unmeasured.
 7. Junk buffer-op flags (a size shift of 8 or more) now throw with `size (0)` (writeint) or `Invalid flags
    value` (readint/readuint), where some returned before and some panicked.
-8. At the tip the C build's int.pushpop8 is +5.6 % on Task 5's last run, and +5.9 % on a bf39c32cc C build run
-   interleaved (above p75, the control flat). It came with Task 6's commits, none of which is on that loop's
-   path by reading. The tip is +3.6 % on vf-c-base. The Zig build did not move ("Benchmark at the tip").
+8. At the tip the C build's int.pushpop8 is +5.6 % on Task 5's last run (above its p75, the control flat). In
+   one interleaved run against a C build of bf39c32cc it is +5.9 %, within that build's spread (its p75 reaches
+   the tip's median). Cause unverified: no Task 6 change is on that loop's path by reading, and one run cannot
+   tell a change from spread. The Zig build did not move ("Benchmark at the tip").
+9. The campaign's net cost on the push/pop path against the builds before it, at the tip, medians of 15
+   interleaved runs:
+   - C array (ob-c against vf-c-base, bench-t7-gap): int.push10m +0.6 %, obj.push10m +1.1 %, int.pushpop8
+     +3.6 %, obj.pushpop8 +7.1 %. In bench-t7: +1.4 %, +0.2 %, +3.4 %, +5.4 %.
+   - Zig array (ob-n against vf-n-base, bench-t7): int.push10m -6.7 %, obj.push10m -1.1 %, int.pushpop8
+     -9.7 %, obj.pushpop8 -5.8 % (faster).
+
+   The choice: accept this, or ask for a profile of an unstripped build of the C array before the upstream
+   PRs.

@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.iZjmfl nqp-m  OB3-readuint-jit.nqp flags_3 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+readuint flags_3: start
+readuint flags_3: calls 200000, died all, returned none, first message [Invalid flags value for readuint], last value returned [none]
+----
+exit: 0
+---- jit evidence (MVM_SPESH_LOG)
+jit: specialization of '' holding readuint: not compiled; BAIL: op <readuint>, - invalid flags (3), left to the interpreter
+jit: specialization of 'read_flags_3' holding readuint: not compiled; BAIL: op <readuint>, - invalid flags (3), left to the interpreter

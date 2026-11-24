@@ -26,6 +26,11 @@ self-splice) are not listed here; see `cfix-mirror.md`.
   unshift, and a reallocation zeroes from the old window's end), 26 (OB21: the offset-0 reset no longer
   leaves slots for growth to bring back), 40 (`vmarray_bind_pos_int64` grows through the zeroing default).
 - OB1 (C only): 14, the rounding mask is 64 bits.
+- Excluded after a check (final fix wave of Task 7): 19b. Area Z makes unshift at start 0 grow through the
+  entry that does not zero (`set_size_internal_caller_writes`); it then writes every slot it exposes (the
+  memmove of the elements and `zero_slots(0, n)`). At a92476665 growth within the storage did not zero
+  either, so the row's visible behaviour (front room, element 0 a zero, the order of the check) is
+  unchanged by ob-fixes, by reading VMArray.c unshift at the tip. The order of the check is cfix's (#2078).
 Rows not named here are unchanged by the ob-fixes campaign.
 
 Campaign `2026-11-16-zig-vmarray-repr`, Task 3. Read from

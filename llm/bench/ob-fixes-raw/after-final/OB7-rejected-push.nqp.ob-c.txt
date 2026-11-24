@@ -1,0 +1,11 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB7-rejected-push.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+obj array, push_i: DIED MVMArray: push expected object register; elems 2
+obj array, push_n: DIED MVMArray: push expected object register; elems 2
+obj array, push_s: DIED MVMArray: push expected object register; elems 2
+int array, push: DIED MVMArray: push expected int register; elems 2
+num array, push_i: DIED MVMArray: push expected num register; elems 2
+str array, push_i: DIED MVMArray: push expected string register; elems 2
+----
+exit: 0
