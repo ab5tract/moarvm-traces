@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  OB4-adopted-setelems.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+heap prepared: 200 results of 97 98 99, element 2 of the last = 99
+normalized 101 769 97: elems 2: 233 97
+setelems 3: returned; elems 3
+element 2 = 0
+----
+exit: 0

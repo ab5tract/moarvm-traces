@@ -59,10 +59,19 @@ Zig paths are relative to src/zig/6model/reprs/ at the port tip.
 | OB18 | deserialize allocates `elems * elem_size` with no limit (the product can wrap); storage-less kinds can never be deserialized | VMArray.c:deserialize 1369-1372, 1423-1424 | read | memory unsafety on crafted data; wrong result | nqp::deserialize of a crafted blob; serialization | yes: serial.zig:deserialize 222-228, storage.zig:alloc 57 |
 | OB19 | OBJ holes come back as NULL from pop/shift but VMNull from at_pos; copy_elements turns holes into VMNull only for a gen2 target | VMArray.c:pop 663, copy_elements 933-967 | read (record: differential) | wrong result (inconsistent) | nqp | yes, by design (va-kind-differences.md rows 18b, 22b) |
 | OB20 | growth of a storage-less kind stores `realloc(slots, 0)`'s result in slots, then throws before ssize | VMArray.c:set_size_internal 464-471 | read | stale state (no known memory unsafety after #2079/#2080) | nqp | no: storage.zig:grow 190 skips the allocator for 0 bytes (OB15d) |
+| OB21 | a splice at offset 0 removing every element resets start and elems without clearing the slots; later growth brings the removed elements back | VMArray.c:asplice 1070-1075 with set_size_internal 431-434 | reproduced (Task 7, also on cfix-base) | memory unsafety (unmarked object pointers come back), wrong result | nqp | yes before area Z (elements.zig asplice, storage.zig setSize); fixed in the port |
+| OB22 | P6opaque's oslice passes its own P6opaque `dest` to the delegate's slice, which treats it as an array | P6opaque.c:oslice 1502-1510; VMArray.c:aslice 969-974; interp.c OP(slice) 5196 | reproduced (Task 7: an allocation panic; ASAN allocation-size-too-big in aslice) | type confusion, memory unsafety | nqp (`is positional_delegate` + `nqp::slice`); no known caller | yes: shared C; Zig aslice the same |
+| OB23 | the JIT's generic repr-op calls (op_to_func's MVM_repr_*) skip the interpreter's concreteness check | jit/graph.c consume_reprop, op_to_func; 6model/reprconv.c (e.g. MVM_repr_bind_pos_i 288-293) | reproduced (bindpos_i; ASAN wild write on cfix-asan) | memory unsafety | nqp, JIT-compiled code given a type object | yes: shared C |
+| OB24 | deserialization holds the object being read (and body pointers) in unrooted C locals across calls that can allocate | serialization.c:deserialize_object 2671-; MVMHash.c:deserialize 194-200; every REPR's deserialize | read | memory unsafety, if the object could move there | serialization | yes: shared C; Zig VMArray deserialize the same shape |
 
-Items 16-20 were added in this pass; where each was found is in its section.
+Items 16-20 were added in this pass; where each was found is in its section. Items 21-24 were added on
+2026-11-24 by the ob-fixes campaign (Task 7), with OB2's slice sibling; every entry now has a status line
+under its heading (traces/llm/bench/ob-fixes.md has the details and the commits).
 
 ## OB1. Win64: `~0xfffUL` truncates the rounded size
+
+Status 2026-11-24: fixed in the port (C 30134b931; the Zig already had a 64-bit mask), see ob-fixes.md "Shared
+C". Not run (no Windows build).
 
 **Location** [checked: `git show origin/main:src/6model/reprs/VMArray.c | sed -n 405,476p`]:
 VMArray.c, `set_size_internal`, line 447.
@@ -103,6 +112,8 @@ every target; storage.zig:171-172 also carry #2077's `ssize < n` check [checked]
 **Uncertain.** Nothing was run on Windows.
 
 ## OB2. A VMArray type object as the splice source
+
+Status 2026-11-24: fixed in the port (C 771b359b6, Zig 14b817180), see ob-fixes.md "Y and Q".
 
 **Location** [checked: `sed -n 1040,1121p` of origin/main VMArray.c; `git show origin/main:src/core/interp.c |
 sed -n 2321,2329p`; `git show origin/main:src/gc/allocation.c | sed -n 71,81p`]:
@@ -153,7 +164,22 @@ Choices: throw (message such as "MVMArray: Cannot splice from a type object"), o
 empty source (a delete). Throwing matches `writeint`/`readint`, which throw "Cannot write to a %s type object".
 The same question applies to `aslice`'s target and to `copy_elements`; not checked here.
 
+**Sibling: `nqp::slice` of a type object** (added 2026-11-24; found and fixed in ob-fixes Task 3, the same
+commits). `OP(slice)` (interp.c), `MVM_repr_pos_slice` (reprconv.c, the JIT's path) and P6opaque's `oslice`
+never check that the array sliced from is concrete. `aslice` read `elems` from the type object's missing body:
+`nqp::slice(nqp::what(nqp::list()), 0, 0)` segfaulted (exit 139) on vf-c-base, vf-n-base and the ob-c/ob-n
+builds before Task 3 [record: ob-fixes.md "Y and Q"]. It now throws `MVMArray: Cannot slice from a type
+object` before that read (C VMArray.c aslice, tip line 1103-1104; Zig elements.zig 701-702) [checked in
+Task 7].
+Reproducer: `ob-repro/OB2-typeobj-slice.nqp`. origin/main has the same aslice without the check
+(`git show origin/main:src/6model/reprs/VMArray.c`, aslice 969-974) [checked]. P6opaque's own `dest` handed to
+the delegate is OB22. A delegate attribute holding a type object is noted in ob-fixes.md "Y and Q", "Not
+verified" (not run, not listed here).
+
 ## OB3. Missing size checks on the buffer ops (JIT readuint, JIT writeint/writeuint, writenum)
+
+Status 2026-11-24: fixed in the port (C f2c32559a, shared C; Zig readBuf/writeBuf unchanged by ruling), see
+ob-fixes.md "Shared C".
 
 **Location** [checked: `git show origin/main:src/jit/graph.c | sed -n 2375,2478p`;
 `git show origin/main:src/core/interp.c | sed -n 5288,5440p`]:
@@ -243,6 +269,10 @@ for `flags >> 2 >= 31`; the interpreter evaluates it before any check. Not run.
 
 ## OB4. Adopted buffers: the room past elems is never written
 
+Status 2026-11-24: fixed in the port by area Z (C 591f3c20b, 963665442, eb98fd0ba; Zig 8223cc952, 8b1ff900c,
+30ce0ba0a), see ob-fixes.md "Z, first mechanism", "Z, second mechanism", "Z, fix round 1". The adopting sites
+are unchanged; growth zeroes what it exposes.
+
 **Location** [checked: `git show origin/main:<path> | sed -n` / `grep -n` on each]:
 - strings/normalize.c, `MVM_unicode_normalize_codepoints`: malloc of `result_alloc` elements (56-57), adopted at
   86-90 (`ssize = result_pos * sizeof(MVMuint32)` at 90 upstream: that is N1, fixed by #2083 to `result_alloc`).
@@ -310,6 +340,9 @@ A third option is to have the adopting sites shrink `ssize` to `elems` (or reall
 
 ## OB5. MVMHash deserialize holds `key` across read_ref
 
+Status 2026-11-24: fixed in the port (C fd8f245f5, shared C), by reading only, see ob-fixes.md "Shared C"
+("OB5 and OB10 by reading"). `root` and the body pointers stay unrooted: OB24.
+
 **Location** [checked: `git show origin/main:src/6model/reprs/MVMHash.c | sed -n 175,203p`]:
 src/6model/reprs/MVMHash.c, `deserialize`, lines 194-200.
 
@@ -348,6 +381,9 @@ the same stolen-work path: src/zig/gc/orchestrate.zig defines a `stolen` status 
 `read_hash_str_var`. Check `root` at the same time. No behaviour choice.
 
 ## OB6. at_pos default arm uses the register-kind name table
+
+Status 2026-11-24: gone with area K (C ce6393516, Zig 75e171c31): no array of a kind without storage can
+exist, so the arm is unreachable; see ob-fixes.md "K and M".
 
 **Location** [checked: `sed -n 340,358p` of origin/main VMArray.c; `git show origin/main:src/core/interp.h |
 sed -n 66,77p` and `139-168`]: VMArray.c, `MVM_VMArray_at_pos`, lines 355-356.
@@ -388,6 +424,9 @@ slot_type)` [checked].
 other arms. Choice of wording only.
 
 ## OB7. A rejected push or bind_pos has already grown the array
+
+Status 2026-11-24: fixed in the port (C 981c4a8f2, restructured by b87b79815; Zig 7ff607fd1), see ob-fixes.md
+"Y and Q" and "Push follow-up".
 
 **Location** [checked: `sed -n 478,500p` and `576-600p` of origin/main VMArray.c]:
 VMArray.c, `MVM_VMArray_push` line 580 (growth) before the kind checks from 581; `MVM_VMArray_bind_pos` lines
@@ -435,6 +474,8 @@ a matching kind, so not affected (by reading, not checked in depth).
 
 ## OB8. write_buf grows to `offset + count` elements, count being bytes
 
+Status 2026-11-24: fixed in the port (C 48fd69052, on #2080; Zig 1c80e9440), see ob-fixes.md "W, V and H".
+
 **Location** [checked: `sed -n 988,1012p` of origin/main VMArray.c]: VMArray.c, `write_buf`, lines 1006-1007.
 
 ```c
@@ -479,6 +520,8 @@ the last element must be zero (they are, since growth zeroes, except for OB4's a
 
 ## OB9. normalizecodes of empty input leaves the output untouched
 
+Status 2026-11-24: fixed in the port (C a8bfc11fd, on #2083, shared C), see ob-fixes.md "Shared C".
+
 **Location** [checked: `git show origin/main:src/strings/normalize.c | sed -n 38,57p`]:
 strings/normalize.c, `MVM_unicode_normalize_codepoints`, lines 52-53.
 
@@ -519,6 +562,9 @@ appends; the non-empty path replaces, so empty input should give an empty output
 
 ## OB10. nqp::encode leaks the encoded buffer when the resize throws
 
+Status 2026-11-24: fixed in the port (C 2c7d1dfb9, on #2084, shared C), by reading only, see ob-fixes.md
+"Shared C".
+
 **Location** [checked: `git show origin/main:src/strings/ops.c | sed -n 1871,1921p`]:
 strings/ops.c, `MVM_string_encode_to_buf_config`, lines 1907-1912 (append branch).
 
@@ -552,6 +598,12 @@ with the exception-handler mechanism MoarVM uses elsewhere for temporary C buffe
 `MVM_tc_set_ex_release_mem` style hook; whether that exists at origin/main was not checked). Low priority.
 
 ## OB11. Recompose gap: a first compose of a type that already has instances
+
+Status 2026-11-24: not fixed: a design question for the maintainers (see Fix sketch). What remains: a first
+compose of a type that already has instances, to `str` or to a native kind of 8 bits or more, reinterprets
+their object slots (undefined; documented in docs/zig-build.md, "Fidelity to the C array"). A first compose to
+4, 2 or 1 bits, and with it the storage-less states this entry describes, is gone with area K (ce6393516,
+75e171c31).
 
 **Location** [checked: `sed -n 1320,1333p` of origin/main VMArray.c; port VMArray.c `sed -n 1377,1405p`]:
 origin/main has no check at all in `compose` (every recompose allowed). With #2081 (port VMArray.c:1395-1399):
@@ -615,6 +667,8 @@ native case (a first compose to an integer kind over live object slots) was not 
 
 ## OB12. #2081's message has a double space for a type without a debug name
 
+Status 2026-11-24: fixed in the port (C 02289298c, on #2081; Zig a1fa9aed7), see ob-fixes.md "K and M".
+
 **Location** [checked]: port VMArray.c:1397-1399 (the #2081 hunk; not present at origin/main).
 `MVM_6model_get_stable_debug_name` returns `""` when there is no debug name (origin/main src/6model/6model.h:
 692-694 [checked]), so the format "Type %s is" gives "Type  is".
@@ -641,6 +695,8 @@ empty ("MVMArray: Type is already composed ..."), or quote it. Wording choice on
 the #2081 branch so C and Zig keep the same text (the port's differential compares messages).
 
 ## OB13. Intermittent segfault in full cleanup (`blocked.nqp --stress`)
+
+Status 2026-11-24: not in this campaign.
 
 **Location.** Unknown. Crash during `--full-cleanup` global destruction, in a background thread.
 
@@ -677,6 +733,8 @@ app-lifetime threads that are still running (wait, stop at a safepoint, or skip 
 
 ## OB14. ReleaseSafe: VM-booting unit tests abort with "cast causes pointer to be null"
 
+Status 2026-11-24: not in this campaign.
+
 **What was observed** [record: va-ledger.md Task 5 "OBSERVATION for the user"; ngc-ledger.md Task 4 note; campaign
 8 plan Outcome item 4; va-final-review.md minor 7 and "Declined to judge"]: `zig build unit-test
 -Doptimize=ReleaseSafe` aborts every test that boots a VM with "panic: cast causes pointer to be null"
@@ -705,6 +763,8 @@ NULL as the C does. No behaviour choice expected.
 
 ### OB15a. t/04-nativecall/02-simple-args.t tests 17-18
 
+Status 2026-11-24: not in this campaign (still the only Rakudo `make test` failure on ob-c and ob-n).
+
 [record: cfix-baseline.md section 6; cfix-mirror.md section 5; va-suites.md section 2] Fails (Wstat 512, subtests
 17-18) on every port prefix since campaign 4, C and Zig REPRs alike; passes on cfix-base. The two runs differ in
 more than MoarVM: cfix-base used upstream nqp 305ff2f77 and upstream rakudo c6d6fc3c6b; the port runs used the
@@ -714,11 +774,15 @@ against the port's libmoar, or the port's rakudo against upstream MoarVM (byteco
 
 ### OB15b. The Perl build path was never exercised
 
+Status 2026-11-24: not in this campaign.
+
 [record: va-ledger.md Task 1 ruling; va-final-review.md minor 8] The three-line Configure.pl change for the Zig
 REPR section was accepted without a Perl (Configure.pl + make) build. The record calls the risk low (it mirrors
 the `zig-gc` change). Next step: one Configure.pl build of the port and its `make test`.
 
 ### OB15c. No AddressSanitizer build of the port
+
+Status 2026-11-24: not in this campaign.
 
 [record: cfix-mirror.md section 6; plan Outcome "Not run: ASAN"] The reproducers' ASAN halves were not run on the
 port. Several cfix bugs show only under ASAN on glibc (S1, the B and P overruns). The Zig side has
@@ -727,6 +791,9 @@ side of the port (zig cc supports `-fsanitize=address`; not checked how the buil
 this.
 
 ### OB15d. Storage-less kinds: NULL slots in Zig, `malloc(0)` in C
+
+Status 2026-11-24: gone with area K (ce6393516, 75e171c31): no array of a kind without storage can exist, so
+the difference cannot be observed; see ob-fixes.md "K and M".
 
 [checked: storage.zig:188-199, `if (len > 0) { ... }` around the allocator calls; storage.zig:56-58 `alloc`
 returns null for 0 bytes; serial.zig:222-228 doc] Where the C passes 0 bytes to malloc or realloc (growth of a
@@ -739,6 +806,8 @@ could read those slots throws first [record: cfix-ledger.md Task 6 ruling]. Fix 
 (simple, but asks the allocator for 0 bytes, against the port's allocator rule), or leave documented.
 
 ## OB16. write_buf and read_buf accept the num kinds; the message says "integer type" (added)
+
+Status 2026-11-24: fixed in the port, message only (C 48fd69052, Zig 1c80e9440), see ob-fixes.md "W, V and H".
 
 **Where found.** va-kind-differences.md rows 24 and 25 ("report to the user (nums accepted, message says
 integer)"); va-differential.md section 4. Not in the plan's Outcome list.
@@ -777,6 +846,8 @@ into a num buffer; not searched). Raku's `Blob.write-num*` work on Buf (uint8) a
 
 ## OB17. Storage-less kinds are misreported (added)
 
+Status 2026-11-24: gone with area K (ce6393516, 75e171c31), see ob-fixes.md "K and M".
+
 **Where found.** va-kind-differences.md row 28 ("the six reported as reference arrays"; va-differential.md
 section 4) and section 3's debugger row. Not in the plan's Outcome list.
 
@@ -803,6 +874,9 @@ composing an array with them (simplest; then OB6, OB17, OB18's second half and O
 changes behaviour for any code that composes such arrays without using them; not searched.
 
 ## OB18. deserialize: unchecked allocation size, and storage-less kinds cannot be deserialized (added)
+
+Status 2026-11-24: first half fixed in the port (C ec2ad02f7, Zig 63a911508), see ob-fixes.md "W, V and H";
+second half gone with area K (ce6393516, 75e171c31: such a type is refused at deserialize_repr_data).
 
 **Where found.** va-kind-differences.md row 34b ("no limit check"; "the six cannot be deserialized"), and
 va-differential.md section 4 last bullet. The wrap below is my reading.
@@ -841,6 +915,9 @@ OB17).
 
 ## OB19. Holes in OBJ arrays: NULL from pop/shift, VMNull from at_pos, generation-dependent copies (added)
 
+Status 2026-11-24: fixed in the port for pop and shift (C bb0eda68f, Zig 922bbfb4d), see ob-fixes.md "W, V and
+H".
+
 **Where found.** va-kind-differences.md rows 12c, 18b, 22b, and section 4 ("Also new here, though not a crash:
 the NULL-versus-VMNull holes of row 22b"). Kept as per-kind behaviour in campaign 8; listed here because the
 record flags it for the user.
@@ -868,6 +945,8 @@ filled with VMNull at growth (costly). The first makes reads consistent and leav
 check what `REFVAR_NULL` deserializes to.
 
 ## OB20. Growth of a storage-less kind stores realloc's result, then throws before ssize (added)
+
+Status 2026-11-24: gone with area K (ce6393516, 75e171c31), see ob-fixes.md "K and M".
 
 **Where found.** cfix-baseline.md section 5 ("set_size_internal for a kind without storage reallocs to 0 bytes,
 stores the pointer and then dies in zero_slots before updating ssize"); va-kind-differences.md section 3.
@@ -899,6 +978,180 @@ those PRs; the state is still inconsistent (e.g. for gc_free, which frees `slots
 
 **Fix sketch.** Throw for a storage-less kind before allocating (check `elem_size == 0` at the top of the growth
 path), or settle OB17 by refusing such kinds at compose.
+
+## OB21. A splice at offset 0 removing every element leaves them in the slots (added 2026-11-24)
+
+Status 2026-11-24: fixed in the port by area Z (C 591f3c20b, 963665442, eb98fd0ba; Zig 8223cc952, 8b1ff900c,
+30ce0ba0a), see ob-fixes.md "Z, second mechanism", "OB21 (found in Task 5)" and "Z, fix round 1".
+
+**Where found.** ob-fixes Task 5 (area Z), while listing which growth paths can expose non-zero slots
+(ob-fixes.md "Which growth paths can expose non-zero slots"); the second route (through a reallocation) was
+found by Task 5's review.
+
+**Location** [checked in Task 7: `sed -n 1236,1252p` of VMArray.c at the branch tip d68a0ec8c;
+`git show origin/main:src/6model/reprs/VMArray.c | sed -n 1060,1082p` and `sed -n 405,476p`]: VMArray.c,
+`asplice`, the offset-0 adjustment, arm `if (n <= -(MVMint64)elems0)` (origin/main 1070-1075; tip 1240-1245):
+
+```c
+        if (n <= -(MVMint64)elems0) {
+            elems0 = 0;
+            count = 0;
+            body->start = 0;
+            body->elems = elems0;
+        }
+```
+
+**What goes wrong.** The arm sets `start = 0, elems = 0` and leaves the removed elements in their slots.
+Growth within the storage only set `elems` (origin/main set_size_internal, the `n <= ssize` branch:
+`body->elems = n`, no zeroing), so a later setelems or bindpos past the end gave the removed elements back.
+After a push and a shift (start 1), a growth past ssize moved the window to start 0 and reallocated, and
+zeroed the new room only from the old ssize, so slots from the old window's end to the old ssize came back
+too. For an object array those slots are pointers the collector no longer marks (it marks only the window),
+so this is memory unsafety, not only a wrong result.
+
+**Reproducers** [record: ob-fixes.md; ran in Task 7 on the four port prefixes and on cfix-base / cfix-asan,
+outputs in ob-fixes-raw/gate-t7/]:
+- `ob-repro/Z-splice-clear-setelems.nqp`: `splice($a, [], 0, 4)` on `11 22 33 44`, then `setelems 4`; and
+  `splice($o, [], 0, 3)` on `a b c`, then `bindpos 2`.
+- `ob-repro/Z-shift-realloc.nqp`: the same splice, a push and a shift, then setelems 20 / bindpos 19.
+
+Outputs (Task 7):
+
+| prefix | Z-splice-clear-setelems: int / obj | Z-shift-realloc: int / obj |
+|---|---|---|
+| cfix-base and cfix-asan (origin/main f112c3998) | `11 22 33 44` / `a b z` | `0 22 33 44 0 0 0 0` / `<null> b c <null>` |
+| vf-c-base, vf-n-base [record: before-z, before-z-fix1] | the same | the same |
+| ob-c, ob-n at the tip (after-t7) | `0 0 0 0` / `<null> <null> z` | `0 0 0 0 0 0 0 0` / `<null> <null> <null> <null>` |
+
+ASAN reports nothing for either program on cfix-asan. The slots are inside the allocation, so the stale read
+is not an out-of-bounds access. Upstream has the bug.
+
+**Zig port.** Yes before the fix: elements.zig asplice has the same arm (`if (n <= @as(i64, 0) -% s(elems0))`,
+tip line 765) [checked], and storage.zig setSize did not zero within ssize (OB4's entry).
+
+**Fix (area Z).** Growth zeroes every slot it brings into the window, from the old window's end (taken at
+entry), within the storage and after a reallocation; push and unshift, which write every slot they expose,
+use an entry that does not zero. There is no separate clearing at the reset (controller's ruling in Task 5).
+
+## OB22. P6opaque's slice hands its own P6opaque `dest` to the delegate's slice (added 2026-11-24)
+
+Status 2026-11-24: not fixed: found by reading in ob-fixes Task 5, outside the campaign's areas; reproduced
+in Task 7 (port prefixes and upstream).
+
+**Where found.** ob-fixes Task 5 (third round), by reading (ob-fixes.md "Seen on the way (not verified, not
+fixed; to be OB22)").
+
+**Location** [checked in Task 7, the tip d68a0ec8c and `git show origin/main:<path>`, the same code in both]:
+- src/core/interp.c `OP(slice)` (tip 5205-5214, origin/main 5196-): `dest = MVM_repr_alloc_init(tc,
+  GET_REG(cur_op, 2).o)`, an instance of the *source's* type, then `REPR(src)->pos_funcs.slice(..., dest,
+  ...)`. `MVM_repr_pos_slice` (reprconv.c 73-80, the JIT's path for `slice` through op_to_func) does the same.
+- src/6model/reprs/P6opaque.c `oslice` (1502-1510 at both): finds the positional delegate `del` and calls
+  `REPR(del)->pos_funcs.slice(tc, STABLE(del), del, OBJECT_BODY(del), dest, start, end)`, `dest` unchanged.
+- VMArray.c `aslice` (tip 1094-1117, origin/main 969-): `d_body = (MVMArrayBody *)OBJECT_BODY(dest)` and
+  `d_repr_data = STABLE(dest)->REPR_data`, then `set_size_internal(tc, d_body, elems, d_repr_data)` and
+  `copy_elements(tc, src, dest, start, 0, elems)`. Zig `aslice` (elements.zig 697-711) takes the same two from
+  `dest`.
+
+**What goes wrong** (by reading). For `nqp::slice` of a P6opaque with a positional delegate, `dest` is a
+P6opaque object: its body is the P6opaque's (attribute slots, `replaced` first) and its REPR data an
+`MVMP6opaqueREPRData`. aslice reads `slot_type` and `elem_size` from that REPR data as if it were an
+`MVMArrayREPRData` and writes `start`, `elems`, `ssize` and `slots` into the P6opaque body: type confusion,
+and a write past the body if the P6opaque body is shorter than an `MVMArrayBody`. `osplice` passes the
+caller's source array on, not an object of the P6opaque's type, so it does not have this shape.
+
+**Reachability.** nqp classes declare a delegate with `has @!list is positional_delegate` (NQPCapture,
+nqp src/core/NQPCapture.nqp:3). `grep -rn 'nqp::slice'` over nqp's and rakudo's src (without jvm/js) gives 58
+call sites. Their sources, by reading the call sites: native arrays and Bufs (`self`/`SELF`), IterationBuffers
+(`$!result`, `$reified`, `$!indices`), nqp lists and split results. None slices a P6opaque [checked]. How each
+source is constructed was not followed further.
+
+**Reproducer** [ran in Task 7 with `ulimit -c 0` and a 2G cap:
+ob-fixes-raw/gate-t7/probes/oslice-delegate.nqp, outputs in probes/out/ and upstream/]. An nqp class with `has @!list is positional_delegate`, the list `a b c d`,
+then `nqp::slice($h, 1, 2)`:
+- vf-c-base, vf-n-base, ob-c, ob-n and cfix-base: `elems through the delegate: 4`, `atpos 1 ...: b`, then
+  `MoarVM panic: Memory allocation failed; could not allocate 2251765453946888 bytes`, exit 1;
+- cfix-asan: `AddressSanitizer: requested allocation size 0x7fff800000008 ... exceeds maximum supported
+  size` in `aslice`, exit 1.
+
+The size comes from reading the P6opaque REPR data as an array's, which confirms the reading. The garbage
+happened to be a huge size here; a small one would write an array body into the P6opaque object. That was
+not seen.
+
+**Zig port.** Yes: the C OP(slice) and P6opaque are shared; the Zig aslice treats `dest` as the C does.
+
+**Fix sketch.** Either `oslice` allocates its `dest` from the delegate's type (and the op returns that), or
+OP(slice)/MVM_repr_pos_slice allocate `dest` through the REPR (a REPR hook, or P6opaque refusing slice). A
+choice of what `nqp::slice` of a delegating object returns.
+
+## OB23. The JIT's generic repr-op calls skip the concreteness check (added 2026-11-24)
+
+Status 2026-11-24: not fixed: found in ob-fixes Task 6, outside its brief; the read_buf/write_buf pair is
+fixed under OB3 (f2c32559a).
+
+**Where found.** ob-fixes Task 6 (OB3's concreteness question), probe
+ob-fixes-raw/adhoc-t6-ob3/probes/typeobj-bindpos-jit.nqp (ob-fixes.md "Shared C", "Seen on the way").
+
+**Location** [checked in Task 7 at the tip; origin/main the same for the lines named]:
+- src/jit/graph.c `consume_reprop` (661-): the REPR's own function is called directly only when the facts
+  give a known type *and* `MVM_SPESH_FACT_CONCRETE` (757-760); otherwise the op is compiled as a call to
+  `op_to_func`'s C function (176-218: `MVM_repr_push_*`, `pop_*`, `shift_*`, `unshift_*`, `at_pos_*`,
+  `bind_pos_*`, `at_key_*`, `bind_key_*`, `exists_*`, `delete_key`, `pos_set_elems`, `pos_slice`,
+  `pos_splice`; origin/main 213 `case MVM_OP_bindpos_i: return MVM_repr_bind_pos_i;` the same).
+- src/6model/reprconv.c: of these, only `MVM_repr_at_pos_o` (160) and `MVM_repr_at_key_o` (600) test
+  `IS_CONCRETE`; e.g. `MVM_repr_bind_pos_i` (288-293, origin/main the same) calls the REPR's `bind_pos` on
+  `OBJECT_BODY(obj)` at once. The interpreter's `OP(bindpos_i)` does `CHECK_CONC(obj)` first
+  (interp.c 2158-2166).
+
+**What goes wrong.** A type object reaching one of these ops in JIT-compiled code is passed to the REPR, whose
+body pointer then points past the `sizeof(MVMObject)` allocation (as in OB2). For VMArray `bind_pos` this
+writes through garbage.
+
+**Reproducer** [ran in Task 7, outputs in ob-fixes-raw/gate-t7/probes/]: typeobj-bindpos-jit.nqp `write`
+(`nqp::bindpos_i(nqp::atpos($list, $k), 0, 7)`, the last 3 of 200,000 calls on the type object).
+
+- vf-c-base, vf-n-base, ob-c and ob-n: SIGSEGV (exit 139), as Task 6 saw [ran];
+- cfix-base (origin/main): SIGSEGV, exit 139; cfix-asan: `AddressSanitizer: unknown-crash ... WRITE of size
+  9007199254740993` at a wild pointer, in `set_size_internal`, exit 1 [ran]. Upstream has the bug;
+- Task 6: with `MVM_JIT_DISABLE=1` or `MVM_SPESH_DISABLE=1`, `bindpos_i requires a concrete object (got a
+  type object instead)` [record: adhoc-t6-ob3/probes/probes.txt; not re-run].
+
+Only bindpos_i was run; the other ops of the list are the same shape by reading.
+
+**Zig port.** Yes: graph.c and reprconv.c are shared C; the Zig array's bind_pos gets the same body pointer.
+
+**Fix sketch.** The fix OB3 used for the buffer ops: an `IS_CONCRETE` check with the interpreter's message in
+each `MVM_repr_*` function the JIT calls (one compare per call), or the JIT emitting a guard. Which ops'
+messages to copy is a list to settle (`CHECK_CONC`'s "%s requires a concrete object").
+
+## OB24. Deserialization holds the object being read in unrooted C locals (added 2026-11-24)
+
+Status 2026-11-24: not fixed: found by reading in ob-fixes Task 6's review; not verified.
+
+**Where found.** ob-fixes Task 6 review (OB5's fix roots `key` only).
+
+**Location** [checked in Task 7 at the tip; origin/main the same shape]:
+- MVMHash.c `deserialize` (tip 177-207; origin/main 198-200 for the read and the insert): `root`, `hashtable =
+  &body->hashtable` and `data` are C locals held across `MVM_serialization_read_ref` (204) and used after it
+  (`MVM_str_hash_insert_nocheck(tc, hashtable, key)` 206, `MVM_ASSIGN_REF(tc, &(root->header), ...)` 207).
+  Since OB5's fix only `key` is rooted there.
+- serialization.c `deserialize_object` (tip 2685-2704; origin/main 2671-): `obj` is held while
+  `REPR(obj)->deserialize(tc, STABLE(obj), obj, OBJECT_BODY(obj), reader)` runs.
+- Every REPR's `deserialize` has that shape: e.g. VMArray.c `deserialize` (tip 1559-) holds `body`
+  (`OBJECT_BODY(root)`) across `MVM_serialization_read_ref` in its OBJ loop.
+
+**What goes wrong** (by reading). If a collection ran inside one of those calls and moved the object, the
+locals would point at the old copy. What makes it safe in practice: deserialization allocates with gen2 as the
+default (`MVM_gc_allocate_gen2_default_set`, serialization.c 1388, 2483, 2846, 2886, 2943, 2980, 3216), and
+gen2 objects do not move; the object is also reachable from its SC's root_objects. Not shown: that an object
+being deserialized (in particular a repossessed one) can never be in the nursery.
+
+**Reproducer.** None.
+
+**Zig port.** Yes: the C serialization code is shared, and the Zig VMArray deserialize (serial.zig) has the
+same shape.
+
+**Fix sketch.** Either a proof (an assertion that the object is in gen2 at `deserialize_object`) or rooting
+`obj` in deserialize_object and re-deriving body pointers after each call that can allocate in every REPR.
 
 ## Not verified in this pass
 

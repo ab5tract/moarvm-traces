@@ -1,0 +1,11 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB19-serialized-hole.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+read back: elems 3
+atpos 1 (the hole): VMNull 1
+pop (the nqp::null() element): VMNull 1
+pop (the hole): VMNull 1
+shift: first
+done
+----
+exit: 0

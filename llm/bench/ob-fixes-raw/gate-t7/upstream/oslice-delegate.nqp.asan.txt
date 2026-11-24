@@ -1,0 +1,17 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m oslice-delegate.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+elems through the delegate: 4
+atpos 1 through the delegate: b
+=================================================================
+==3343138==ERROR: AddressSanitizer: requested allocation size 0x7fff800000008 (0x7fff800001008 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
+    #0 0x7fe8f992c0c1 in malloc (/usr/lib/libasan.so.8+0x12c0c1) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7fe8f84a81f3 in aslice (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9891f3) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7fe8f834e62b in MVM_interp_run (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x82f62b) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x55acb525a4d3 in main (/tmp/claude-1000/cfix-base/bin/nqp-m+0x14d3) (BuildId: bd2f3fc32dea510caaa109ba2e26429f95eeb636)
+
+==3343138==HINT: if you don't care about these errors you may set allocator_may_return_null=1
+SUMMARY: AddressSanitizer: allocation-size-too-big (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9891f3) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in aslice
+==3343138==ABORTING
+----
+exit: 1

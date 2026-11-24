@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  vmnull-splice.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+DIED MVMArray: Cannot splice from a type object elems 3
+DIED MVMArray: Cannot splice from a type object elems 3
+DIED MVMArray: Cannot splice from a type object elems 3
+DIED slice Cannot create an instance of null type
+done
+----
+exit: 0

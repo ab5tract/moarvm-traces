@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.RqtSAc nqp-m  OB3-writeint-jit.nqp writeint_flags_16 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+writeint_flags_16: start
+writeint_flags_16: calls 200000, died all, returned none, first message [Invalid flags (16) or size (16) value for writeint], elems after 64, element 0 0
+----
+exit: 0
+---- jit evidence (MVM_SPESH_LOG)
+jit: specialization of '' holding writeint: not compiled; BAIL: op <writeint>, - invalid flags (16), left to the interpreter
+jit: specialization of 'writeint_flags_16' holding writeint: not compiled; BAIL: op <writeint>, - invalid flags (16), left to the interpreter

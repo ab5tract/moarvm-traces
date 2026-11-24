@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m G2-limit-boundary.nqp over (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+over: setelems(1152921504606846977): DIED Unable to allocate an array of 1152921504606846977 elements
+----
+exit: 0

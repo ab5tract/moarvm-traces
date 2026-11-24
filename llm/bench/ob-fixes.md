@@ -10,7 +10,8 @@ Before:    /tmp/claude-1000/vf-c-base (-Dzig-reprs=false, the C array) and /tmp/
 After:     /tmp/claude-1000/ob-c and /tmp/claude-1000/ob-n, built by ob-repro/build-prefixes.sh (first built in Task 2)
 Runners:   nqp-m of /tmp/claude-1000/tune-zig-prefix (read only) and the rakudo checkout's rakudo-m, with
            RAKUDO_NO_PRECOMPILATION=1 and -I<rakudo>/lib; only the libmoar swapped through LD_LIBRARY_PATH
-Raw:       ob-fixes-raw/before/ (reproducer outputs and benchmark lines on the before prefixes)
+Raw:       ob-fixes-raw/before/ (reproducer outputs and benchmark lines on the before prefixes); per task
+           ob-fixes-raw/after-*, suites-*, diff-*.log; the final gate in ob-fixes-raw/gate-t7/ (section "Gate")
 Toolchain: Zig 0.17.1
 ```
 
@@ -316,7 +317,13 @@ not ok. The per-file lists equal cfix-mirror-raw/suites/ for all four runs.
 
 ### Not verified
 
-- `deserialize_repr_data`'s throw: by reading only (no crafted blob with a 4-bit element type).
+- `deserialize_repr_data`'s throw: by reading only in this task. Run since (Task 2's review, and again in
+  Task 7): `vmarray-serial.nqp --read=` on the pre-fix blob file `va-differential-raw/serial.out`, which holds a
+  serialized `u4` array type. On ob-c and ob-n: `u4.0.read: DIED MVMArray: Cannot compose an array of 4-bit
+  integers, element types need at least 8 bits`, then `done: 65`, exit 0. On vf-c-base and vf-n-base: `u4.0.read:
+  DIED MVMArray: Unhandled slot type`. Every other line is the same on the four. Outputs:
+  ob-fixes-raw/gate-t7/probes/out/vmarray-serial.nqp.--read=*.txt. No kept test drives it (diff.sh's
+  cross-read uses blobs written by the same builds).
 - The new check uses `bits < 8`; widths 0, 3, 5, 6 and 7 would now get the new message instead of
   "Unsupported int size", but P6int refuses them at its own compose, so no type with such a spec is known.
 
@@ -465,7 +472,16 @@ new message, so no suite file splices or slices from a type object.
   other VMArray op) as a type-object *target* body. Not this area's subject (a target, not a source), not
   reached by any known program; not changed.
 - `nqp::null` (VMNull, a type object) as a splice source now gets the type-object message instead of the
-  MVMNull REPR's own error; not run.
+  MVMNull REPR's own error. Not run in this task. Task 3's reviewer ran it (/tmp/claude-1000/rv3/out/), and
+  Task 7 re-ran it (program ob-fixes-raw/gate-t7/probes/vmnull-splice.nqp, outputs in probes/out/). Three
+  splices from `nqp::null()` into a 3-element list (offset 1 count 0, offset 1 count 2, an int list at 0):
+  - before, vf-c-base and vf-n-base: `DIED This representation (Null) does not support elems (for type
+    VMNull) elems 3`;
+  - now, ob-c and ob-n: `DIED MVMArray: Cannot splice from a type object elems 3`.
+
+  It threw before and after, and the target was unchanged both times. `nqp::slice(nqp::null(), 0, 0)` gives
+  `Cannot create an instance of null type` on all four (OP(slice) allocates dest first). No nqp or Rakudo
+  caller passes `nqp::null` to splice (the reviewer's grep).
 - The slice fix's message was adapted from the brief's rule ("splice" replaced by "slice"); it is not in the
   global constraints' list of exact messages.
 
@@ -1203,6 +1219,11 @@ Commits in P (zig-open-bugs), one per bug id:
   freed. On a throw it is garbage, and both collectors call VMArray's gc_free (C and Zig free
   `slots.any`) for a dead nursery object (gc/collect.c 594-599, zig/gc/collect.zig 709-715). Cost: one
   small allocation per append; a fresh, empty target is handed the buffer as before.
+- OB10, a caller of the append branch: nqp's compiler. `add-internal` in QASTCompilerMAST.nqp (nqp 41e7210ba,
+  lines 2499-2501, checked in Task 7) takes `nqp::elems($!strings)`, does `nqp::setelems($!strings, $prev + 4)`
+  and then `nqp::encode($s, ..., $!strings)`. `$!strings` then has storage, so every string added to the string
+  heap takes the append branch and pays the owner's allocation, once per heap string. The extra cost on nqp's
+  compile path is unmeasured (controller's ruling in Task 6: named, not measured).
 
 ### OB5 and OB10 by reading
 
@@ -1316,3 +1337,173 @@ prefixes built at f2c32559a (the OB3 commit alone), with the same outputs as aft
   `MVM_repr_read_buf`, which now checks concreteness.
 - `MVM_unicode_string_to_codepoints` (strtocodes) of an empty string calls `MVM_malloc(0)`, which panics
   on a C library whose malloc(0) returns NULL (MVM_malloc treats NULL as out of memory). Not on glibc.
+
+## Gate (Task 7)
+
+On the branch tip d68a0ec8c (no source change since 2c7d1dfb9; Task 7 changes only docs and records). Raw
+files under `ob-fixes-raw/`; `gate-t7/` unless named otherwise. Every build, unit-test run and suite run
+started at a 1-minute load below 2.0 (the load at the start is in each file).
+
+| # | check | command | result | raw |
+|---|---|---|---|---|
+| 1 | prefixes | `ob-repro/build-prefixes.sh` (ob-c, ob-n) | both exit 0 at d68a0ec8c (59 s, 61 s; loads 1.05, 1.63); no warnings in the logs | build/builds.tsv, build/ob-{c,n}.out |
+| 2 | format | `zig fmt --check src/zig build.zig build/zig tools/zig` | exit 0, no file listed | fmt.txt |
+| 3 | unit tests | `zig build unit-test --summary all` in P, under `systemd-run ... MemoryMax=8G` | 253/265 (12 skipped), exit 0 | unit-default.log |
+| 4 | | the same with `-Dzig-reprs=false` | 253/265 (12 skipped), exit 0 | unit-creprs.log |
+| 5 | | the same with `-Dgc-debug=1` | 258/265 (7 skipped), exit 0 | unit-gcdebug.log |
+| 6 | exported symbols | `nm -D --defined-only <prefix>/lib/libmoar.so \| awk '{print $3}' \| sort` (build-prefixes.sh) | ob-c = ob-n, 2,850 names; both equal to cfix-mirror-raw/build/exports-vf-{c,n}-base.txt (`diff`: no name added or removed) | build/exports-ob-{c,n}.txt |
+| 7 | differential | `tools/bench/repr/diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t7` | exit 0, `identical (3 runs a side; lines: diff-nqp 11106, diff-raku 2497, serial 196, devirt 10, spesh and nospesh each; cross-read identical)`, as after Task 6; `undefined-lines.txt` has no entry (comments only, unchanged) | diff-t7.log |
+| 8 | suites | `ob-repro/maketest-driver.sh ob-fixes-raw/suites-t7` | nqp PASS on both (Files=150, Tests=13746; loads 1.27, 1.17). Rakudo FAIL on both (Files=599, Tests=11162; loads 1.12, 1.07), only `t/04-nativecall/02-simple-args.t` 17-18 (OB15a). The four per-file lists equal cfix-mirror-raw/suites/{nqp,rakudo}-{c,n}-base.list (the baseline at 99f7ce8cd's src, with the same three nqp `t/hll/0[234]-*.t notok` entries) and suites-t6's. Probes: each run mapped its prefix's libmoar.so | suites-t7/ |
+| 9 | reproducers, after | `ob-repro/run-all.sh -p ob-c\|ob-n -o ob-fixes-raw/after-t7`; `cmp.sh after-t7 ob-c ob-n` | 41 of 41 outputs `c=n`, including Z-splice-clear-setelems, Z-shift-realloc and the OB3 programs in all three modes (plain, `.nojit`, `.jitlog`); every output equals its after-t6 counterpart (82 of 82, probe and run lines dropped) | after-t7/, cmp-after-t7.txt |
+| 10 | reproducers, before against after | each after-t7 ob-c output against the vf-c-base output of before/, before-t3, before-t4, before-z or before-z-fix1 | 34 changed, 7 unchanged: the six OB3 `.nojit` runs (the interpreter refused before and after; they are the controls) and OB7-negative-bindpos (it pins an order the fix keeps). Every before output was `c=n` on vf-c-base / vf-n-base | before-after.txt |
+| 11 | OB3, three modes | (in 9) | readuint flags 3 and 16, writeint and writeuint flags 3 and 16: `died all, returned none` in the plain, `.nojit` and `.jitlog` runs on both; every `.jitlog` line `not compiled; BAIL: op <op>, - invalid flags (N), left to the interpreter`; writenum: `Cannot write a num of 16\|1\|1\|2 bytes` in all three modes, flags 8, 12, 15 return | after-t7/OB3-* |
+| 12 | cfix-repro | `cfix-mirror-raw/run-all-port.sh -p ob-c\|ob-n -o ob-fixes-raw/gate-t7/cfix-repro`; `gate-t7/cmp-cfix-repro.sh` | 62 outputs, all `c=n`; 47 equal to cfix-mirror-raw/repro/ on both builds, 15 differ, each explained below | cfix-repro/, cmp-cfix-repro.txt |
+| 13 | area Z benchmark | (recorded in Task 5) | "Z, first mechanism", "Z, second mechanism", "Push follow-up", "Benchmark sanity check"; not re-run in Task 7 (no source change since) | bench-z-*/ |
+
+### Unit-test count against the baseline
+
+| setting | 99f7ce8cd | tip | arithmetic (passed) |
+|---|---|---|---|
+| default | 240/252 (12 skipped) | 253/265 (12 skipped) | 240 - 3 + 2 (T2) + 5 (T3) + 4 (T4) + 2 (T5 first: 1 new, 1 enabled) + 2 (T5 second) + 1 (T5 fix round) + 0 (T6) = 253 |
+| `-Dzig-reprs=false` | 240/252 (12 skipped) | 253/265 (12 skipped) | the same |
+| `-Dgc-debug=1` | 245/252 (7 skipped) | 258/265 (7 skipped) | 245 - 3 + 2 + 5 + 4 + 2 + 2 + 1 = 258 |
+
+Totals: 252 - 3 + 2 + 5 + 5 (T4: 4 passing, 1 skipped until T5) + 1 + 2 + 1 = 265. The skipped counts are
+back at the baseline's: Task 4's skipped test ("write_buf into spare room of an adopted buffer") was enabled in Task 5.
+The three tests removed in Task 2 are listed in "K and M", "Unit tests". Their subject, an array of a kind
+without storage, can no longer be made. Floor (the baseline minus those three): 237, 237, 242. Per-task numbers
+are from the task sections above; the tip totals are from this task's runs.
+
+### cfix-repro: the differences against the campaign's outputs
+
+`cmp-cfix-repro.sh` compares each output with cfix-mirror-raw/repro/ (vf-c-base for ob-c, vf-n-base for ob-n),
+normalised as cfix-mirror-raw/cmp-repro.sh does. The 15 that differ, on both builds the same way:
+
+| program (case) | what changed | why |
+|---|---|---|
+| B3-writeint-no-storage-kind, B3-write-no-storage-state live, P2-splice-no-storage-kind source and target, P2-splice-no-storage-same-kind same-fit, same-grow, empty-into | the second compose (to uint4) gave `Type  is already composed ...`; it now gives `Cannot compose an array of 4-bit integers, element types need at least 8 bits` | area K: the uint4 compose is refused before #2081's recompose check |
+| B3-write-no-storage-state fresh, P2-splice-no-storage-same-kind empty-src | the program composed a fresh uint4 type outside a `try` and went on; it now dies there, with the compose message and a backtrace (the rest of the program does not run) | area K (these programs are storage-less by subject) |
+| B3-write-first-compose | `first compose to uint4 with live array: returned` becomes `died: ... Cannot compose an array of 4-bit integers ...`; the three writes' `write_buf requires an integer type` becomes `... integer or num type` (elems 3 both times) | area K; OB16's message (area W) |
+| R1-recompose-object-type, R-recompose-matrix, X1-recompose-wider-kind | `Type  is already composed` becomes `Type <anon> is already composed` | area M (OB12) |
+| N-adopt-state | `normalizecodes of empty input into 10 20 30: elems 3: 10 20 30` becomes `elems 0:` | OB9 |
+| B-buf-grid | 1,309 of its lines changed. 835 have access size 0 (flags 32): reads that returned a value or `read_buf out of bounds ...` now `DIED Invalid flags value for readuint`; writes now `DIED Invalid flags (32) or size (0) value for writeint`, array unchanged. 474 have sizes 2, 4 or 8, on the 16-, 32- and 64-bit and num kinds: a write that grows leaves `offset + ceil(size / elem_size)` elements (e.g. int16 at 5, 8 bytes: elems 9, was 13), and the refused growths name that count in `Unable to allocate an array of N elements`. The 8-bit kinds' lines changed only at size 0 | OB3's size helper (Task 6: a shift of 8 or more gives size 0, refused); area W (OB8) |
+
+Every other output (47) is unchanged on both builds.
+
+### Probes run in Task 7
+
+`ob-repro/run.sh` (port prefixes) and `cfix-repro/run.sh` (cfix-base and cfix-asan, origin/main f112c3998), with
+`ulimit -c 0`, 2G or 4G caps and timeouts. Programs in gate-t7/probes/; outputs in gate-t7/probes/out/ and
+gate-t7/upstream/.
+- VMNull as splice source (Y and Q, "Not verified"): as Task 3's reviewer saw. Before: the Null REPR's error;
+  now: the type-object message. It threw both times and the target was unchanged.
+- K's deserialize throw (K and M, "Not verified"): `u4.0.read: DIED MVMArray: Cannot compose an array of 4-bit
+  integers, element types need at least 8 bits` on ob-c and ob-n, `Unhandled slot type` on the vf prefixes.
+- OB21 on upstream: Z-splice-clear-setelems.nqp and Z-shift-realloc.nqp show the bug on cfix-base and cfix-asan
+  (no ASAN report: the slots lie inside the allocation).
+- OB22 (oslice-delegate.nqp): `MoarVM panic: Memory allocation failed; could not allocate 2251765453946888
+  bytes` on the four port prefixes and cfix-base; ASAN on cfix-asan: allocation-size-too-big in `aslice`.
+- OB23 (adhoc-t6-ob3/probes/typeobj-bindpos-jit.nqp `write`): SIGSEGV on the four port prefixes and
+  cfix-base; ASAN on cfix-asan: a wild WRITE in `set_size_internal`.
+
+### New and changed exception messages
+
+Identical in C and Zig where both have the code (checked in Task 7 with `grep -rn` over src/*.c and src/**/*.zig
+outside the tests):
+- `MVMArray: Cannot compose an array of %d-bit integers, element types need at least 8 bits` (K; VMArray.c,
+  serial.zig).
+- `MVMArray: Cannot splice from a type object` (Y; VMArray.c asplice, elements.zig).
+- `MVMArray: Cannot slice from a type object` (Y; VMArray.c aslice, elements.zig). It is the sixth message: not
+  in the global constraints' list. It was derived by the plan's rule and accepted by the controller.
+- `Cannot write a num of %d bytes` (OB3; interp.c writenum, shared C).
+- `MVMArray: Type <anon> is already composed with another element kind` (M; a type without a debug name).
+- `MVMArray: write_buf requires an integer or num type`, `MVMArray: read_buf requires an integer or num type`
+  (W, OB16).
+
+Existing messages in new places:
+- `Cannot read from a %s type object` and `Cannot write to a %s type object` now also come from
+  `MVM_repr_read_buf`/`MVM_repr_write_buf` (OB3; the JIT's path).
+- `Invalid flags (N) or size (0) value for writeint` and the readint/readuint `Invalid flags value` now also
+  for flags whose shift is 8 or more (OB3).
+- `Unable to allocate an array of N elements` now also from deserialize (V).
+
+## Not verified (the campaign)
+
+- No AddressSanitizer build of the port (OB15c). The only ASAN runs in this campaign are Task 7's three
+  probes on cfix-asan, which is upstream.
+- No 64-bit Windows build: OB1's fix is by reading (LLP64 assumed).
+- No `-Dzig-gc=false` build: every port prefix used the Zig collector. The C REPR builds (`-Dzig-reprs=false`)
+  share it.
+- By reading only: OB5 (no reproducer; `root` in the nursery after a repossession not ruled out, OB24) and
+  OB10 (the throw path with an owner collected was never driven).
+- The Perl build path (Configure.pl + make, OB15b) was not exercised for any of the changed C. The JIT changes
+  were run on x86-64 only; `MVM_BIGENDIAN` paths untouched and not run.
+- The SC write barrier the JIT's writeint now emits was not observed.
+- OB10's extra allocation on nqp's compile path (QASTCompilerMAST.nqp 2499-2501) was not measured.
+- Zig push keeps two dispatches on the kind. Its shape was not measured on its own: the Zig build showed no
+  slowdown.
+- The benchmark was not re-run on the final tree after Task 5's fix round. OB1, OB3, OB5, OB9 and OB10 (Task
+  6) do not touch push or pop, except OB1's mask in the rounding of a growth of 8192 or more slots.
+- OB4's Raku route (a socket or process Buf, then `Buf.reallocate`) was not run. OB4 is fixed at the growth,
+  not at the adopting sites.
+- The five Rakudo Buf candidates (`int @values` without `:D`) now throw the VM's message for a type object.
+  Only `Buf.new(array[int])` is a reproducer here; the other four are diff lines in vmarray-diff.raku.
+- OB22: only the case where the garbage gives a huge size was seen; the write of an array body into the
+  P6opaque (small garbage) was not. OB23: only bindpos_i was run. OB24: nothing was run.
+- Everything ran on one machine (Linux x86-64, glibc).
+
+## Commits by bug id
+
+`git log --oneline 99f7ce8cd..HEAD` on zig-open-bugs. Only C commits are meant for upstream; the Zig mirrors
+belong to the port. "Applies to origin/main" was checked in Task 7 with `patch -p1 --dry-run` of each C commit's
+`src` diff onto `git show origin/main:<file>` copies, alone and then all in branch order (fuzz and offsets
+allowed). Files and functions are from `git show -U0`.
+
+| bug ids | C commits | Zig commits | depends on a cherry-picked PR | shares hunks with |
+|---|---|---|---|---|
+| K: OB6, OB17, OB18 second half, OB20, OB15d (gone) | ce6393516 | 75e171c31 | none (applies) | - (spec_to_repr_data only) |
+| OB12 (M) | 02289298c | a1fa9aed7 | #2081 (fails on origin/main: the hunk is #2081's compose check) | - |
+| OB2 and its slice sibling (Y) | 771b359b6 | 14b817180 | none (applies) | - (asplice, aslice) |
+| OB7 (Q) | 981c4a8f2, then b87b79815 (push restructured, C only) | 7ff607fd1 | none for 981c4a8f2; b87b79815 has 963665442's `set_size_internal_caller_writes` call in its context | push: 981c4a8f2, 963665442, b87b79815 |
+| OB8, OB16 (W) | 48fd69052 | 1c80e9440 | #2080 (named in the message; 2 of 3 hunks fail on origin/main), also #2077's rules | - (write_buf, read_buf) |
+| OB18 first half (V) | ec2ad02f7 | 63a911508 | none (applies) | set_size_internal (slot_budget): Z's three and OB1 |
+| OB19 (H) | bb0eda68f | 922bbfb4d | none (applies) | - (pop, shift) |
+| OB4, OB21 (Z) | 591f3c20b (first mechanism), 963665442 (second mechanism), eb98fd0ba (fix round) | 8223cc952, 8b1ff900c, 30ce0ba0a | none: they apply after the branch's earlier commits (963665442 and eb98fd0ba do not apply alone on origin/main: they build on 591f3c20b, on Q's push and on V's slot_budget) | set_size_internal: V, OB1; push: Q; unshift |
+| OB1 | 30134b931 | none (storage.zig already masks with 64 bits) | #2077 (its context is #2077's comment; fails without it) | in set_size_internal_with, which 963665442 created |
+| OB3 | f2c32559a | none (shared C) | none (applies) | - (graph.c, interp.c, reprconv.c) |
+| OB5 | fd8f245f5 | none | none (applies; the message cites #2086 for the shape only) | - |
+| OB9 | a8bfc11fd | none | #2083 (named; the empty path matches #2083's ssize-in-elements state; the patch applies textually) | - |
+| OB10 | 2c7d1dfb9 | none | #2084 (the hunk rewrites #2084's append branch; fails on origin/main) | - |
+
+Traces pointer commits: 2912653aa, f70792a18, 0feb0de01 (Task 1), d6dcc43e3, cd2826682, 2e32a3191, 0e52acce3,
+bef116732, 7de5d6a7a, 3c74bbf4c, 8f5516a20, d68a0ec8c. Harness commits (tools/bench/repr): 3c8556c9d, 9b511d4e3,
+a8a712e6c, 3393c5932, 3f4dd1c69, ec2e4f080, bf39c32cc.
+
+For PRs:
+- Area Z becomes one PR: 591f3c20b + 963665442 + eb98fd0ba squashed. The first mechanism alone was
+  rejected by the benchmark, and the fix round closes a gap the first two left. In the port, 8223cc952 +
+  8b1ff900c + 30ce0ba0a are one change too.
+- Area Q becomes one PR: 981c4a8f2 + b87b79815 squashed. b87b79815's context holds Z's
+  `set_size_internal_caller_writes` call. If Q goes first, the squash keeps `set_size_internal` there, and Z's
+  PR then changes that call. If Z goes first, b87b79815 applies as it is.
+- Order where hunks meet: V (slot_budget) before Z; Q (push) before or with Z (above); OB1 after Z (its line is
+  in set_size_internal_with; on its own it is a one-line change to upstream's set_size_internal, after #2077).
+- W after #2080, M after #2081, OB9 after #2083, OB10 after #2084. The rest are independent.
+
+## Decisions for the owner
+
+1. Deserialize's limit equals set_size_internal's (`>` against slot_budget), so 2**63 one-byte elements still
+   reaches the allocator and aborts (`could not allocate 9223372036854775808 bytes`). Tightening both is one
+   comparison each.
+2. Area Z's second mechanism was accepted by the controller at +5.2 % on one case (ob-n obj.push10m) against a
+   5 % rule, with +2.8 % control drift in the same run.
+3. Push in C was restructured (b87b79815: one dispatch, the kind check through a table), while Zig's push keeps
+   its two-step shape (check dispatch, then store dispatch).
+4. The sixth message, `MVMArray: Cannot slice from a type object`, is not in the constraints' list.
+5. Five Rakudo Buf candidates (`Blob.new`, `STORE`, `append`, `prepend`, `splice` with `int @values`) now throw
+   an internal VM message for a type-object argument (`MVMArray: Cannot splice from a type object`). Before:
+   `Buf.new(array[int])` panicked; the other four were not run before the fix.
+6. OB10's design: an owner object for the encoded buffer, one allocation per append. Its cost on nqp's compile
+   path (one per string-heap entry) is unmeasured.
+7. Junk buffer-op flags (a size shift of 8 or more) now throw with `size (0)` (writeint) or `Invalid flags
+   value` (readint/readuint), where some returned before and some panicked.

@@ -1,5 +1,11 @@
 # VMArray kind differences: where the twelve arms are not one piece of code
 
+Note 2026-11-24 (ob-fixes, branch zig-open-bugs): arrays of the 1-, 2- and 4-bit integer kinds (`U4` ... `I1`,
+section 3) can no longer be composed. Compose and deserialize refuse them with `MVMArray: Cannot compose an
+array of N-bit integers, element types need at least 8 bits`, in C and Zig (area K, ce6393516 / 75e171c31). The
+rows and section 3 below that are about those kinds describe the state before that change. So does row 18b:
+pop and shift of an OBJ hole now give `VMNull` (area H). See `ob-fixes.md`. The rest of this file is unchanged.
+
 Campaign `2026-11-16-zig-vmarray-repr`, Task 3. Read from
 `src/6model/reprs/VMArray.c` at MoarVM `a92476665` (the file last changed in
 `c7ca550e8`); every line number below is that file's unless another file is

@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  OB19-hole-to-sub.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+pop into a variable, passed to a sub: isnull 1
+shift into a variable, passed to a sub: isnull 1
+done
+----
+exit: 0

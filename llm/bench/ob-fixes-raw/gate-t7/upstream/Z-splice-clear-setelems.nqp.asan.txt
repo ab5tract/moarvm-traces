@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m Z-splice-clear-setelems.nqp  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+int: after splice(0, 4) elems 0
+int: setelems 4: 11 22 33 44
+obj: after splice(0, 3) elems 0
+obj: bindpos 2: a b z
+----
+exit: 0

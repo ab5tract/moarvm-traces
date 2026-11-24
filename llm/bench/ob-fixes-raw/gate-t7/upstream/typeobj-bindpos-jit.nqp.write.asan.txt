@@ -1,0 +1,17 @@
+probe: /tmp/claude-1000/cfix-asan/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/cfix-asan/lib LD_PRELOAD=/usr/lib/libasan.so.8 ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:symbolize=1 nqp-m typeobj-bindpos-jit.nqp write (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+=================================================================
+==3343185==ERROR: AddressSanitizer: unknown-crash on address 0x207c30d7752bd1 at pc 0x7f20da128a47 bp 0x7ffcdd0fb7a0 sp 0x7ffcdd0faf58
+WRITE of size 9007199254740993 at 0x207c30d7752bd1 thread T0
+    #0 0x7f20da128a46 in memset (/usr/lib/libasan.so.8+0x128a46) (BuildId: b8a4241051a1621937fdc46e867ba7ecb56d96ea)
+    #1 0x7f20d8ca29a4 in set_size_internal (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9839a4) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #2 0x7f20d8ca5f80 in MVM_VMArray_bind_pos (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x986f80) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #3 0x7f20d8c8c91d in MVM_repr_bind_pos_i (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x96d91d) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030)
+    #4 0x7b20d6c3ec2b  (<unknown module>)
+
+Address 0x207c30d7752bd1 is a wild pointer inside of access range of size 0x20000000000001.
+SUMMARY: AddressSanitizer: unknown-crash (/tmp/claude-1000/cfix-asan/lib/libmoar.so+0x9839a4) (BuildId: 5c69cf77d201bec3b7c27c8d388225ebfb238030) in set_size_internal
+==3343185==ABORTING
+----
+exit: 1

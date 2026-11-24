@@ -1,0 +1,71 @@
+probe: /tmp/claude-1000/vf-n-base/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/vf-n-base/lib nqp-m  vmarray-serial.nqp --read=/home/longwalker/code/raku/x.core/zmoarz/rakudo/nqp/MoarVM/traces/llm/bench/va-differential-raw/serial.out (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+list.0.read: objects=1 VMArray elems=0 [] +u,p elems=2
+list.3.read: objects=4 VMArray elems=3 [first <null> (0.5)] +u,p elems=5
+list.shifted.read: objects=1 VMArray elems=4 [(1222,-1222) <null> (n2444) o55] +u,p elems=6
+list.10000.read: objects=1 VMArray elems=10000 sha1=16108B01075678B69FF23EC77974A638CC48B3B2 head=[o0 1 (2,-2)] tail=[(9997,-9997) <null> (n9999)] +u,p elems=10002
+list_i.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+list_i.3.read: objects=1 VMArray elems=3 [-1 1311768467463790320 -9223372036854775808] +8,7 elems=5
+list_i.shifted.read: objects=1 VMArray elems=4 [-21002 -4653597063383 -97140 -16234976375825] +8,7 elems=6
+list_i.10000.read: objects=1 VMArray elems=10000 sha1=C8CBBD67F0A85EEFEF580EAA4AD45405EA077F21 head=[-4000 -7997 -15990] tail=[51513837758221 103044855375630 206124070479631] +8,7 elems=10002
+list_n.0.read: objects=1 VMArray elems=0 [] +8.5,7.5 elems=2
+list_n.3.read: objects=1 VMArray elems=3 [NaN -0 1e+39] +8.5,7.5 elems=5
+list_n.shifted.read: objects=1 VMArray elems=4 [-12848.25 -10022.375 -7196.5 -4370.625] +8.5,7.5 elems=6
+list_n.10000.read: objects=1 VMArray elems=10000 sha1=2DF7E64AFE4635D95CAFA0C2E9073E703309C3F3 head=[-18500 -18495.375 -18490.75] tail=[27736.125 27740.75 27745.375] +8.5,7.5 elems=10002
+list_s.0.read: objects=3 VMArray elems=0 [] +u,p elems=2
+list_s.3.read: objects=1 VMArray elems=3 [first <null> third] +u,p elems=5
+list_s.shifted.read: objects=1 VMArray elems=4 [s522 s433 s344 s255] +u,p elems=6
+list_s.10000.read: objects=1 VMArray elems=10000 sha1=BA6724D9E0F17077D46C6BC9EF4D549200A7EDB5 head=[s0 s1 s2] tail=[s197 s198 s199] +u,p elems=10002
+i8.0.read: objects=5 VMArray elems=0 [] +8,7 elems=2
+i8.3.read: objects=3 VMArray elems=3 [-1 -16 0] +8,7 elems=5
+i8.shifted.read: objects=3 VMArray elems=4 [-10 41 -116 -17] +8,7 elems=6
+i8.10000.read: objects=3 VMArray elems=10000 sha1=F29923EB630CA666DDB4C207B94B5CF75EECDF44 head=[96 -61 -118] tail=[13 14 15] +8,7 elems=10002
+i16.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+i16.3.read: objects=3 VMArray elems=3 [-1 -8464 0] +8,7 elems=5
+i16.shifted.read: objects=3 VMArray elems=4 [-21002 1833 -31604 3055] +8,7 elems=6
+i16.10000.read: objects=3 VMArray elems=10000 sha1=2C33D516716AB3C7694E9D328711B1F4FF714F71 head=[-4000 -7997 -15990] tail=[9997 9998 9999] +8,7 elems=10002
+i32.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+i32.3.read: objects=3 VMArray elems=3 [-1 -1698898192 0] +8,7 elems=5
+i32.shifted.read: objects=3 VMArray elems=4 [-21002 -2147481815 -97140 3055] +8,7 elems=6
+i32.10000.read: objects=3 VMArray elems=10000 sha1=639FDE6E3FE1CC4C10891781B3D82C03CCCE9418 head=[-4000 -7997 -15990] tail=[9997 9998 9999] +8,7 elems=10002
+i64.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+i64.3.read: objects=3 VMArray elems=3 [-1 1311768467463790320 -9223372036854775808] +8,7 elems=5
+i64.shifted.read: objects=3 VMArray elems=4 [-21002 -4653597063383 -97140 -16234976375825] +8,7 elems=6
+i64.10000.read: objects=3 VMArray elems=10000 sha1=C8CBBD67F0A85EEFEF580EAA4AD45405EA077F21 head=[-4000 -7997 -15990] tail=[51513837758221 103044855375630 206124070479631] +8,7 elems=10002
+u8.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+u8.3.read: objects=3 VMArray elems=3 [255 240 0] +8,7 elems=5
+u8.shifted.read: objects=3 VMArray elems=4 [246 41 140 239] +8,7 elems=6
+u8.10000.read: objects=3 VMArray elems=10000 sha1=08AF85A9FCA031C7BC059F8BB857A4AE6D6389AB head=[96 195 138] tail=[13 14 15] +8,7 elems=10002
+u16.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+u16.3.read: objects=3 VMArray elems=3 [65535 57072 0] +8,7 elems=5
+u16.shifted.read: objects=3 VMArray elems=4 [44534 1833 33932 3055] +8,7 elems=6
+u16.10000.read: objects=3 VMArray elems=10000 sha1=ABA8B9D4ECE56617698340427456094C38F29A64 head=[61536 57539 49546] tail=[9997 9998 9999] +8,7 elems=10002
+u32.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+u32.3.read: objects=3 VMArray elems=3 [4294967295 2596069104 0] +8,7 elems=5
+u32.shifted.read: objects=3 VMArray elems=4 [4294946294 2147485481 4294870156 3055] +8,7 elems=6
+u32.10000.read: objects=3 VMArray elems=10000 sha1=87AD53DC2CDEBD4D5F19E0E9AA31FF5C8F79F110 head=[4294963296 4294959299 4294951306] tail=[9997 9998 9999] +8,7 elems=10002
+u64.0.read: objects=3 VMArray elems=0 [] +8,7 elems=2
+u64.3.read: objects=3 VMArray elems=3 [-1 1311768467463790320 -9223372036854775808] +8,7 elems=5
+u64.shifted.read: objects=3 VMArray elems=4 [-21002 -4653597063383 -97140 -16234976375825] +8,7 elems=6
+u64.10000.read: objects=3 VMArray elems=10000 sha1=C8CBBD67F0A85EEFEF580EAA4AD45405EA077F21 head=[-4000 -7997 -15990] tail=[51513837758221 103044855375630 206124070479631] +8,7 elems=10002
+n32.0.read: objects=3 VMArray elems=0 [] +8.5,7.5 elems=2
+n32.3.read: objects=3 VMArray elems=3 [NaN -0 Inf] +8.5,7.5 elems=5
+n32.shifted.read: objects=3 VMArray elems=4 [-12848.25 -10022.375 -7196.5 -4370.625] +8.5,7.5 elems=6
+n32.10000.read: objects=3 VMArray elems=10000 sha1=2DF7E64AFE4635D95CAFA0C2E9073E703309C3F3 head=[-18500 -18495.375 -18490.75] tail=[27736.125 27740.75 27745.375] +8.5,7.5 elems=10002
+n64.0.read: objects=3 VMArray elems=0 [] +8.5,7.5 elems=2
+n64.3.read: objects=3 VMArray elems=3 [NaN -0 1e+39] +8.5,7.5 elems=5
+n64.shifted.read: objects=3 VMArray elems=4 [-12848.25 -10022.375 -7196.5 -4370.625] +8.5,7.5 elems=6
+n64.10000.read: objects=3 VMArray elems=10000 sha1=2DF7E64AFE4635D95CAFA0C2E9073E703309C3F3 head=[-18500 -18495.375 -18490.75] tail=[27736.125 27740.75 27745.375] +8.5,7.5 elems=10002
+str.0.read: objects=2 VMArray elems=0 [] +u,p elems=2
+str.3.read: objects=2 VMArray elems=3 [first <null> third] +u,p elems=5
+str.shifted.read: objects=2 VMArray elems=4 [s522 s433 s344 s255] +u,p elems=6
+str.10000.read: objects=2 VMArray elems=10000 sha1=BA6724D9E0F17077D46C6BC9EF4D549200A7EDB5 head=[s0 s1 s2] tail=[s197 s198 s199] +u,p elems=10002
+obj.0.read: objects=2 VMArray elems=0 [] +u,p elems=2
+obj.3.read: objects=3 VMArray elems=3 [first <null> (0.5)] +u,p elems=5
+obj.shifted.read: objects=2 VMArray elems=4 [(1222,-1222) <null> (n2444) o55] +u,p elems=6
+obj.10000.read: objects=2 VMArray elems=10000 sha1=16108B01075678B69FF23EC77974A638CC48B3B2 head=[o0 1 (2,-2)] tail=[(9997,-9997) <null> (n9999)] +u,p elems=10002
+u4.0.read: DIED MVMArray: Unhandled slot type
+done: 65
+----
+exit: 0

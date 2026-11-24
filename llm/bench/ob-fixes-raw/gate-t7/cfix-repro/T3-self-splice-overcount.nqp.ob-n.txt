@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m T3-self-splice-overcount.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+count 9: elems 8: 1 4 7 10 13 16 19 22
+count 10: elems 8: 1 4 7 10 13 16 19 22
+count 11: elems 8: 1 4 7 10 13 16 19 22
+count 12: elems 8: 1 4 7 10 13 16 19 22
+----
+exit: 0

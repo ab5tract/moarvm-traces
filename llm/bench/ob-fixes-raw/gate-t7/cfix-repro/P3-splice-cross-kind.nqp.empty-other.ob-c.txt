@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m P3-splice-cross-kind.nqp empty-other (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+str: a c
+u8: 1 3 (elems 2)
+----
+exit: 0

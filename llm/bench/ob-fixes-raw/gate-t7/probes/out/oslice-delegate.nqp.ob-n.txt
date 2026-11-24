@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  oslice-delegate.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+elems through the delegate: 4
+atpos 1 through the delegate: b
+MoarVM panic: Memory allocation failed; could not allocate 2251765453946888 bytes
+----
+exit: 1

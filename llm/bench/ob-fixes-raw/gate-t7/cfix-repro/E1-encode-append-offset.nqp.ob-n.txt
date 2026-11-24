@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m E1-encode-append-offset.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+u16: 1 2 97 98
+u8s: 2 3 97 98
+u8: 1 2 97 98
+----
+exit: 0
