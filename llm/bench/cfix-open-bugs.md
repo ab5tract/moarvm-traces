@@ -63,8 +63,9 @@ Zig paths are relative to src/zig/6model/reprs/ at the port tip.
 | OB22 | P6opaque's oslice passes its own P6opaque `dest` to the delegate's slice, which treats it as an array | P6opaque.c:oslice 1502-1510; VMArray.c:aslice 969-974; interp.c OP(slice) 5196 | reproduced (Task 7: an allocation panic; ASAN allocation-size-too-big in aslice) | type confusion, memory unsafety | nqp (`is positional_delegate` + `nqp::slice`); no known caller | yes: shared C; Zig aslice the same |
 | OB23 | the JIT's generic repr-op calls (op_to_func's MVM_repr_*) skip the interpreter's concreteness check | jit/graph.c consume_reprop, op_to_func; 6model/reprconv.c (e.g. MVM_repr_bind_pos_i 288-293) | reproduced (bindpos_i; ASAN wild write on cfix-asan) | memory unsafety | nqp, JIT-compiled code given a type object | yes: shared C |
 | OB24 | deserialization holds the object being read (and body pointers) in unrooted C locals across calls that can allocate | serialization.c:deserialize_object 2671-; MVMHash.c:deserialize 194-200; every REPR's deserialize | read | memory unsafety, if the object could move there | serialization | yes: shared C; Zig VMArray deserialize the same shape |
+| OB25 | strtocodes of an empty string calls MVM_malloc(0), which panics where malloc(0) returns NULL | strings/normalize.c:MVM_unicode_string_to_codepoints 162 | read | crash (panic) on such a C library | nqp (`nqp::strtocodes`); Rakudo callers not searched | yes: shared C |
 
-Items 16-20 were added in this pass; where each was found is in its section. Items 21-24 were added on
+Items 16-20 were added in this pass; where each was found is in its section. Items 21-25 were added on
 2026-11-24 by the ob-fixes campaign (Task 7), with OB2's slice sibling; every entry now has a status line
 under its heading (traces/llm/bench/ob-fixes.md has the details and the commits).
 
@@ -172,9 +173,13 @@ builds before Task 3 [record: ob-fixes.md "Y and Q"]. It now throws `MVMArray: C
 object` before that read (C VMArray.c aslice, tip line 1103-1104; Zig elements.zig 701-702) [checked in
 Task 7].
 Reproducer: `ob-repro/OB2-typeobj-slice.nqp`. origin/main has the same aslice without the check
-(`git show origin/main:src/6model/reprs/VMArray.c`, aslice 969-974) [checked]. P6opaque's own `dest` handed to
-the delegate is OB22. A delegate attribute holding a type object is noted in ob-fixes.md "Y and Q", "Not
-verified" (not run, not listed here).
+(`git show origin/main:src/6model/reprs/VMArray.c`, aslice 969-974) [checked]. Only `aslice` was fixed. An
+`nqp::slice` of a *P6opaque* type object (with a positional delegate) is still unchecked: OP(slice) allocates
+`dest`, then `oslice` (P6opaque.c 1502-1510) calls `MVM_p6opaque_real_data` on the type object's missing body
+(it reads `replaced` from past the allocation) and fetches the delegate from a garbage offset [by reading in
+fix round 1 of Task 7; not run]. A delegate attribute holding a type object, and P6opaque's own `dest` handed to
+the delegate, are the same `oslice` path; the latter is OB22. The former is noted in ob-fixes.md "Y and Q",
+"Not verified" (not run).
 
 ## OB3. Missing size checks on the buffer ops (JIT readuint, JIT writeint/writeuint, writenum)
 
@@ -563,7 +568,7 @@ appends; the non-empty path replaces, so empty input should give an empty output
 ## OB10. nqp::encode leaks the encoded buffer when the resize throws
 
 Status 2026-11-24: fixed in the port (C 2c7d1dfb9, on #2084, shared C), by reading only, see ob-fixes.md
-"Shared C".
+"Shared C". The commit message does not name #2084; the PR text must (ob-fixes.md "Commits by bug id").
 
 **Location** [checked: `git show origin/main:src/strings/ops.c | sed -n 1871,1921p`]:
 strings/ops.c, `MVM_string_encode_to_buf_config`, lines 1907-1912 (append branch).
@@ -876,7 +881,9 @@ changes behaviour for any code that composes such arrays without using them; not
 ## OB18. deserialize: unchecked allocation size, and storage-less kinds cannot be deserialized (added)
 
 Status 2026-11-24: first half fixed in the port (C ec2ad02f7, Zig 63a911508), see ob-fixes.md "W, V and H";
-second half gone with area K (ce6393516, 75e171c31: such a type is refused at deserialize_repr_data).
+second half gone with area K (ce6393516, 75e171c31: such a type is refused at deserialize_repr_data). The
+limit is set_size_internal's (`>`), so a count of 2**63 one-byte elements still reaches the allocator and
+aborts (`could not allocate 9223372036854775808 bytes`): ob-fixes.md "Decisions for the owner", item 1.
 
 **Where found.** va-kind-differences.md row 34b ("no limit check"; "the six cannot be deserialized"), and
 va-differential.md section 4 last bullet. The wrap below is my reading.
@@ -1152,6 +1159,35 @@ same shape.
 
 **Fix sketch.** Either a proof (an assertion that the object is in gen2 at `deserialize_object`) or rooting
 `obj` in deserialize_object and re-deriving body pointers after each call that can allocate in every REPR.
+
+## OB25. strtocodes of an empty string calls `MVM_malloc(0)` (added 2026-11-24)
+
+Status 2026-11-24: not in this campaign (seen in ob-fixes Task 6, not fixed).
+
+**Where found.** ob-fixes Task 6, while checking OB9 (task report, concern 4; ob-fixes.md "Shared C", "Seen on
+the way").
+
+**Location** [checked in fix round 1 of Task 7: `sed -n 164,174p src/strings/normalize.c` at the tip d68a0ec8c;
+`git show origin/main:src/strings/normalize.c`, the function at 154, the line at 162; src/core/alloc.h
+`MVM_malloc`]: normalize.c, `MVM_unicode_string_to_codepoints`:
+
+```c
+    result_alloc = s->body.num_graphs;
+    result       = MVM_malloc(result_alloc * sizeof(MVMCodepoint));
+```
+
+**What goes wrong** (by reading). For `""`, `num_graphs` is 0, so this is `MVM_malloc(0)`. `MVM_malloc` calls
+`mi_malloc` (with MVM_USE_MIMALLOC) or `malloc` and treats a NULL result as out of memory
+(`MVM_panic_allocation_failed`). C allows `malloc(0)` to return NULL, so on such a C library (without mimalloc)
+`nqp::strtocodes("", ...)` would panic. mimalloc and glibc return a non-NULL block, so it does not show on these
+builds (the port's zig build compiles mimalloc, build/zig/moar.zig).
+
+**Reproducer.** None (it needs a C library whose `malloc(0)` returns NULL).
+
+**Zig port.** Yes: normalize.c is shared C.
+
+**Fix sketch.** Skip the allocation for 0 (and hand the output an empty array, as OB9's fix does for
+normalizecodes), or allocate at least one element.
 
 ## Not verified in this pass
 

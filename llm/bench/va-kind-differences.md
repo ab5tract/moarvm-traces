@@ -1,10 +1,32 @@
 # VMArray kind differences: where the twelve arms are not one piece of code
 
-Note 2026-11-24 (ob-fixes, branch zig-open-bugs): arrays of the 1-, 2- and 4-bit integer kinds (`U4` ... `I1`,
-section 3) can no longer be composed. Compose and deserialize refuse them with `MVMArray: Cannot compose an
-array of N-bit integers, element types need at least 8 bits`, in C and Zig (area K, ce6393516 / 75e171c31). The
-rows and section 3 below that are about those kinds describe the state before that change. So does row 18b:
-pop and shift of an OBJ hole now give `VMNull` (area H). See `ob-fixes.md`. The rest of this file is unchanged.
+Note 2026-11-24 (ob-fixes, branch zig-open-bugs; fix round 1 of Task 7): this file describes VMArray.c at
+a92476665. The ob-fixes campaign changed what the rows below say, in C and Zig alike. Arrays of the 1-, 2- and
+4-bit integer kinds (`U4` ... `I1`, section 3) can no longer be composed. Compose and deserialize refuse them
+with `MVMArray: Cannot compose an array of N-bit integers, element types need at least 8 bits` (area K,
+ce6393516 / 75e171c31). Each row named here describes the state before; the rows are not rewritten. Details
+and commits are in `ob-fixes.md`. Checked against the branch tip d68a0ec8c by reading each row against that
+campaign's diffs. Rows changed by the earlier cfix campaign (#2076-#2086: e.g. 18c, 19b's order, 22d, 26's
+self-splice) are not listed here; see `cfix-mirror.md`.
+- K (no array of the six can exist; their parts are unreachable): 3, 4 (the six), 12e, 13 (the six), 14 (the
+  six's 2**63), 17b, 18a, 19a, 20 and 21 (the `default`/`abort` arms for the six), 28 (the six reported as
+  reference arrays), 31a (4/2/1 bits now throw), 32 (the refusal stores nothing), 33 (deserialize_repr_data
+  refuses them), 34b and 35 (the six's serialize and deserialize), 37, and section 3 as a whole.
+- M: the #2081 message in row 32's recompose case names `<anon>` for a type without a debug name.
+- Q: 15a and 17a ("the growth happens before the kind check": now the check comes first and a rejected bind or
+  push leaves the array as it was).
+- Y: 23 (aslice refuses a type-object source) and 26 (asplice refuses a type-object source).
+- W: 24 and 25 (the message now says "integer or num type"; write_buf grows by whole elements, not to
+  `offset + count`).
+- V: 14 (the limit moved into `slot_budget`, unchanged) and 34b (the count is checked against that limit
+  before allocating).
+- H: 18b and 20 (pop and shift of an OBJ hole now give `VMNull`, as at_pos), and the "Observable" part of
+  22b (copy_elements itself is unchanged, but pop/shift no longer tell the two hole forms apart).
+- Z: 14 (growth exposes only zeroed slots, through a zeroing default with a caller-writes entry for push and
+  unshift, and a reallocation zeroes from the old window's end), 26 (OB21: the offset-0 reset no longer
+  leaves slots for growth to bring back), 40 (`vmarray_bind_pos_int64` grows through the zeroing default).
+- OB1 (C only): 14, the rounding mask is 64 bits.
+Rows not named here are unchanged by the ob-fixes campaign.
 
 Campaign `2026-11-16-zig-vmarray-repr`, Task 3. Read from
 `src/6model/reprs/VMArray.c` at MoarVM `a92476665` (the file last changed in
