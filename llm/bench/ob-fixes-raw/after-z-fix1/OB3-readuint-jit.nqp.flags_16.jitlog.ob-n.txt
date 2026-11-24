@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.wF1kxg nqp-m  OB3-readuint-jit.nqp flags_16 (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+readuint flags_16: start
+timeout: the monitored command dumped core
+----
+exit: 139
+---- jit evidence (MVM_SPESH_LOG)
+jit: specialization of '' holding readuint: compiled
+jit: specialization of 'read_flags_16' holding readuint: compiled

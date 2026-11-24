@@ -46,6 +46,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `OB19-hole-to-sub.nqp` | a hole popped and shifted into a variable and passed to a sub (the crash Task 1 saw); added in Task 4 |
 | `OB19-serialized-hole.nqp` | an object array with a hole and an `nqp::null()` element, serialized and read back, then atpos/pop/shift; added in Task 4 |
 | `Z-splice-clear-setelems.nqp` | OB21: a splice at offset 0 removing every element, then setelems / bindpos past the end (the removed elements came back); added in Task 5 |
+| `Z-shift-realloc.nqp` | OB21 through a reallocation: the same splice, a push and a shift, then setelems 20 / bindpos 19 (the move to start 0 plus a reallocation); the review's program, added in Task 5 fix round 1 |
 | `K-compose-small.nqp` | compose, then push_i, for 4-, 2-, 1-bit signed and unsigned, and 8-bit controls |
 | `K-smallnatives.raku` | the plan's program; the declaration compiled through EVAL inside its try |
 
@@ -656,6 +657,11 @@ Commits in P (zig-open-bugs): 3f4dd1c69 (benchmark, longer cases, before the fix
 
 ### Which growth paths can expose non-zero slots (reading)
 
+Correction (fix round 1): the reading below is wrong where it says that a reallocation together with the
+move keeps the slots zero. After the move to start 0, a reallocation zeroed the new room only from the old
+ssize, so the slots from the old window's end to the old ssize came into the window unzeroed. The first two
+rounds missed this; the review found it (see "Z, fix round 1"). The original text follows.
+
 The REPR keeps slots past the window zero by itself in these places: pop zeroes the slot it leaves, a
 shrink zeroes the dropped slots, a reallocation zeroes the new room, and the move to start 0 zeroes the
 vacated part. shift does not zero the slot it leaves, but that slot is before `start`. Only the move can
@@ -969,6 +975,158 @@ for parallelism, so no Zig measurement was taken.
   The four per-file lists equal suites-t4's.
 - The scratch prefixes ob-c-t2, ob-c-t3, ob-c-t4 and ob-c-push, with their -src copies and build logs, are
   removed.
+
+## Z, fix round 1 (review)
+
+### The gap
+
+The review ran /tmp/claude-1000/rv5/prog/Zgap-shift-realloc.nqp (now `ob-repro/Z-shift-realloc.nqp`). The
+program splices a 4-element list down to empty at offset 0, pushes 5, shifts it off (start 1, elems 0, the
+removed elements still in slots 1-3), then grows past ssize with setelems 20 or bindpos 19.
+
+`set_size_internal` moved the window to start 0 and zeroed the slots the old window held, then set its
+clear point to the old ssize. The reallocation then zeroed from there. Slots from the old window's end to
+the old ssize were never zeroed. This was safe only while every slot past the window was zero, and area Z
+gave that up. The first two rounds' path analysis missed it, because it took "a reallocation zeroes the new
+room" as enough.
+
+| prefix | int: setelems 20 / bindpos 19 (slots 0-7) | obj: setelems 20 (0-3) |
+|---|---|---|
+| vf-c-base, vf-n-base (before-z-fix1) | `0 22 33 44 0 0 0 0` (both) | `<null> b c <null>` |
+| ob-c, ob-n at b87b79815 (before-z-fix1; the reviewer's /tmp/claude-1000/rv5/out/ are the same) | `0 22 33 44 0 0 0 0` | `<null> b c <null>` |
+| ob-c, ob-n at bf39c32cc (after-z-fix1) | `0 0 0 0 0 0 0 0` | `<null> <null> <null> <null>` |
+
+### The fix
+
+Commits: eb98fd0ba (C), 30ce0ba0a (Zig mirror with tests), bf39c32cc (harness).
+
+What can be non-zero, re-derived (C and Zig alike), with the old window [s, s + e) in an ssize-slot
+buffer:
+- before the move: [0, s) (shift's slots, asplice's adjustment) and [s + e, ssize) (adopted spare room,
+  OB21);
+- the move writes [0, e) with the elements and zeroes [e, s + e), so after it only [s + e, ssize) may be
+  non-zero.
+
+The reallocation must therefore zero from s + e (= old_window_end, taken at entry) to the new ssize. It
+used to start at the old ssize. Without a move the reallocation runs with start 0, so old_window_end ==
+elems, as before:
+- start > 0 with n + start <= ssize stays within the storage;
+- an n + start that wraps (n >= 2**64 - start) makes the new size exceed the limit, so it throws before
+  anything changes.
+
+Two more cases were checked:
+- "n below the old ssize but the rounding sends it to reallocation" cannot happen: the branch is chosen by
+  `n <= ssize` before any rounding.
+- When the move ends within the storage, its zeroing plus the zeroing from old_window_end to the new
+  window's end cover everything exposed.
+
+C: the `elems = ssize` clear point in the move branch is gone, and the reallocation zeroes from
+old_window_end. Zig: `clear_from` is gone, and `grow` gets old_window_end. A comment at
+`set_size_internal_with` / `setSizeWith` states the invariant. The caller-writes comments now say that
+push's and unshift's guarantee rests on area K.
+
+push cannot reach the changed case. With start > 0, elems + start <= ssize, so push's n = elems + 1 <=
+ssize: after the move it stays within the storage. A reallocation from push has start 0, where the clear
+point is elems as before.
+
+### The path analysis again, with the invariant
+
+Each path below was checked. None has the shape of this gap.
+- grow's rounding branches only compute the new ssize; they zero nothing else. The `ssize < n` and limit
+  throws come before the reallocation; at most the move has happened, which keeps the elements.
+- The compaction test's `n + start` wrap throws in the size checks, before any change (above).
+- copy_to (C and Zig) gives the destination ssize = elems and start 0: no room past the window. deserialize
+  sets ssize = elems.
+- asplice:
+  - the tail move left comes before a shrink (which zeroes the dropped slots), and the tail move right comes
+    after a zeroing growth;
+  - the offset-0 adjustment with n > 0 brings slots below start into the window; they are [0, n) of the new
+    window, and copy_elements writes [0, elems1) with n <= elems1 - count. Nothing in between collects:
+    at_pos and bind_pos of VMArrays do not allocate, and the kinds were checked before;
+  - the n < 0 adjustment and the reset leave slots outside the window, which the invariant allows.
+- write_buf grows with the zeroing default, then memcpys into the window. The trailing bytes of the last
+  element were zeroed by the growth.
+- The JIT bind entry (`vmarray_bind_pos_int64`, Zig `bindPosKind.jit`) and bind_pos use the zeroing
+  default.
+- unshift:
+  - at start 0 it grows through caller-writes and then writes all of [0, n + elems); a reallocation there
+    has start 0;
+  - at start > 0 it writes slot start - 1 (possibly a shift's leftover) before `start--`.
+- push: proven above.
+- pop zeroes the slot it leaves. shift's leftover is below start and is covered by the move.
+- at_pos past elems returns zero without reading slots. The collector marks only the window.
+- Other C users of the body (nativecall's unmarshal, the io and Decoder readers, encode, loadbytecode) read
+  only the window or adopt with ssize = elems.
+
+### Tests
+
+Both tests failed before the fix (default 251/265, 2 failed: the obj case "exposed slots not zero" and "expected
+0, found 22"):
+- "growth within storage zeroes the exposed slots" gains the case start 1, elems 2, dirty spare room, grow to
+  9 in 8 slots (move plus reallocation to 16). Slots 2-15 must be zero, for every stored kind, through E and
+  the library.
+- New "OB21 through a reallocation: a shift before the growth leaves nothing to bring back":
+  - an int array, and an object array of fresh nursery objects;
+  - collected before the growth, fully under -Dgc-debug=1;
+  - all 20 elements read as holes or zeros afterwards.
+
+After the fix (bf39c32cc tree, loads 1.63, 1.74, 1.83):
+- default 253/265 (12 skipped);
+- -Dzig-reprs=false 253/265 (12 skipped);
+- -Dgc-debug=1 258/265 (7 skipped).
+
+Differential: `ob.splice.clear.shift.setelems.<kind>` and `ob.splice.clear.shift.bindpos.<kind>`. These are
+24 new lines, all holes or zeros (bindpos: the bound value at 19).
+
+### Gates on bf39c32cc
+
+- `zig fmt --check` is clean. `build-prefixes.sh`: ob-c and ob-n exit 0 (60 s each, load 1.66 and 1.91);
+  export lists equal.
+- `diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t5-fix1`:
+  exit 0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 11106 diff-nqp/nospesh 11106
+  diff-raku/spesh 2497 diff-raku/nospesh 2497 serial/spesh 196 serial/nospesh 196 devirt/spesh 10
+  devirt/nospesh 10; cross-read identical)` (log: ob-fixes-raw/diff-t5-fix1.log).
+- `run-all.sh` on both into ob-fixes-raw/after-z-fix1: 41 of 42 outputs c=n.
+  - The exception is `OB3-writeint-jit.nqp.writeint_flags_16` (the plain run, spesh and JIT at their
+    defaults): ob-n printed `died all, returned none ... element 0 0`, ob-c `died some, returned some`.
+  - That is OB3 (not yet fixed; Task 6). Its plain-run outcome depends on whether the JIT takes over in time,
+    and the `.jitlog` run under `MVM_SPESH_BLOCKING=1` is c=n.
+  - Five re-runs on each prefix all gave `died some, returned some`, so this was a one-off timing outlier
+    and not area Z.
+  - Every other ob-c output equals after-t5's, and Z-shift-realloc is fixed (above).
+- Suites (`maketest-driver.sh ob-fixes-raw/suites-t5-fix1`):
+  - nqp PASS on both;
+  - Rakudo FAIL on both, only 02-simple-args.t 17-18 (OB15a).
+
+  The per-file lists equal suites-t4's.
+
+### Benchmark sanity check
+
+`run-bench.sh -n 15 -o ob-fixes-raw/bench-z-fix1 vf-c-base vf-n-base ob-c ob-n`, started at load 1.24
+(1.12-1.35). The previous round is the push attempt's numbers for C (bench-z-push, ob-c-push, the same code
+as b87b79815) and bench-z2-post for Zig. The rule was: stop if a median is more than 5 % above the previous
+round's p75.
+
+| build | case | previous round, median (p25-p75) | now | change | check |
+|---|---|---|---|---|---|
+| ob-c | int.push10m | ob-c-push 0.5850 (0.5833-0.5887) | 0.5746 (0.5709-0.5854) | -1.8 % | ok |
+| ob-c | obj.push10m | ob-c-push 0.6061 (0.6011-0.6101) | 0.5910 (0.5839-0.5969) | -2.5 % | ok |
+| ob-c | int.pushpop8 | ob-c-push 0.8262 (0.8199-0.8679) | 0.8158 (0.8140-0.8434) | -1.3 % | ok |
+| ob-c | obj.pushpop8 | ob-c-push 0.8974 (0.8816-0.9475) | 0.8920 (0.8752-0.9258) | -0.6 % | ok |
+| ob-n | int.push10m | ob-n 0.5628 (0.5559-0.5737) | 0.5457 (0.5404-0.5530) | -3.0 % | ok |
+| ob-n | obj.push10m | ob-n 0.5875 (0.5758-0.5980) | 0.5625 (0.5583-0.5942) | -4.3 % | ok |
+| ob-n | int.pushpop8 | ob-n 0.7437 (0.7103-0.7861) | 0.7168 (0.7129-0.8089) | -3.6 % | ok |
+| ob-n | obj.pushpop8 | ob-n 0.8295 (0.7986-0.8890) | 0.7902 (0.7564-0.8993) | -4.7 % | ok |
+| vf-c-base (control) | int.push10m | 0.5992 | 0.5809 (0.5795-0.5843) | -3.1 % | |
+| vf-c-base (control) | obj.push10m | 0.6033 | 0.5858 (0.5843-0.5941) | -2.9 % | |
+| vf-c-base (control) | int.pushpop8 | 0.8441 | 0.8448 (0.8325-0.8662) | +0.1 % | |
+| vf-c-base (control) | obj.pushpop8 | 0.8987 | 0.8597 (0.8500-0.8908) | -4.3 % | |
+| vf-n-base (control) | int.push10m | 0.5925 | 0.5774 (0.5745-0.5836) | -2.5 % | |
+| vf-n-base (control) | obj.push10m | 0.5972 | 0.5818 (0.5775-0.5839) | -2.6 % | |
+| vf-n-base (control) | int.pushpop8 | 0.8184 | 0.8120 (0.8114-0.8170) | -0.8 % | |
+| vf-n-base (control) | obj.pushpop8 | 0.8343 | 0.8286 (0.8245-0.8367) | -0.7 % | |
+No case moved above the bound. All are 0.6-4.7 % faster, in line with the vf controls (-4.3 to +0.1 %), so the
+machine was quieter.
 
 ### Seen on the way (not verified, not fixed; to be OB22)
 

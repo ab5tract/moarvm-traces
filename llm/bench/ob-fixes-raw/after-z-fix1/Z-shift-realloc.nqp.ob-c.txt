@@ -1,0 +1,9 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib nqp-m  Z-shift-realloc.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+int: elems 0
+int: setelems 20: 0 0 0 0 0 0 0 0
+int: bindpos 19: 0 0 0 0 0 0 0 0
+obj: setelems 20: <null> <null> <null> <null>
+----
+exit: 0
