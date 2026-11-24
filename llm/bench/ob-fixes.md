@@ -45,7 +45,7 @@ depends on JIT timing or heap contents prints only none/some/all or zero/non-zer
 | `OB19-holes.nqp` | holes via atpos, pop, shift; a splice of holes into a gen2 and a nursery target |
 | `OB19-hole-to-sub.nqp` | a hole popped and shifted into a variable and passed to a sub (the crash Task 1 saw); added in Task 4 |
 | `OB19-serialized-hole.nqp` | an object array with a hole and an `nqp::null()` element, serialized and read back, then atpos/pop/shift; added in Task 4 |
-| `Z-splice-clear-setelems.nqp` | a splice at offset 0 removing every element, then setelems / bindpos past the end (the removed elements came back); added in Task 5 |
+| `Z-splice-clear-setelems.nqp` | OB21: a splice at offset 0 removing every element, then setelems / bindpos past the end (the removed elements came back); added in Task 5 |
 | `K-compose-small.nqp` | compose, then push_i, for 4-, 2-, 1-bit signed and unsigned, and 8-bit controls |
 | `K-smallnatives.raku` | the plan's program; the declaration compiled through EVAL inside its try |
 
@@ -764,7 +764,7 @@ The following were not run: diff.sh, the suites, and the rest of run-all.sh. The
 never run. Until diff.sh runs, nothing shows that C and Zig agree beyond the unit test and the two
 reproducers.
 
-## Z, second mechanism (BLOCKED by the benchmark)
+## Z, second mechanism (accepted by the controller)
 
 The controller ruled on the first block as follows. Growth within the storage still only exposes zeroed
 slots by default. The callers that write every slot they expose grow through an entry that does not zero.
@@ -858,8 +858,16 @@ ob-fixes-raw/bench-z-pre (same method); the vf prefixes ran alongside as the mac
 One case is worse under the rule: ob-n obj.push10m, pre 0.5585 (p75 0.5641), post 0.5875, +5.2 %. In the
 same run vf-n-base obj.push10m was +2.8 % against its own pre run, so the machine accounts for part of it.
 The rule was applied as it stands. ob-c obj.pushpop8 is +6.1 % but below the pre-Z p75 (1.0274), so it is
-not worse. Every other case is within +4.2 %. Status BLOCKED. Per the ruling, the remaining steps were not
-run: diff.sh, the suites, and the post-change OB4 / Z reproducer runs on these builds.
+not worse. Every other case is within +4.2 %. Status at that point: BLOCKED. The remaining steps were then
+run in the third round (below).
+
+Controller's ruling A, against the letter of the stop rule: area Z's second mechanism is accepted as
+committed (963665442, 8b1ff900c). The reasons given:
+- the single case over the rule (ob-n obj.push10m, +5.2 %) had a machine drift of +2.8 % (vf-n-base) in the
+  same run;
+- push no longer zeroes;
+- Task 4's int.pushpop8 change of +6.7 % in the C build, with no source change on that path (below), shows
+  that code layout alone moves these cases by more than the 5 % threshold.
 
 ### The pre-Z gap (ruling 4, localisation only)
 
@@ -891,7 +899,78 @@ Likely reasons, by reading the diffs only (the libraries are stripped; not profi
   change on the int push/pop path explains the +6.7 %, and code layout (alignment) of the push/pop loop is
   the likely cause. This is not verified.
 
-### Seen on the way (not verified, not fixed)
+### Push follow-up (controller's ruling B: one attempt, C only)
+
+Task 3's 981c4a8f2 split the C push into a register-kind switch before the growth and a store switch
+after it. The localisation above puts the object push/pop slowdown of the C build at that task. The single
+attempt was the "expected kind lookup" form. The register-kind check became one compare against a static
+table indexed by slot type (`push_register_kinds`: the register kind and the word of the message, for the
+12 slot types with a store arm). Slot types without an entry are not checked and are refused by the store,
+as before. The store switch is the only dispatch, on the slot type read once at entry. The messages are
+byte-identical (`"MVMArray: push expected %s register"` with object/string/int/num). Nothing is grown
+before the throw. This form was chosen over a check-grow-store arm per slot type because it keeps one call
+of set_size_internal_caller_writes and one store switch, the simpler code for the compiler.
+
+Measured: the attempt built from a `git archive` copy of 8b1ff900c with the changed VMArray.c
+(/tmp/claude-1000/ob-c-push, scratch), with `run-bench.sh -n 15 -o ob-fixes-raw/bench-z-push vf-c-base
+ob-c-t2 ob-c ob-c-push`, interleaved, starting at load 1.27 (1.27-1.94). Medians (p25-p75):
+
+| case | vf-c-base | ob-c-t2 (after Task 2) | ob-c (8b1ff900c) | attempt | attempt vs ob-c-t2 | attempt vs ob-c |
+|---|---|---|---|---|---|---|
+| int.push10m | 0.5992 (0.5913-0.6075) | 0.5891 (0.5875-0.5970) | 0.6019 (0.5985-0.6091) | 0.5850 (0.5833-0.5887) | -0.7 % | -2.8 % |
+| obj.push10m | 0.6033 (0.6004-0.6056) | 0.6024 (0.5970-0.6110) | 0.6265 (0.6080-0.6443) | 0.6061 (0.6011-0.6101) | +0.6 % | -3.3 % |
+| int.pushpop8 | 0.8441 (0.8362-0.8546) | 0.8434 (0.8354-0.8532) | 0.8959 (0.8868-0.9393) | 0.8262 (0.8199-0.8679) | -2.0 % | -7.8 % |
+| obj.pushpop8 | 0.8987 (0.8675-0.9067) | 0.8635 (0.8610-0.9018) | 0.9986 (0.9391-1.0463) | 0.8974 (0.8816-0.9475) | +3.9 % | -10.1 % |
+The acceptance test: obj.pushpop8 and obj.push10m within 5 % of ob-c-t2 (+3.9 %, +0.6 %), and no int case
+more than 5 % worse than the current C build (-2.8 %, -7.8 %: both faster). Accepted and committed as
+b87b79815 "VMArray push: one dispatch on the slot type" (C only). Before the build, the C-REPR unit run on
+the attempt passed 252/264 (12 skipped), with Task 3's rejected-push tests and area Z's dirty-spare-room
+test unchanged.
+
+Zig is not changed. Zig's push has the same order (`kinds.dispatch(..., Arm(.push).check)` before
+`setSizeCallerWrites`, then the store dispatch). But its check is the port's comptime per-kind arm, which
+pop, unshift and bind_pos use too, and it is not a C-style switch. The two sides are parallel in order and
+behaviour (diff.sh identical, the same unit tests), not in the dispatch mechanism, which already differs
+everywhere. The Zig build has no slowdown to recover: pre-Z ob-n was 6-9 % faster than vf-n-base on the
+pushpop8 cases. Rewriting only Zig's push to a table would make it unlike its siblings and is not needed
+for parallelism, so no Zig measurement was taken.
+
+### Third round: the remaining steps on the final tree (b87b79815)
+
+- Unit tests (loads 1.53, 1.94, 1.79):
+  - default 252/264 (12 skipped);
+  - -Dzig-reprs=false 252/264 (12 skipped);
+  - -Dgc-debug=1 257/264 (7 skipped).
+
+  `zig fmt --check src/zig build.zig` is clean.
+- `build-prefixes.sh`: ob-c and ob-n exit 0 at b87b79815 (60 s and 61 s, load 1.86 and 1.74); export lists
+  equal.
+- `diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t5`:
+  exit 0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 11082 diff-nqp/nospesh 11082
+  diff-raku/spesh 2497 diff-raku/nospesh 2497 serial/spesh 196 serial/nospesh 196 devirt/spesh 10
+  devirt/nospesh 10; cross-read identical)` (log: ob-fixes-raw/diff-t5.log).
+
+  The new cases ran for the first time; they account for the 26 new nqp lines (11056 -> 11082):
+  - `ob.adopted.setelems.encode: elems=6 [97 98 99 0 0 0]`;
+  - `ob.adopted.setelems.normalizecodes: elems=3 [233 97 0]`;
+  - `ob.splice.clear.setelems.<kind>`: four holes or zeros;
+  - `ob.splice.clear.bindpos.<kind>`: four holes or zeros, then the bound value.
+
+  undefined-lines.txt is unchanged.
+- Reproducers: `run-all.sh -p ob-c|ob-n -o ob-fixes-raw/after-t5` and `cmp.sh`: c=n for all 41 outputs.
+  - OB4: `heap prepared ... = 99` and `element 2 = 0` on both.
+  - Z-splice-clear-setelems: `0 0 0 0` and `<null> <null> z` on both.
+  - Every other output equals its latest earlier run: after-t4, after-t3 or after-t2. For OB3 and OB9 that
+    is the baseline, because their areas come later.
+- Suites (`ob-repro/maketest-driver.sh ob-fixes-raw/suites-t5`):
+  - nqp PASS on both (Files=150, Tests=13746);
+  - Rakudo FAIL on both (Files=599, Tests=11162), only `t/04-nativecall/02-simple-args.t` 17-18 (OB15a).
+
+  The four per-file lists equal suites-t4's.
+- The scratch prefixes ob-c-t2, ob-c-t3, ob-c-t4 and ob-c-push, with their -src copies and build logs, are
+  removed.
+
+### Seen on the way (not verified, not fixed; to be OB22)
 
 - P6opaque.c `oslice` passes the `dest` that interp's OP(slice) made with `MVM_repr_alloc_init` of the
   P6opaque source on to the positional delegate's `slice`. The delegate is a VMArray, so `aslice` then

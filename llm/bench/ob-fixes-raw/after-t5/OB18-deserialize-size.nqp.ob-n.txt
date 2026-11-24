@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  OB18-deserialize-size.nqp  (timeout 60 s, MemoryMax=2G, ulimit -c 0)
+----
+unpatched round trip (control): returned, elems 3, elements 9128161956862029837 1 2
+count 3 and first element found once in the blob
+patched: count 2**61 + 1 (9-byte form), first element 0 (1-byte form)
+deserialize of the patched blob: DIED Unable to allocate an array of 2305843009213693953 elements
+done
+----
+exit: 0

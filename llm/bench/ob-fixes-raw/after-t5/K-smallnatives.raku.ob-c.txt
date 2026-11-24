@@ -1,0 +1,7 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m -I/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib K-smallnatives.raku  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+declare: DIED MVMArray: Cannot compose an array of 4-bit integers, element types need at least 8 bits
+push 3 and say: skipped, no array
+----
+exit: 0

@@ -1,0 +1,75 @@
+# run 1 2026-11-24 00:50:01 load 1.33 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.5909
+obj.push10m 0.6069
+int.pushpop8 0.9347
+obj.pushpop8 1.0184
+# run 2 2026-11-24 00:50:13 load 1.44 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6091
+obj.push10m 0.6464
+int.pushpop8 0.8899
+obj.pushpop8 1.0678
+# run 3 2026-11-24 00:50:26 load 1.56 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6002
+obj.push10m 0.6475
+int.pushpop8 0.9380
+obj.pushpop8 0.9818
+# run 4 2026-11-24 00:50:39 load 1.66 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.5979
+obj.push10m 0.6316
+int.pushpop8 0.8959
+obj.pushpop8 0.9391
+# run 5 2026-11-24 00:50:51 load 1.79 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6070
+obj.push10m 0.6055
+int.pushpop8 0.8898
+obj.pushpop8 1.0612
+# run 6 2026-11-24 00:51:04 load 1.84 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6014
+obj.push10m 0.6577
+int.pushpop8 0.8858
+obj.pushpop8 0.9775
+# run 7 2026-11-24 00:51:17 load 1.86 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6034
+obj.push10m 0.6265
+int.pushpop8 0.9393
+obj.pushpop8 1.0104
+# run 8 2026-11-24 00:52:00 load 1.92 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.5985
+obj.push10m 0.6015
+int.pushpop8 0.8909
+obj.pushpop8 1.0645
+# run 9 2026-11-24 00:52:12 load 1.93 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6019
+obj.push10m 0.6443
+int.pushpop8 0.8868
+obj.pushpop8 0.9546
+# run 10 2026-11-24 00:52:25 load 1.95 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6116
+obj.push10m 0.6288
+int.pushpop8 0.8817
+obj.pushpop8 0.9355
+# run 11 2026-11-24 00:53:08 load 1.70 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6181
+obj.push10m 0.6232
+int.pushpop8 0.8618
+obj.pushpop8 0.9173
+# run 12 2026-11-24 00:53:20 load 1.90 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.5894
+obj.push10m 0.6080
+int.pushpop8 0.9093
+obj.pushpop8 1.0463
+# run 13 2026-11-24 00:53:33 load 1.92 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6049
+obj.push10m 0.6150
+int.pushpop8 0.9911
+obj.pushpop8 0.9986
+# run 14 2026-11-24 00:53:46 load 1.94 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6364
+obj.push10m 0.6359
+int.pushpop8 0.9831
+obj.pushpop8 0.9156
+# run 15 2026-11-24 00:53:58 load 1.95 libmoar /tmp/claude-1000/ob-c/lib/libmoar.so
+int.push10m 0.6016
+obj.push10m 0.6198
+int.pushpop8 0.9876
+obj.pushpop8 1.0384

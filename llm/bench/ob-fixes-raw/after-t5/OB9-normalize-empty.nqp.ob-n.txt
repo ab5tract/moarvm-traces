@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib nqp-m  OB9-normalize-empty.nqp  (timeout 60 s, MemoryMax=4G, ulimit -c 0)
+----
+normalizecodes of empty input into 10 20 30: returned; elems 3: 10 20 30
+strtocodes of empty string into 10 (control): returned; elems 0:
+normalizecodes of 101 769 into 10 20 30 (control): returned; elems 1: 233
+----
+exit: 0
