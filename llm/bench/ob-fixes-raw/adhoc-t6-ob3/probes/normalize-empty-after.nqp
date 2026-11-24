@@ -1,0 +1,10 @@
+my $t := nqp::newtype(nqp::null(), "VMArray"); my $e := nqp::newtype(nqp::null(), "P6int");
+nqp::composetype($e, nqp::hash("integer", nqp::hash("bits", 32, "unsigned", 1)));
+nqp::composetype($t, nqp::hash("array", nqp::hash("type", $e)));
+my $in := nqp::create($t); my $out := nqp::create($t);
+nqp::push_i($out, 10); nqp::push_i($out, 20); nqp::push_i($out, 30);
+nqp::normalizecodes($in, nqp::const::NORMALIZE_NFC, $out);
+nqp::push_i($out, 5); nqp::setelems($out, 4);
+say("after empty normalizecodes, push 5, setelems 4: elems " ~ nqp::elems($out) ~ ": " ~ nqp::atpos_i($out, 0) ~ " " ~ nqp::atpos_i($out, 1) ~ " " ~ nqp::atpos_i($out, 3));
+nqp::normalizecodes($in, nqp::const::NORMALIZE_NFC, $in);
+say("empty into itself: elems " ~ nqp::elems($in));

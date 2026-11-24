@@ -1,0 +1,8 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib RAKUDO_NO_PRECOMPILATION=1 rakudo-m -I/home/longwalker/code/raku/x.core/zmoarz/rakudo/lib OB2-buf-new-array.raku  (timeout 120 s, MemoryMax=2G, ulimit -c 0)
+----
+Buf.new(array[int]):
+DIED MVMArray: Cannot splice from a type object
+done
+----
+exit: 0

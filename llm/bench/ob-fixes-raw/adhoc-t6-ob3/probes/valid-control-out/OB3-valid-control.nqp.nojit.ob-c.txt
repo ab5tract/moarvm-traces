@@ -1,0 +1,6 @@
+probe: /tmp/claude-1000/ob-c/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-c/lib MVM_JIT_DISABLE=1 nqp-m  OB3-valid-control.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+valid flags 9 (4 bytes, little endian): sum 19999900000, bytes 4-7 63 13 3 0
+----
+exit: 0

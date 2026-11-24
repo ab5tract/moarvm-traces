@@ -1,0 +1,4 @@
+nqp	c	exit 0	18s	load 1.97	2026-11-24 02:30:49	Files=150, Tests=13746, 18 wallclock secs ( 0.41 usr  0.15 sys + 14.73 cusr  1.52 csys = 16.81 CPU)	Result: PASS
+nqp	n	exit 0	18s	load 1.95	2026-11-24 02:31:07	Files=150, Tests=13746, 18 wallclock secs ( 0.42 usr  0.13 sys + 14.44 cusr  1.66 csys = 16.65 CPU)	Result: PASS
+rakudo	c	exit 2	122s	load 1.96	2026-11-24 02:33:09	Files=599, Tests=11162, 122 wallclock secs ( 3.44 usr  1.10 sys + 838.18 cusr 76.83 csys = 919.55 CPU)	Result: FAIL
+rakudo	n	exit 2	121s	load 1.96	2026-11-24 02:37:11	Files=599, Tests=11162, 121 wallclock secs ( 3.49 usr  1.05 sys + 836.47 cusr 74.68 csys = 915.69 CPU)	Result: FAIL

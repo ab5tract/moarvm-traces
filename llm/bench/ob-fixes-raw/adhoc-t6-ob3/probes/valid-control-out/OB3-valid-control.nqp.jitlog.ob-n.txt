@@ -1,0 +1,10 @@
+probe: /tmp/claude-1000/ob-n/lib/libmoar.so
+run:   LD_LIBRARY_PATH=/tmp/claude-1000/ob-n/lib MVM_SPESH_BLOCKING=1 MVM_SPESH_LOG=/tmp/claude-1000/ob-spesh-log.jli9nm nqp-m  OB3-valid-control.nqp  (timeout 120 s, MemoryMax=4G, ulimit -c 0)
+----
+valid flags 9 (4 bytes, little endian): sum 19999900000, bytes 4-7 63 13 3 0
+----
+exit: 0
+---- jit evidence (MVM_SPESH_LOG)
+jit: specialization of 'MAIN' holding writeint readuint: compiled
+jit: specialization of 'read_flags_9' holding readuint: compiled
+jit: specialization of 'write_flags_9' holding writeint: compiled

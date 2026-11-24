@@ -1,0 +1,43 @@
+Task 6 probes (programs in this directory; nqp-m of tune-zig-prefix, LD_LIBRARY_PATH=<prefix>/lib, ulimit -c 0).
+"before" = ob-c built at bf39c32cc (src identical to 8f5516a20); "after" = ob-c and ob-n at f2c32559a (OB3)
+for OB3-valid-control and the first OB3 runs, at 2c7d1dfb9 (tip) for the rest. ob-c and ob-n gave the same
+output in every after run.
+
+typeobj-buffer-jit.nqp read|write: 200,000 readuint/writeint with valid flags 0 on nqp::atpos($list, $k),
+the last 3 on a type object (so the buffer is not known concrete to spesh)
+  before, default settings:   read: died 3 returned 199997 msg [MVMArray: read_buf out of bounds offset 0
+                              start 9007199254740993 elems 0 count 1]   (garbage read from the type object)
+                              write: SIGSEGV (exit 139)
+  before, MVM_SPESH_BLOCKING=1 and MVM_SPESH_LOG: the same (read garbage, write SIGSEGV)
+  before, MVM_SPESH_BLOCKING=1 alone: died 3 with the right messages (this run's code did not reach the op compiled)
+  before, MVM_JIT_DISABLE=1: died 3, "Cannot read from a  type object" / "Cannot write to a  type object"
+  after (default, MVM_SPESH_BLOCKING=1, MVM_JIT_DISABLE=1; ob-c and ob-n):
+                              read: died 3 returned 199997 msg [Cannot read from a  type object]
+                              write: died 3 returned 199997 msg [Cannot write to a  type object]
+
+typeobj-bindpos-jit.nqp write: the same shape with nqp::bindpos_i (not part of OB3; new defect, not fixed)
+  before and after, default settings: SIGSEGV (exit 139) on both builds
+  MVM_JIT_DISABLE=1 or MVM_SPESH_DISABLE=1: died 3, "bindpos_i requires a concrete object (got a  type object instead)"
+
+size-shift.nqp FLAGS: writeint, readuint, readint with FLAGS, interpreted (MVM_JIT_DISABLE=1 before;
+default after, the ops are not hot)
+  before: 32  all three returned (size 0: 1 << 8 truncated)
+          34  MoarVM panic: Invalid size (0) when attempting to switch endianness of 1   (exit 1)
+          128 all three returned, readuint 1 (shift 32: size 1)
+          130 MoarVM panic: Invalid size (1) when attempting to switch endianness of 1   (exit 1)
+          136 all three returned
+          138 MoarVM panic: Invalid size (4) when attempting to switch endianness of 1   (exit 1)
+  after:  every one: writeint DIED Invalid flags (N) or size (0) value for writeint; readuint DIED Invalid
+          flags value for readuint; readint DIED Invalid flags value for readint (exit 0)
+
+OB3-valid-control.nqp (run.sh, all three modes): writeint flags 9 and readuint flags 9 (4 bytes, little
+endian) 200,000 times, after the fix
+  all modes, both builds: sum 19999900000, bytes 4-7 63 13 3 0
+  jitlog: specializations of MAIN, read_flags_9, write_flags_9 holding the ops: compiled
+
+encode-append.nqp: 20,000 nqp::encode("abc", "utf8", $b) into [7] for uint8, uint16, uint32 (the append branch of OB10)
+  after, both builds: uint8 elems 60001, first 7 97 98 99 97 98 99; uint16 elems 40001, first 7 25185 99 ...;
+  uint32 elems 20001, first 7 6513249 ...
+
+normalize-empty-after.nqp: after the empty normalizecodes, the output takes push 5 and setelems 4
+  after, both builds: elems 4: 5 0 0; normalizecodes of an empty array into itself: elems 0

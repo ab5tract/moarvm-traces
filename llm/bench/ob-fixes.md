@@ -1135,3 +1135,184 @@ machine was quieter.
   treats the P6opaque's body as an `MVMArrayBody` (`set_size_internal` and `copy_elements` on it). This is
   type confusion if `nqp::slice` is ever applied to a P6opaque with a positional delegate. By reading only;
   a candidate for the bug list.
+
+## Shared C
+
+OB1, OB3, OB5, OB9 and OB10: C that both builds share; the port has no Zig version of any of it (checked:
+no Zig file defines the JIT, the interpreter's ops, reprconv.c, MVMHash, normalize.c or encode; the only
+Zig mentions of normalize.c and encode are comments in storage.zig and vmarray_storage_test.zig). No Zig
+file was changed; Zig's readBuf/writeBuf stay as they are (controller's ruling).
+
+### The fix
+
+Commits in P (zig-open-bugs), one per bug id:
+
+| id | commit | file(s) |
+|---|---|---|
+| OB1 | 30134b931 | VMArray.c `set_size_internal_with`: `~0xfffUL` becomes `~(MVMuint64)0xfff` |
+| OB3 | f2c32559a | jit/graph.c, core/interp.c, 6model/reprconv.c |
+| OB5 | fd8f245f5 | MVMHash.c `deserialize`: `MVMROOT(tc, key)` around `MVM_serialization_read_ref` |
+| OB9 | a8bfc11fd | normalize.c `MVM_unicode_normalize_codepoints`: empty input empties the output |
+| OB10 | 2c7d1dfb9 | strings/ops.c `MVM_string_encode_to_buf_config`: the encoded buffer has an owner across the resize |
+
+- OB1: found by reading, not run (it needs 64-bit Windows). storage.zig already masks with
+  `~@as(u64, 0xfff)`.
+- OB3, JIT (readuint, writeint, writeuint): with the flags a known value, the JIT compiles only sizes 1, 2,
+  4 and 8 with a valid byte order. Any other known flags (`(flags & 3) == 3` or `flags >> 2 > 3`, the
+  test made on the flags as `MVMuint64`, before the size is computed) add the comment `BAIL: op <%s>, -
+  invalid flags (%"PRIu64"), left to the interpreter` and `return 0` from `consume_ins`, so the
+  specialization runs in the interpreter, whose op throws. Unknown flags already bailed (`no known value
+  for writeint flags` / `for readint flags`), so that path was checked before and is unchanged. readint
+  has no case in `consume_ins` at all (the default arm bails). The buffer ops have no expression
+  templates, so `consume_ins` is the only JIT path.
+- OB3, writenum: sizes other than 4 and 8 throw `Cannot write a num of %d bytes`, after the type-object
+  check, before anything is written (as readnum). readnum does not refuse `(flags & 3) == 3`: only
+  `MVM_SWITCHENDIAN` (2 on little-endian) swaps, so flags 3 reads in native order. writenum already did
+  the same and still does (`writenum flags 15 (size 8): returned`).
+- OB3, the bug list's two open points, both defects, both fixed in the OB3 commit:
+  - `MVM_SC_WB_OBJ` / `IS_CONCRETE`. The SC write barrier: every other mutating op the JIT compiles
+    calls `jg_sc_wb` after its write (push, unshift, bindpos, bindkey, bindattr ...), the JIT's writeint
+    did not, so a JIT-compiled write to an SC-owned buffer was not repossessed. It now calls `jg_sc_wb`
+    after either call. Concreteness: the direct-REPR branch requires `MVM_SPESH_FACT_CONCRETE`, but the
+    other branch called `MVM_repr_write_buf` / `MVM_repr_read_buf`, which passed a type object's missing
+    body to the REPR (a type object is `sizeof(MVMObject)`, gc/allocation.c). Shown before the fix (probe
+    `typeobj-buffer-jit.nqp`, buffer from `nqp::atpos` of a list, last 3 of 200,000 calls on the type
+    object; ob-c at bf39c32cc, default settings): readuint ended in `MVMArray: read_buf out of bounds
+    offset 0 start 9007199254740993 elems 0 count 1` (a garbage read), writeint in SIGSEGV. The two
+    functions, called only by the JIT (`grep -rn MVM_repr_read_buf src`), now throw the interpreter's
+    `Cannot read from a %s type object` / `Cannot write to a %s type object`; after the fix the probe
+    gives those messages in all modes on both builds.
+  - `1 << (flags >> 2)`. An int shift, undefined for shifts of 31 and over, and truncated to an unsigned
+    char from shift 8 on (size 0, which `size > 8` let through). Shown before (probe `size-shift.nqp`,
+    interpreted): flags 32 and 136 returned, 128 read as size 1, and 34, 130, 138 made `switch_endian`
+    panic (`MoarVM panic: Invalid size (0|1|4) when attempting to switch endianness of 1`; sizes 1 and 4
+    are handled there, so that is the undefined shift miscompiled). The four ops now take the size from
+    `buffer_op_size_from_flags` (interp.c), which gives 0 for any shift over 7, and readint/readuint and
+    writeint refuse 0 with the sizes over 8 (readnum and writenum refuse it as not 4 or 8). After: every
+    such flags value throws the op's own message. The JIT computes its size only for shifts up to 3.
+- OB5: see "OB5 and OB10 by reading" below.
+- OB9: the empty path frees the output's slots and leaves it with slots NULL, start 0, elems 0, ssize 0
+  (a freshly created array's state), as the non-empty path replaces the storage (with #2083's ssize in
+  elements). The commit names #2083 (5c3f435bb here). Checked afterwards: the emptied output takes push and
+  setelems (`elems 4: 5 0 0`), and an empty array normalized into itself stays empty.
+- OB10: there is no hook that frees a C buffer on a throw (threadcontext.h has only the ex_release mutex
+  and atomic), and a size check before the resize could only copy the REPR's limits and rounding (C and
+  Zig). So in the append branch an empty array of buf's type (`MVM_repr_alloc` of `STABLE(buf)->WHAT`,
+  with buf rooted) owns the encoded buffer (`slots.u8 = encoded`) from before the resize until the copy;
+  it is rooted with buf across the resize and the copy, then its slots are set to NULL and the buffer
+  freed. On a throw it is garbage, and both collectors call VMArray's gc_free (C and Zig free
+  `slots.any`) for a dead nursery object (gc/collect.c 594-599, zig/gc/collect.zig 709-715). Cost: one
+  small allocation per append; a fresh, empty target is handed the buffer as before.
+
+### OB5 and OB10 by reading
+
+OB5, every statement between the read of `key` and its last use:
+1. `MVM_str_hash_key_is_valid(tc, key)`: null, REPR and concreteness tests; no allocation.
+2. `MVM_str_hash_key_throw_invalid`: throws; `key` is not used after it.
+3. `MVM_serialization_read_ref`: can block on another SC's reentrant mutex (`MVM_sc_get_object` →
+   `MVM_serialization_demand_object`), during which another thread's collection can run with this
+   thread's work stolen (#2086's argument): now inside `MVMROOT(tc, key)`.
+4. `MVM_str_hash_insert_nocheck(tc, hashtable, key)` (the port's Zig hash engine, str_exports.zig →
+   `str.insertNocheck`): the last use. It hashes the key (`MVM_string_hash_code` /
+   `MVM_string_compute_hash_code`, ops.c 3124, a stack grapheme iterator, no allocation) and may grow the
+   table with the C allocator; no GC allocation, so no collection.
+`root` (and `hashtable`, `data`, pointers into it) is not rooted, as the brief asks only for `key`. It
+cannot be freed (it is in the SC's root_objects, marked through the SC). It cannot move when stub_object
+allocated it, because deserialization runs with gen2 as the allocation default (`MVM_gc_allocate_gen2_
+default_set` in the demand functions and MVM_serialization_deserialize; read_ref asserts it), and gen2
+does not move. A repossessed object comes from another SC, whose objects were deserialized into gen2 too;
+that no repossessed object can still be in the nursery is not proven here.
+
+OB10, every exit after `encoded` is allocated (`MVM_string_encode_config` returns it):
+1. The end of the `MVMROOT2(tc, buf, s)` block: no throw.
+2. Append branch, `MVM_repr_alloc` of the owner: may collect (buf rooted, `encoded` is C heap); it panics
+   on out of memory rather than throwing. Before this, `encoded` has no owner and nothing throws.
+3. Append branch, `MVM_repr_pos_set_elems` throws (the size limits, or `Array may not be used
+   concurrently` with `MVM_ARRAY_CONC_DEBUG`): the owner holds `encoded`; the exception pops the temp roots
+   (`MVM_gc_root_temp_pop_all`, exceptions.c 1018), the owner is garbage and its gc_free frees the buffer.
+4. Append branch, success: memmove and memset (no throw), the owner's slots set to NULL, `MVM_free(encoded)`.
+5. Else branch (no storage): `MVM_realloc` (panics, does not throw) and the buffer is handed to buf.
+6. `return buf`: after 4 or 5.
+Not covered: a throw inside `MVM_string_encode_config` itself (its own buffer before it returns) is the
+encoder's, not this function's, and was not checked. Reachability of 3 stays doubtful: the limit is 2**60
+elements or more, and 64-bit Windows or a debug build is needed for the other throws.
+
+### Reproducers, before and after
+
+Before: ob-fixes-raw/after-z-fix1 (ob-c and ob-n at bf39c32cc, src identical to 8f5516a20). After:
+ob-fixes-raw/after-t6 (ob-c and ob-n at 2c7d1dfb9). `cmp.sh ob-fixes-raw/after-t6 ob-c ob-n`: all 41
+outputs `c=n`. Against after-z-fix1 only the OB3 outputs (plain and `.jitlog`; the readuint and writeint
+`.nojit` outputs were already "died all") and OB9 changed.
+
+| program | before (plain / .jitlog; .nojit) | after, ob-c = ob-n, plain, .nojit and .jitlog |
+|---|---|---|
+| OB3-readuint-jit flags_3 | died some, returned some; nojit died all | died all, returned none, `Invalid flags value for readuint` |
+| OB3-readuint-jit flags_16 | SIGSEGV (exit 139); nojit died all | died all, returned none, the same message |
+| OB3-writeint-jit (4 cases) | died some, returned some, element 0 1; nojit died all, element 0 0 | died all, returned none, `Invalid flags (3) or size (1)` / `(16) or size (16) value for writeint`, element 0 0 |
+| OB3-writenum-size | flags 16, 0, 3, 4 returned (elems 16, 1, 1, 2) | `DIED Cannot write a num of 16|1|1|2 bytes; elems 0`; flags 8, 12, 15 return (elems 4, 8, 8); readnum controls unchanged |
+| OB9-normalize-empty | `elems 3: 10 20 30` | `elems 0:`; controls unchanged |
+
+The `.jitlog` lines after, on both builds (before: every line `compiled`, see Baseline):
+
+    OB3-readuint-jit flags_N (N = 3, 16):
+      jit: specialization of '' holding readuint: not compiled; BAIL: op <readuint>, - invalid flags (N), left to the interpreter
+      jit: specialization of 'read_flags_N' holding readuint: not compiled; BAIL: op <readuint>, - invalid flags (N), left to the interpreter
+    OB3-writeint-jit <op>_flags_N (op = writeint, writeuint):
+      jit: specialization of '' holding <op>: not compiled; BAIL: op <<op>>, - invalid flags (N), left to the interpreter
+      jit: specialization of '<op>_flags_N' holding <op>: not compiled; BAIL: op <<op>>, - invalid flags (N), left to the interpreter
+    OB3-writenum-size: jit: no specialization of this file holds the op (as before; no JIT case)
+
+with "died all, returned none" in the same runs, as Baseline's "JIT evidence" asks. The plain run of
+writeint_flags_16, which differed between the builds in Task 5 fix round 1, is now "died all" on both.
+
+Probes (ob-fixes-raw/adhoc-t6-ob3/probes/, results in probes.txt): `OB3-valid-control.nqp` (writeint and
+readuint with flags 9, 200,000 calls) is still compiled (`jit: ... compiled` for MAIN, read_flags_9,
+write_flags_9) and gives the same sum and bytes in all three modes on both builds; `typeobj-buffer-jit.nqp`
+and `size-shift.nqp` as above; `encode-append.nqp` (20,000 appends of "abc" into [7], uint8/16/32) gives
+the expected elems and bytes on both builds after OB10. adhoc-t6-ob3/ also holds the OB3 runs on the
+prefixes built at f2c32559a (the OB3 commit alone), with the same outputs as after-t6.
+
+### Unit tests and gates
+
+- No Zig file changed and no unit test was added. Unit tests on 2c7d1dfb9 in P (loads 0.89, 1.76, 1.82):
+  default 253/265 (12 skipped), -Dzig-reprs=false 253/265 (12 skipped), -Dgc-debug=1 258/265 (7 skipped),
+  as at 8f5516a20.
+- How the JIT is built: graph.c, interp.c and the other changed files are ordinary C sources; the generated
+  JIT files (DynASM's emit.c from src/jit/x64/emit.dasc and tiles.dasc, the expression template and tiler
+  tables from core_templates.expr and tile_pattern.tile) are produced by build/zig/jit.zig at build time
+  into the zig cache, from those inputs only. None of them changed, and nothing needed regenerating.
+- `build-prefixes.sh` at 2c7d1dfb9: ob-c and ob-n exit 0 (58 s each, loads 0.29 and 1.58), no warnings in
+  the logs, export lists equal. (Built once before at f2c32559a for the OB3 runs.)
+- `diff.sh --base=/tmp/claude-1000/ob-c --head=/tmp/claude-1000/ob-n --out=/tmp/claude-1000/ob/diff-t6`:
+  exit 0, `diff.sh: identical (3 runs a side; lines: diff-nqp/spesh 11106 diff-nqp/nospesh 11106
+  diff-raku/spesh 2497 diff-raku/nospesh 2497 serial/spesh 196 serial/nospesh 196 devirt/spesh 10
+  devirt/nospesh 10; cross-read identical)` (log: ob-fixes-raw/diff-t6.log); undefined-lines.txt unchanged
+  (no entries).
+- `run-all.sh` on both prefixes into ob-fixes-raw/after-t6: 41 of 41 outputs `c=n` (above).
+- Suites (`maketest-driver.sh ob-fixes-raw/suites-t6`, loads 1.95-1.97): nqp PASS on both (150 files,
+  13746 tests); Rakudo FAIL on both, only t/04-nativecall/02-simple-args.t 17-18 (OB15a). The per-file
+  lists equal suites-t5-fix1's.
+
+### Not verified
+
+- OB1 was not run (no Windows build).
+- OB5 and OB10 were not reproduced; the arguments above are by reading. OB5's `root` in the nursery after
+  a repossession is not ruled out (above). The OB10 throw path (an owner collected with the buffer) was not
+  driven: no target near the limit can be built.
+- The SC write barrier now emitted by the JIT's writeint was not observed (that needs a JIT-compiled write
+  to an object of a compiling SC); it is the call every other mutating JIT op makes.
+- The JIT checks were run on x86-64 only; `MVM_BIGENDIAN` paths are untouched and not run.
+
+### Seen on the way (not fixed; candidates for the bug list)
+
+- OB23 candidate: the JIT's generic repr-op calls do not check concreteness either. Probe
+  `typeobj-bindpos-jit.nqp` (`nqp::bindpos_i` on `nqp::atpos($list, $k)`, the last 3 of 200,000 on a type
+  object): SIGSEGV on both builds, before and after; with `MVM_JIT_DISABLE=1` or `MVM_SPESH_DISABLE=1`
+  `bindpos_i requires a concrete object (got a  type object instead)`. The JIT's `op_to_func` fallbacks
+  (`MVM_repr_bind_pos_*` and the like, reprconv.c) pass the type object to the REPR, as the buffer ops
+  did. Only bindpos_i was run; the other ops on that path are presumed the same by reading.
+- The JIT's readuint direct-call branch takes the type facts of operand 0, the destination register, not
+  the buffer (graph.c, already in OB3 (a) of the bug list); left as is, so readuint always goes through
+  `MVM_repr_read_buf`, which now checks concreteness.
+- `MVM_unicode_string_to_codepoints` (strtocodes) of an empty string calls `MVM_malloc(0)`, which panics
+  on a C library whose malloc(0) returns NULL (MVM_malloc treats NULL as out of memory). Not on glibc.

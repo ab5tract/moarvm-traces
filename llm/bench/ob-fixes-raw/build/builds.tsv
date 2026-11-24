@@ -14,3 +14,7 @@
 2026-11-24 01:03:48 CET	ob-n	exit 0	61s	load 1.74	commit b87b79815	opts 	This is MoarVM version 2026.09 built with JIT support
 2026-11-24 01:35:05 CET	ob-c	exit 0	60s	load 1.66	commit bf39c32cc	opts -Dzig-reprs=false	This is MoarVM version 2026.09 built with JIT support
 2026-11-24 01:37:05 CET	ob-n	exit 0	60s	load 1.91	commit bf39c32cc	opts 	This is MoarVM version 2026.09 built with JIT support
+2026-11-24 02:07:02 CET	ob-c	exit 0	58s	load 0.17	commit f2c32559a	opts -Dzig-reprs=false	This is MoarVM version 2026.09 built with JIT support
+2026-11-24 02:08:01 CET	ob-n	exit 0	59s	load 1.82	commit f2c32559a	opts 	This is MoarVM version 2026.09 built with JIT support
+2026-11-24 02:15:38 CET	ob-c	exit 0	58s	load 0.29	commit 2c7d1dfb9	opts -Dzig-reprs=false	This is MoarVM version 2026.09 built with JIT support
+2026-11-24 02:16:36 CET	ob-n	exit 0	58s	load 1.58	commit 2c7d1dfb9	opts 	This is MoarVM version 2026.09 built with JIT support
